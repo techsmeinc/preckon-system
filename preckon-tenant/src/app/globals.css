@@ -469,50 +469,16 @@ tr.flagged td{background:var(--amber-tint);}
 .provlist{list-style:none; margin:0; padding:0;}
 .provlist li{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 13px; border-top:1px solid var(--hairline); font-size:12.5px;}
 .provlist li:first-child{border-top:0;}
-
-/* ---------- DRAWLOGIX (viewer) ---------- */
-.dwg-wrap{display:grid; grid-template-columns:1fr 300px; gap:14px;}
 @media(max-width:1000px){ .dwg-wrap{grid-template-columns:1fr;} }
-.dwg-main{border:1px solid var(--hairline); border-radius:14px; overflow:hidden; background:var(--surface);}
-.dwg-toolbar{display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid var(--hairline); flex-wrap:wrap;}
-.dwg-toolbar select{font-family:var(--font-mono); font-size:11.5px; color:var(--ink); background:var(--panel-2); border:1px solid var(--hairline); border-radius:7px; padding:6px 9px;}
-.tgl{display:inline-flex; align-items:center; gap:7px; font-size:12px; color:var(--slate-600); cursor:pointer;}
-.tgl input{accent-color:var(--brand);}
-.zoomctl{margin-inline-start:auto; display:flex; gap:4px;}
-.zoomctl button,.dwg-toolbar .tbtn{width:30px; height:30px; border-radius:7px; border:1px solid var(--hairline); background:var(--surface);
-  color:var(--slate-500); cursor:pointer; display:grid; place-items:center; font-size:15px;}
-.zoomctl button:hover,.tbtn:hover{color:var(--ink); border-color:var(--slate-400);}
-.dwg-canvas{height:520px; background:var(--panel-2); position:relative; overflow:hidden; cursor:grab; touch-action:none;}
-.dwg-canvas.grabbing{cursor:grabbing;}
-.dwg-canvas svg{width:100%; height:100%; display:block;}
 .dwg-panel{border:1px solid var(--hairline); border-radius:14px; background:var(--surface); padding:16px; height:fit-content;}
-.g-grid{stroke:var(--slate-300); stroke-width:.6; stroke-dasharray:4 3;}
-.g-slab{fill:none; stroke:var(--slate-500); stroke-width:1.6;}
-.g-core{fill:var(--slate-400); opacity:.18; stroke:var(--slate-500); stroke-width:1;}
 .g-col{fill:var(--slate-500); opacity:.55;}
 .g-dim{stroke:var(--slate-400); stroke-width:.5;}
 .g-dimt{font-family:var(--font-mono); font-size:8px; fill:var(--slate-500); text-anchor:middle;}
-.g-bub{fill:var(--surface); stroke:var(--slate-400); stroke-width:.8;}
-.g-bubt{font-family:var(--font-mono); font-size:8px; fill:var(--slate-600); text-anchor:middle; dominant-baseline:central;}
-.rec{fill:color-mix(in srgb,var(--brand) 12%,transparent); stroke:var(--brand); stroke-width:1.4; cursor:pointer;}
-.rec:hover{fill:color-mix(in srgb,var(--brand) 26%,transparent);}
-.rec.flagged{fill:rgba(245,165,36,.14); stroke:var(--amber);}
-.rec.rec-outline{fill:none;}
-.rec.sel{stroke-width:2.6; fill:color-mix(in srgb,var(--brand) 32%,transparent);}
-.rec.flagged.sel{fill:rgba(245,165,36,.32);}
-.reclbl{font-family:var(--font-mono); font-size:7px; fill:var(--teal-press); pointer-events:none;}
 .dwg-stat{display:flex; gap:10px; margin-bottom:14px;}
 .dwg-stat .st{flex:1; background:var(--panel-2); border:1px solid var(--hairline); border-radius:9px; padding:9px 11px;}
 .dwg-stat .st .k{font-size:9.5px; color:var(--slate-500);}
 .dwg-stat .st .v{font-family:var(--font-mono); font-weight:600; font-size:16px; color:var(--ink); margin-top:3px;}
 .dwg-stat .st .v.warn{color:var(--amber);}
-.dwg-types{list-style:none; margin:0; padding:0;}
-.dwg-types li{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 0; border-top:1px solid var(--hairline);
-  font-size:13px; color:var(--slate-700); cursor:pointer;}
-.dwg-types li:first-child{border-top:0;}
-.dwg-types li:hover{color:var(--ink);}
-.dwg-types .ct{font-family:var(--font-mono); color:var(--slate-500);}
-.dwg-types .ct .fl{color:var(--amber);}
 .dwg-det{border-top:1px solid var(--hairline); margin-top:6px; padding-top:14px;}
 .dwg-det .empty{font-size:12.5px; color:var(--slate-400); text-align:center; padding:14px 0;}
 .dwg-det .dt{font-family:var(--font-display); font-weight:600; font-size:15px; color:var(--ink);}
@@ -644,11 +610,6 @@ input[type=color]{width:46px; height:34px; border:1px solid var(--hairline); bor
   [dir="rtl"] .side{transform:translateX(100%);}
   [dir="rtl"] .app.nav-open .side{transform:none;}
 }
-
-/* The drawing canvas is deliberately NOT mirrored. A plan is a plan: flipping it
-   would misrepresent the geometry it stands for, and grid references would read
-   backwards against the real sheet. */
-[dir="rtl"] .dwg-canvas{direction:ltr;}
 
 /* French runs ~20–30% longer than English; let dense labels wrap rather than
    blow out the column, and keep the chain tabs scrollable instead of squeezed. */

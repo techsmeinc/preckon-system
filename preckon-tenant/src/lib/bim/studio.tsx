@@ -25,6 +25,23 @@ import { applyCommands, initHistory, redo, run, undo, type Command, type History
 
 const hex = (c: number) => "#" + c.toString(16).padStart(6, "0");
 
+/**
+ * The catalogue's colours are 3D *material* colours — a wall is near-white
+ * because that is what a lit surface looks like in a viewport. Flat on a plan
+ * the same value is invisible against the sheet, so pale items are darkened to
+ * something like the poché a real drawing uses. Services keep their signal
+ * colours, which are already legible.
+ */
+function planHex(c: number): string {
+  const r = (c >> 16) & 255, g = (c >> 8) & 255, b = c & 255;
+  const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+  if (lum <= 0.72) return hex(c);
+  // Keep the hue, drop it to a readable weight rather than flat black.
+  const k = 0.34 / lum;
+  const d = (v: number) => Math.round(Math.min(255, v * k));
+  return `#${((d(r) << 16) | (d(g) << 8) | d(b)).toString(16).padStart(6, "0")}`;
+}
+
 /* ── Plan geometry ────────────────────────────────────────────────────────── */
 
 interface Bounds { minX: number; minY: number; maxX: number; maxY: number }
@@ -169,7 +186,7 @@ export function BimStudio({
       <div className="bim-tools">
         {catalogByDiscipline(discipline).map((item) => (
           <button key={item.category} className="bim-tool" disabled={readOnly} onClick={() => place(item)} title={item.category}>
-            <i style={{ background: hex(item.color) }} />
+            <i style={{ background: planHex(item.color) }} />
             {item.label}
           </button>
         ))}
@@ -222,7 +239,7 @@ export function BimStudio({
                 </button>
                 {[...cats.entries()].map(([cat, n]) => (
                   <div className="bim-leg-r" key={cat}>
-                    <i style={{ background: hex(CATALOG[cat]?.color ?? 0x94a3b8) }} />
+                    <i style={{ background: planHex(CATALOG[cat]?.color ?? 0x94a3b8) }} />
                     <span>{CATALOG[cat]?.label ?? cat}</span>
                     <b className="mono">{n}</b>
                   </div>
@@ -259,7 +276,8 @@ export function BimStudio({
 function PlanElement({ doc, e, stroke, selected, onSelect }: {
   doc: BimDocument; e: Element; stroke: number; selected: boolean; onSelect: (id: Id) => void;
 }) {
-  const c = hex(CATALOG[e.category]?.color ?? 0x94a3b8);
+  const raw = CATALOG[e.category]?.color ?? 0x94a3b8;
+  const c = planHex(raw);
   const g = e.geom;
   const click = { onClick: (ev: React.MouseEvent) => { ev.stopPropagation(); onSelect(e.id); }, style: { cursor: "pointer" } };
   const sw = selected ? stroke * 3 : stroke;
@@ -274,9 +292,11 @@ function PlanElement({ doc, e, stroke, selected, onSelect }: {
     );
   }
   if (g.kind === "area" && g.outline?.length) {
+    // Slabs and rooms are the ground the plan sits on: keep the pale material
+    // colour as fill so walls read on top of it, and outline in the plan ink.
     return (
       <polygon {...click} points={g.outline.map((p) => `${p.x},${-p.y}`).join(" ")}
-        fill={c} fillOpacity={0.28} stroke={c} strokeWidth={sw} />
+        fill={hex(raw)} fillOpacity={0.28} stroke={c} strokeWidth={sw} strokeOpacity={0.55} />
     );
   }
   if (g.kind === "hosted") {
