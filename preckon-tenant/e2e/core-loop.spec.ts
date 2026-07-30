@@ -71,7 +71,10 @@ test("core loop: start a skeleton run, confirm scope, pursuit advances", async (
   await expect(page.getByText("Step timeline")).toBeVisible();
   // Step ids are humanised in the timeline, so match the label not the key.
   await expect(page.getByText(/Gate Scope/i)).toBeVisible();
-  await expect(page.getByText(/awaiting review/i).first()).toBeVisible();
+  // Two agent steps run before the gate. Against the deterministic stubs that
+  // was instant; against real Claude agents each step is a live model call, so
+  // the wait has to cover them rather than assume the gate is already there.
+  await expect(page.getByText(/awaiting review/i).first()).toBeVisible({ timeout: 120_000 });
 });
 
 test("a proposal is confirmed on the chain stage that produced it", async ({ page }) => {

@@ -33,7 +33,9 @@ async function openAdvancedProject(page: Page) {
 
 const STAGES = [
   { tab: "Tender", url: /modules\/tenderlogix/, marker: "Requirements" },
-  { tab: "Drawings", url: /modules\/drawlogix/, marker: /Schematic view|No drawings indexed/ },
+  // BIM Studio is on this surface whether or not anything has been measured —
+  // modelling is how the first quantities often get made.
+  { tab: "Drawings", url: /modules\/drawlogix/, marker: /BIM Studio/ },
   { tab: "Specs", url: /modules\/doclogix/, marker: /Clauses|Specs not parsed/ },
   { tab: "BOQ", url: /modules\/quantlogix/, marker: /Bill of quantities|BOQ not ready/ },
   { tab: "Estimate", url: /modules\/costlogix/, marker: /Priced bill|Estimate not started/ },
