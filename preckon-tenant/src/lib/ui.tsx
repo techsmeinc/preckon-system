@@ -23,22 +23,32 @@ export function useCan(perm: string): boolean {
 }
 
 /* ── Toast ───────────────────────────────────────────────────────────────── */
-type ToastFn = (msg: string) => void;
+// A failure announced with a tick reads as a success at a glance, so the tone is
+// explicit. Callers that don't pass one keep the confirming tick they had.
+type ToastTone = "ok" | "bad";
+type ToastFn = (msg: string, tone?: ToastTone) => void;
 const ToastCtx = createContext<ToastFn>(() => {});
 export function useToast(): ToastFn { return useContext(ToastCtx); }
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [msg, setMsg] = useState<string | null>(null);
+  const [tone, setTone] = useState<ToastTone>("ok");
   const tRef = useRef<number | undefined>(undefined);
-  const show = useCallback((m: string) => {
+  const show = useCallback((m: string, k: ToastTone = "ok") => {
     setMsg(m);
+    setTone(k);
     window.clearTimeout(tRef.current);
-    tRef.current = window.setTimeout(() => setMsg(null), 2400);
+    // Errors are longer and worth reading twice before they vanish.
+    tRef.current = window.setTimeout(() => setMsg(null), k === "bad" ? 6000 : 2400);
   }, []);
   return (
     <ToastCtx.Provider value={show}>
       {children}
-      <div className={"toast" + (msg ? " on" : "")}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M5 12l4 4 10-10" /></svg>
+      <div className={"toast" + (msg ? " on" : "") + (tone === "bad" ? " bad" : "")}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+          {tone === "bad"
+            ? <><path d="M12 7v6" /><path d="M12 17h.01" /></>
+            : <path d="M5 12l4 4 10-10" />}
+        </svg>
         <span>{msg}</span>
       </div>
     </ToastCtx.Provider>

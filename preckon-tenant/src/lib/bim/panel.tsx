@@ -40,7 +40,7 @@ export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: 
       setNonce((n) => n + 1);
       reload();
     } catch (e: any) {
-      toast(e?.message ?? t("bim.drawFail"));
+      toast(e?.message ?? t("bim.drawFail"), "bad");
     } finally { setDrawing(false); }
   }
 
@@ -61,7 +61,7 @@ export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: 
       toast(t("bim.takeoffDone", { n: r.emitted }));
       onMeasured?.();
     } catch (e: any) {
-      toast(e?.message ?? t("bim.takeoffFail"));
+      toast(e?.message ?? t("bim.takeoffFail"), "bad");
     } finally { setMeasuring(false); }
   }
 
