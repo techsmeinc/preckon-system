@@ -1,0 +1,14 @@
+{
+  "name": "preckon-worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Preckon AI worker — stateless stub agents. NO database dependency (trust boundary §5.1).",
+  "scripts": {
+    "start": "node src/server.mjs"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=20"
+  }
+}

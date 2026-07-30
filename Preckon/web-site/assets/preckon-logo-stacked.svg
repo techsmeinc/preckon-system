@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 118" width="190" height="118" fill="none" role="img" aria-label="Preckon">
+  <g transform="translate(71 0)">
+    <path d="M16 50V8h14a13 13 0 0 1 0 26H16" stroke="#0B1B2B" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="25" cy="21" r="3.6" fill="#15C2A8"/>
+  </g>
+  <text x="95" y="104" text-anchor="middle" font-family="'General Sans','Inter',system-ui,sans-serif" font-size="38" font-weight="600" letter-spacing="-1.2" fill="#0B1B2B">Preck<tspan fill="#15C2A8">o</tspan>n</text>
+</svg>

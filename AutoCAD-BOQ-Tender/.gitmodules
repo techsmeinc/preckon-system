@@ -1,0 +1,3 @@
+﻿[submodule "tenderlogix-autocad"]
+	path = tenderlogix-autocad
+	url = https://github.com/techsmeinc/tenderlogix-autocad.git

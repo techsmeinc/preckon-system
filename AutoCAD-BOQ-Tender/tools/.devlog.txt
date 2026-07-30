@@ -1,0 +1,155 @@
+$ node tools/dev.mjs
+[2mStarting api on http://localhost:5000  +  web on http://localhost:5173  +  cad sidecar on http://127.0.0.1:7400  +  drawlogix on http://localhost:3001/drawlogix[0m
+[2mDATABASE_URL=mysql://root@localhost:3306/boq_tender[0m
+[2mCtrl+C to stop all.[0m
+
+[36m[api][0m $ node ./watch.mjs
+[32m[web][0m $ vite --config vite.config.ts --host 0.0.0.0
+[36m[api][0m [api:watch] watching src/ for changes...
+[35m[cad][0m INFO:     Started server process [36488]
+[35m[cad][0m INFO:     Waiting for application startup.
+[35m[cad][0m INFO:     Application startup complete.
+[35m[cad][0m INFO:     Uvicorn running on http://127.0.0.1:7400 (Press CTRL+C to quit)
+[32m[web][0m 
+[32m[web][0m   [32m[1mVITE[22m v7.3.2[39m  [2mready in [0m[1m1152[22m[2m[0m ms[22m
+[32m[web][0m 
+[32m[web][0m   [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
+[32m[web][0m   [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.1.146:[1m5173[22m/[39m
+[32m[web][0m   [32m➜[39m  [1mNetwork[22m: [36mhttp://172.25.176.1:[1m5173[22m/[39m
+[36m[api][0m [api:watch] rebuilt — restarting server
+[36m[api][0m [watch] build finished, watching for changes...
+[34m[drawlogix][0m    ▲ Next.js 15.1.3
+[34m[drawlogix][0m    - Local:        http://localhost:3001
+[34m[drawlogix][0m    - Network:      http://192.168.1.146:3001
+[34m[drawlogix][0m    - Environments: .env.local
+[34m[drawlogix][0m 
+[34m[drawlogix][0m  ✓ Starting...
+[36m[api][0m [16:44:02.195] [32mINFO[39m (5200): [36mServer listening[39m
+[36m[api][0m     [35mport[39m: 5000
+[34m[drawlogix][0m  ✓ Ready in 4s
+[35m[cad][0m INFO:     127.0.0.1:52532 - "GET / HTTP/1.1" 404 Not Found
+[36m[api][0m [16:44:34.315] [32mINFO[39m (5200): [36mrequest completed[39m
+[36m[api][0m     [35mreq[39m: {
+[36m[api][0m       "id": 1,
+[36m[api][0m       "method": "GET",
+[36m[api][0m       "url": "/"
+[36m[api][0m     }
+[36m[api][0m     [35mres[39m: {
+[36m[api][0m       "statusCode": 404
+[36m[api][0m     }
+[36m[api][0m     [35mresponseTime[39m: 11
+[34m[drawlogix][0m  ○ Compiling / ...
+[34m[drawlogix][0m  ✓ Compiled / in 3.9s (1747 modules)
+[34m[drawlogix][0m  GET / 200 in 5004ms
+[34m[drawlogix][0m  GET / 200 in 91ms
+[34m[drawlogix][0m  GET / 200 in 155ms
+[34m[drawlogix][0m  GET / 200 in 148ms
+[34m[drawlogix][0m  GET / 200 in 144ms
+[34m[drawlogix][0m  GET / 200 in 70ms
+[34m[drawlogix][0m  GET / 200 in 64ms
+[34m[drawlogix][0m  GET / 200 in 70ms
+[34m[drawlogix][0m `x-forwarded-host` header with value `localhost:3001` does not match `origin` header with value `localhost:5173` from a forwarded Server Actions request. Aborting the action.
+[34m[drawlogix][0m  ⨯ [Error: Invalid Server Actions request.] { digest: '3703507013' }
+[34m[drawlogix][0m  POST / 500 in 778ms
+[34m[drawlogix][0m `x-forwarded-host` header with value `localhost:3001` does not match `origin` header with value `localhost:5173` from a forwarded Server Actions request. Aborting the action.
+[34m[drawlogix][0m  ⨯ [Error: Invalid Server Actions request.] { digest: '3703507013' }
+[34m[drawlogix][0m  POST / 500 in 477ms
+[34m[drawlogix][0m  GET / 200 in 51ms
+[34m[drawlogix][0m  ⚠ Found a change in next.config.ts. Restarting the server to apply the changes...
+[32m[web][0m [2m11:41:06 AM[22m [31m[1m[vite][22m[39m [31mws proxy error:[39m
+[32m[web][0m Error: read ECONNRESET
+[32m[web][0m     at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+[34m[drawlogix][0m [?25h
+[34m[drawlogix][0m [2mexited (code=0 signal=null)[0m
+[34m[drawlogix][0m [2moptional service — leaving api/web running[0m
+[32m[web][0m [2m11:41:18 AM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /drawlogix[39m
+[32m[web][0m AggregateError [ECONNREFUSED]: 
+[32m[web][0m     at internalConnectMultiple (node:net:1134:18)
+[32m[web][0m     at afterConnectMultiple (node:net:1715:7)
+[36m[api][0m [19:43:29.596] [32mINFO[39m (5200): [36mrequest completed[39m
+[36m[api][0m     [35mreq[39m: {
+[36m[api][0m       "id": 2,
+[36m[api][0m       "method": "GET",
+[36m[api][0m       "url": "/api/models"
+[36m[api][0m     }
+[36m[api][0m     [35mres[39m: {
+[36m[api][0m       "statusCode": 304
+[36m[api][0m     }
+[36m[api][0m     [35mresponseTime[39m: 41
+[36m[api][0m [19:43:29.603] [32mINFO[39m (5200): [36mrequest completed[39m
+[36m[api][0m     [35mreq[39m: {
+[36m[api][0m       "id": 3,
+[36m[api][0m       "method": "GET",
+[36m[api][0m       "url": "/api/models"
+[36m[api][0m     }
+[36m[api][0m     [35mres[39m: {
+[36m[api][0m       "statusCode": 304
+[36m[api][0m     }
+[36m[api][0m     [35mresponseTime[39m: 3
+[36m[api][0m [19:43:29.606] [32mINFO[39m (5200): [36mrequest completed[39m
+[36m[api][0m     [35mreq[39m: {
+[36m[api][0m       "id": 4,
+[36m[api][0m       "method": "GET",
+[36m[api][0m       "url": "/api/models"
+[36m[api][0m     }
+[36m[api][0m     [35mres[39m: {
+[36m[api][0m       "statusCode": 304
+[36m[api][0m     }
+[36m[api][0m     [35mresponseTime[39m: 1
+[36m[api][0m [19:43:30.033] [32mINFO[39m (5200): [36mrequest completed[39m
+[36m[api][0m     [35mreq[39m: {
+[36m[api][0m       "id": 6,
+[36m[api][0m       "method": "GET",
+[36m[api][0m       "url": "/api/openai/conversations"
+[36m[api][0m     }
+[36m[api][0m     [35mres[39m: {
+[36m[api][0m       "statusCode": 304
+[36m[api][0m     }
+[36m[api][0m     [35mresponseTime[39m: 80
+[36m[api][0m [19:43:30.083] [32mINFO[39m (5200): [36mrequest completed[39m
+[36m[api][0m     [35mreq[39m: {
+[36m[api][0m       "id": 7,
+[36m[api][0m       "method": "GET",
+[36m[api][0m       "url": "/api/models"
+[36m[api][0m     }
+[36m[api][0m     [35mres[39m: {
+[36m[api][0m       "statusCode": 304
+[36m[api][0m     }
+[36m[api][0m     [35mresponseTime[39m: 107
+[36m[api][0m [19:43:30.303] [32mINFO[39m (5200): [36mrequest completed[39m
+[36m[api][0m     [35mreq[39m: {
+[36m[api][0m       "id": 5,
+[36m[api][0m       "method": "GET",
+[36m[api][0m       "url": "/api/models"
+[36m[api][0m     }
+[36m[api][0m     [35mres[39m: {
+[36m[api][0m       "statusCode": 200
+[36m[api][0m     }
+[36m[api][0m     [35mresponseTime[39m: 530
+[36m[api][0m [19:43:30.388] [32mINFO[39m (5200): [36mrequest completed[39m
+[36m[api][0m     [35mreq[39m: {
+[36m[api][0m       "id": 8,
+[36m[api][0m       "method": "GET",
+[36m[api][0m       "url": "/api/openai/conversations/1"
+[36m[api][0m     }
+[36m[api][0m     [35mres[39m: {
+[36m[api][0m       "statusCode": 304
+[36m[api][0m     }
+[36m[api][0m     [35mresponseTime[39m: 17
+[32m[web][0m [2m8:13:59 PM[22m [31m[1m[vite][22m[39m [31mws proxy error:[39m
+[32m[web][0m Error: read ECONNRESET
+[32m[web][0m     at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+[32m[web][0m [2m8:13:59 PM[22m [31m[1m[vite][22m[39m [31mws proxy error:[39m
+[32m[web][0m Error: read ECONNRESET
+[32m[web][0m     at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+[32m[web][0m [2m10:18:14 PM[22m [31m[1m[vite][22m[39m [31mws proxy error:[39m
+[32m[web][0m Error: read ECONNRESET
+[32m[web][0m     at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+[32m[web][0m [2m12:58:41 AM[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /drawlogix/studio[39m
+[32m[web][0m Error: read ECONNRESET
+[32m[web][0m     at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+[32m[web][0m C:\Users\IKIO\Downloads\New\AutoCAD-BOQ-Tender\artifacts\boq-platform:
+[32m[web][0m [ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @workspace/boq-platform@0.0.0 dev: `vite --config vite.config.ts --host 0.0.0.0`
+[32m[web][0m Exit status 1
+[32m[web][0m [2mexited (code=1 signal=null)[0m
+[ELIFECYCLE] Command failed with exit code 1.

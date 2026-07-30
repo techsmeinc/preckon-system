@@ -1,0 +1,112 @@
+"use client";
+// The BIM Studio panel as it appears on the Drawings stage: loads the project's
+// model, hands it to the Studio, and saves it back with optimistic concurrency.
+
+import { useState } from "react";
+import { api } from "@/lib/apiclient";
+import { useApi, useCan, useToast, Skeleton, ErrorBox } from "@/lib/ui";
+import { useI18n, type Key } from "@/lib/i18n";
+import { BimStudio } from "./studio";
+import { emptyDocument, type BimDocument } from "./model";
+import { SPECIALIST_LIST } from "./agents";
+
+interface Loaded { doc: BimDocument; version: number }
+
+export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: () => void }) {
+  const { t } = useI18n();
+  const toast = useToast();
+  const canEdit = useCan("artifact.edit");
+  const { data, loading, error, reload } = useApi<Loaded>(`/projects/${pid}/bim`);
+  const [savedOnce, setSavedOnce] = useState(false);
+
+  const [measuring, setMeasuring] = useState(false);
+  const [instruction, setInstruction] = useState("");
+  const [specialist, setSpecialist] = useState("all");
+  const [drawing, setDrawing] = useState(false);
+  const [nonce, setNonce] = useState(0);
+
+  /** Draw by instruction. The assistant returns the finished model, so the
+   *  Studio remounts on it rather than trying to replay commands client-side. */
+  async function draw() {
+    const text = instruction.trim();
+    if (!text) return;
+    setDrawing(true);
+    try {
+      const r = await api.post<{ reply: string; applied: number; dropped: number }>(
+        `/projects/${pid}/bim/agent`, { instruction: text, specialist }
+      );
+      toast(r.reply || t("bim.drewN", { n: r.applied }));
+      setInstruction("");
+      setNonce((n) => n + 1);
+      reload();
+    } catch (e: any) {
+      toast(e?.message ?? t("bim.drawFail"));
+    } finally { setDrawing(false); }
+  }
+
+
+  async function save(doc: BimDocument, baseVersion: number): Promise<number> {
+    const r = await api.put<{ version: number }>(`/projects/${pid}/bim`, { doc, baseVersion });
+    toast(t("bim.saved"));
+    setSavedOnce(true);
+    return r.version;
+  }
+
+  /** Measure the saved model into drawing_measurement records — the join that
+   *  puts modelled geometry into the BOQ. */
+  async function measure() {
+    setMeasuring(true);
+    try {
+      const r = await api.post<{ emitted: number; superseded: number }>(`/projects/${pid}/bim/takeoff`);
+      toast(t("bim.takeoffDone", { n: r.emitted }));
+      onMeasured?.();
+    } catch (e: any) {
+      toast(e?.message ?? t("bim.takeoffFail"));
+    } finally { setMeasuring(false); }
+  }
+
+  if (loading) return <Skeleton rows={6} />;
+  if (error) return <ErrorBox message={error} onRetry={reload} />;
+
+  return (
+    <div className="card" style={{ marginBottom: 16 }}>
+      <div className="chead">
+        <div><h3>{t("bim.studio")}</h3><div className="csub">{t("bim.studioSub")}</div></div>
+        {canEdit && (
+          <button className="mini sm" onClick={measure} disabled={measuring}>
+            {measuring ? t("bim.measuring") : t("bim.takeoff")}
+          </button>
+        )}
+      </div>
+      {canEdit && (
+        <div className="bim-ask">
+          <select value={specialist} onChange={(e) => setSpecialist(e.target.value)} aria-label={t("bim.specialist")}>
+            {SPECIALIST_LIST.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
+          </select>
+          <input
+            value={instruction}
+            onChange={(e) => setInstruction(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") draw(); }}
+            placeholder={t("bim.askPlaceholder")}
+            aria-label={t("bim.ask")}
+            disabled={drawing}
+          />
+          <button className="mini sm pri" onClick={draw} disabled={drawing || !instruction.trim()}>
+            {drawing ? t("bim.drawing") : t("bim.draw")}
+          </button>
+        </div>
+      )}
+
+      <BimStudio
+        // The assistant rewrites the document server-side, so remount on its
+        // result; manual edits between draws are preserved by Save.
+        key={`studio-${nonce}`}
+        initialDoc={data?.doc ?? emptyDocument()}
+        version={data?.version ?? 0}
+        onSave={save}
+        readOnly={!canEdit}
+        t={(k, vars) => t(k as Key, vars)}
+      />
+    </div>
+  );
+}

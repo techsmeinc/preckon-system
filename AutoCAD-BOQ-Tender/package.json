@@ -1,0 +1,21 @@
+{
+  "name": "workspace",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "preinstall": "node tools/preinstall.mjs",
+    "dev": "node tools/dev.mjs",
+    "db:push": "pnpm --filter @workspace/db exec drizzle-kit push --config ./drizzle.config.ts",
+    "db:push:force": "pnpm --filter @workspace/db exec drizzle-kit push --force --config ./drizzle.config.ts",
+    "db:reset": "node tools/db-reset.mjs",
+    "build": "pnpm run typecheck && pnpm -r --if-present run build",
+    "typecheck:libs": "tsc --build",
+    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
+  },
+  "private": true,
+  "devDependencies": {
+    "mysql2": "^3.11.5",
+    "prettier": "^3.8.1",
+    "typescript": "~5.9.2"
+  }
+}

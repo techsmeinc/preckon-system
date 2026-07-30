@@ -1,0 +1,28 @@
+ID,Epic,Title,Size,Depends On,Milestone,Acceptance
+WS-A1,A Store,Drizzle migrations: 10 skeleton tables + enums,M,—,M1,tables create clean; UUIDv7 PKs; money integer minor units
+WS-A2,A Store,RLS policies + withTenant() repo + 3-part isolation test,M,WS-A1,M1,cross-tenant read returns 0 rows; test in CI
+WS-A3,A Store,Seed 3 artifact types + tenderlogix.skeleton workflow def,S,WS-A1,M1,resolver accepts the DAG; seed idempotent
+WS-A4,A Store,review_queue view + markDownstreamStale() recursive CTE,S,WS-A1,M1,edit upstream marks transitive downstream stale
+WS-B1,B Kernel,AgentContext + four syscalls (trusted TS),L,"WS-A1,WS-A2",M1,agent touches only these; scope unforgeable
+WS-B2,B Kernel,"Deterministic runtime: steps, dispatch, gate pause, resume, terminal",L,"WS-B1,WS-A3",M1,run pauses at gate; confirm resumes
+WS-B3,B Kernel,Use-case skeleton + append-only hash-chained audit,M,WS-B1,M1,every mutation audited; chain verifies
+WS-B4,B Kernel,"rerunStale(runId): re-run stale-producing steps, supersede",M,"WS-B2,WS-A4",M1,"edit summary -> new boq_line versions, old superseded"
+WS-C1,C Job seam,enqueueJob writes ai_job + pushes JobEnvelope to Redis lane,M,WS-B1,M1,input artifacts inlined; worker never reads store
+WS-C2,C Job seam,arq worker: envelope -> tier->model (Opus/Haiku) -> Langfuse -> JobResult,M,WS-C1,M1,tier lanes isolate deep from routing
+WS-C3,C Job seam,/internal/jobs/{id}/result (idempotent) -> onJobResult -> emitArtifact,M,"WS-C2,WS-B2",M1,re-delivery is no-op; outputs land as proposals
+WS-C4,C Job seam,Stub agent (no LLM) emitting fixed tender_summary — M1 kernel proof,S,WS-C3,M1,full run/gate/confirm/stale works with zero AI
+WS-E1,E Ingestion,POST /files (presigned MinIO PUT) + /files/{id}/complete,M,"WS-A1,WS-F3",M2,Core never proxies bytes; checksum verified
+WS-E2,E Ingestion,Ingestion job (non-LLM): per-page text -> file_page -> ingested,M,WS-E1,M2,file.status tracks; OCR/embeddings deferred
+WS-D1,D Agents,Document Agent: classify/split -> document proposals (Haiku),M,"WS-C3,WS-E2",M2,"multi-doc PDF splits into typed documents, auto-confirmed"
+WS-D2,D Agents,Tender Agent: document -> tender_summary + confidence (Opus),M,WS-D1,M2,schema-valid tender_summary proposal with provenance
+WS-D3,D Agents,BOQ Agent: confirmed tender_summary -> 2-3 boq_line (Opus),M,"WS-D2,WS-B2",M2,lines provenance-linked to the summary
+WS-D4,D Agents,Prompt refs (Langfuse) + confidence fns + auto-accept wiring,S,WS-D3,M2,"confidence computed by worker, not lifted from prose"
+WS-F1,F API,"Run endpoints: start skeleton, get run, cancel (gated+audit)",M,WS-B2,M1,workflow.run required; run+steps readable
+WS-F2,F API,Artifact ops: list/review-queue/confirm/reject/PATCH/rerun-stale,M,"WS-B2,WS-A4",M1,confirm resumes paused run; edit re-plans
+WS-F3,F API,Seed tenant+user (Better Auth) + estimator preset + perm subset,S,WS-A1,M1,seeded user drives the whole slice
+WS-G1,G Frontend,Upload + start-run screen (Next.js/shadcn),M,"WS-F1,WS-E1",M3,"drop a PDF, start the run"
+WS-G2,G Frontend,Review queue: confirm/edit via canonical workspace layer,M,WS-F2,M3,confirm advances run; edit supersedes
+WS-G3,G Frontend,"Run view: step status, awaiting_review, stale + re-run",M,"WS-F1,WS-F2",M3,gate and stale state visible
+WS-H1,H Proof,E2E test: all 7 §S steps; gate/provenance/stale/supersede,L,"WS-F1,WS-F2,WS-C4",M1,green on CI
+WS-H2,H Proof,Agent eval harness + CI eval gate (golden PDFs),M,"WS-D2,WS-D3",M3,regression below threshold fails build
+WS-H3,H Proof,RLS isolation + worker-cannot-write trust-boundary test,S,"WS-A2,WS-C2",M1,both green in CI

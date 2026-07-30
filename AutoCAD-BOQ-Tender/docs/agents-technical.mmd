@@ -1,0 +1,71 @@
+flowchart TD
+    subgraph MODELS["AI / LLM stack (provider-pluggable: Anthropic - OpenAI - OpenRouter - Groq - Ollama)"]
+        M1["Reasoning LLM<br/><b>Anthropic Opus 4.8</b><br/>1M context - native function-calling<br/>drives every agent below"]
+        M2["Vision VLM<br/><b>Anthropic Haiku</b><br/>per-page multimodal OCR/understanding"]
+        M3["Embeddings<br/><b>OpenAI text-embedding-3-small</b><br/>1536-d vectors for semantic recall"]
+    end
+
+    subgraph PRE["Pre-processing - deterministic + VLM"]
+        P1["CAD parser (ezdxf)<br/>explodes blocks/xrefs - measures<br/>length/area - footprint signal"]
+        P2["Doc parser (PyMuPDF)<br/>section + table extraction"]
+        P3["Vision pre-pass<br/><b>VLM per page</b> - recovers scans,<br/>photos, image-only schedules"]
+        P4["Hybrid retrieval engine<br/>BM25 + cosine fused by RRF (k=60)<br/>+ structural layer/block boost"]
+    end
+
+    subgraph AGENTS["Agentic BOQ pipeline - each box = an autonomous LLM agent"]
+        AG1["AGENT 1 - SOW Outline Extractor<br/><b>LLM Opus 4.8</b><br/>parses tender into a numbered<br/>4-level section tree (strict JSON)"]
+        AG2["AGENT 2 - Agent Designer (meta-agent)<br/><b>LLM Opus 4.8</b><br/>INVENTS a bespoke specialist roster +<br/>project-specific completeness checks"]
+        AG3["AGENT 3..N - Section Specialists (DYNAMIC)<br/><b>LLM Opus 4.8 - one per SOW section (~10-18)</b><br/>ReAct tool-calling loop, up to 6 tool iters each<br/>run 3-wide concurrently - grounded quantities only"]
+        AG4["AGENT N+1 - Completeness Verifier<br/><b>LLM Opus 4.8</b><br/>per-check audit loop - proposes &amp;<br/>back-fills missed scope"]
+        AG5["AGENT N+2 - Estimator QA<br/><b>deterministic code - 0 tokens</b><br/>scope-type tag - quality score -<br/>MEP testing-coverage check"]
+    end
+
+    subgraph TOOLS["Agent toolbox - function-calling surface (read-only, project-scoped)"]
+        TT["count_blocks - list_layers - get_layer_geometry (footprint, pre-converted m2/m)<br/>get_schedules - get_text_on_sheet - get_drawing_metadata<br/>search_drawing - search_documents - list_documents"]
+    end
+
+    subgraph RELI["Reliability &amp; guardrails (production hardening)"]
+        R1["4x overload backoff<br/>429 / 5xx / 529 - exp + jitter"]
+        R2["Self-healing JSON<br/>jsonrepair + brace-walk salvage"]
+        R3["Unit normaliser (9 tokens)<br/>+ garbage-item rejector"]
+        R4["Anti-hallucination: every qty<br/>traces to a tool / figure / formula"]
+    end
+
+    subgraph SCHED["Schedule engine"]
+        SC1["Activity extraction<br/><b>LLM Opus 4.8</b>"]
+        SC2["CPM engine (code)<br/>typed FS/SS/FF/SF + lag -<br/>forward/backward pass - critical path"]
+    end
+
+    subgraph OUT["Persistence &amp; delivery"]
+        O1["BOQ items + drawing refs<br/>(full traceability)"]
+        O2["Human QS approval gate"]
+        O3["AIGCC Excel - Gantt - Word"]
+    end
+
+    M1 -.powers.-> AGENTS
+    M2 -.powers.-> P3
+    M3 -.powers.-> P4
+    P1 --> P4
+    P2 --> P4
+    P3 --> P4
+    P4 --> AG3
+    AG1 --> AG2 --> AG3 --> AG4 --> AG5 --> O1
+    AG3 <-->|"ReAct loop"| TOOLS
+    AG4 -.audits.-> TOOLS
+    RELI -.wraps.-> AGENTS
+    O1 --> SC1 --> SC2 --> O3
+    O1 --> O2 --> O3
+
+    classDef model fill:#4a2f6e,color:#fff,stroke:#2d1b45,stroke-width:1px;
+    classDef agent fill:#1f6e7e,color:#fff,stroke:#0d3c4a,stroke-width:2px;
+    classDef code fill:#fce4d6,color:#333,stroke:#d9772e,stroke-width:1px;
+    classDef tool fill:#e3f2fd,color:#0d3c61,stroke:#1f6e7e,stroke-width:1px;
+    classDef guard fill:#fdecea,color:#9c2a1c,stroke:#c0392b,stroke-width:1px;
+    classDef out fill:#fff2cc,color:#333,stroke:#bf9000,stroke-width:1px;
+    class M1,M2,M3 model;
+    class AG1,AG2,AG3,AG4 agent;
+    class AG5,P1,P2,P4,SC2 code;
+    class P3,SC1 model;
+    class TT tool;
+    class R1,R2,R3,R4 guard;
+    class O1,O2,O3 out;

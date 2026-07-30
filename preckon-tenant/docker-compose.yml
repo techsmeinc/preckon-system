@@ -1,0 +1,103 @@
+# Preckon Tenant plane — one-command local/prod-like run.
+#
+#   docker compose up --build -d          # db + phpMyAdmin + app + worker
+#   docker compose run --rm seed          # register the pack + demo tenant/owner
+#
+# App:        http://localhost:3100   (login admin@techsme.com / preckon-admin-2026)
+# phpMyAdmin: http://localhost:8081    (server: db, user: root, pass: preckon)
+# MySQL:      localhost:3308 -> 3306
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: preckon
+      MYSQL_DATABASE: preckon_tenant
+    ports:
+      - "3308:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      # Schema runs once, on first init.
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-ppreckon"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: preckon
+      UPLOAD_LIMIT: 64M
+    ports:
+      - "8081:80"
+
+  worker:
+    build: ./worker
+    restart: unless-stopped
+    environment:
+      PORT: "4000"
+      CORE_URL: http://app:3000
+      INTERNAL_SERVICE_TOKEN: change-me-service-token
+      # Set ANTHROPIC_API_KEY (e.g. in a .env next to this file) to use REAL Claude
+      # agents; unset → deterministic stub agents. Model ids are env-overridable.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    ports:
+      - "4000:4000"
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: "3306"
+      DATABASE_USER: root
+      DATABASE_PASSWORD: preckon
+      DATABASE_NAME: preckon_tenant
+      BETTER_AUTH_SECRET: change-me-to-a-long-random-string-min-32-chars
+      BETTER_AUTH_URL: http://localhost:3100
+      INTERNAL_SERVICE_TOKEN: change-me-service-token
+      WORKER_URL: http://worker:4000
+      CORE_URL: http://app:3000
+      FILE_STORAGE_DIR: /app/.uploads
+    volumes:
+      - uploads:/app/.uploads
+    ports:
+      - "3100:3000"
+
+  # One-off: register the construction pack + seed the demo tenant/owner/project.
+  #   docker compose run --rm seed
+  seed:
+    build:
+      context: .
+      target: builder
+    profiles: ["tools"]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: "3306"
+      DATABASE_USER: root
+      DATABASE_PASSWORD: preckon
+      DATABASE_NAME: preckon_tenant
+      BETTER_AUTH_SECRET: change-me-to-a-long-random-string-min-32-chars
+      BETTER_AUTH_URL: http://localhost:3100
+      TENANT_OWNER_EMAIL: owner@riverside.build
+      TENANT_OWNER_PASSWORD: preckon-tenant-2026
+    command: ["npm", "run", "seed"]
+
+volumes:
+  db_data:
+  uploads:

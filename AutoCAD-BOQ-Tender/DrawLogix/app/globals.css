@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* DrawLogix design tokens — HSL channels (no hsl() wrapper) so <alpha-value> works.
+   "DrawLogix violet" primary to visually distinguish this app from the teal platform. */
+:root {
+  --color-background: 240 30% 99%;
+  --color-foreground: 234 35% 14%;
+  --color-card: 0 0% 100%;
+  --color-primary: 243 75% 58%; /* indigo/violet */
+  --color-primary-foreground: 0 0% 100%;
+  --color-accent: 199 89% 48%;
+  --color-success: 142 71% 38%;
+  --color-warning: 38 92% 50%;
+  --color-muted: 240 20% 96%;
+  --color-muted-foreground: 240 9% 46%;
+  --color-border: 240 18% 89%;
+  --color-destructive: 0 72% 51%;
+}
+
+.dark {
+  --color-background: 234 30% 8%;
+  --color-foreground: 0 0% 98%;
+  --color-card: 234 24% 12%;
+  --color-primary: 243 75% 68%;
+  --color-primary-foreground: 234 30% 8%;
+  --color-accent: 199 85% 58%;
+  --color-success: 142 60% 48%;
+  --color-warning: 38 90% 56%;
+  --color-muted: 234 18% 18%;
+  --color-muted-foreground: 240 10% 65%;
+  --color-border: 234 14% 24%;
+  --color-destructive: 0 62% 55%;
+}
+
+body {
+  background: hsl(var(--color-background));
+  color: hsl(var(--color-foreground));
+}

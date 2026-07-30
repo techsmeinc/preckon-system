@@ -1,0 +1,50 @@
+flowchart TB
+    subgraph J["HOW A TENDER PACK BECOMES A PRICED BID"]
+        direction LR
+        S1["📂 1. UPLOAD<br/>Your drawings +<br/>tender documents"]
+        S2["👁️ 2. READ<br/>Vision AI reads drawings,<br/>scans, photos &amp; tables"]
+        S3["🤖 3. PRICE<br/>A team of AI agents<br/>measures &amp; prices<br/>each trade"]
+        S4["🔎 4. CHECK<br/>Nothing missed +<br/>quality + traceable<br/>to the drawing"]
+        S5["👤 5. APPROVE<br/>Your QS reviews<br/>&amp; signs off"]
+        S6["📦 6. DELIVER<br/>Priced BOQ +<br/>Programme +<br/>Tender narrative"]
+        S1 --> S2 --> S3 --> S4 --> S5 --> S6
+    end
+
+    subgraph TEAM["🔬 INSIDE STEP 3 - A TEAM OF AI AGENTS (not one chatbot)"]
+        direction LR
+        R["🗂️ Reader agent<br/>maps the scope"]
+        P["🧩 Planner agent<br/>builds a custom<br/>estimating team"]
+        SP["👷 Specialist agents (10-18)<br/>one per trade -<br/>measure from drawings"]
+        CK["🔎 Completeness agent<br/>catches anything<br/>missed"]
+        R --> P --> SP --> CK
+    end
+
+    subgraph BRAIN["⚙️ THE AI BEHIND IT"]
+        direction LR
+        B1["🧠 Claude Opus 4.8<br/>reasoning - runs every agent"]
+        B2["👁️ Claude Haiku<br/>reads the drawings"]
+        B3["📐 Take-off tools<br/>agents MEASURE drawings,<br/>not guess"]
+        B1 ~~~ B2 ~~~ B3
+    end
+
+    subgraph VS["⚖️ WHY THIS IS NOT JUST A CHATGPT ANSWER"]
+        direction LR
+        X1["❌ Generic AI chatbot<br/>one model - one guess<br/>no access to your drawings<br/>invents quantities"]
+        X2["✅ This platform<br/>a TEAM of agents - reads &amp; MEASURES your<br/>drawings - PROVES every number - QS-approved"]
+        X1 ~~~ X2
+    end
+
+    J ~~~ TEAM
+    TEAM ~~~ BRAIN
+    BRAIN ~~~ VS
+
+    classDef stage fill:#1f6e7e,color:#fff,stroke:#0d3c4a,stroke-width:2px;
+    classDef agent fill:#2e7d8a,color:#fff,stroke:#0d3c4a,stroke-width:1px;
+    classDef brain fill:#ede7f6,color:#311b6e,stroke:#5e35b1,stroke-width:1px;
+    classDef bad fill:#fdecea,color:#9c2a1c,stroke:#c0392b,stroke-width:2px;
+    classDef good fill:#e3f2fd,color:#0d3c61,stroke:#1f6e7e,stroke-width:2px;
+    class S1,S2,S3,S4,S5,S6 stage;
+    class R,P,SP,CK agent;
+    class B1,B2,B3 brain;
+    class X1 bad;
+    class X2 good;

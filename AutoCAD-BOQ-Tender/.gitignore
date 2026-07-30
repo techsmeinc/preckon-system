@@ -1,0 +1,97 @@
+node_modules/
+**/node_modules/
+dist/
+build/
+.next/
+.turbo/
+.parcel-cache/
+/.pnp/
+coverage/
+uploads/
+env/
+.env
+.env.*
+.DS_Store
+.idea/
+.vscode/
+.cache/
+*.log
+*.sqlite
+*.tgz
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+/.pnp.cjs
+
+# OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# VS Code
+.history/
+# See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+
+# compiled output
+dist
+tmp
+out-tsc
+*.tsbuildinfo
+.expo
+.expo-shared
+
+# dependencies
+node_modules
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+yarn-error.log
+testem.log
+/typings
+
+# System Files
+.DS_Store
+Thumbs.db
+
+.cursor/rules/nx-rules.mdc
+.github/instructions/nx.instructions.md
+
+.cache/
+.local/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# User uploads (local / VPS runtime)
+uploads/
+artifacts/api-server/uploads/
+
+# Local agent settings (machine-specific)
+.claude/settings.local.json
+
+# Python bytecode
+__pycache__/
+*.pyc

@@ -1,0 +1,1435 @@
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Preckon — App</title>
+<meta name="theme-color" content="#FBFCFE" />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+
+<script>try{var t=localStorage.getItem("preckon-app-theme")||"light";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","light");}</script>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+  @import url('https://api.fontshare.com/v2/css?f[]=general-sans@500,600,700&display=swap');
+
+  :root{
+    --ink:#0B1B2B; --ink-deep:#06101C; --teal:#15C2A8; --teal-press:#0FA593; --teal-tint:#E8FAF6; --brand:#15C2A8;
+    --slate-700:#334155; --slate-600:#475569; --slate-500:#64748B; --slate-400:#94A3B8; --slate-300:#CBD5E1;
+    --paper:#FBFCFE; --surface:#FFFFFF; --panel-2:#F1F5F9; --hairline:#E3E8EF;
+    --amber:#F5A524; --amber-tint:#FEF3E2; --blue:#3B82F6; --blue-tint:#E7F0FE; --red:#EF4444; --red-tint:#FDECEC;
+    --font-display:'General Sans','Inter',system-ui,sans-serif;
+    --font-body:'Inter',system-ui,sans-serif; --font-mono:'JetBrains Mono',ui-monospace,monospace;
+    --side:248px;
+  }
+  [data-theme="dark"]{
+    --ink:#EAF1F8; --paper:#0A1626; --surface:#0F2033; --panel-2:#0C1B2E;
+    --slate-700:#C7D3E0; --slate-600:#A8B6C6; --slate-500:#8493A6; --slate-400:#6A7A8E; --slate-300:#3A4C60;
+    --hairline:#1D3250; --teal-tint:rgba(21,194,168,.14);
+    --amber-tint:rgba(245,165,36,.14); --blue-tint:rgba(59,130,246,.16); --red-tint:rgba(239,68,68,.15);
+  }
+  *{box-sizing:border-box;} html,body{margin:0; height:100%;}
+  body{font-family:var(--font-body); color:var(--slate-700); background:var(--paper); -webkit-font-smoothing:antialiased; font-size:14px; line-height:1.45;}
+  .mono{font-family:var(--font-mono);}
+  a{color:inherit; text-decoration:none;}
+  ::selection{background:var(--teal); color:#04121b;}
+
+  .btn{font-family:var(--font-body); font-weight:600; font-size:14px; border-radius:10px; padding:11px 16px; cursor:pointer; border:1.5px solid transparent; transition:all .18s ease; display:inline-flex; gap:8px; align-items:center; justify-content:center;}
+  .btn-primary{background:var(--brand); color:#06131d;} .btn-primary:hover{background:var(--teal-press);}
+  .btn-ghost{background:transparent; color:var(--ink); border-color:var(--hairline);} .btn-ghost:hover{border-color:var(--slate-400);}
+  .mini{font-family:var(--font-body); font-size:12.5px; font-weight:600; padding:8px 13px; border-radius:8px; border:1px solid var(--hairline); background:transparent; color:var(--ink); cursor:pointer;}
+  .mini:hover{border-color:var(--slate-400);}
+  .mini.pri{background:var(--brand); border-color:var(--brand); color:#06131d;} .mini.pri:hover{background:var(--teal-press);}
+
+  /* ---------- LOGIN ---------- */
+  .login-wrap{min-height:100vh; display:grid; place-items:center; padding:24px; background:radial-gradient(1100px 560px at 50% -10%, rgba(21,194,168,.10), transparent 60%), var(--paper);}
+  .login-wrap::before{content:""; position:fixed; inset:0; pointer-events:none; background-image:linear-gradient(var(--hairline) 1px,transparent 1px),linear-gradient(90deg,var(--hairline) 1px,transparent 1px); background-size:26px 26px; opacity:.45;}
+  .login{position:relative; width:100%; max-width:392px; background:var(--surface); border:1px solid var(--hairline); border-radius:16px; padding:34px; box-shadow:0 40px 90px -52px rgba(11,27,43,.35);}
+  .login .brand{display:flex; align-items:center; gap:11px;}
+  .login .brand .wm{font-family:var(--font-display); font-weight:600; font-size:17px; color:var(--ink); letter-spacing:-.02em;}
+  .login .brand .wm .o{color:var(--teal);}
+  .login h1{font-family:var(--font-display); font-weight:600; font-size:22px; color:var(--ink); margin:22px 0 4px; letter-spacing:-.02em;}
+  .login .sub{font-size:12.5px; color:var(--slate-500); margin:0 0 22px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:11.5px; font-weight:600; color:var(--ink); margin-bottom:6px;}
+  .field input{width:100%; padding:11px 13px; border:1.5px solid var(--hairline); border-radius:10px; background:var(--panel-2); color:var(--ink); font-family:var(--font-body); font-size:14px;}
+  .field input:focus{outline:none; border-color:var(--teal);}
+  .login .btn{width:100%;}
+  .login .row{display:flex; justify-content:space-between; align-items:center; margin:2px 0 14px;}
+  .login .row a{font-size:11.5px; color:var(--teal-press); font-weight:600;}
+  .login .sso-sep{display:flex; align-items:center; gap:10px; margin:16px 0 6px; color:var(--slate-400); font-size:11px;}
+  .login .sso-sep::before,.login .sso-sep::after{content:""; height:1px; background:var(--hairline); flex:1;}
+  .btn-ghost.full{width:100%; margin-top:9px;}
+  .login .ws{display:flex; align-items:center; gap:7px; margin-top:20px; font-family:var(--font-mono); font-size:11px; color:var(--slate-400);}
+
+  /* ---------- SHELL ---------- */
+  .app{display:none; min-height:100vh; grid-template-columns:var(--side) 1fr;}
+  .app.on{display:grid;}
+  .side{background:var(--surface); border-right:1px solid var(--hairline); display:flex; flex-direction:column; position:sticky; top:0; height:100vh;}
+  .side-top{padding:15px 16px 13px; border-bottom:1px solid var(--hairline);}
+  .ws-switch{display:flex; align-items:center; gap:10px; padding:7px; border-radius:9px; cursor:pointer;}
+  .ws-switch:hover{background:var(--panel-2);}
+  .ws-logo{width:30px; height:30px; border-radius:8px; background:linear-gradient(135deg,var(--ink),var(--teal-press)); color:#fff; display:grid; place-items:center; font-family:var(--font-display); font-weight:600; font-size:12px; flex:none;}
+  .ws-switch .nm{font-family:var(--font-display); font-weight:600; font-size:13.5px; color:var(--ink); line-height:1.2; flex:1;}
+  .ws-switch .nm small{display:block; font-family:var(--font-mono); font-size:9.5px; color:var(--slate-400); font-weight:400;}
+  .ws-switch .chev{color:var(--slate-400);}
+  .side-new{padding:12px 12px 4px;}
+  .side-new .btn{width:100%;}
+  .nav{flex:1; overflow-y:auto; padding:8px 10px;}
+  .nav .grp{font-family:var(--font-mono); font-size:9.5px; letter-spacing:.16em; color:var(--slate-400); text-transform:uppercase; padding:14px 10px 6px;}
+  .nav a{display:flex; align-items:center; gap:11px; padding:9px 10px; border-radius:8px; color:var(--slate-600); font-size:13.5px; font-weight:500; cursor:pointer; position:relative;}
+  .nav a svg{width:17px; height:17px; flex:none; color:var(--slate-400);}
+  .nav a:hover{background:var(--panel-2); color:var(--ink);}
+  .nav a.active{background:var(--teal-tint); color:var(--ink);}
+  .nav a.active svg{color:var(--teal-press);}
+  .nav a.active::before{content:""; position:absolute; left:-10px; top:8px; bottom:8px; width:3px; border-radius:0 3px 3px 0; background:var(--brand);}
+  .nav a .badge{margin-left:auto; font-family:var(--font-mono); font-size:9.5px; background:var(--amber-tint); color:var(--amber); border-radius:999px; padding:2px 7px;}
+  .side-user{border-top:1px solid var(--hairline); padding:12px; display:flex; align-items:center; gap:10px;}
+  .avatar{width:32px; height:32px; border-radius:8px; background:linear-gradient(135deg,var(--ink),var(--teal-press)); color:#fff; display:grid; place-items:center; font-family:var(--font-display); font-weight:600; font-size:12px; flex:none;}
+  .side-user .nm{font-size:12.5px; font-weight:600; color:var(--ink); line-height:1.2;}
+  .side-user .rl{font-family:var(--font-mono); font-size:10px; color:var(--slate-500);}
+  .side-user .out{margin-left:auto; color:var(--slate-400); cursor:pointer; padding:4px; border-radius:6px;}
+  .side-user .out:hover{color:var(--ink); background:var(--panel-2);}
+
+  .main{min-width:0; display:flex; flex-direction:column;}
+  .topbar{position:sticky; top:0; z-index:20; background:color-mix(in srgb,var(--paper) 85%,transparent); backdrop-filter:blur(8px); border-bottom:1px solid var(--hairline); display:flex; align-items:center; gap:12px; padding:12px 24px;}
+  .crumb{font-family:var(--font-display); font-weight:600; font-size:16px; color:var(--ink); letter-spacing:-.01em;}
+  .kbd{margin-left:auto; display:flex; align-items:center; gap:8px; color:var(--slate-500); font-size:12.5px; cursor:pointer; border:1px solid var(--hairline); border-radius:9px; padding:7px 11px; background:var(--surface);}
+  .kbd .keys{font-family:var(--font-mono); font-size:10.5px; color:var(--slate-400); border:1px solid var(--hairline); border-radius:5px; padding:1px 5px;}
+  .cop-btn{display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:#06131d; background:var(--brand); border:0; border-radius:9px; padding:8px 13px; cursor:pointer;}
+  .cop-btn:hover{background:var(--teal-press);}
+  .tb-btn{width:34px; height:34px; border-radius:9px; border:1px solid var(--hairline); background:var(--surface); color:var(--slate-500); display:grid; place-items:center; cursor:pointer;}
+  .tb-btn:hover{color:var(--ink); border-color:var(--slate-400);}
+  .tb-btn .ic-sun{display:none;} [data-theme="dark"] .tb-btn .ic-moon{display:none;} [data-theme="dark"] .tb-btn .ic-sun{display:block;}
+
+  .content{padding:24px; max-width:1320px; width:100%;}
+  .page-head{display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:20px; flex-wrap:wrap;}
+  .page-head h2{font-family:var(--font-display); font-weight:600; font-size:23px; color:var(--ink); margin:0; letter-spacing:-.02em;}
+  .page-head p{margin:5px 0 0; font-size:13px; color:var(--slate-500);}
+
+  /* KPI */
+  .kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px;}
+  .kpi{background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:16px;}
+  .kpi .k{font-size:11.5px; color:var(--slate-500); display:flex; align-items:center; gap:6px;}
+  .kpi .k svg{width:14px; height:14px; color:var(--slate-400);}
+  .kpi .v{font-family:var(--font-mono); font-weight:600; font-size:24px; color:var(--ink); margin:9px 0 4px; letter-spacing:-.02em;}
+  .kpi .sub{font-size:11px; color:var(--slate-400);}
+  .kpi .v.accent{color:var(--amber);}
+  @media(max-width:1080px){ .kpis{grid-template-columns:repeat(2,1fr);} }
+
+  .row{display:grid; gap:12px; margin-bottom:16px;}
+  .row.two2{grid-template-columns:1.5fr 1fr;}
+  @media(max-width:980px){ .row.two2{grid-template-columns:1fr;} }
+  .card{background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:18px;}
+  .card h3{font-family:var(--font-display); font-weight:600; font-size:14.5px; color:var(--ink); margin:0 0 2px;}
+  .card .csub{font-size:11.5px; color:var(--slate-500); margin:0 0 14px;}
+  .card .chead{display:flex; align-items:baseline; justify-content:space-between; gap:10px;}
+  .card .chead a{font-size:11.5px; color:var(--teal-press); font-weight:600; cursor:pointer;}
+
+  /* review queue */
+  .rq{list-style:none; margin:0; padding:0;}
+  .rq li{display:flex; align-items:center; gap:12px; padding:12px 0; border-top:1px solid var(--hairline);}
+  .rq li:first-child{border-top:0; padding-top:2px;}
+  .rq .ic{width:34px; height:34px; border-radius:9px; display:grid; place-items:center; flex:none;}
+  .mod-quant{background:var(--teal-tint); color:var(--teal-press);}
+  .mod-draw{background:var(--blue-tint); color:var(--blue);}
+  .mod-cost{background:var(--teal-tint); color:var(--teal-press);}
+  .mod-doc{background:var(--panel-2); color:var(--slate-500);}
+  .mod-proc{background:var(--amber-tint); color:var(--amber);}
+  .rq .tx{flex:1; min-width:0;}
+  .rq .tt{font-size:13px; color:var(--ink); font-weight:600;}
+  .rq .mt{font-family:var(--font-mono); font-size:10.5px; color:var(--slate-500); margin-top:2px;}
+  .conf{font-family:var(--font-mono); font-size:10px; color:var(--teal-press); background:var(--teal-tint); border-radius:5px; padding:2px 6px;}
+  .conf.warn{color:var(--amber); background:var(--amber-tint);}
+
+  /* deadlines */
+  .dl{list-style:none; margin:0; padding:0;}
+  .dl li{display:flex; align-items:center; gap:12px; padding:11px 0; border-top:1px solid var(--hairline);}
+  .dl li:first-child{border-top:0; padding-top:2px;}
+  .dl .day{width:42px; text-align:center; flex:none;}
+  .dl .day .d{font-family:var(--font-mono); font-weight:600; font-size:16px; color:var(--ink); line-height:1;}
+  .dl .day .m{font-family:var(--font-mono); font-size:9px; color:var(--slate-400); text-transform:uppercase;}
+  .dl .nm{font-size:12.5px; color:var(--ink); font-weight:500; flex:1;}
+  .dl .nm small{display:block; color:var(--slate-500); font-weight:400; font-size:11px;}
+
+  /* tables */
+  table{width:100%; border-collapse:collapse;}
+  thead th{font-family:var(--font-mono); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--slate-400); text-align:left; padding:0 10px 10px; font-weight:500;}
+  thead th.r,tbody td.r{text-align:right;}
+  tbody td{padding:12px 10px; border-top:1px solid var(--hairline); font-size:13px; color:var(--slate-700);}
+  tbody tr.clickable{cursor:pointer;} tbody tr.clickable:hover{background:var(--panel-2);}
+  td .t-name{font-weight:600; color:var(--ink);}
+  td .t-sub{font-family:var(--font-mono); font-size:10.5px; color:var(--slate-400);}
+  td.num{font-family:var(--font-mono); color:var(--ink);}
+  .stage{font-family:var(--font-mono); font-size:10.5px; color:var(--slate-600); background:var(--panel-2); border:1px solid var(--hairline); border-radius:6px; padding:3px 8px; white-space:nowrap;}
+  .prog{height:6px; background:var(--panel-2); border-radius:3px; overflow:hidden; min-width:70px;}
+  .prog span{display:block; height:100%; background:var(--brand); border-radius:3px;}
+  .chip{font-family:var(--font-mono); font-size:10px; letter-spacing:.02em; padding:4px 9px; border-radius:999px; white-space:nowrap; display:inline-flex; align-items:center; gap:5px;}
+  .chip::before{content:""; width:6px; height:6px; border-radius:50%; background:currentColor;}
+  .chip.review{color:var(--amber); background:var(--amber-tint);}
+  .chip.processing{color:var(--blue); background:var(--blue-tint);}
+  .chip.ready{color:var(--teal-press); background:var(--teal-tint);}
+  .chip.upload{color:var(--slate-500); background:var(--panel-2);}
+  .rowbtn{font-family:var(--font-body); font-size:12px; font-weight:600; color:var(--teal-press); background:transparent; border:0; cursor:pointer;}
+
+  /* feed */
+  .feed{list-style:none; margin:0; padding:0;}
+  .feed li{display:flex; gap:12px; padding:11px 0; border-top:1px solid var(--hairline);}
+  .feed li:first-child{border-top:0; padding-top:2px;}
+  .feed .dot{width:28px; height:28px; border-radius:8px; background:var(--panel-2); display:grid; place-items:center; color:var(--slate-500); flex:none;}
+  .feed .dot svg{width:14px; height:14px;}
+  .feed .tx{font-size:12.5px; color:var(--slate-700);}
+  .feed .tx b{color:var(--ink); font-weight:600;}
+  .feed .tm{font-family:var(--font-mono); font-size:10.5px; color:var(--slate-400); margin-top:2px;}
+
+  /* placeholder */
+  .placeholder{background:var(--surface); border:1px dashed var(--hairline); border-radius:16px; padding:56px 32px; text-align:center;}
+  .placeholder .pic{width:56px; height:56px; border-radius:14px; background:var(--teal-tint); color:var(--teal-press); display:grid; place-items:center; margin:0 auto 18px;}
+  .placeholder h3{font-family:var(--font-display); font-weight:600; font-size:20px; color:var(--ink); margin:0 0 8px;}
+  .placeholder p{font-size:13.5px; color:var(--slate-500); max-width:52ch; margin:0 auto;}
+  .placeholder .next{display:inline-flex; align-items:center; gap:8px; margin-top:20px; font-family:var(--font-mono); font-size:11px; color:var(--teal-press); border:1px solid var(--teal); background:var(--teal-tint); border-radius:999px; padding:7px 14px;}
+
+  /* drawers */
+  .drawer-overlay{display:none; position:fixed; inset:0; z-index:90; background:rgba(4,10,18,.5);}
+  .drawer-overlay.on{display:block;}
+  .drawer{position:fixed; top:0; right:0; height:100vh; width:452px; max-width:94vw; background:var(--surface); border-left:1px solid var(--hairline); z-index:91; transform:translateX(100%); transition:transform .26s cubic-bezier(.4,0,.2,1); display:flex; flex-direction:column;}
+  .drawer-overlay.on .drawer{transform:none;}
+  .drawer .dh{display:flex; align-items:center; justify-content:space-between; padding:18px 20px; border-bottom:1px solid var(--hairline);}
+  .drawer .dh h3{font-family:var(--font-display); font-weight:600; font-size:16px; color:var(--ink); margin:0;}
+  .drawer .dh .x{cursor:pointer; color:var(--slate-400); padding:4px; border-radius:6px; display:grid; place-items:center;} .drawer .dh .x:hover{color:var(--ink); background:var(--panel-2);}
+  .drawer .db{flex:1; overflow-y:auto; padding:20px;}
+  .drawer .df{display:flex; gap:10px; padding:16px 20px; border-top:1px solid var(--hairline);}
+  .drawer .df .mini{flex:1; text-align:center;}
+  .fld{margin-bottom:15px;} .fl{font-size:11.5px; font-weight:600; color:var(--ink); margin:0 0 6px; display:block;}
+  .fld input,.fld textarea,.fld select{width:100%; padding:9px 11px; border:1.5px solid var(--hairline); border-radius:9px; background:var(--panel-2); color:var(--ink); font-family:var(--font-body); font-size:13px;}
+  .fld input:focus,.fld textarea:focus,.fld select:focus{outline:none; border-color:var(--teal);}
+  .fld textarea{min-height:70px; resize:vertical;}
+
+  /* copilot drawer */
+  .cop{width:420px;}
+  .cop .msgs{flex:1; overflow-y:auto; padding:18px 20px; display:flex; flex-direction:column; gap:14px;}
+  .cop .m{max-width:88%;}
+  .cop .m.u{align-self:flex-end;}
+  .cop .m .bub{padding:11px 13px; border-radius:12px; font-size:13px; line-height:1.5;}
+  .cop .m.a .bub{background:var(--panel-2); color:var(--ink); border-bottom-left-radius:4px;}
+  .cop .m.u .bub{background:var(--brand); color:#06131d; border-bottom-right-radius:4px;}
+  .cop .cite{font-family:var(--font-mono); font-size:10px; color:var(--teal-press); margin-top:6px; display:inline-flex; align-items:center; gap:5px;}
+  .cop .chips{display:flex; gap:8px; flex-wrap:wrap; margin-top:4px;}
+  .cop .chips button{font-size:12px; color:var(--slate-600); background:var(--panel-2); border:1px solid var(--hairline); border-radius:999px; padding:7px 12px; cursor:pointer;}
+  .cop .chips button:hover{border-color:var(--teal); color:var(--ink);}
+  .cop .inp{display:flex; gap:8px; padding:14px 16px; border-top:1px solid var(--hairline);}
+  .cop .inp input{flex:1; border:1.5px solid var(--hairline); border-radius:10px; background:var(--panel-2); color:var(--ink); font-size:13px; padding:10px 12px; outline:none; font-family:var(--font-body);}
+  .cop .inp input:focus{border-color:var(--teal);}
+  .cop .inp button{width:40px; border:0; border-radius:10px; background:var(--brand); color:#06131d; cursor:pointer; display:grid; place-items:center;}
+
+  /* command palette */
+  .cmd-overlay{display:none; position:fixed; inset:0; z-index:100; background:rgba(4,10,18,.4); backdrop-filter:blur(3px); padding-top:14vh;}
+  .cmd-overlay.on{display:block;}
+  .cmd{max-width:520px; margin:0 auto; background:var(--surface); border:1px solid var(--hairline); border-radius:14px; overflow:hidden; box-shadow:0 40px 90px -40px rgba(0,0,0,.5);}
+  .cmd input{width:100%; border:0; border-bottom:1px solid var(--hairline); background:transparent; color:var(--ink); font-size:15px; padding:16px 18px; font-family:var(--font-body); outline:none;}
+  .cmd-list{max-height:320px; overflow-y:auto; padding:8px;}
+  .cmd-list button{width:100%; display:flex; align-items:center; gap:11px; padding:10px 12px; border:0; background:transparent; border-radius:9px; cursor:pointer; color:var(--slate-600); font-size:13.5px; text-align:left;}
+  .cmd-list button:hover,.cmd-list button.sel{background:var(--teal-tint); color:var(--ink);}
+  .cmd-list button svg{width:16px; height:16px; color:var(--slate-400); flex:none;}
+  .cmd-list .grp{font-family:var(--font-mono); font-size:9.5px; letter-spacing:.14em; color:var(--slate-400); text-transform:uppercase; padding:12px 12px 5px;}
+
+  /* toast */
+  .toast{position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:var(--paper); font-size:13px; font-weight:500; padding:11px 18px; border-radius:10px; box-shadow:0 20px 50px -20px rgba(0,0,0,.4); opacity:0; pointer-events:none; transition:all .25s ease; z-index:120; display:flex; align-items:center; gap:9px;}
+  .toast.on{opacity:1; transform:translateX(-50%);}
+  .toast svg{color:var(--teal);}
+
+  @media(max-width:840px){ :root{--side:64px;} .ws-switch .nm,.ws-switch .chev,.side-new,.nav .grp,.nav a span,.side-user .nm,.side-user .rl,.side-user .out{display:none;} .nav a{justify-content:center;} .side-user,.ws-switch{justify-content:center;} .crumb{font-size:14px;} }
+  /* ---------- PROJECTS / WORKSPACE ---------- */
+  .fbar{display:flex; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap;}
+  .fsearch{flex:1; min-width:200px; display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--hairline); border-radius:9px; padding:8px 12px;}
+  .fsearch input{border:0; background:transparent; color:var(--ink); font-size:13px; width:100%; outline:none; font-family:var(--font-body);}
+  .fsearch svg{color:var(--slate-400); flex:none;}
+  .range{display:inline-flex; gap:2px; background:var(--panel-2); border:1px solid var(--hairline); border-radius:9px; padding:3px; flex-wrap:wrap;}
+  .range button{font-family:var(--font-mono); font-size:11px; color:var(--slate-500); background:transparent; border:0; padding:6px 11px; border-radius:6px; cursor:pointer;}
+  .range button.on{background:var(--surface); color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.12);}
+  .trow-lbl{font-size:12.5px; color:var(--slate-500); display:flex; justify-content:space-between; padding:9px 0; border-top:1px solid var(--hairline);}
+  .trow-lbl b{color:var(--ink); font-weight:600;}
+  .pw-back{display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:var(--slate-500); font-weight:600; cursor:pointer; margin-bottom:12px;}
+  .pw-back:hover{color:var(--ink);}
+  .pw-head{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:16px;}
+  .pw-head h2{font-family:var(--font-display); font-weight:600; font-size:22px; color:var(--ink); margin:0; letter-spacing:-.02em;}
+  .pw-meta{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; align-items:center;}
+  .pw-meta .mc{font-family:var(--font-mono); font-size:11px; color:var(--slate-600); background:var(--panel-2); border:1px solid var(--hairline); border-radius:7px; padding:4px 9px;}
+  .pw-tabs{display:flex; gap:2px; border-bottom:1px solid var(--hairline); margin-bottom:20px; overflow-x:auto;}
+  .pw-tabs button{position:relative; font-family:var(--font-body); font-size:13px; font-weight:600; color:var(--slate-500); background:transparent; border:0; padding:11px 13px; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:7px;}
+  .pw-tabs button:hover{color:var(--ink);}
+  .pw-tabs button.on{color:var(--ink);}
+  .pw-tabs button.on::after{content:""; position:absolute; left:8px; right:8px; bottom:-1px; height:2px; background:var(--brand);}
+  .sd{width:6px; height:6px; border-radius:50%; flex:none;}
+  .sd.done{background:var(--teal);} .sd.review{background:var(--amber);} .sd.processing{background:var(--blue);} .sd.pending{background:var(--slate-300);}
+  .chain{display:flex; align-items:flex-start; justify-content:space-between; position:relative;}
+  .chain .step{flex:1; text-align:center; position:relative; cursor:pointer;}
+  .chain .step::before{content:""; position:absolute; top:18px; left:-50%; width:100%; height:2px; background:var(--hairline); z-index:0;}
+  .chain .step:first-child::before{display:none;}
+  .chain .step.done::before,.chain .step.review::before,.chain .step.processing::before{background:var(--teal);}
+  .chain .node{position:relative; z-index:1; width:38px; height:38px; border-radius:50%; margin:0 auto 8px; display:grid; place-items:center; background:var(--surface); border:2px solid var(--hairline); color:var(--slate-400); font-family:var(--font-mono); font-weight:600; font-size:13px;}
+  .chain .step.done .node{border-color:var(--teal); background:var(--teal); color:#06131d;}
+  .chain .step.review .node{border-color:var(--amber); background:var(--amber-tint); color:var(--amber);}
+  .chain .step.processing .node{border-color:var(--blue); background:var(--blue-tint); color:var(--blue);}
+  .chain .step .sl{font-size:11.5px; font-weight:600; color:var(--ink);}
+  .chain .step .ss{font-family:var(--font-mono); font-size:9px; color:var(--slate-400); margin-top:2px; text-transform:uppercase; letter-spacing:.04em;}
+  .chain .step:hover .node{border-color:var(--teal-press);}
+  .dropzone{border:1.5px dashed var(--hairline); border-radius:12px; padding:26px; text-align:center; color:var(--slate-500); cursor:pointer; margin-bottom:16px; background:var(--panel-2);}
+  .dropzone:hover{border-color:var(--teal); color:var(--ink);}
+  .dropzone svg{color:var(--teal-press); margin-bottom:8px;}
+
+  /* ---------- BOQ ---------- */
+  tr.grp-row td{background:var(--panel-2); font-family:var(--font-mono); font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--slate-400); padding:8px 10px;}
+  tr.flagged td{background:var(--amber-tint);}
+  [data-theme="dark"] tr.flagged td{background:rgba(245,165,36,.08);}
+  .acc{font-family:var(--font-mono); font-size:10.5px; color:var(--teal-press); display:inline-flex; align-items:center; gap:4px; white-space:nowrap;}
+  .srcchip{font-family:var(--font-mono); font-size:10.5px; color:var(--teal-press); background:var(--teal-tint); border-radius:5px; padding:2px 7px; cursor:pointer;}
+  .srcchip:hover{background:var(--teal); color:#06131d;}
+  .boq-sum{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px;}
+  @media(max-width:820px){ .boq-sum{grid-template-columns:1fr 1fr;} }
+  .boq-sum .s{background:var(--surface); border:1px solid var(--hairline); border-radius:12px; padding:14px 16px;}
+  .boq-sum .s .k{font-size:11px; color:var(--slate-500);}
+  .boq-sum .s .v{font-family:var(--font-mono); font-weight:600; font-size:19px; color:var(--ink); margin-top:6px;}
+  .boq-sum .s .v.warn{color:var(--amber);}
+  .boq-prop{background:var(--panel-2); border:1px solid var(--hairline); border-radius:12px; padding:16px; margin-bottom:14px;}
+  .boq-prop .lab{font-family:var(--font-mono); font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--slate-400);}
+  .boq-prop .val{font-family:var(--font-mono); font-weight:600; font-size:24px; color:var(--ink); margin-top:6px; letter-spacing:-.02em;}
+  .boq-prop .val small{font-size:13px; color:var(--slate-400); font-weight:400;}
+  .boq-src{border:1px solid var(--hairline); border-radius:12px; overflow:hidden; margin-bottom:14px;}
+  .boq-src .sh{display:flex; align-items:center; justify-content:space-between; padding:10px 13px; border-bottom:1px solid var(--hairline); font-size:12px;}
+  .boq-src .prev{background:var(--panel-2); line-height:0;}
+
+  /* ---------- DRAWLOGIX VIEWER ---------- */
+  .dwg-wrap{display:grid; grid-template-columns:1fr 300px; gap:14px;}
+  @media(max-width:1000px){ .dwg-wrap{grid-template-columns:1fr;} }
+  .dwg-main{border:1px solid var(--hairline); border-radius:14px; overflow:hidden; background:var(--surface);}
+  .dwg-toolbar{display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid var(--hairline);}
+  .dwg-toolbar select{font-family:var(--font-mono); font-size:11.5px; color:var(--ink); background:var(--panel-2); border:1px solid var(--hairline); border-radius:7px; padding:6px 9px;}
+  .tgl{display:inline-flex; align-items:center; gap:7px; font-size:12px; color:var(--slate-600); cursor:pointer;}
+  .tgl input{accent-color:var(--teal);}
+  .zoomctl{margin-left:auto; display:flex; gap:4px;}
+  .zoomctl button,.dwg-toolbar .tbtn{width:30px; height:30px; border-radius:7px; border:1px solid var(--hairline); background:var(--surface); color:var(--slate-500); cursor:pointer; display:grid; place-items:center; font-size:15px;}
+  .zoomctl button:hover,.tbtn:hover{color:var(--ink); border-color:var(--slate-400);}
+  .dwg-canvas{height:520px; background:var(--panel-2); position:relative; overflow:hidden; cursor:grab; touch-action:none;}
+  .dwg-canvas.grabbing{cursor:grabbing;}
+  .dwg-canvas svg{width:100%; height:100%; display:block;}
+  .dwg-panel{border:1px solid var(--hairline); border-radius:14px; background:var(--surface); padding:16px; height:fit-content;}
+  /* base drawing */
+  .g-grid{stroke:var(--slate-300); stroke-width:.6; stroke-dasharray:4 3;}
+  .g-slab{fill:none; stroke:var(--slate-500); stroke-width:1.6;}
+  .g-core{fill:var(--slate-400); opacity:.18; stroke:var(--slate-500); stroke-width:1;}
+  .g-col{fill:var(--slate-500); opacity:.55;}
+  .g-dim{stroke:var(--slate-400); stroke-width:.5;}
+  .g-dimt{font-family:var(--font-mono); font-size:8px; fill:var(--slate-500); text-anchor:middle;}
+  .g-bub{fill:var(--surface); stroke:var(--slate-400); stroke-width:.8;}
+  .g-bubt{font-family:var(--font-mono); font-size:8px; fill:var(--slate-600); text-anchor:middle; dominant-baseline:central;}
+  /* recognition overlay */
+  .rec{fill:rgba(21,194,168,.12); stroke:var(--teal); stroke-width:1.4; cursor:pointer;}
+  .rec:hover{fill:rgba(21,194,168,.26);}
+  .rec.flagged{fill:rgba(245,165,36,.14); stroke:var(--amber);}
+  .rec.rec-outline{fill:none;}
+  .rec.sel{stroke-width:2.6; fill:rgba(21,194,168,.32);}
+  .rec.flagged.sel{fill:rgba(245,165,36,.32);}
+  .reclbl{font-family:var(--font-mono); font-size:7px; fill:var(--teal-press); pointer-events:none;}
+  /* panel */
+  .dwg-stat{display:flex; gap:10px; margin-bottom:14px;}
+  .dwg-stat .st{flex:1; background:var(--panel-2); border:1px solid var(--hairline); border-radius:9px; padding:9px 11px;}
+  .dwg-stat .st .k{font-size:9.5px; color:var(--slate-500);}
+  .dwg-stat .st .v{font-family:var(--font-mono); font-weight:600; font-size:16px; color:var(--ink); margin-top:3px;}
+  .dwg-stat .st .v.warn{color:var(--amber);}
+  .dwg-types{list-style:none; margin:0; padding:0;}
+  .dwg-types li{display:flex; align-items:center; justify-content:space-between; padding:9px 0; border-top:1px solid var(--hairline); font-size:13px; color:var(--slate-700); cursor:pointer;}
+  .dwg-types li:first-child{border-top:0;}
+  .dwg-types li:hover{color:var(--ink);}
+  .dwg-types .ct{font-family:var(--font-mono); color:var(--slate-500);}
+  .dwg-types .ct .fl{color:var(--amber);}
+  .dwg-det{border-top:1px solid var(--hairline); margin-top:6px; padding-top:14px;}
+  .dwg-det .empty{font-size:12.5px; color:var(--slate-400); text-align:center; padding:14px 0;}
+  .dwg-det .dt{font-family:var(--font-display); font-weight:600; font-size:15px; color:var(--ink);}
+  .dwg-det .dk{font-family:var(--font-mono); font-size:10px; color:var(--slate-400);}
+
+  /* ---------- ESTIMATE ---------- */
+  .rs{font-family:var(--font-mono); font-size:10px; padding:3px 7px; border-radius:6px; white-space:nowrap;}
+  .rs-lib{color:var(--teal-press); background:var(--teal-tint);}
+  .rs-hist{color:var(--blue); background:var(--blue-tint);}
+  .rs-man{color:var(--slate-500); background:var(--panel-2);}
+  .rs-none{color:var(--amber); background:var(--amber-tint);}
+  .row.est{grid-template-columns:1.5fr 1fr;} @media(max-width:980px){ .row.est{grid-template-columns:1fr;} }
+  .bd-row{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 0; border-top:1px solid var(--hairline); font-size:13px; color:var(--slate-600);}
+  .bd-row.first{border-top:0;}
+  .bd-row b{font-family:var(--font-mono); color:var(--ink); font-weight:600;}
+  .bd-row .pin{display:flex; align-items:center; gap:8px;}
+  .bd-row .pin input{width:52px; padding:5px 7px; border:1.5px solid var(--hairline); border-radius:7px; background:var(--panel-2); color:var(--ink); font-family:var(--font-mono); font-size:12px; text-align:right; outline:none;}
+  .bd-row .pin input:focus{border-color:var(--teal);}
+  .bd-row .pin .amt{font-family:var(--font-mono); color:var(--ink); font-weight:600; min-width:78px; text-align:right;}
+  .bd-total{display:flex; align-items:center; justify-content:space-between; padding:13px 0 2px; border-top:2px solid var(--ink); margin-top:6px; font-family:var(--font-display); font-weight:600; font-size:14px; color:var(--ink);}
+  .bd-total b{font-family:var(--font-mono); font-size:19px;}
+
+  /* ---------- PROCUREMENT ---------- */
+  .vrow{display:flex; align-items:center; justify-content:space-between; padding:9px 0; border-top:1px solid var(--hairline); font-size:13px;}
+  .vrow:first-child{border-top:0;}
+  .vrow .vn{color:var(--ink); font-weight:500;}
+  .vrow .vs{font-family:var(--font-mono); font-size:10.5px; color:var(--slate-500);}
+
+  /* ---------- ADMIN ---------- */
+  .swatches{display:flex; gap:9px; flex-wrap:wrap; margin:12px 0;}
+  .swatches button{width:30px; height:30px; border-radius:8px; border:2px solid var(--surface); box-shadow:0 0 0 1px var(--hairline); cursor:pointer;}
+  .swatches button:hover{transform:scale(1.08);}
+  input[type=color]{width:46px; height:34px; border:1px solid var(--hairline); border-radius:8px; background:var(--panel-2); cursor:pointer; padding:2px;}
+  .brand-prev{display:flex; align-items:center; gap:14px; padding:16px; background:var(--panel-2); border:1px solid var(--hairline); border-radius:12px; margin-top:14px; flex-wrap:wrap;}
+  .brand-node{width:36px; height:36px; border-radius:50%; background:var(--brand); color:#06131d; display:grid; place-items:center; font-family:var(--font-mono); font-weight:600; font-size:13px;}
+  .usage-row{margin:16px 0;}
+  .usage-row .ul{display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:6px; color:var(--slate-600);}
+  .usage-row .ul b{font-family:var(--font-mono); color:var(--ink);}
+  .prog.lg{height:8px;}
+
+  /* ---------- SETTINGS / LIBRARY ---------- */
+  .switch{width:38px; height:22px; border-radius:999px; background:var(--slate-300); position:relative; cursor:pointer; transition:background .18s; flex:none;}
+  .switch.on{background:var(--brand);}
+  .switch::after{content:""; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:#fff; transition:transform .18s; box-shadow:0 1px 2px rgba(0,0,0,.2);}
+  .switch.on::after{transform:translateX(16px);}
+  .set-row{display:flex; align-items:center; justify-content:space-between; gap:14px; padding:13px 0; border-top:1px solid var(--hairline);}
+  .set-row:first-child{border-top:0;}
+  .set-row .sl{font-size:13px; color:var(--ink); font-weight:500;}
+  .set-row .desc{font-size:11.5px; color:var(--slate-500); margin-top:2px;}
+  .set-row select{padding:8px 11px; border:1.5px solid var(--hairline); border-radius:9px; background:var(--panel-2); color:var(--ink); font-family:var(--font-body); font-size:13px;}
+
+  /* ---------- PLANLOGIX GANTT ---------- */
+  .gantt{border:1px solid var(--hairline); border-radius:12px; overflow:hidden;}
+  .gantt-head{display:flex; background:var(--panel-2); border-bottom:1px solid var(--hairline);}
+  .gantt-head .glbl{width:190px; flex:none; padding:9px 12px; font-family:var(--font-mono); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--slate-400);}
+  .gantt-head .gaxis{flex:1; position:relative;}
+  .gaxis .wk{position:absolute; top:0; bottom:0; font-family:var(--font-mono); font-size:9px; color:var(--slate-400); border-left:1px solid var(--hairline); padding:9px 0 0 4px;}
+  .grow{display:flex; align-items:stretch; border-top:1px solid var(--hairline);}
+  .grow:hover{background:var(--panel-2);}
+  .grow .glbl{width:190px; flex:none; padding:10px 12px; font-size:12.5px; color:var(--ink); display:flex; align-items:center; gap:7px; cursor:pointer;}
+  .grow .glbl .sd{margin-left:auto;}
+  .grow .gtrack{flex:1; position:relative; min-height:38px;}
+  .gwk-grid{position:absolute; top:0; bottom:0; border-left:1px solid var(--hairline); opacity:.5;}
+  .gbar{position:absolute; top:9px; height:20px; border-radius:5px; cursor:pointer; display:flex; align-items:center; padding:0 6px; white-space:nowrap; box-shadow:0 1px 2px rgba(0,0,0,.08);}
+  .gbar.crit{background:var(--brand); color:#06131d;}
+  .gbar.norm{background:var(--slate-400); color:#fff;}
+  .gbar.flag{background:var(--amber); color:#06131d;}
+  .gbar .gd{font-family:var(--font-mono); font-size:9px; font-weight:600;}
+  .gbar.sel{outline:2px solid var(--ink); outline-offset:1px;}
+  .leg{display:flex; gap:16px; margin-top:14px; font-size:11.5px; color:var(--slate-500); flex-wrap:wrap;}
+  .leg span{display:inline-flex; align-items:center; gap:6px;}
+  .leg i{width:12px; height:12px; border-radius:3px; display:inline-block;}
+
+  @media (prefers-reduced-motion: reduce){ *{transition:none!important; animation:none!important;} }
+</style>
+
+<!-- ============ LOGIN ============ -->
+<div class="login-wrap" id="login">
+  <form class="login" id="loginForm" novalidate>
+    <div class="brand">
+      <svg viewBox="0 0 48 56" width="24" height="28" fill="none" aria-hidden="true"><path d="M16 50V8h14a13 13 0 0 1 0 26H16" stroke="var(--ink)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="25" cy="21" r="3.6" fill="var(--teal)"/></svg>
+      <span class="wm">Preck<span class="o">o</span>n</span>
+    </div>
+    <h1>Sign in</h1>
+    <p class="sub">Welcome back. Pick up where your bids left off.</p>
+    <div class="field"><label for="email">Work email</label><input id="email" type="email" placeholder="you@company.com" autocomplete="username" value="sam@cedarstone.build"></div>
+    <div class="field"><label for="pw">Password</label><input id="pw" type="password" placeholder="••••••••••" autocomplete="current-password" value="demo"></div>
+    <div class="row"><span></span><a href="#" onclick="return false">Forgot password?</a></div>
+    <button class="btn btn-primary" type="submit">Sign in</button>
+    <div class="sso-sep">or</div>
+    <button class="btn btn-ghost full" type="button" onclick="enterApp()">Continue with SSO</button>
+    <div class="ws"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18M5 21V7l7-4 7 4v14"/></svg>cedarstone.preckon.app</div>
+  </form>
+</div>
+
+<!-- ============ APP ============ -->
+<div class="app" id="app">
+  <aside class="side">
+    <div class="side-top">
+      <div class="ws-switch">
+        <div class="ws-logo">CS</div>
+        <div class="nm">Cedar &amp; Stone<small>Builders</small></div>
+        <svg class="chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+    </div>
+    <div class="side-new"><button class="btn btn-primary" onclick="openNewProject()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>New project</button></div>
+    <nav class="nav" id="nav">
+      <div class="grp">Workspace</div>
+      <a data-screen="dashboard" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span>Dashboard</span></a>
+      <a data-screen="projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Projects</span><span class="badge">5</span></a>
+      <div class="grp">Tools</div>
+      <a id="navCopilot" onclick="openCopilot()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2a4 4 0 0 1 4 4v1a4 4 0 0 1 0 8 4 4 0 0 1-8 0 4 4 0 0 1 0-8V6a4 4 0 0 1 4-4z"/></svg><span>Copilot</span></a>
+      <a data-screen="library"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16l-4-3-4 3-4-3-4 3z"/></svg><span>Library</span></a>
+      <div class="grp">Manage</div>
+      <a data-screen="admin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a5 5 0 0 1 10 0v1"/><path d="M16 3.1a3 3 0 0 1 0 5.8M21 20v-1a5 5 0 0 0-3.5-4.8"/></svg><span>Admin</span></a>
+    </nav>
+    <div style="padding:0 10px 8px"><a class="nav" style="display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:8px;color:var(--slate-600);font-size:13.5px;font-weight:500;cursor:pointer" data-screen="settings" onclick="go('settings')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 6.6 19l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0-1.1-2.7H2a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 3.4 6.6l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H8a1.6 1.6 0 0 0 1-1.5V2a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V8a1.6 1.6 0 0 0 1.5 1H22a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg><span>Settings</span></a></div>
+    <div class="side-user">
+      <div class="avatar">SW</div>
+      <div><div class="nm">Sam Whitfield</div><div class="rl">Preconstruction lead</div></div>
+      <div class="out" title="Sign out" onclick="signOut()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="crumb" id="crumb">Dashboard</div>
+      <div class="kbd" onclick="openCmd()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg> Search <span class="keys">⌘K</span></div>
+      <button class="cop-btn" onclick="openCopilot()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 2a4 4 0 0 1 4 4v1a4 4 0 0 1 0 8 4 4 0 0 1-8 0 4 4 0 0 1 0-8V6a4 4 0 0 1 4-4z"/></svg>Copilot</button>
+      <button class="tb-btn" title="Toggle theme" onclick="toggleTheme()">
+        <svg class="ic-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="ic-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19"/></svg>
+      </button>
+      <button class="tb-btn" title="Notifications"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
+    </header>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<!-- new project drawer -->
+<div class="drawer-overlay" id="npOv" onclick="if(event.target===this)closeNewProject()">
+  <aside class="drawer" role="dialog" aria-label="New project">
+    <div class="dh"><h3>New project</h3><div class="x" onclick="closeNewProject()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div></div>
+    <div class="db">
+      <div class="fld"><label class="fl">Project name</label><input type="text" id="pName" placeholder="e.g. Tower B — Residential"></div>
+      <div class="fld"><label class="fl">Client</label><input type="text" placeholder="e.g. Meridian Living"></div>
+      <div class="fld"><label class="fl">Project type</label><select><option>Building</option><option>Civils / Infrastructure</option><option>Fit-out</option><option>Industrial</option></select></div>
+      <div class="fld"><label class="fl">Bid due date</label><input type="text" class="mono" placeholder="e.g. 12 Jul 2026"></div>
+      <div class="fld"><label class="fl">Notes (optional)</label><textarea placeholder="Anything the team should know…"></textarea></div>
+      <div style="font-size:11.5px;color:var(--slate-500);display:flex;gap:7px;align-items:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--teal-press)"><path d="M12 15V3m0 0L8 7m4-4 4 4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>You'll upload the tender documents next.</div>
+    </div>
+    <div class="df"><button class="mini" onclick="closeNewProject()">Cancel</button><button class="mini pri" onclick="createProject()">Create project</button></div>
+  </aside>
+</div>
+
+<!-- copilot drawer -->
+<div class="drawer-overlay" id="copOv" onclick="if(event.target===this)closeCopilot()">
+  <aside class="drawer cop" role="dialog" aria-label="Construction Copilot">
+    <div class="dh"><h3>Construction Copilot</h3><div class="x" onclick="closeCopilot()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div></div>
+    <div class="msgs" id="copMsgs">
+      <div class="m a"><div class="bub">Hi Sam — I can help across your projects. Ask me about a quantity, a spec clause, a cost, or where a number came from.</div>
+        <div class="chips">
+          <button onclick="copAsk('What changed in the Tower B BOQ?')">What changed in the Tower B BOQ?</button>
+          <button onclick="copAsk('Which drawings still need review?')">Which drawings need review?</button>
+        </div>
+      </div>
+    </div>
+    <div class="inp"><input id="copInput" placeholder="Ask Copilot…" onkeydown="if(event.key==='Enter')copSend()"><button onclick="copSend()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg></button></div>
+  </aside>
+</div>
+
+<!-- command palette -->
+<div class="cmd-overlay" id="cmdOverlay" onclick="if(event.target===this)closeCmd()">
+  <div class="cmd"><input id="cmdInput" placeholder="Search projects, screens, actions…" oninput="filterCmd(this.value)" onkeydown="cmdKey(event)"><div class="cmd-list" id="cmdList"></div></div>
+</div>
+
+<!-- BOQ line review drawer -->
+<div class="drawer-overlay" id="boqOv" onclick="if(event.target===this)closeBoq()">
+  <aside class="drawer" role="dialog" aria-label="Review BOQ line">
+    <div class="dh"><h3 id="boqTitle">Review line</h3><div class="x" onclick="closeBoq()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div></div>
+    <div class="db" id="boqBody"></div>
+    <div class="df"><button class="mini" onclick="boqCorrect()">Save correction</button><button class="mini pri" onclick="boqAccept()">Accept as-is</button></div>
+  </aside>
+</div>
+
+<!-- procurement package drawer -->
+<div class="drawer-overlay" id="procOv" onclick="if(event.target===this)closeProc()">
+  <aside class="drawer" role="dialog" aria-label="Procurement package">
+    <div class="dh"><div style="display:flex;align-items:center;gap:10px"><h3 id="procTitle">Package</h3><span id="procStatus"></span></div><div class="x" onclick="closeProc()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div></div>
+    <div class="db" id="procBody"></div>
+    <div class="df"><button class="mini" onclick="closeProc()">Close</button><button class="mini pri" id="procAction">Send RFQ</button></div>
+  </aside>
+</div>
+
+<!-- invite member drawer -->
+<div class="drawer-overlay" id="invOv" onclick="if(event.target===this)closeInvite()">
+  <aside class="drawer" role="dialog" aria-label="Invite member">
+    <div class="dh"><h3>Invite member</h3><div class="x" onclick="closeInvite()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div></div>
+    <div class="db">
+      <div class="fld"><label class="fl">Email</label><input type="text" id="invEmail" placeholder="name@company.com"></div>
+      <div class="fld"><label class="fl">Role</label><select id="invRole"><option>Estimator</option><option>QS / Reviewer</option><option>Viewer</option><option>Owner / Admin</option></select></div>
+      <div style="font-size:11.5px;color:var(--slate-500)">They'll get an email invite to join the Cedar &amp; Stone workspace.</div>
+    </div>
+    <div class="df"><button class="mini" onclick="closeInvite()">Cancel</button><button class="mini pri" onclick="inviteMember()">Send invite</button></div>
+  </aside>
+</div>
+
+<!-- schedule activity drawer -->
+<div class="drawer-overlay" id="schOv" onclick="if(event.target===this)closeSch()">
+  <aside class="drawer" role="dialog" aria-label="Review activity">
+    <div class="dh"><h3 id="schTitle">Activity</h3><div class="x" onclick="closeSch()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div></div>
+    <div class="db" id="schBody"></div>
+    <div class="df"><button class="mini" onclick="schAdjust()">Save adjustment</button><button class="mini pri" onclick="schAccept()">Accept duration</button></div>
+  </aside>
+</div>
+
+<!-- spec clause mapping drawer -->
+<div class="drawer-overlay" id="specOv" onclick="if(event.target===this)closeSpec()">
+  <aside class="drawer" role="dialog" aria-label="Map clause to BOQ">
+    <div class="dh"><h3>Map clause to BOQ</h3><div class="x" onclick="closeSpec()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></div></div>
+    <div class="db" id="specBody"></div>
+    <div class="df"><button class="mini" onclick="closeSpec()">Cancel</button><button class="mini pri" onclick="specLink()">Link clause</button></div>
+  </aside>
+</div>
+
+<!-- toast -->
+<div class="toast" id="toast"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4 10-10"/></svg><span id="toastMsg">Saved</span></div>
+
+<script>
+  var root=document.documentElement;
+  function store(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  function toggleTheme(){var t=root.getAttribute("data-theme")==="dark"?"light":"dark";root.setAttribute("data-theme",t);store("preckon-app-theme",t);}
+  function showToast(m){var t=document.getElementById("toast");document.getElementById("toastMsg").textContent=m;t.classList.add("on");clearTimeout(window._tt);window._tt=setTimeout(function(){t.classList.remove("on");},2200);}
+
+  function enterApp(){document.getElementById("login").style.display="none";document.getElementById("app").classList.add("on");}
+  function signOut(){document.getElementById("app").classList.remove("on");document.getElementById("login").style.display="grid";}
+  document.getElementById("loginForm").addEventListener("submit",function(e){e.preventDefault();enterApp();});
+
+  // form controls (segments/switches shared)
+  document.addEventListener("click",function(e){var sg=e.target.closest(".seg [data-seg]");if(sg){sg.parentElement.querySelectorAll("[data-seg]").forEach(function(b){b.classList.remove("on");});sg.classList.add("on");}});
+
+  var SCREENS={
+    dashboard:{title:"Dashboard"},
+    projects:{title:"Projects", desc:"All your bids in one list — client, value, stage in the chain, due date and status. Open one to enter its workspace: Documents, Tender, Drawings, Specs, BOQ, Estimate and Procurement, with Copilot docked."},
+    library:{title:"Library", desc:"Your rate libraries, methods of measurement, spec standards and historical bids — the reference data the AI learns from and prices against."},
+    admin:{title:"Admin", desc:"Manage your team and their roles, set your branding (logo and colour), and see your plan and usage. Owner and Admin only."},
+    settings:{title:"Settings", desc:"Your profile, notifications, theme and language preferences."}
+  };
+
+  function dashboardHTML(){
+    var reviews=[
+      ['mod-quant','QuantLogix','BOQ ready — Tower B, Residential','214 lines · 96% confidence','96%',false],
+      ['mod-draw','DrawLogix','Drawing takeoff needs correction — Plot 7','3 flagged elements · 88% confidence','88%',true],
+      ['mod-cost','CostLogix','Estimate ready — Riverside Retail Fit-out','$2.4M · 12 assumptions','ready',false],
+      ['mod-doc','DocLogix','5 spec clauses unmatched — Tower B','Needs a rule or manual link','—',true],
+      ['mod-proc','ProcureLogix','Procurement packages ready — Northgate','8 packages · 24 RFQs','ready',false]
+    ];
+    var rq=reviews.map(function(r){
+      var conf = r[4]==='ready'?'<span class="conf">Ready</span>':(r[4]==='—'?'':'<span class="conf'+(r[5]?' warn':'')+'">'+r[4]+'</span>');
+      return '<li><div class="ic '+r[0]+'"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>'+
+        '<div class="tx"><div class="tt">'+r[2]+'</div><div class="mt">'+r[1]+' · '+r[3]+'</div></div>'+conf+
+        '<button class="mini pri" onclick="showToast(\'Opening review\')">Review</button></li>';
+    }).join('');
+
+    ensureProjects();
+    var prows=window.PROJECTS.map(function(p,i){
+      return '<tr class="clickable" onclick="openProject('+i+')">'+
+        '<td><div class="t-name">'+p.name+'</div><div class="t-sub">'+p.client+'</div></td>'+
+        '<td><span class="stage">'+p.stage+'</span></td>'+
+        '<td><div style="display:flex;align-items:center;gap:9px"><div class="prog"><span style="width:'+p.progress+'%"></span></div><span class="mono" style="font-size:11px;color:var(--slate-500)">'+p.progress+'%</span></div></td>'+
+        '<td class="num r">'+p.value+'</td>'+
+        '<td class="r" style="color:var(--slate-500);font-size:12px">'+p.due+'</td>'+
+        '<td><span class="chip '+p.status+'">'+p.statusLabel+'</span></td></tr>';
+    }).join('');
+
+    return `
+      <div class="page-head"><div><h2>Good morning, Sam</h2><p>You have 7 items waiting on your review across 5 active bids.</p></div><button class="mini pri" onclick="openNewProject()">+ New project</button></div>
+      <div class="kpis">
+        <div class="kpi"><div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Active bids</div><div class="v">5</div><div class="sub">$31.7M total value</div></div>
+        <div class="kpi"><div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>Due this week</div><div class="v accent">2</div><div class="sub">Plot 7 · Tower B</div></div>
+        <div class="kpi"><div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Awaiting review</div><div class="v accent">7</div><div class="sub">items need your eyes</div></div>
+        <div class="kpi"><div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2a4 4 0 0 1 4 4v1a4 4 0 0 1 0 8 4 4 0 0 1-8 0 4 4 0 0 1 0-8V6a4 4 0 0 1 4-4z"/></svg>In progress</div><div class="v">3</div><div class="sub">documents processing</div></div>
+      </div>
+      <div class="row two2">
+        <div class="card">
+          <div class="chead"><div><h3>Needs your review</h3><div class="csub">AI proposals waiting for a human decision</div></div><a onclick="go('projects')">All projects →</a></div>
+          <ul class="rq" style="margin-top:6px">${rq}</ul>
+        </div>
+        <div class="card">
+          <h3>Bid deadlines</h3><div class="csub">Next 10 days</div>
+          <ul class="dl">
+            <li><div class="day"><div class="d">9</div><div class="m">Jul</div></div><div class="nm">Plot 7 Warehouse<small>Harbour Logistics · $3.1M</small></div></li>
+            <li><div class="day"><div class="d">12</div><div class="m">Jul</div></div><div class="nm">Tower B — Residential<small>Meridian Living · $8.2M</small></div></li>
+            <li><div class="day"><div class="d">15</div><div class="m">Jul</div></div><div class="nm">Riverside Retail Fit-out<small>Riverside Group · $2.4M</small></div></li>
+          </ul>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="chead"><div><h3>Your projects</h3><div class="csub">Active bids and where each is in the chain</div></div><a onclick="go('projects')">View all →</a></div>
+        <table style="margin-top:12px">
+          <thead><tr><th>Project</th><th>Stage</th><th>Progress</th><th class="r">Value</th><th class="r">Due</th><th>Status</th></tr></thead>
+          <tbody>${prows}</tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3>Recent activity</h3><div class="csub">Across your workspace</div>
+        <ul class="feed">
+          <li><div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h5"/></svg></div><div><div class="tx"><b>QuantLogix</b> generated a BOQ for <b>Tower B</b> — 214 lines</div><div class="tm">18 min ago</div></div></li>
+          <li><div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 11l3 3L22 4"/></svg></div><div><div class="tx"><b>You</b> approved the drawing takeoff for <b>Riverside</b></div><div class="tm">1 hr ago</div></div></li>
+          <li><div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div><div><div class="tx"><b>DrawLogix</b> flagged 3 elements needing review on <b>Plot 7</b></div><div class="tm">2 hr ago</div></div></li>
+          <li><div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 15V3m0 0L8 7m4-4 4 4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></div><div><div class="tx">New documents uploaded to <b>Eastside Clinic</b></div><div class="tm">Yesterday</div></div></li>
+        </ul>
+      </div>
+    `;
+  }
+
+  function placeholderHTML(key){var s=SCREENS[key];return `
+    <div class="page-head"><div><h2>${s.title}</h2><p>Part of the Preckon app — next in the build.</p></div></div>
+    <div class="placeholder"><div class="pic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20h9M3 20h3M3 4h18M3 12h13"/></svg></div><h3>${s.title}</h3><p>${s.desc}</p><div class="next">◆ We build this screen next</div></div>`;}
+
+  var CHAIN=[
+    {tab:'tender',label:'Tender',full:'TenderLogix'},
+    {tab:'drawings',label:'Drawings',full:'DrawLogix'},
+    {tab:'specs',label:'Specs',full:'DocLogix'},
+    {tab:'boq',label:'BOQ',full:'QuantLogix'},
+    {tab:'estimate',label:'Estimate',full:'CostLogix'},
+    {tab:'schedule',label:'Schedule',full:'PlanLogix'},
+    {tab:'procurement',label:'Procurement',full:'ProcureLogix'}
+  ];
+  var TABDESC={
+    tender:'The requirement register — mandatory items, submittals and deadlines pulled from the tender documents.',
+    drawings:'The drawing viewer — pan and zoom the set with recognized elements overlaid, and correct takeoffs inline. This is the signature screen, and it is next in the build.',
+    specs:'The spec browser — clauses mapped to BOQ items, with unmatched clauses flagged for a human.',
+    boq:'The bill of quantities — a dense, traceable table where every line links back to the drawing element it came from. Building next.',
+    estimate:'The costed estimate — rates from your Library applied to the BOQ, with live totals and a full audit of every number.',
+    schedule:'The construction programme — durations derived from your BOQ quantities and output rates, sequenced into a Gantt with a critical path. Every bar traces to the lines that sized it.',
+    procurement:'Procurement packages and RFQs — scopes grouped and made ready to send to vendors.'
+  };
+  function ensureProjects(){
+    if(!window.PROJECTS) window.PROJECTS=[
+      {name:'Tower B — Residential',client:'Meridian Living',type:'Building',value:'$8.2M',due:'12 Jul',status:'review',statusLabel:'In review',progress:70,stage:'BOQ',docs:42,team:['SW','DA','RK'],chain:{tender:'done',drawings:'done',specs:'review',boq:'review',estimate:'pending',schedule:'pending',procurement:'pending'}},
+      {name:'Plot 7 Warehouse',client:'Harbour Logistics',type:'Industrial',value:'$3.1M',due:'9 Jul',status:'processing',statusLabel:'Processing',progress:40,stage:'Drawings',docs:18,team:['SW','DA'],chain:{tender:'done',drawings:'processing',specs:'pending',boq:'pending',estimate:'pending',schedule:'pending',procurement:'pending'}},
+      {name:'Riverside Retail Fit-out',client:'Riverside Group',type:'Fit-out',value:'$2.4M',due:'15 Jul',status:'review',statusLabel:'In review',progress:85,stage:'Estimate',docs:27,team:['SW','MK'],chain:{tender:'done',drawings:'done',specs:'done',boq:'done',estimate:'review',schedule:'pending',procurement:'pending'}},
+      {name:'Northgate Civils',client:'City of Northgate',type:'Civils',value:'$12.6M',due:'20 Jul',status:'ready',statusLabel:'Ready',progress:95,stage:'Schedule',docs:63,team:['SW','DA','RK','MK'],chain:{tender:'done',drawings:'done',specs:'done',boq:'done',estimate:'done',schedule:'review',procurement:'review'}},
+      {name:'Eastside Clinic',client:'Southern NHS Trust',type:'Building',value:'$5.4M',due:'25 Jul',status:'upload',statusLabel:'Uploading',progress:15,stage:'Documents',docs:9,team:['SW'],chain:{tender:'pending',drawings:'pending',specs:'pending',boq:'pending',estimate:'pending',schedule:'pending',procurement:'pending'}}
+    ];
+  }
+  function stLabel(s){return {done:'Complete',review:'Needs review',processing:'Processing',pending:'Pending'}[s]||s;}
+
+  function projectsHTML(){
+    ensureProjects();
+    var P=window.PROJECTS;
+    function ct(s){return P.filter(function(p){return p.status===s;}).length;}
+    var rows=P.map(function(p,i){
+      return '<tr class="clickable" data-status="'+p.status+'" data-name="'+(p.name+' '+p.client).toLowerCase()+'" onclick="openProject('+i+')">'+
+        '<td><div class="t-name">'+p.name+'</div><div class="t-sub">'+p.client+'</div></td>'+
+        '<td class="num">'+p.type+'</td>'+
+        '<td><span class="stage">'+p.stage+'</span></td>'+
+        '<td><div style="display:flex;align-items:center;gap:9px"><div class="prog"><span style="width:'+p.progress+'%"></span></div><span class="mono" style="font-size:11px;color:var(--slate-500)">'+p.progress+'%</span></div></td>'+
+        '<td class="num r">'+p.value+'</td>'+
+        '<td class="r" style="color:var(--slate-500);font-size:12px">'+p.due+'</td>'+
+        '<td><span class="chip '+p.status+'">'+p.statusLabel+'</span></td></tr>';
+    }).join('');
+    return `
+      <div class="page-head"><div><h2>Projects</h2><p>Every bid, and where each is in the chain.</p></div><button class="mini pri" onclick="openNewProject()">+ New project</button></div>
+      <div class="fbar">
+        <div class="range">
+          <button class="on" data-pstatus="all" onclick="setPStatus(this)">All ${P.length}</button>
+          <button data-pstatus="review" onclick="setPStatus(this)">In review ${ct('review')}</button>
+          <button data-pstatus="processing" onclick="setPStatus(this)">Processing ${ct('processing')}</button>
+          <button data-pstatus="ready" onclick="setPStatus(this)">Ready ${ct('ready')}</button>
+          <button data-pstatus="upload" onclick="setPStatus(this)">Uploading ${ct('upload')}</button>
+        </div>
+        <div class="fsearch"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input id="projSearch" placeholder="Search projects…" oninput="doProjFilter()"></div>
+      </div>
+      <div class="card" style="padding:14px 18px"><table id="projTable"><thead><tr><th>Project</th><th>Type</th><th>Stage</th><th>Progress</th><th class="r">Value</th><th class="r">Due</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>
+    `;
+  }
+  function setPStatus(btn){btn.parentElement.querySelectorAll('[data-pstatus]').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');doProjFilter();}
+  function doProjFilter(){
+    var b=document.querySelector('[data-pstatus].on'); if(!b) return;
+    var st=b.getAttribute('data-pstatus');
+    var q=(document.getElementById('projSearch').value||'').toLowerCase();
+    document.querySelectorAll('#projTable tbody tr').forEach(function(tr){
+      var ok=(st==='all'||tr.getAttribute('data-status')===st)&&tr.getAttribute('data-name').indexOf(q)>-1;
+      tr.style.display=ok?'':'none';
+    });
+  }
+
+  function openProject(i){ensureProjects();window.CUR_PROJECT=i;window.CUR_TAB='overview';renderWorkspace();}
+  function setProjTab(t){window.CUR_TAB=t;renderWorkspace();}
+  function renderWorkspace(){
+    var p=window.PROJECTS[window.CUR_PROJECT]; var tab=window.CUR_TAB||'overview';
+    document.getElementById('crumb').textContent='Projects / '+p.name;
+    document.querySelectorAll('#nav a[data-screen]').forEach(function(a){a.classList.toggle('active',a.getAttribute('data-screen')==='projects');});
+    var tabs=[['overview','Overview',null],['documents','Documents','doc']].concat(CHAIN.map(function(c){return [c.tab,c.label,c.tab];}));
+    var tabbar=tabs.map(function(t){
+      var dot = t[2]==='doc' ? '<span class="sd processing"></span>' : (t[2]?'<span class="sd '+p.chain[t[2]]+'"></span>':'');
+      return '<button class="'+(tab===t[0]?'on':'')+'" onclick="setProjTab(\''+t[0]+'\')">'+dot+t[1]+'</button>';
+    }).join('');
+    var body = tab==='overview'?projOverviewHTML(p)
+      : tab==='documents'?projDocsHTML(p)
+      : tab==='tender'?tenderHTML(p)
+      : tab==='drawings'?drawingsHTML(p)
+      : tab==='specs'?specsHTML(p)
+      : tab==='boq'?boqHTML(p)
+      : tab==='estimate'?estimateHTML(p)
+      : tab==='schedule'?scheduleHTML(p)
+      : tab==='procurement'?procurementHTML(p)
+      : projTabPlaceholder(p,tab);
+    document.getElementById('content').innerHTML=
+      '<div class="pw-back" onclick="go(\'projects\')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Projects</div>'+
+      '<div class="pw-head"><div><h2>'+p.name+'</h2><div class="pw-meta"><span class="mc">'+p.client+'</span><span class="mc">'+p.type+'</span><span class="mc">'+p.value+'</span><span class="mc">Due '+p.due+'</span><span class="chip '+p.status+'">'+p.statusLabel+'</span></div></div>'+
+      '<div style="display:flex;gap:8px"><button class="mini" onclick="openCopilot()">Ask Copilot</button><button class="mini pri" onclick="showToast(\'Exporting\')">Export</button></div></div>'+
+      '<div class="pw-tabs">'+tabbar+'</div><div id="pwBody">'+body+'</div>';
+    if(tab==='drawings') initDrawings();
+    if(tab==='estimate') estRecalc();
+    window.scrollTo(0,0);
+  }
+  function projOverviewHTML(p){
+    var stepper=CHAIN.map(function(c,idx){
+      var st=p.chain[c.tab];
+      var inner = st==='done' ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4 10-10"/></svg>' : (idx+1);
+      return '<div class="step '+st+'" onclick="setProjTab(\''+c.tab+'\')"><div class="node">'+inner+'</div><div class="sl">'+c.label+'</div><div class="ss">'+stLabel(st)+'</div></div>';
+    }).join('');
+    var revs=CHAIN.filter(function(c){return p.chain[c.tab]==='review';});
+    var revHTML = revs.length ? revs.map(function(c){
+      return '<li><div class="ic mod-quant"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="tx"><div class="tt">'+c.label+' needs your review</div><div class="mt">'+c.full+'</div></div><button class="mini pri" onclick="setProjTab(\''+c.tab+'\')">Open</button></li>';
+    }).join('') : '<li style="border-top:0;color:var(--slate-500);font-size:13px;padding-top:2px">Nothing waiting on you right now — the chain is running.</li>';
+    return `
+      <div class="card" style="margin-bottom:16px"><h3>Chain progress</h3><div class="csub">From documents to a procurement-ready estimate — click a stage to open it</div><div class="chain" style="margin-top:20px">${stepper}</div></div>
+      <div class="row two2">
+        <div class="card"><h3>Needs your attention</h3><div class="csub">Where this bid is waiting on a human</div><ul class="rq" style="margin-top:6px">${revHTML}</ul></div>
+        <div class="card"><h3>Details</h3><div class="csub">Project information</div>
+          <div class="trow-lbl" style="border-top:0">Client <b>${p.client}</b></div>
+          <div class="trow-lbl">Type <b>${p.type}</b></div>
+          <div class="trow-lbl">Bid value <b>${p.value}</b></div>
+          <div class="trow-lbl">Due <b>${p.due}</b></div>
+          <div class="trow-lbl">Documents <b>${p.docs}</b></div>
+          <div class="trow-lbl">Team <b>${p.team.length} people</b></div>
+        </div>
+      </div>`;
+  }
+  function projDocsHTML(p){
+    var docs=[['Tender','RFT-2024-118.pdf','24 pages','done'],['Drawings','Architectural set.pdf','86 sheets','done'],['Drawings','Structural set.pdf','42 sheets','processing'],['Specs','Project specification.pdf','210 pages','done'],['Addendum','Addendum 01.pdf','6 pages','new']];
+    function dchip(s){return s==='done'?'<span class="chip ready">Processed</span>':s==='processing'?'<span class="chip processing">Processing</span>':'<span class="chip review">New</span>';}
+    var rows=docs.map(function(d){return '<tr><td class="num">'+d[0]+'</td><td class="t-name">'+d[1]+'</td><td class="num" style="color:var(--slate-500)">'+d[2]+'</td><td>'+dchip(d[3])+'</td></tr>';}).join('');
+    return '<div class="dropzone" onclick="showToast(\'Choose files to upload\')"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 15V3m0 0L8 7m4-4 4 4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg><div style="font-weight:600;color:var(--ink)">Drop tender documents, drawings or specs here</div><div style="font-size:12px;margin-top:3px">PDF, DWG or images · or click to browse</div></div>'+
+      '<div class="card" style="padding:14px 18px"><table><thead><tr><th>Type</th><th>File</th><th>Size</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }
+  function projTabPlaceholder(p,tab){
+    var full={tender:'TenderLogix',drawings:'DrawLogix',specs:'DocLogix',boq:'QuantLogix',estimate:'CostLogix',schedule:'PlanLogix',procurement:'ProcureLogix'}[tab]||'';
+    return '<div class="placeholder"><div class="pic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20h9M3 20h3M3 4h18M3 12h13"/></svg></div><h3>'+full+'</h3><p>'+(TABDESC[tab]||'')+'</p><div class="next">◆ We build this surface next</div></div>';
+  }
+
+  function ensureBOQ(){
+    if(window.BOQ && window.BOQ.proj===window.CUR_PROJECT) return;
+    var chain=window.PROJECTS[window.CUR_PROJECT].chain.boq;
+    var T=[
+      {sec:'Substructure', lines:[
+        {code:'2.1.1',desc:'Excavation to reduce levels',unit:'m³',qty:'1,240',rate:'18.50',amt:22940,src:'S-101',conf:99,reason:'Cut volume from the earthworks model on S-101.'},
+        {code:'2.1.2',desc:'Disposal of excavated material off site',unit:'m³',qty:'1,240',rate:'12.00',amt:14880,src:'S-101',conf:99,reason:'Matched to the excavation volume above.'},
+        {code:'2.2.1',desc:'Mass concrete foundations',unit:'m³',qty:'186',rate:'165.00',amt:30690,src:'S-102',conf:97,reason:'Pad and strip foundations scheduled on S-102.'}
+      ]},
+      {sec:'Frame — concrete', lines:[
+        {code:'3.1.1',desc:'Reinforced concrete columns 400×400',unit:'m³',qty:'92',rate:'420.00',amt:38640,src:'S-204',conf:88,reason:'Measured from 14 RC columns, 400×400×3.0m, on grid A–E / 1–4.'},
+        {code:'3.1.2',desc:'Reinforced concrete beams',unit:'m³',qty:'148',rate:'395.00',amt:58460,src:'S-205',conf:96,reason:'Beam schedule on S-205.'},
+        {code:'3.2.1',desc:'RC suspended slabs 250mm',unit:'m²',qty:'3,180',rate:'88.00',amt:279840,src:'S-204',conf:91,reason:'Area of suspended slabs, levels 2–8, net of voids and stair openings.'},
+        {code:'3.3.1',desc:'RC core walls 300mm',unit:'m²',qty:'1,240',rate:'96.00',amt:119040,src:'S-210',conf:95,reason:'Core wall elevations on S-210.'}
+      ]},
+      {sec:'Masonry', lines:[
+        {code:'4.1.1',desc:'Blockwork 140mm to internal walls',unit:'m²',qty:'2,640',rate:'48.00',amt:126720,src:'A-330',conf:84,reason:'Internal blockwork from the architectural GA, less openings > 0.5m².'},
+        {code:'4.1.2',desc:'Facing brickwork to external walls',unit:'m²',qty:'1,820',rate:'92.00',amt:167440,src:'A-331',conf:97,reason:'External elevations on A-331.'}
+      ]},
+      {sec:'Finishes', lines:[
+        {code:'5.1.1',desc:'Plasterboard linings to walls',unit:'m²',qty:'4,210',rate:'34.00',amt:143140,src:'A-401',conf:96,reason:'Wall finishes schedule on A-401.'},
+        {code:'5.2.1',desc:'Cement screed to floors',unit:'m²',qty:'3,180',rate:'22.00',amt:69960,src:'A-402',conf:98,reason:'Floor areas from A-402.'}
+      ]}
+    ];
+    T.forEach(function(s){s.lines.forEach(function(l){l.status=(chain==='done')?'accepted':(l.conf<92?'flagged':'accepted');});});
+    window.BOQ={proj:window.CUR_PROJECT, sections:T};
+  }
+  function findBoqLine(code){var f=null;window.BOQ.sections.forEach(function(s){s.lines.forEach(function(l){if(l.code===code)f=l;});});return f;}
+  function drawingPreview(){
+    var cols='';
+    for(var y=0;y<3;y++)for(var x=0;x<5;x++){var hl=(x%2===0&&y===1);cols+='<rect x="'+(46+x*36)+'" y="'+(38+y*32)+'" width="12" height="12" fill="'+(hl?'var(--teal)':'none')+'" stroke="'+(hl?'var(--teal)':'var(--slate-400)')+'" stroke-width="1.5"/>';}
+    return '<svg width="100%" height="150" viewBox="0 0 260 150"><rect x="26" y="24" width="216" height="104" fill="none" stroke="var(--slate-400)" stroke-width="1"/>'+cols+'<text x="30" y="142" font-family="monospace" font-size="8" fill="var(--slate-400)">S-204 · column layout — highlighted = measured</text></svg>';
+  }
+  function boqHTML(p){
+    if(p.chain.boq==='pending') return '<div class="placeholder"><div class="pic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h5"/></svg></div><h3>BOQ not ready yet</h3><p>The bill of quantities appears here once the drawings and specs for this project have been processed by DrawLogix and DocLogix.</p></div>';
+    ensureBOQ();
+    var all=[], total=0, flagged=0;
+    window.BOQ.sections.forEach(function(s){s.lines.forEach(function(l){total+=l.amt; if(l.status==='flagged')flagged++; all.push(l);});});
+    var reviewedPct=Math.round((all.length-flagged)/all.length*100);
+    var body='';
+    window.BOQ.sections.forEach(function(s){
+      body+='<tr class="grp-row"><td colspan="8">'+s.sec+'</td></tr>';
+      s.lines.forEach(function(l){
+        var last = l.status==='flagged'
+          ? '<span class="conf warn">'+l.conf+'%</span> <button class="rowbtn" onclick="openBoqReview(\''+l.code+'\')">Review</button>'
+          : '<span class="acc"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12l4 4 10-10"/></svg>Accepted</span>';
+        body+='<tr class="'+(l.status==='flagged'?'flagged':'')+'">'+
+          '<td class="num" style="color:var(--slate-500)">'+l.code+'</td>'+
+          '<td class="t-name" style="font-weight:500">'+l.desc+'</td>'+
+          '<td class="num">'+l.unit+'</td>'+
+          '<td class="num r">'+l.qty+'</td>'+
+          '<td class="num r">'+l.rate+'</td>'+
+          '<td class="num r">$'+l.amt.toLocaleString()+'</td>'+
+          '<td><span class="srcchip" onclick="openBoqReview(\''+l.code+'\')">'+l.src+'</span></td>'+
+          '<td class="r">'+last+'</td></tr>';
+      });
+    });
+    return '<div class="boq-sum">'+
+      '<div class="s"><div class="k">Total value</div><div class="v">$'+total.toLocaleString()+'</div></div>'+
+      '<div class="s"><div class="k">Lines</div><div class="v">'+all.length+'</div></div>'+
+      '<div class="s"><div class="k">Needs review</div><div class="v'+(flagged?' warn':'')+'">'+flagged+'</div></div>'+
+      '<div class="s"><div class="k">Reviewed</div><div class="v">'+reviewedPct+'%</div></div></div>'+
+      '<div class="card" style="padding:14px 18px"><div class="chead" style="margin-bottom:6px"><div><h3>Bill of quantities</h3><div class="csub">Every line traces to its source drawing — accept or correct the AI\'s measure</div></div><div style="display:flex;gap:8px">'+(flagged?'<button class="mini" onclick="boqAcceptAll()">Accept all ≥90%</button>':'')+'<button class="mini pri" onclick="showToast(\'Exporting BOQ\')">Export</button></div></div>'+
+      '<table style="margin-top:8px"><thead><tr><th>Code</th><th>Description</th><th>Unit</th><th class="r">Qty</th><th class="r">Rate</th><th class="r">Amount</th><th>Source</th><th class="r">Status</th></tr></thead><tbody>'+body+'</tbody></table></div>';
+  }
+  function openBoqReview(code){
+    ensureBOQ(); var l=findBoqLine(code); if(!l)return; window.BOQ_CUR=code;
+    document.getElementById('boqTitle').textContent=l.code+' · '+l.desc;
+    document.getElementById('boqBody').innerHTML=
+      '<div class="boq-prop"><div class="lab">AI proposal</div><div class="val">'+l.qty+' <small>'+l.unit+'</small></div><div style="font-size:12.5px;color:var(--slate-500);margin-top:8px">'+l.reason+'</div></div>'+
+      '<div class="boq-src"><div class="sh"><span style="color:var(--ink);font-weight:600">Source · '+l.src+'</span><span class="conf'+(l.conf<92?' warn':'')+'">'+l.conf+'% confidence</span></div><div class="prev">'+drawingPreview()+'</div><div style="padding:10px 13px;text-align:center;border-top:1px solid var(--hairline)"><button class="rowbtn" onclick="showToast(\'Opening '+l.src+' in DrawLogix\')">Open '+l.src+' in DrawLogix →</button></div></div>'+
+      '<div class="fld"><label class="fl">Corrected quantity ('+l.unit+')</label><input type="text" class="mono" id="boqQty" value="'+l.qty+'"></div>'+
+      '<div style="font-size:11.5px;color:var(--slate-500)">Accept the AI quantity, or correct it — your correction is logged and teaches the model on your own projects.</div>';
+    document.getElementById('boqOv').classList.add('on');
+  }
+  function closeBoq(){document.getElementById('boqOv').classList.remove('on');}
+  function boqAccept(){var l=findBoqLine(window.BOQ_CUR); if(l)l.status='accepted'; closeBoq(); setProjTab('boq'); showToast('Line accepted');}
+  function boqCorrect(){var l=findBoqLine(window.BOQ_CUR); if(l){var v=document.getElementById('boqQty').value; if(v)l.qty=v; l.status='accepted';} closeBoq(); setProjTab('boq'); showToast('Correction saved');}
+  function boqAcceptAll(){ensureBOQ(); var n=0; window.BOQ.sections.forEach(function(s){s.lines.forEach(function(l){if(l.status==='flagged'&&l.conf>=90){l.status='accepted';n++;}});}); setProjTab('boq'); showToast(n+' high-confidence line'+(n===1?'':'s')+' accepted');}
+
+  function drawingsHTML(p){
+    if(p.chain.drawings==='pending') return '<div class="placeholder"><div class="pic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 15V3m0 0L8 7m4-4 4 4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></div><h3>Drawings not uploaded yet</h3><p>Upload the drawing set on the Documents tab, and DrawLogix will recognize elements and measure them automatically.</p></div>';
+    var note = p.chain.drawings==='processing' ? '<div style="display:flex;gap:8px;align-items:center;background:var(--blue-tint);color:var(--blue);border-radius:10px;padding:10px 14px;font-size:12.5px;margin-bottom:14px"><span class="sd processing"></span>Still processing 1 of 2 sheets — recognized elements shown so far.</div>' : '';
+    return note+'<div class="dwg-wrap">'+
+      '<div class="dwg-main">'+
+        '<div class="dwg-toolbar"><select onchange="showToast(\'Loading sheet\')"><option>S-204 · Structural plan</option><option>S-205 · Beam layout</option><option>A-330 · Wall GA</option></select>'+
+          '<label class="tgl"><input type="checkbox" checked onchange="toggleRec(this)"> Recognition</label>'+
+          '<div class="zoomctl"><button onclick="zoomDwg(0.83)" title="Zoom out">−</button><button onclick="zoomDwg(1.2)" title="Zoom in">+</button><button class="tbtn" onclick="fitDwg()" title="Fit to view">⤢</button></div>'+
+        '</div>'+
+        '<div class="dwg-canvas" id="dwgCanvas"><svg id="dwgSvg" viewBox="0 0 800 600"><g id="dwgViewport"></g></svg></div>'+
+      '</div>'+
+      '<aside class="dwg-panel"><div id="dwgSummary"></div><ul class="dwg-types" id="dwgList"></ul><div class="dwg-det" id="dwgDetail"><div class="empty">Select an element on the drawing to inspect it.</div></div></aside>'+
+    '</div>';
+  }
+  function ensureDWG(){
+    if(window.DWG && window.DWG.proj===window.CUR_PROJECT) return;
+    var gx=[120,260,400,540,680], gy=[110,290,470], els=[], n=1;
+    gx.forEach(function(X){gy.forEach(function(Y){
+      if(X===400&&Y===290) return; // core location
+      var id='C'+n; var conf=96; if(id==='C6')conf=87; if(id==='C11')conf=84;
+      els.push({id:id,type:'column',x:X-14,y:Y-14,w:28,h:28,cx:X,cy:Y,dim:'400×400',conf:conf,status:conf<90?'flagged':'accepted',boq:'3.1.1'});
+      n++;
+    });});
+    els.push({id:'CORE',type:'wall',x:340,y:225,w:120,h:130,cx:400,cy:290,dim:'300mm RC core walls',conf:95,status:'accepted',boq:'3.3.1'});
+    els.push({id:'SLAB',type:'slab',x:70,y:60,w:670,h:470,cx:400,cy:295,dim:'3,180 m² suspended slab',conf:91,status:'flagged',boq:'3.2.1'});
+    window.DWG={proj:window.CUR_PROJECT, els:els, sel:null};
+  }
+  function buildDwgSVG(){
+    var gx=[120,260,400,540,680], gy=[110,290,470];
+    var s='<g id="baseLayer">';
+    // grid lines
+    gx.forEach(function(X){s+='<line class="g-grid" x1="'+X+'" y1="55" x2="'+X+'" y2="525"/>';});
+    gy.forEach(function(Y){s+='<line class="g-grid" x1="55" y1="'+Y+'" x2="745" y2="'+Y+'"/>';});
+    // slab + core
+    s+='<rect class="g-slab" x="70" y="60" width="670" height="470"/>';
+    s+='<rect class="g-core" x="340" y="225" width="120" height="130"/>';
+    // base columns
+    window.DWG.els.forEach(function(e){ if(e.type==='column') s+='<rect class="g-col" x="'+(e.cx-10)+'" y="'+(e.cy-10)+'" width="20" height="20"/>'; });
+    // grid bubbles
+    gx.forEach(function(X,i){s+='<circle class="g-bub" cx="'+X+'" cy="40" r="9"/><text class="g-bubt" x="'+X+'" y="40">'+(i+1)+'</text>';});
+    ['A','B','C'].forEach(function(L,i){s+='<circle class="g-bub" cx="40" cy="'+gy[i]+'" r="9"/><text class="g-bubt" x="40" y="'+gy[i]+'">'+L+'</text>';});
+    // dimensions (top)
+    s+='<line class="g-dim" x1="120" y1="20" x2="680" y2="20"/>';
+    for(var i=0;i<gx.length-1;i++){var mid=(gx[i]+gx[i+1])/2; s+='<text class="g-dimt" x="'+mid+'" y="17">6.00</text><line class="g-dim" x1="'+gx[i]+'" y1="16" x2="'+gx[i]+'" y2="24"/>';}
+    s+='<line class="g-dim" x1="680" y1="16" x2="680" y2="24"/>';
+    s+='</g><g id="recLayer">';
+    // recognition overlay
+    window.DWG.els.forEach(function(e){
+      var cls='rec'+(e.status==='flagged'?' flagged':'')+(e.type==='slab'?' rec-outline':'')+(window.DWG.sel===e.id?' sel':'');
+      s+='<rect class="'+cls+'" data-id="'+e.id+'" x="'+e.x+'" y="'+e.y+'" width="'+e.w+'" height="'+e.h+'" rx="'+(e.type==='column'?2:0)+'"/>';
+      if(e.type==='column') s+='<text class="reclbl" x="'+(e.x+1)+'" y="'+(e.y-3)+'">'+e.id+'</text>';
+    });
+    s+='</g>';
+    document.getElementById('dwgViewport').innerHTML=s;
+  }
+  function renderDwgPanel(){
+    var els=window.DWG.els;
+    var flagged=els.filter(function(e){return e.status==='flagged';}).length;
+    document.getElementById('dwgSummary').innerHTML='<div class="dwg-stat"><div class="st"><div class="k">Recognized</div><div class="v">'+els.length+'</div></div><div class="st"><div class="k">Need review</div><div class="v'+(flagged?' warn':'')+'">'+flagged+'</div></div></div>';
+    var types=[['column','Columns'],['wall','Core / walls'],['slab','Slab']];
+    document.getElementById('dwgList').innerHTML=types.map(function(t){
+      var g=els.filter(function(e){return e.type===t[0];}); if(!g.length)return '';
+      var fl=g.filter(function(e){return e.status==='flagged';}).length;
+      return '<li onclick="selectElement(\''+g[0].id+'\')"><span>'+t[1]+'</span><span class="ct">'+g.length+(fl?' · <span class="fl">'+fl+' flagged</span>':'')+'</span></li>';
+    }).join('');
+    var d=document.getElementById('dwgDetail');
+    if(!window.DWG.sel){ d.innerHTML='<div class="empty">Select an element on the drawing to inspect it.</div>'; return; }
+    var e=els.filter(function(x){return x.id===window.DWG.sel;})[0];
+    var typeLabel={column:'Column',wall:'Core wall',slab:'Slab'}[e.type];
+    var st = e.status==='flagged'
+      ? '<div style="display:flex;gap:8px;margin-top:14px"><button class="mini pri" style="flex:1" onclick="dwgAccept(\''+e.id+'\')">Accept boundary</button><button class="mini" style="flex:1" onclick="showToast(\'Correction mode\')">Correct</button></div>'
+      : '<div class="acc" style="margin-top:14px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12l4 4 10-10"/></svg>Boundary accepted</div>';
+    d.innerHTML='<div class="dt">'+typeLabel+' '+e.id+'</div><div class="dk">S-204 · recognized element</div>'+
+      '<div class="trow-lbl" style="margin-top:12px">Measurement <b>'+e.dim+'</b></div>'+
+      '<div class="trow-lbl">Confidence <b><span class="conf'+(e.conf<90?' warn':'')+'">'+e.conf+'%</span></b></div>'+
+      '<div class="trow-lbl">Feeds <b>BOQ '+e.boq+'</b></div>'+
+      st+
+      '<div style="font-size:11px;color:var(--slate-500);margin-top:12px">'+(e.status==='flagged'?'Low confidence — confirm the boundary is right, or correct it. Your fix teaches the model.':'This element has been confirmed and its measure is in the BOQ.')+'</div>';
+  }
+  function selectElement(id){window.DWG.sel=id;
+    document.querySelectorAll('#recLayer .rec').forEach(function(r){r.classList.toggle('sel',r.getAttribute('data-id')===id);});
+    renderDwgPanel();
+  }
+  function dwgAccept(id){var e=window.DWG.els.filter(function(x){return x.id===id;})[0]; if(e)e.status='accepted';
+    var box=document.querySelector('#recLayer .rec[data-id="'+id+'"]'); if(box)box.classList.remove('flagged');
+    renderDwgPanel(); showToast('Element accepted');
+  }
+  function toggleRec(cb){document.getElementById('recLayer').style.display=cb.checked?'':'none';}
+  var dwgT={tx:0,ty:0,s:1};
+  function applyDwg(){document.getElementById('dwgViewport').setAttribute('transform','translate('+dwgT.tx+','+dwgT.ty+') scale('+dwgT.s+')');}
+  function zoomDwg(f){var ns=Math.min(4,Math.max(0.6,dwgT.s*f));dwgT.tx=400-((400-dwgT.tx)/dwgT.s)*ns;dwgT.ty=300-((300-dwgT.ty)/dwgT.s)*ns;dwgT.s=ns;applyDwg();}
+  function fitDwg(){dwgT={tx:0,ty:0,s:1};applyDwg();}
+  function initDrawings(){
+    ensureDWG(); dwgT={tx:0,ty:0,s:1}; buildDwgSVG(); applyDwg(); renderDwgPanel();
+    var canvas=document.getElementById('dwgCanvas'), svg=document.getElementById('dwgSvg');
+    var pan=false,sx,sy,stx,sty; window._dwgMoved=false;
+    canvas.addEventListener('pointerdown',function(e){pan=true;window._dwgMoved=false;sx=e.clientX;sy=e.clientY;stx=dwgT.tx;sty=dwgT.ty;canvas.classList.add('grabbing');});
+    canvas.addEventListener('pointermove',function(e){if(!pan)return;var rect=svg.getBoundingClientRect();var dx=(e.clientX-sx)/rect.width*800;var dy=(e.clientY-sy)/rect.height*600;if(Math.abs(e.clientX-sx)+Math.abs(e.clientY-sy)>4)window._dwgMoved=true;dwgT.tx=stx+dx;dwgT.ty=sty+dy;applyDwg();});
+    window.addEventListener('pointerup',function(){pan=false;canvas.classList.remove('grabbing');});
+    canvas.addEventListener('wheel',function(e){e.preventDefault();var rect=svg.getBoundingClientRect();var mx=(e.clientX-rect.left)/rect.width*800;var my=(e.clientY-rect.top)/rect.height*600;var f=e.deltaY<0?1.1:0.9;var ns=Math.min(4,Math.max(0.6,dwgT.s*f));dwgT.tx=mx-((mx-dwgT.tx)/dwgT.s)*ns;dwgT.ty=my-((my-dwgT.ty)/dwgT.s)*ns;dwgT.s=ns;applyDwg();},{passive:false});
+    svg.addEventListener('click',function(e){if(window._dwgMoved)return;var r=e.target.closest('.rec');if(r)selectElement(r.getAttribute('data-id'));});
+  }
+
+  function ensureEst(){ if(!window.EST||window.EST.proj!==window.CUR_PROJECT){window.EST={proj:window.CUR_PROJECT,prelims:8,ohp:6,cont:4,direct:0};} }
+  function rsChip(name){var m={Library:'rs-lib',Historical:'rs-hist',Manual:'rs-man'};return '<span class="rs '+(m[name]||'rs-lib')+'">'+name+'</span>';}
+  function estimateHTML(p){
+    if(p.chain.estimate==='pending') return '<div class="placeholder"><div class="pic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><h3>Estimate not started</h3><p>Once the BOQ is reviewed, CostLogix applies rates from your Library to produce a costed estimate — with every rate traceable to its source.</p></div>';
+    ensureBOQ(); ensureEst();
+    var direct=0; window.BOQ.sections.forEach(function(s){s.lines.forEach(function(l){direct+=l.amt;});}); window.EST.direct=direct;
+    var reviewLine = p.chain.estimate==='review' ? '4.1.1' : null;
+    var RSRC={'2.1.1':'Library','2.1.2':'Library','2.2.1':'Library','3.1.1':'Library','3.1.2':'Historical','3.2.1':'Library','3.3.1':'Library','4.1.1':'Manual','4.1.2':'Library','5.1.1':'Library','5.2.1':'Historical'};
+    var body='';
+    window.BOQ.sections.forEach(function(s){
+      body+='<tr class="grp-row"><td colspan="7">'+s.sec+'</td></tr>';
+      s.lines.forEach(function(l){
+        var isRev = l.code===reviewLine;
+        var src = isRev ? '<span class="rs rs-none">No match</span>' : rsChip(RSRC[l.code]||'Library');
+        var rate = isRev ? '<span style="color:var(--amber)">—</span>' : l.rate;
+        var amt = isRev ? '<button class="rowbtn" onclick="showToast(\'Set a rate for this line\')">Set rate</button>' : '$'+l.amt.toLocaleString();
+        body+='<tr class="'+(isRev?'flagged':'')+'"><td class="num" style="color:var(--slate-500)">'+l.code+'</td><td class="t-name" style="font-weight:500">'+l.desc+'</td><td class="num r">'+l.qty+'</td><td class="num">'+l.unit+'</td><td class="num r">'+rate+'</td><td>'+src+'</td><td class="num r">'+amt+'</td></tr>';
+      });
+    });
+    var flagNote = reviewLine ? '<div class="csub" style="margin-top:12px;color:var(--amber)">1 line has no library rate — set it to complete the estimate.</div>' : '';
+    return `
+      <div class="kpis">
+        <div class="kpi"><div class="k">Direct cost</div><div class="v" id="kpiDirect">$${direct.toLocaleString()}</div><div class="sub">from your accepted BOQ</div></div>
+        <div class="kpi"><div class="k">Prelims &amp; OH&amp;P</div><div class="v" id="kpiAdds">—</div><div class="sub">on direct cost</div></div>
+        <div class="kpi"><div class="k">Contingency</div><div class="v" id="kpiCont">—</div><div class="sub">on subtotal</div></div>
+        <div class="kpi"><div class="k">Tender total</div><div class="v" id="kpiTotal">—</div><div class="sub">all in</div></div>
+      </div>
+      <div class="row est">
+        <div class="card" style="padding:14px 18px">
+          <div class="chead" style="margin-bottom:6px"><div><h3>Priced bill</h3><div class="csub">Rates applied to every BOQ line — each traceable to its source</div></div><button class="mini pri" onclick="showToast('Exporting estimate')">Export</button></div>
+          <table style="margin-top:8px"><thead><tr><th>Code</th><th>Description</th><th class="r">Qty</th><th>Unit</th><th class="r">Rate</th><th>Source</th><th class="r">Amount</th></tr></thead><tbody>${body}</tbody></table>
+          ${flagNote}
+        </div>
+        <div class="card">
+          <h3>Cost buildup</h3><div class="csub">Adjust the percentages — the total updates live</div>
+          <div style="margin-top:8px">
+            <div class="bd-row first">Direct works cost <b id="estDirect">$${direct.toLocaleString()}</b></div>
+            <div class="bd-row">Preliminaries <span class="pin"><input type="number" id="estPrelims" value="${window.EST.prelims}" oninput="estRecalc()">%<span class="amt" id="estPrelimsAmt">—</span></span></div>
+            <div class="bd-row">Overheads &amp; profit <span class="pin"><input type="number" id="estOhp" value="${window.EST.ohp}" oninput="estRecalc()">%<span class="amt" id="estOhpAmt">—</span></span></div>
+            <div class="bd-row">Contingency <span class="pin"><input type="number" id="estCont" value="${window.EST.cont}" oninput="estRecalc()">%<span class="amt" id="estContAmt">—</span></span></div>
+            <div class="bd-total">Tender total <b id="estTotal">—</b></div>
+          </div>
+          <div style="font-size:11px;color:var(--slate-500);margin-top:14px">Costed from your accepted BOQ. Change a percentage and every figure recalculates.</div>
+        </div>
+      </div>`;
+  }
+  function estRecalc(){
+    if(!document.getElementById('estPrelims')) return;
+    var d=window.EST.direct;
+    var pr=parseFloat(document.getElementById('estPrelims').value)||0;
+    var oh=parseFloat(document.getElementById('estOhp').value)||0;
+    var co=parseFloat(document.getElementById('estCont').value)||0;
+    window.EST.prelims=pr; window.EST.ohp=oh; window.EST.cont=co;
+    var prA=d*pr/100, ohA=(d+prA)*oh/100, coA=(d+prA+ohA)*co/100, total=d+prA+ohA+coA;
+    function set(id,v){var el=document.getElementById(id); if(el)el.textContent='$'+Math.round(v).toLocaleString();}
+    set('estPrelimsAmt',prA); set('estOhpAmt',ohA); set('estContAmt',coA); set('estTotal',total);
+    set('kpiAdds',prA+ohA); set('kpiCont',coA); set('kpiTotal',total);
+  }
+
+  var PROC_VENDORS={'Substructure':['Groundline Civils','Terra Foundations','Meridian Earthworks','BuildBase Groundworks'],'Frame — concrete':['Apex Concrete','Structura Ltd','Formwork Partners','RC Solutions','Concrete Co'],'Masonry':['Brick & Block Co','Masoncraft','Heritage Masonry'],'Finishes':['Prime Interiors','FinishLine','Drywall Direct','Coats & Co','Interior Systems','Trueline Finishes']};
+  function ensureProc(){
+    if(window.PROC&&window.PROC.proj===window.CUR_PROJECT)return;
+    window.PROC={proj:window.CUR_PROJECT,packages:[
+      {name:'Groundworks & substructure',sec:'Substructure',vendors:4,status:'sent',responses:2},
+      {name:'Concrete frame',sec:'Frame — concrete',vendors:5,status:'sent',responses:3},
+      {name:'Masonry',sec:'Masonry',vendors:3,status:'draft',responses:0},
+      {name:'Finishes',sec:'Finishes',vendors:6,status:'ready',responses:0}
+    ]};
+  }
+  function procChip(s){return s==='sent'?'<span class="chip processing">RFQ sent</span>':s==='ready'?'<span class="chip ready">Ready to send</span>':s==='closed'?'<span class="chip ready">Awarded</span>':'<span class="chip upload">Draft</span>';}
+  function secValue(sec){var v=0;window.BOQ.sections.forEach(function(s){if(s.sec===sec)s.lines.forEach(function(l){v+=l.amt;});});return v;}
+  function secCount(sec){var n=0;window.BOQ.sections.forEach(function(s){if(s.sec===sec)n=s.lines.length;});return n;}
+  function procurementHTML(p){
+    if(p.chain.procurement==='pending') return '<div class="placeholder"><div class="pic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg></div><h3>No packages yet</h3><p>Once the estimate is priced, ProcureLogix groups the scopes into buyout packages and drafts RFQs ready to send to vendors.</p></div>';
+    ensureBOQ(); ensureProc();
+    var pk=window.PROC.packages, total=0, sent=0, resp=0;
+    var rows=pk.map(function(k,i){
+      var v=secValue(k.sec); total+=v; if(k.status==='sent'){sent++;resp+=k.responses;}
+      return '<tr class="clickable" onclick="openProcPackage('+i+')"><td class="t-name">'+k.name+'</td><td class="num r">'+secCount(k.sec)+'</td><td class="num r">$'+v.toLocaleString()+'</td><td class="num r">'+k.vendors+'</td><td>'+procChip(k.status)+(k.status==='sent'?' <span class="mono" style="font-size:11px;color:var(--slate-500)">'+k.responses+'/'+k.vendors+'</span>':'')+'</td><td class="r"><button class="rowbtn" onclick="event.stopPropagation();openProcPackage('+i+')">'+(k.status==='sent'?'Responses':'Open')+'</button></td></tr>';
+    }).join('');
+    return `
+      <div class="kpis">
+        <div class="kpi"><div class="k">Packages</div><div class="v">${pk.length}</div><div class="sub">buyout scopes</div></div>
+        <div class="kpi"><div class="k">Total value</div><div class="v">$${total.toLocaleString()}</div><div class="sub">across packages</div></div>
+        <div class="kpi"><div class="k">RFQs sent</div><div class="v">${sent}</div><div class="sub">out to vendors</div></div>
+        <div class="kpi"><div class="k">Responses in</div><div class="v">${resp}</div><div class="sub">quotes received</div></div>
+      </div>
+      <div class="card" style="padding:14px 18px">
+        <div class="chead" style="margin-bottom:6px"><div><h3>Procurement packages</h3><div class="csub">Scopes grouped from the estimate — open one to review and send its RFQ</div></div><button class="mini" onclick="showToast('New package')">+ New package</button></div>
+        <table style="margin-top:8px"><thead><tr><th>Package</th><th class="r">Lines</th><th class="r">Value</th><th class="r">Vendors</th><th>Status</th><th></th></tr></thead><tbody>${rows}</tbody></table>
+      </div>`;
+  }
+  function openProcPackage(i){
+    ensureBOQ(); ensureProc(); var k=window.PROC.packages[i]; window.PROC_CUR=i;
+    document.getElementById('procTitle').textContent=k.name;
+    document.getElementById('procStatus').innerHTML=procChip(k.status);
+    var v=secValue(k.sec);
+    var scope='';
+    window.BOQ.sections.forEach(function(s){if(s.sec===k.sec)s.lines.forEach(function(l){scope+='<tr><td class="num" style="color:var(--slate-500)">'+l.code+'</td><td style="font-size:12.5px">'+l.desc+'</td><td class="num r">$'+l.amt.toLocaleString()+'</td></tr>';});});
+    var vs=(PROC_VENDORS[k.sec]||[]).slice(0,k.vendors);
+    var vrows=vs.map(function(name,idx){
+      var st = k.status==='sent' ? (idx<k.responses?'<span class="vs" style="color:var(--teal-press)">Responded</span>':'<span class="vs">Invited</span>') : '<span class="vs">Suggested</span>';
+      return '<div class="vrow"><span class="vn">'+name+'</span>'+st+'</div>';
+    }).join('');
+    document.getElementById('procBody').innerHTML=
+      '<div class="boq-prop" style="margin-bottom:16px"><div class="lab">Package value</div><div class="val">$'+v.toLocaleString()+'</div><div style="font-size:12.5px;color:var(--slate-500);margin-top:6px">'+secCount(k.sec)+' scope lines from the priced estimate</div></div>'+
+      '<label class="fl" style="margin-bottom:8px">Scope</label><div class="card" style="padding:6px 14px;margin-bottom:16px"><table><tbody>'+scope+'</tbody></table></div>'+
+      '<label class="fl" style="margin-bottom:4px">Vendors ('+k.vendors+')</label>'+vrows;
+    var act=document.getElementById('procAction');
+    if(k.status==='sent'){act.textContent='View responses ('+k.responses+')';act.onclick=function(){showToast('Opening vendor responses');};}
+    else{act.textContent='Send RFQ to '+k.vendors+' vendors';act.onclick=function(){procSend(i);};}
+    document.getElementById('procOv').classList.add('on');
+  }
+  function closeProc(){document.getElementById('procOv').classList.remove('on');}
+  function procSend(i){var k=window.PROC.packages[i];k.status='sent';closeProc();setProjTab('procurement');showToast('RFQ sent to '+k.vendors+' vendors');}
+
+  function ensureTeam(){ if(window.TEAM) return; window.TEAM=[
+    {name:'Sam Whitfield',email:'sam@cedarstone.build',role:'Owner / Admin',status:'active',last:'now'},
+    {name:'Dana Ashcroft',email:'dana@cedarstone.build',role:'Estimator',status:'active',last:'12 min ago'},
+    {name:'Riya Kapoor',email:'riya@cedarstone.build',role:'QS / Reviewer',status:'active',last:'1 hr ago'},
+    {name:'Mark Kelly',email:'mark@cedarstone.build',role:'Estimator',status:'active',last:'yesterday'},
+    {name:'Tom Reed',email:'tom@meridian.co',role:'Viewer',status:'invited',last:'—'}
+  ];}
+  function adminHTML(){
+    ensureTeam(); var tab=window.ADMIN_TAB||'team';
+    var subtabs=[['team','Team'],['branding','Branding'],['plan','Plan & usage']].map(function(t){return '<button class="'+(tab===t[0]?'on':'')+'" onclick="setAdminTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join('');
+    var section = tab==='team'?adminTeam():(tab==='branding'?adminBranding():adminPlan());
+    return '<div class="page-head"><div><h2>Admin</h2><p>Your team, branding and plan for Cedar &amp; Stone Builders.</p></div></div><div class="pw-tabs">'+subtabs+'</div>'+section;
+  }
+  function setAdminTab(t){window.ADMIN_TAB=t;document.getElementById('content').innerHTML=adminHTML();}
+  function adminTeam(){
+    var rows=window.TEAM.map(function(m){
+      var initials=m.name.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+      var st=m.status==='active'?'<span class="chip ready">Active</span>':'<span class="chip upload">Invited</span>';
+      return '<tr><td><div style="display:flex;align-items:center;gap:10px"><div class="avatar" style="width:30px;height:30px;font-size:11px">'+initials+'</div><div><div class="t-name">'+m.name+'</div><div class="t-sub">'+m.email+'</div></div></div></td><td>'+m.role+'</td><td>'+st+'</td><td class="num" style="color:var(--slate-500)">'+m.last+'</td></tr>';
+    }).join('');
+    return '<div class="card" style="padding:14px 18px;margin-bottom:16px"><div class="chead" style="margin-bottom:6px"><div><h3>Team members</h3><div class="csub">'+window.TEAM.length+' people in this workspace</div></div><button class="mini pri" onclick="openInvite()">+ Invite member</button></div>'+
+      '<table style="margin-top:8px"><thead><tr><th>Member</th><th>Role</th><th>Status</th><th>Last active</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+      '<div class="card"><h3>Roles</h3><div class="csub">What each role can do</div>'+
+        '<div class="trow-lbl" style="border-top:0"><b>Owner / Admin</b><span style="color:var(--slate-500)">Manage team, branding, billing — full access</span></div>'+
+        '<div class="trow-lbl"><b>Estimator</b><span style="color:var(--slate-500)">Create projects, run the chain, accept AI proposals</span></div>'+
+        '<div class="trow-lbl"><b>QS / Reviewer</b><span style="color:var(--slate-500)">Review and correct quantities and rates</span></div>'+
+        '<div class="trow-lbl"><b>Viewer</b><span style="color:var(--slate-500)">Read-only access to projects and reports</span></div></div>';
+  }
+  function adminBranding(){
+    return '<div class="row two2">'+
+      '<div class="card"><h3>Logo</h3><div class="csub">Shown across the app your team uses</div>'+
+        '<div class="brand-prev"><div class="ws-logo" style="width:44px;height:44px;font-size:15px">CS</div><div><div style="font-weight:600;color:var(--ink)">Cedar &amp; Stone Builders</div><div style="font-size:11.5px;color:var(--slate-500)">SVG or PNG · square works best</div></div></div>'+
+        '<button class="mini" style="margin-top:12px" onclick="showToast(\'Choose a logo file\')">Upload logo</button></div>'+
+      '<div class="card"><h3>Brand colour</h3><div class="csub">Recolours the app in real time — try it</div>'+
+        '<div style="display:flex;align-items:center;gap:12px;margin-top:8px"><input type="color" id="brandColor" value="#15C2A8" oninput="setBrand(this.value)"><span class="mono" id="brandHex" style="font-size:13px;color:var(--ink)">#15C2A8</span></div>'+
+        '<div class="swatches"><button style="background:#15C2A8" onclick="setBrand(\'#15C2A8\')"></button><button style="background:#3B82F6" onclick="setBrand(\'#3B82F6\')"></button><button style="background:#6366F1" onclick="setBrand(\'#6366F1\')"></button><button style="background:#10B981" onclick="setBrand(\'#10B981\')"></button><button style="background:#F5A524" onclick="setBrand(\'#F5A524\')"></button><button style="background:#EC4899" onclick="setBrand(\'#EC4899\')"></button></div>'+
+        '<div class="brand-prev"><button class="mini pri">Primary button</button><span class="brand-node">C1</span><span style="font-size:12px;color:var(--slate-500)">Live preview</span></div>'+
+        '<div style="font-size:11px;color:var(--slate-500);margin-top:14px">Managed centrally — this maps to your <span class="mono">tenant_theme</span> and applies for everyone on your team.</div></div></div>';
+  }
+  function adminPlan(){
+    function bar(label,used,total,unit){var pct=Math.round(used/total*100);return '<div class="usage-row"><div class="ul"><span>'+label+'</span><b>'+used+' / '+total+' '+unit+'</b></div><div class="prog lg"><span style="width:'+pct+'%"></span></div></div>';}
+    return '<div class="row two2">'+
+      '<div class="card"><h3>Plan</h3><div class="csub">Your current edition</div>'+
+        '<div class="brand-prev" style="justify-content:space-between"><div><div style="font-family:var(--font-display);font-weight:600;font-size:20px;color:var(--ink)">Professional</div><div style="font-size:12px;color:var(--slate-500)">5 of 10 seats used</div></div><span class="chip ready">Active</span></div>'+
+        '<div style="display:flex;gap:8px;margin-top:14px"><button class="mini" onclick="showToast(\'Opening billing\')">Manage billing</button><button class="mini pri" onclick="showToast(\'Upgrade options\')">Upgrade</button></div></div>'+
+      '<div class="card"><h3>Usage</h3><div class="csub">This billing period</div>'+
+        bar('Active projects',5,25,'')+bar('Documents processed',128,500,'')+bar('Storage',12,50,'GB')+'</div></div>';
+  }
+  function setBrand(hex){document.documentElement.style.setProperty('--brand',hex);var i=document.getElementById('brandColor');if(i)i.value=hex;var h=document.getElementById('brandHex');if(h)h.textContent=hex.toUpperCase();}
+  function openInvite(){document.getElementById('invOv').classList.add('on');}
+  function closeInvite(){document.getElementById('invOv').classList.remove('on');}
+  function inviteMember(){var e=(document.getElementById('invEmail').value||'').trim();var r=document.getElementById('invRole').value;if(!e){showToast('Enter an email');return;}window.TEAM.push({name:e.split('@')[0].replace(/[._]/g,' '),email:e,role:r,status:'invited',last:'—'});closeInvite();setAdminTab('team');showToast('Invite sent to '+e);}
+
+  function ensureLib(){ if(window.LIB) return; window.LIB={
+    rates:[
+      {code:'EX-RDL',desc:'Excavation to reduce levels',unit:'m³',rate:'18.50',lib:'Group standard',upd:'Mar 2026'},
+      {code:'EX-DSP',desc:'Disposal of excavated material off site',unit:'m³',rate:'12.00',lib:'Group standard',upd:'Mar 2026'},
+      {code:'CN-032',desc:'Mass concrete C32/40 in foundations',unit:'m³',rate:'165.00',lib:'Group standard',upd:'Mar 2026'},
+      {code:'CN-COL',desc:'RC columns — concrete, formwork & rebar',unit:'m³',rate:'420.00',lib:'Group standard',upd:'Mar 2026'},
+      {code:'CN-BM',desc:'RC beams — concrete, formwork & rebar',unit:'m³',rate:'395.00',lib:'Group standard',upd:'Mar 2026'},
+      {code:'CN-SLB',desc:'RC suspended slab 250mm',unit:'m²',rate:'88.00',lib:'Regional 2026',upd:'Jan 2026'},
+      {code:'CN-CW',desc:'RC core walls 300mm',unit:'m²',rate:'96.00',lib:'Regional 2026',upd:'Jan 2026'},
+      {code:'MS-BLK',desc:'Blockwork 140mm to internal walls',unit:'m²',rate:'48.00',lib:'Regional 2026',upd:'Jan 2026'},
+      {code:'MS-BRK',desc:'Facing brickwork to external walls',unit:'m²',rate:'92.00',lib:'Regional 2026',upd:'Jan 2026'},
+      {code:'FN-PLB',desc:'Plasterboard linings to walls',unit:'m²',rate:'34.00',lib:'Subcontractor',upd:'Feb 2026'},
+      {code:'FN-SCR',desc:'Cement screed to floors',unit:'m²',rate:'22.00',lib:'Subcontractor',upd:'Feb 2026'}
+    ],
+    hist:[
+      {name:'Harbour Tower',client:'Meridian Living',value:'$9.1M',outcome:'won',date:'Nov 2025'},
+      {name:'Westgate Retail',client:'Riverside Group',value:'$3.2M',outcome:'lost',date:'Oct 2025'},
+      {name:'Central Depot',client:'Harbour Logistics',value:'$4.4M',outcome:'won',date:'Sep 2025'},
+      {name:'Parkview Residences',client:'Meridian Living',value:'$11.8M',outcome:'won',date:'Jul 2025'},
+      {name:'Southbank Clinic',client:'Southern NHS Trust',value:'$6.0M',outcome:'lost',date:'Jun 2025'}
+    ]
+  };}
+  function libraryHTML(){
+    ensureLib(); var tab=window.LIB_TAB||'rates';
+    var subtabs=[['rates','Rates'],['hist','Historical bids'],['std','Standards']].map(function(t){return '<button class="'+(tab===t[0]?'on':'')+'" onclick="setLibTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join('');
+    var section = tab==='rates'?libRates():(tab==='hist'?libHist():libStd());
+    return '<div class="page-head"><div><h2>Library</h2><p>The reference data the AI learns from and prices against.</p></div></div><div class="pw-tabs">'+subtabs+'</div>'+section;
+  }
+  function setLibTab(t){window.LIB_TAB=t;document.getElementById('content').innerHTML=libraryHTML();}
+  function libRates(){
+    var rows=window.LIB.rates.map(function(r){return '<tr data-name="'+(r.code+' '+r.desc).toLowerCase()+'"><td class="num" style="color:var(--slate-500)">'+r.code+'</td><td class="t-name" style="font-weight:500">'+r.desc+'</td><td class="num">'+r.unit+'</td><td class="num r">'+r.rate+'</td><td><span class="rs '+(r.lib==='Group standard'?'rs-lib':r.lib==='Regional 2026'?'rs-hist':'rs-man')+'">'+r.lib+'</span></td><td class="num" style="color:var(--slate-500)">'+r.upd+'</td></tr>';}).join('');
+    return '<div class="fbar"><div class="fsearch"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input id="libSearch" placeholder="Search rates…" oninput="doLibFilter()"></div><button class="mini pri" onclick="showToast(\'Add rate\')">+ Add rate</button></div>'+
+      '<div class="card" style="padding:14px 18px"><table id="libTable"><thead><tr><th>Code</th><th>Description</th><th>Unit</th><th class="r">Rate</th><th>Library</th><th>Updated</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }
+  function doLibFilter(){var q=(document.getElementById('libSearch').value||'').toLowerCase();document.querySelectorAll('#libTable tbody tr').forEach(function(tr){tr.style.display=tr.getAttribute('data-name').indexOf(q)>-1?'':'none';});}
+  function libHist(){
+    var rows=window.LIB.hist.map(function(h){return '<tr><td class="t-name">'+h.name+'</td><td>'+h.client+'</td><td class="num r">'+h.value+'</td><td>'+(h.outcome==='won'?'<span class="chip ready">Won</span>':'<span class="chip upload">Lost</span>')+'</td><td class="num" style="color:var(--slate-500)">'+h.date+'</td></tr>';}).join('');
+    return '<div class="card" style="padding:14px 18px"><div class="chead" style="margin-bottom:6px"><div><h3>Historical bids</h3><div class="csub">Past tenders — the source of your benchmarked rates</div></div></div><table style="margin-top:8px"><thead><tr><th>Project</th><th>Client</th><th class="r">Value</th><th>Outcome</th><th>Date</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }
+  function libStd(){
+    function card(t,d,active){return '<div class="card"><div style="display:flex;align-items:center;justify-content:space-between"><h3>'+t+'</h3>'+(active?'<span class="chip ready">Active</span>':'<button class="rowbtn" onclick="showToast(\'Switch standard\')">Use</button>')+'</div><div class="csub" style="margin-top:4px">'+d+'</div></div>';}
+    return '<div class="csub" style="margin:-6px 0 12px">Methods of measurement</div><div class="row two2">'+card('NRM2','New Rules of Measurement — detailed measurement for building works.',true)+card('CESMM4','Civil Engineering Standard Method of Measurement.',false)+'</div>'+
+      '<div class="row two2" style="margin-top:12px">'+card('POMI','Principles of Measurement (International).',false)+card('SMM7','Standard Method of Measurement, 7th edition.',false)+'</div>'+
+      '<div class="csub" style="margin:16px 0 12px">Specification standards</div><div class="row two2">'+card('NBS','National Building Specification clause library.',true)+card('MasterFormat','CSI MasterFormat divisions for spec mapping.',false)+'</div>';
+  }
+  function settingsHTML(){
+    var tab=window.SET_TAB||'profile';
+    var subtabs=[['profile','Profile'],['notifs','Notifications'],['prefs','Preferences']].map(function(t){return '<button class="'+(tab===t[0]?'on':'')+'" onclick="setSetTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join('');
+    var section = tab==='profile'?setProfile():(tab==='notifs'?setNotifs():setPrefs());
+    return '<div class="page-head"><div><h2>Settings</h2><p>Your profile and preferences.</p></div></div><div class="pw-tabs">'+subtabs+'</div>'+section;
+  }
+  function setSetTab(t){window.SET_TAB=t;document.getElementById('content').innerHTML=settingsHTML();}
+  function setProfile(){
+    return '<div class="card" style="max-width:560px"><h3>Profile</h3><div class="csub">How you appear in your workspace</div>'+
+      '<div class="brand-prev" style="margin-bottom:6px"><div class="avatar" style="width:48px;height:48px;font-size:16px">SW</div><div><div style="font-weight:600;color:var(--ink)">Sam Whitfield</div><div style="font-size:12px;color:var(--slate-500)">Preconstruction lead · Cedar &amp; Stone</div></div></div>'+
+      '<div class="fld" style="margin-top:14px"><label class="fl">Full name</label><input type="text" value="Sam Whitfield"></div>'+
+      '<div class="fld"><label class="fl">Email</label><input type="text" value="sam@cedarstone.build"></div>'+
+      '<div style="display:flex;gap:10px"><button class="mini" onclick="showToast(\'Change password\')">Change password</button><button class="mini pri" onclick="showToast(\'Profile saved\')">Save</button></div></div>';
+  }
+  function setNotifs(){
+    function row(t,d,on){return '<div class="set-row"><div><div class="sl">'+t+'</div><div class="desc">'+d+'</div></div><div class="switch'+(on?' on':'')+'" onclick="this.classList.toggle(\'on\')"></div></div>';}
+    return '<div class="card" style="max-width:560px"><h3>Notifications</h3><div class="csub">What Preckon tells you about</div>'+
+      row('Review ready','When the AI has proposals waiting on you',true)+
+      row('RFQ responses','When a vendor responds to a procurement package',true)+
+      row('Deadline reminders','As a bid due date approaches',true)+
+      row('Weekly summary','A Monday email across all your projects',false)+'</div>';
+  }
+  function setPrefs(){
+    var cur=document.documentElement.getAttribute('data-theme');
+    return '<div class="card" style="max-width:560px"><h3>Preferences</h3><div class="csub">Personal to you</div>'+
+      '<div class="set-row"><div><div class="sl">Theme</div><div class="desc">Light or dark</div></div><div class="range"><button class="'+(cur!=='dark'?'on':'')+'" onclick="setThemeMode(\'light\')">Light</button><button class="'+(cur==='dark'?'on':'')+'" onclick="setThemeMode(\'dark\')">Dark</button></div></div>'+
+      '<div class="set-row"><div><div class="sl">Language</div><div class="desc">Interface language</div></div><select onchange="showToast(\'Language set\')"><option>English</option><option>العربية</option><option>Français</option><option>Deutsch</option><option>Español</option></select></div>'+
+      '<div class="set-row"><div><div class="sl">Currency</div><div class="desc">For estimates and reports</div></div><select onchange="showToast(\'Currency set\')"><option>USD $</option><option>CAD $</option><option>EUR €</option><option>GBP £</option><option>AED د.إ</option></select></div>'+
+      '<div class="set-row"><div><div class="sl">Date format</div><div class="desc">How dates display</div></div><select onchange="showToast(\'Format set\')"><option>DD MMM YYYY</option><option>MM/DD/YYYY</option><option>YYYY-MM-DD</option></select></div></div>';
+  }
+  function setThemeMode(m){document.documentElement.setAttribute('data-theme',m);store('preckon-app-theme',m);setSetTab('prefs');}
+
+  function ensureSched(){
+    if(window.SCHED&&window.SCHED.proj===window.CUR_PROJECT)return;
+    var chain=window.PROJECTS[window.CUR_PROJECT].chain.schedule;
+    var A=[
+      {name:'Mobilisation',qty:null,unit:'',rate:null,dur:10,dep:null,crit:true,boq:'Preliminaries'},
+      {name:'Excavation & disposal',qty:1240,unit:'m³',rate:150,dep:0,crit:true,boq:'2.1.1 / 2.1.2'},
+      {name:'Foundations',qty:186,unit:'m³',rate:30,dep:1,crit:true,boq:'2.2.1'},
+      {name:'RC frame — columns & beams',qty:240,unit:'m³',rate:24,dep:2,crit:true,boq:'3.1.1 / 3.1.2'},
+      {name:'RC suspended slabs',qty:3180,unit:'m²',rate:180,dep:3,crit:true,boq:'3.2.1'},
+      {name:'RC core walls',qty:1240,unit:'m²',rate:120,dep:3,crit:false,boq:'3.3.1'},
+      {name:'Masonry',qty:4460,unit:'m²',rate:160,dep:4,crit:true,boq:'4.1.1 / 4.1.2',flag:true},
+      {name:'Finishes',qty:7390,unit:'m²',rate:220,dep:6,crit:true,boq:'5.1.1 / 5.2.1'}
+    ];
+    A.forEach(function(a,i){ a.id=i; a.dur = a.qty? Math.ceil(a.qty/a.rate) : a.dur; a.status = (a.flag && chain!=='done')?'flagged':'accepted'; });
+    computeSched(A);
+    window.SCHED={proj:window.CUR_PROJECT, acts:A};
+  }
+  function computeSched(A){ A.forEach(function(a){ a.start = a.dep==null?0:A[a.dep].end; a.end=a.start+a.dur; }); }
+  function schedTotal(){ return Math.max.apply(null, window.SCHED.acts.map(function(a){return a.end;})); }
+  function scheduleHTML(p){
+    if(p.chain.schedule==='pending') return '<div class="placeholder"><div class="pic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 5h18M3 10h12M3 15h16M3 20h9"/></svg></div><h3>Programme not started</h3><p>Once the estimate is priced, PlanLogix derives activity durations from your BOQ quantities and output rates, and sequences them into a Gantt with a critical path.</p></div>';
+    ensureSched(); var A=window.SCHED.acts, total=schedTotal();
+    var flagged=A.filter(function(a){return a.status==='flagged';}).length, critCount=A.filter(function(a){return a.crit;}).length;
+    var weeks=Math.ceil(total/7);
+    // axis markers + gridlines every 4 weeks
+    var marks='', grid='';
+    for(var d=0; d<=total; d+=28){ var L=(d/total*100); marks+='<span class="wk" style="left:'+L+'%">W'+(d/7)+'</span>'; grid+='<div class="gwk-grid" style="left:'+L+'%"></div>'; }
+    var rows=A.map(function(a,i){
+      var cls = a.status==='flagged'?'flag':(a.crit?'crit':'norm');
+      var left=a.start/total*100, w=a.dur/total*100;
+      var dot = a.status==='flagged'?'<span class="sd review"></span>':'';
+      return '<div class="grow"><div class="glbl" onclick="openSchActivity('+i+')">'+a.name+dot+'</div>'+
+        '<div class="gtrack">'+grid+'<div class="gbar '+cls+(window.SCHED.sel===i?' sel':'')+'" style="left:'+left+'%;width:'+w+'%" onclick="openSchActivity('+i+')"><span class="gd">'+a.dur+'d</span></div></div></div>';
+    }).join('');
+    return `
+      <div class="kpis">
+        <div class="kpi"><div class="k">Programme</div><div class="v">${weeks} wks</div><div class="sub">${total} working days</div></div>
+        <div class="kpi"><div class="k">Activities</div><div class="v">${A.length}</div><div class="sub">derived from the BOQ</div></div>
+        <div class="kpi"><div class="k">Critical path</div><div class="v">${critCount}</div><div class="sub">activities drive the end date</div></div>
+        <div class="kpi"><div class="k">Needs review</div><div class="v${flagged?' accent':''}">${flagged}</div><div class="sub">durations to confirm</div></div>
+      </div>
+      <div class="card" style="padding:16px 18px">
+        <div class="chead" style="margin-bottom:12px"><div><h3>Construction programme</h3><div class="csub">Each duration derived from a BOQ quantity ÷ its output rate — click a bar to see the working</div></div><button class="mini pri" onclick="showToast('Exporting programme')">Export</button></div>
+        <div class="gantt"><div class="gantt-head"><div class="glbl">Activity</div><div class="gaxis">${marks}</div></div>${rows}</div>
+        <div class="leg"><span><i style="background:var(--brand)"></i>Critical path</span><span><i style="background:var(--slate-400)"></i>Float</span><span><i style="background:var(--amber)"></i>Needs review</span></div>
+      </div>`;
+  }
+  function openSchActivity(i){
+    ensureSched(); var a=window.SCHED.acts[i]; window.SCH_CUR=i; window.SCHED.sel=i;
+    document.getElementById('schTitle').textContent=a.name;
+    var deriv = a.qty
+      ? '<div class="val">'+a.dur+' <small>days</small></div><div style="font-size:12.5px;color:var(--slate-500);margin-top:8px">'+a.qty.toLocaleString()+' '+a.unit+' ÷ '+a.rate+' '+a.unit+'/day = '+a.dur+' days</div>'
+      : '<div class="val">'+a.dur+' <small>days</small></div><div style="font-size:12.5px;color:var(--slate-500);margin-top:8px">Fixed allowance — not quantity-driven.</div>';
+    var rateFld = a.qty ? '<div class="fld"><label class="fl">Output rate ('+a.unit+'/day)</label><input type="text" class="mono" id="schRate" value="'+a.rate+'"></div>' : '';
+    document.getElementById('schBody').innerHTML=
+      '<div class="boq-prop"><div class="lab">Derived duration</div>'+deriv+'</div>'+
+      '<div class="trow-lbl" style="border-top:0">Source <b>BOQ '+a.boq+'</b></div>'+
+      '<div class="trow-lbl">Starts after <b>'+(a.dep==null?'—':window.SCHED.acts[a.dep].name)+'</b></div>'+
+      '<div class="trow-lbl">On critical path <b>'+(a.crit?'Yes':'No — has float')+'</b></div>'+
+      rateFld+
+      '<div style="font-size:11.5px;color:var(--slate-500);margin-top:6px">'+(a.status==='flagged'?'Output rate is a default — confirm it or adjust, and the programme re-sequences.':'This duration is confirmed. Adjust the output rate to re-plan.')+'</div>';
+    document.getElementById('schOv').classList.add('on');
+  }
+  function closeSch(){document.getElementById('schOv').classList.remove('on');window.SCHED.sel=null;}
+  function schAccept(){var a=window.SCHED.acts[window.SCH_CUR];a.status='accepted';document.getElementById('schOv').classList.remove('on');window.SCHED.sel=null;setProjTab('schedule');showToast('Activity accepted');}
+  function schAdjust(){var a=window.SCHED.acts[window.SCH_CUR];var r=document.getElementById('schRate');if(r&&a.qty){var nv=parseFloat(r.value)||a.rate;a.rate=nv;a.dur=Math.ceil(a.qty/nv);}a.status='accepted';computeSched(window.SCHED.acts);document.getElementById('schOv').classList.remove('on');window.SCHED.sel=null;setProjTab('schedule');showToast('Programme re-sequenced');}
+
+  function ensureTender(){
+    if(window.TENDER&&window.TENDER.proj===window.CUR_PROJECT)return;
+    window.TENDER={proj:window.CUR_PROJECT, items:[
+      ['Submittals','Method statement for temporary works','RFT §4.2','action'],
+      ['Submittals','Health &amp; safety plan','RFT §4.3','ack'],
+      ['Submittals','Proposed programme (Gantt)','RFT §4.5','action'],
+      ['Compliance','ISO 9001 certification','RFT §2.1','ack'],
+      ['Compliance','Local trade licence','RFT §2.2','ack'],
+      ['Programme','Practical completion within 18 months','RFT §6.1','ack'],
+      ['Programme','Sectional completion — podium by month 10','RFT §6.2','action'],
+      ['Commercial','Performance bond 10%','RFT §3.1','ack'],
+      ['Commercial','Retention 5%','RFT §3.2','ack'],
+      ['Commercial','Priced BOQ in the tender form','RFT §3.4','ack']
+    ].map(function(r){return {cat:r[0],req:r[1],src:r[2],status:r[3]};})};
+  }
+  function tenderHTML(p){
+    if(p.chain.tender==='pending') return '<div class="placeholder"><div class="pic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></div><h3>No tender yet</h3><p>Upload the tender package and TenderLogix builds the requirement register — submittals, deadlines, compliance and commercial obligations, each traced to its clause.</p></div>';
+    ensureTender();
+    var items=window.TENDER.items, action=items.filter(function(i){return i.status==='action';}).length, subs=items.filter(function(i){return i.cat==='Submittals';}).length;
+    var cats=['Submittals','Compliance','Programme','Commercial'], body='';
+    cats.forEach(function(cat){
+      body+='<tr class="grp-row"><td colspan="4">'+cat+'</td></tr>';
+      items.forEach(function(it,idx){ if(it.cat!==cat)return;
+        var st = it.status==='action'
+          ? '<span class="chip review">Action needed</span> <button class="rowbtn" onclick="tenderAck('+idx+')">Acknowledge</button>'
+          : '<span class="acc"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12l4 4 10-10"/></svg>Acknowledged</span>';
+        body+='<tr class="'+(it.status==='action'?'flagged':'')+'"><td class="t-name" style="font-weight:500">'+it.req+'</td><td><span class="mono" style="font-size:11px;color:var(--slate-500)">'+it.src+'</span></td><td>'+it.cat+'</td><td class="r">'+st+'</td></tr>';
+      });
+    });
+    return `
+      <div class="kpis">
+        <div class="kpi"><div class="k">Requirements</div><div class="v">${items.length}</div><div class="sub">extracted from the tender</div></div>
+        <div class="kpi"><div class="k">Action needed</div><div class="v${action?' accent':''}">${action}</div><div class="sub">decisions outstanding</div></div>
+        <div class="kpi"><div class="k">Submittals</div><div class="v">${subs}</div><div class="sub">required with the bid</div></div>
+        <div class="kpi"><div class="k">Days to bid</div><div class="v accent">10</div><div class="sub">due ${p.due}</div></div>
+      </div>
+      <div class="row two2">
+        <div class="card" style="padding:14px 18px">
+          <div class="chead" style="margin-bottom:6px"><div><h3>Requirement register</h3><div class="csub">What governs the bid — each item traced to its clause</div></div></div>
+          <table style="margin-top:8px"><thead><tr><th>Requirement</th><th>Source</th><th>Category</th><th class="r">Status</th></tr></thead><tbody>${body}</tbody></table>
+        </div>
+        <div class="card"><h3>Key dates</h3><div class="csub">From the instructions to bidders</div>
+          <div class="trow-lbl" style="border-top:0">Site visit <b>28 Jun 2026</b></div>
+          <div class="trow-lbl">Clarification deadline <b>5 Jul 2026</b></div>
+          <div class="trow-lbl">Tender deadline <b>${p.due} 2026</b></div>
+          <div class="trow-lbl">Bond required <b>10% performance</b></div>
+        </div>
+      </div>`;
+  }
+  function tenderAck(i){ensureTender();window.TENDER.items[i].status='ack';setProjTab('tender');showToast('Requirement acknowledged');}
+
+  function ensureSpecs(){
+    if(window.SPECS&&window.SPECS.proj===window.CUR_PROJECT)return;
+    var done=window.PROJECTS[window.CUR_PROJECT].chain.specs==='done';
+    window.SPECS={proj:window.CUR_PROJECT, items:[
+      ['Concrete','E10/120','Concrete grade C32/40','2.2.1'],
+      ['Concrete','E20/210','Reinforcement B500B','3.1.1'],
+      ['Concrete','E30/310','Formwork — fair-face finish',null],
+      ['Masonry','F10/110','Blockwork 140mm','4.1.1'],
+      ['Masonry','F10/130','Facing brick — type to confirm',null],
+      ['Finishes','M20/210','Plasterboard linings','5.1.1'],
+      ['Finishes','M10/110','Cement screed 50mm','5.2.1'],
+      ['Finishes','M40/410','Floor tiling',null]
+    ].map(function(r){ var boq=r[3]; var matched = boq || done; if(!boq && done) boq='auto'; return {sec:r[0],ref:r[1],desc:r[2],boq:boq,status:matched?'matched':'unmatched'}; })};
+  }
+  function specsHTML(p){
+    if(p.chain.specs==='pending') return '<div class="placeholder"><div class="pic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg></div><h3>Specs not processed yet</h3><p>Once the specification is uploaded, DocLogix parses each clause and maps it to the BOQ items it governs — so nothing is priced generically.</p></div>';
+    ensureSpecs();
+    var items=window.SPECS.items, matched=items.filter(function(i){return i.status==='matched';}).length, unmatched=items.length-matched;
+    var secs=['Concrete','Masonry','Finishes'], body='';
+    secs.forEach(function(sec){
+      body+='<tr class="grp-row"><td colspan="4">'+sec+'</td></tr>';
+      items.forEach(function(it,idx){ if(it.sec!==sec)return;
+        var mapped = it.status==='matched' ? '<span class="mono" style="font-size:11px;color:var(--teal-press)">'+(it.boq==='auto'?'BOQ (auto)':'BOQ '+it.boq)+'</span>' : '<span style="color:var(--slate-400)">—</span>';
+        var st = it.status==='matched' ? '<span class="chip ready">Matched</span>' : '<span class="chip review">Unmatched</span> <button class="rowbtn" onclick="specMap('+idx+')">Map</button>';
+        body+='<tr class="'+(it.status==='unmatched'?'flagged':'')+'"><td class="num" style="color:var(--slate-500)">'+it.ref+'</td><td class="t-name" style="font-weight:500">'+it.desc+'</td><td>'+mapped+'</td><td class="r">'+st+'</td></tr>';
+      });
+    });
+    return `
+      <div class="kpis">
+        <div class="kpi"><div class="k">Clauses</div><div class="v">${items.length}</div><div class="sub">parsed from the spec</div></div>
+        <div class="kpi"><div class="k">Mapped to BOQ</div><div class="v">${matched}</div><div class="sub">carry their attributes</div></div>
+        <div class="kpi"><div class="k">Unmatched</div><div class="v${unmatched?' accent':''}">${unmatched}</div><div class="sub">need a link</div></div>
+        <div class="kpi"><div class="k">Sections</div><div class="v">${secs.length}</div><div class="sub">of the specification</div></div>
+      </div>
+      <div class="card" style="padding:14px 18px">
+        <div class="chead" style="margin-bottom:6px"><div><h3>Specification clauses</h3><div class="csub">Each clause mapped to the BOQ items it governs — unmatched clauses flagged for a human</div></div></div>
+        <table style="margin-top:8px"><thead><tr><th>Clause</th><th>Description</th><th>Mapped to</th><th class="r">Status</th></tr></thead><tbody>${body}</tbody></table>
+      </div>`;
+  }
+  function specMap(i){
+    ensureSpecs(); var it=window.SPECS.items[i]; window.SPEC_CUR=i;
+    document.getElementById('specBody').innerHTML=
+      '<div class="boq-prop"><div class="lab">Specification clause</div><div class="val" style="font-size:17px">'+it.ref+'</div><div style="font-size:12.5px;color:var(--slate-500);margin-top:6px">'+it.desc+'</div></div>'+
+      '<div class="fld"><label class="fl">Link to BOQ line</label><select id="specSel"><option>2.2.1 — Mass concrete foundations</option><option>3.1.1 — RC columns</option><option>3.2.1 — RC suspended slabs</option><option>4.1.1 — Blockwork 140mm</option><option>4.1.2 — Facing brickwork</option><option>5.1.1 — Plasterboard linings</option><option>5.2.1 — Cement screed</option></select></div>'+
+      '<div style="font-size:11.5px;color:var(--slate-500)">Linking the clause tells CostLogix which items carry this specification — so nothing is priced generically.</div>';
+    document.getElementById('specOv').classList.add('on');
+  }
+  function closeSpec(){document.getElementById('specOv').classList.remove('on');}
+  function specLink(){var it=window.SPECS.items[window.SPEC_CUR];var sel=document.getElementById('specSel');it.boq=(sel.value||'').split(' ')[0];it.status='matched';closeSpec();setProjTab('specs');showToast('Clause mapped to BOQ '+it.boq);}
+
+  function go(key){
+    document.querySelectorAll("#nav a, [data-screen]").forEach(function(a){if(a.hasAttribute("data-screen"))a.classList.toggle("active",a.getAttribute("data-screen")===key);});
+    document.getElementById("crumb").textContent=SCREENS[key].title;
+    var R={dashboard:dashboardHTML, projects:projectsHTML, admin:adminHTML, library:libraryHTML, settings:settingsHTML};
+    document.getElementById("content").innerHTML=R[key]?R[key]():placeholderHTML(key);
+    window.scrollTo(0,0);
+  }
+  document.getElementById("nav").addEventListener("click",function(e){var a=e.target.closest("a[data-screen]");if(a)go(a.getAttribute("data-screen"));});
+  go("dashboard");
+
+  // new project
+  function openNewProject(){document.getElementById("npOv").classList.add("on");}
+  function closeNewProject(){document.getElementById("npOv").classList.remove("on");}
+  function createProject(){var n=(document.getElementById("pName").value||"New project").trim();closeNewProject();showToast('Project \u201C'+n+'\u201D created');}
+
+  // copilot
+  function openCopilot(){document.getElementById("copOv").classList.add("on");setTimeout(function(){document.getElementById("copInput").focus();},60);}
+  function closeCopilot(){document.getElementById("copOv").classList.remove("on");}
+  function copAppend(who,html){var m=document.getElementById("copMsgs");var d=document.createElement("div");d.className="m "+who;d.innerHTML='<div class="bub">'+html+'</div>';m.appendChild(d);m.scrollTop=m.scrollHeight;}
+  function copReply(q){
+    var ql=q.toLowerCase(), ans;
+    if(ql.indexOf("boq")>-1||ql.indexOf("tower b")>-1){ans='The Tower B BOQ has 214 lines. Since the last set, concrete to the core walls rose 8% after DrawLogix picked up a revised slab thickness on sheet S-204.<div class="cite">◇ Source: S-204 · BOQ line 1.4.2</div>';}
+    else if(ql.indexOf("drawing")>-1||ql.indexOf("review")>-1){ans='Two projects have drawings awaiting review: Plot 7 (3 flagged elements) and Eastside Clinic (still uploading). Plot 7 is the one due soonest — 9 Jul.<div class="cite">◇ Source: DrawLogix queue</div>';}
+    else{ans='I can trace any quantity, cost or clause back to its source drawing or spec. Try asking about a specific project or line item, and I\'ll show you where the number came from.';}
+    setTimeout(function(){copAppend("a",ans);},260);
+  }
+  function copAsk(q){copAppend("u",q);copReply(q);}
+  function copSend(){var i=document.getElementById("copInput");var v=i.value.trim();if(!v)return;i.value="";copAppend("u",v);copReply(v);}
+
+  document.addEventListener("keydown",function(e){if(e.key==="Escape"){closeNewProject();closeCopilot();closeCmd();closeBoq();closeProc();closeInvite();closeSch();closeSpec();}});
+
+  // command palette
+  var cmdItems=[{k:"dashboard",t:"Dashboard"},{k:"projects",t:"Projects"},{k:"library",t:"Library"},{k:"admin",t:"Admin"},{k:"settings",t:"Settings"}];
+  var sel=0;
+  function renderCmd(items){document.getElementById("cmdList").innerHTML='<div class="grp">Go to</div>'+items.map(function(it,i){return '<button class="'+(i===sel?'sel':'')+'" onclick="go(\''+it.k+'\');closeCmd();"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'+it.t+'</button>';}).join('')||'<div class="grp">No matches</div>';}
+  function openCmd(){document.getElementById("cmdOverlay").classList.add("on");var i=document.getElementById("cmdInput");i.value="";sel=0;window._cf=cmdItems;renderCmd(cmdItems);setTimeout(function(){i.focus();},30);}
+  function closeCmd(){document.getElementById("cmdOverlay").classList.remove("on");}
+  function filterCmd(v){var f=cmdItems.filter(function(it){return it.t.toLowerCase().indexOf(v.toLowerCase())>-1;});sel=0;window._cf=f;renderCmd(f);}
+  function cmdKey(e){var items=window._cf||cmdItems;if(e.key==="ArrowDown"){sel=Math.min(sel+1,items.length-1);renderCmd(items);e.preventDefault();}else if(e.key==="ArrowUp"){sel=Math.max(sel-1,0);renderCmd(items);e.preventDefault();}else if(e.key==="Enter"){if(items[sel]){go(items[sel].k);closeCmd();}}else if(e.key==="Escape"){closeCmd();}}
+  document.addEventListener("keydown",function(e){if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();if(document.getElementById("app").classList.contains("on"))openCmd();}});
+</script>

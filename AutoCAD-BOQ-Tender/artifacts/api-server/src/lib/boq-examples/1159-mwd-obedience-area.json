@@ -1,0 +1,866 @@
+{
+  "slug": "1159-mwd-obedience-area",
+  "source": {
+    "sowPdf": "2025.7.28 SOW 24-1020 Repair MWD Obedience Area.pdf",
+    "boq": "1159-Priced BOQ-Repair MWD Obedience Area..xlsb"
+  },
+  "meta": {
+    "projectNumber": "24-107420",
+    "projectName": "Repair of MWD Obedience area.",
+    "projectLocation": "Ali Al Salem Air base,Kuwait.",
+    "submissionDate": "23rd August 2025",
+    "submittedTo": "AQ Global Gen.Trad. & Cont. Co.W.L.L."
+  },
+  "units": {
+    "LS": 9,
+    "m3": 4,
+    "L.M": 1,
+    "LM": 2,
+    "sq.m": 2,
+    "Mtrs": 1
+  },
+  "sowOutline": [
+    {
+      "ref": "1.1",
+      "title": "Summary"
+    },
+    {
+      "ref": "1.2",
+      "title": "Existing Conditions"
+    },
+    {
+      "ref": "2.1",
+      "title": "Perform a Comprehensive Site Survey"
+    },
+    {
+      "ref": "2.2",
+      "title": "Develop 100% Design Contract Drawings"
+    },
+    {
+      "ref": "2.3",
+      "title": "Perform Mobilization and Demobilization"
+    },
+    {
+      "ref": "2.4",
+      "title": "Repair MWD Obedience Area"
+    },
+    {
+      "ref": "2.5",
+      "title": "Provide As-Built Drawings (Submittal Required)"
+    },
+    {
+      "ref": "2.6",
+      "title": "DD Form 1354 (Submittal Required)"
+    },
+    {
+      "ref": "3.1",
+      "title": "Execution Plan (submittal required)"
+    },
+    {
+      "ref": "3.2",
+      "title": "Notice to Proceed (NTP)"
+    },
+    {
+      "ref": "3.3",
+      "title": "Period of Performance (PoP)"
+    },
+    {
+      "ref": "3.4",
+      "title": "Inspections"
+    },
+    {
+      "ref": "4.1",
+      "title": "Summary"
+    },
+    {
+      "ref": "4.2",
+      "title": "Drawing Set (65% Submittal)"
+    },
+    {
+      "ref": "4.3",
+      "title": "Drawing Set (95% Submittal)"
+    },
+    {
+      "ref": "4.4",
+      "title": "Drawing Set (100% Submittal)"
+    },
+    {
+      "ref": "5.1",
+      "title": "Summary"
+    },
+    {
+      "ref": "5.2",
+      "title": "Architectural"
+    },
+    {
+      "ref": "5.3",
+      "title": "Plumbing Engineering"
+    },
+    {
+      "ref": "6.1",
+      "title": "Designation of Authority"
+    },
+    {
+      "ref": "6.2",
+      "title": "Material Submittals (submittal required)"
+    },
+    {
+      "ref": "6.3",
+      "title": "Approved Submittals"
+    },
+    {
+      "ref": "7.1",
+      "title": "Force Protection Condition (FPCON)"
+    },
+    {
+      "ref": "7.2",
+      "title": "Personnel List"
+    },
+    {
+      "ref": "7.3",
+      "title": "Procedures To Obtain Badging"
+    },
+    {
+      "ref": "7.4",
+      "title": "Access Delays"
+    },
+    {
+      "ref": "7.5",
+      "title": "Escorts"
+    },
+    {
+      "ref": "7.6",
+      "title": "Material Deliveries"
+    },
+    {
+      "ref": "8.1",
+      "title": "Summary of Time Requirements"
+    },
+    {
+      "ref": "8.2",
+      "title": "Publications – Not Used"
+    },
+    {
+      "ref": "8.3",
+      "title": "References"
+    },
+    {
+      "ref": "1.1.1",
+      "title": "The scope of this Design-Build project is to repair the MWD Obedience Area"
+    },
+    {
+      "ref": "1.1.2",
+      "title": "The Contractor shall assume all risks associated with the execution (design and"
+    },
+    {
+      "ref": "1.1.3",
+      "title": "All services furnished by the Contractor shall be under the direct supervision of"
+    },
+    {
+      "ref": "1.1.4",
+      "title": "Throughout the project, the Contractor is responsible for providing accurate and"
+    },
+    {
+      "ref": "1.1.5",
+      "title": "The work shall be accomplished under the direction of the Contracting Officer"
+    },
+    {
+      "ref": "1.2.1",
+      "title": "The existing project site is Bldg. 717. The site is protected with an arched open-"
+    },
+    {
+      "ref": "1.2.2",
+      "title": "Jacobson Avenue is located immediately to the north of the site that will provide"
+    },
+    {
+      "ref": "1.2.3",
+      "title": "Contractor shall be responsible to investigate and perform a comprehensive"
+    },
+    {
+      "ref": "1.2.4",
+      "title": "All systems related to this building and project are currently functioning properly."
+    },
+    {
+      "ref": "2.1.1",
+      "title": "Contractor shall perform a comprehensive site inventory, with surveying"
+    },
+    {
+      "ref": "2.1.2",
+      "title": "The Contractor shall show all existing site information and features needed to"
+    },
+    {
+      "ref": "2.1.3",
+      "title": "The data gathered from this comprehensive site survey will be used for the"
+    },
+    {
+      "ref": "2.1.4",
+      "title": "Measurement & Payment"
+    },
+    {
+      "ref": "2.2.1",
+      "title": "Contractor shall develop a complete set of engineered drawings by submitting"
+    },
+    {
+      "ref": "2.2.2",
+      "title": "Measurement & Payment"
+    },
+    {
+      "ref": "2.3.1",
+      "title": "The Contractor shall include a cost to mobilize and demobilize from the project"
+    },
+    {
+      "ref": "2.3.2",
+      "title": "Once the project has been finished, the contractor shall perform the"
+    },
+    {
+      "ref": "2.3.3",
+      "title": "Measurement & Payment"
+    },
+    {
+      "ref": "2.4.1",
+      "title": "Contractor shall excavate as required to accommodate new turf, new drainage"
+    },
+    {
+      "ref": "2.4.2",
+      "title": "Contractor shall protect-in-place all items that are to remain in and around the"
+    },
+    {
+      "ref": "2.4.3",
+      "title": "Remove all demolished items off the base."
+    },
+    {
+      "ref": "2.4.4",
+      "title": "Clean area in and around the Obedience Area prior to installation of new turf."
+    },
+    {
+      "ref": "2.4.5",
+      "title": "Contractor shall clean area in and around the Obedience Area after the"
+    },
+    {
+      "ref": "2.4.6",
+      "title": "Contractor shall furnish and install a new turf system. At a minimum, the turf"
+    },
+    {
+      "ref": "2.4.7",
+      "title": "Contractor shall furnish and install a new bird netting system. At a minimum, the"
+    },
+    {
+      "ref": "2.4.8",
+      "title": "Contractor shall furnish and install a new bird spike system. At a minimum, the"
+    },
+    {
+      "ref": "2.4.9",
+      "title": "Measurement & Payment"
+    },
+    {
+      "ref": "2.5.1",
+      "title": "The Contractor shall provide as-built record drawings in accordance with"
+    },
+    {
+      "ref": "2.5.2",
+      "title": "Measurement & Payment"
+    },
+    {
+      "ref": "2.6.1",
+      "title": "This form itemizes the types, quantities and costs of various accountability that"
+    },
+    {
+      "ref": "2.6.2",
+      "title": "The Contracting Officer will send the blank DD 1354 form to the Contractor. The"
+    },
+    {
+      "ref": "2.6.3",
+      "title": "The final DD 1354 form shall be submitted by the Contractor after the following"
+    },
+    {
+      "ref": "2.6.4",
+      "title": "The Contracting Officer is responsible for making sure the final cost is recorded"
+    },
+    {
+      "ref": "2.6.5",
+      "title": "Measurement & Payment"
+    },
+    {
+      "ref": "3.1.1",
+      "title": "Within 15 calendar days of project award and prior to any work execution, the"
+    },
+    {
+      "ref": "3.2.1",
+      "title": "After contract award, the Contracting Officer may issue a Notice to Proceed"
+    },
+    {
+      "ref": "3.3.1",
+      "title": "The Period of Performance (PoP) for this contract shall not exceed one hundred"
+    },
+    {
+      "ref": "3.4.1",
+      "title": "The Contracting Officer and/or Construction Manager may inspect the work daily."
+    },
+    {
+      "ref": "5.1.1",
+      "title": "The following sections contain the individual architectural/engineering discipline"
+    },
+    {
+      "ref": "5.2.1",
+      "title": "References"
+    },
+    {
+      "ref": "5.2.2",
+      "title": "Clear Obedience Area. Perform operation carefully in preparation for restoring"
+    },
+    {
+      "ref": "5.2.3",
+      "title": "Concrete Curb"
+    },
+    {
+      "ref": "5.2.4",
+      "title": "Synthetic Turf System"
+    },
+    {
+      "ref": "5.2.5",
+      "title": "Bird Netting System"
+    },
+    {
+      "ref": "5.2.6",
+      "title": "Bird Spike System"
+    },
+    {
+      "ref": "5.3.1",
+      "title": "References"
+    },
+    {
+      "ref": "5.3.2",
+      "title": "Hose Bib System"
+    },
+    {
+      "ref": "6.1.1",
+      "title": "The Construction Manager is designated as the representative of the Contracting"
+    },
+    {
+      "ref": "6.2.1",
+      "title": "All materials and articles that require approval shall be submitted by the"
+    },
+    {
+      "ref": "6.3.1",
+      "title": "The Contracting Officer's approval or acceptance of submittals is not to be"
+    },
+    {
+      "ref": "6.3.2",
+      "title": "Approval or acceptance will not relieve the Contractor of the responsibility for any"
+    },
+    {
+      "ref": "6.3.3",
+      "title": "After submittals have been approved or accepted by the Contracting Officer, no"
+    },
+    {
+      "ref": "6.3.4",
+      "title": "Sole Source"
+    },
+    {
+      "ref": "6.3.5",
+      "title": "Substitutions"
+    },
+    {
+      "ref": "6.3.6",
+      "title": "Quality Control (QC) (submittal required)"
+    },
+    {
+      "ref": "6.3.7",
+      "title": "QC Plan (submittal required)"
+    },
+    {
+      "ref": "6.3.8",
+      "title": "QC Coordination Meeting"
+    },
+    {
+      "ref": "6.3.9",
+      "title": "Acceptance of QC Plan"
+    },
+    {
+      "ref": "6.3.10",
+      "title": "Contractor’s Review"
+    },
+    {
+      "ref": "6.3.11",
+      "title": "Documentation"
+    },
+    {
+      "ref": "6.3.12",
+      "title": "Acceptance & Warranty"
+    },
+    {
+      "ref": "6.3.13",
+      "title": "Punch-Out Inspection"
+    },
+    {
+      "ref": "6.3.14",
+      "title": "Pre-Final Inspection"
+    },
+    {
+      "ref": "6.3.15",
+      "title": "Final Inspection"
+    },
+    {
+      "ref": "6.3.16",
+      "title": "Acceptance Test"
+    },
+    {
+      "ref": "6.3.17",
+      "title": "Final Acceptance"
+    },
+    {
+      "ref": "6.3.18",
+      "title": "Beneficial Occupancy"
+    },
+    {
+      "ref": "6.3.19",
+      "title": "Badging"
+    },
+    {
+      "ref": "6.3.20",
+      "title": "Work Clearance Requests"
+    },
+    {
+      "ref": "6.3.21",
+      "title": "Materials and Staging Areas"
+    },
+    {
+      "ref": "6.3.22",
+      "title": "Safety"
+    },
+    {
+      "ref": "6.3.23",
+      "title": "Secure Perimeter"
+    },
+    {
+      "ref": "6.3.24",
+      "title": "Accident Prevention"
+    },
+    {
+      "ref": "6.3.25",
+      "title": "Environmental Protection"
+    },
+    {
+      "ref": "6.3.26",
+      "title": "Hazardous Material"
+    },
+    {
+      "ref": "6.3.27",
+      "title": "Asbestos"
+    },
+    {
+      "ref": "6.3.28",
+      "title": "Toxic Substances"
+    },
+    {
+      "ref": "6.3.29",
+      "title": "Work Site Maintenance"
+    },
+    {
+      "ref": "6.3.30",
+      "title": "Transporting Materials"
+    },
+    {
+      "ref": "6.3.31",
+      "title": "Site Cleanup"
+    },
+    {
+      "ref": "6.3.32",
+      "title": "Waste Material"
+    },
+    {
+      "ref": "6.3.33",
+      "title": "Hazardous Waste Disposal"
+    },
+    {
+      "ref": "6.3.34",
+      "title": "Clean-up Responsibility"
+    },
+    {
+      "ref": "6.3.35",
+      "title": "Daily Clean-up"
+    },
+    {
+      "ref": "6.3.36",
+      "title": "Construction Site Maintenance"
+    },
+    {
+      "ref": "8.1.1",
+      "title": "After award, Contractor shall submit a project execution plan and QC plan for"
+    },
+    {
+      "ref": "8.1.2",
+      "title": "Upon award, the Contractor shall have 15 days to begin submitting applications"
+    },
+    {
+      "ref": "8.1.3",
+      "title": "After award, NTP will be given at a time determined by the Contracting Officer."
+    },
+    {
+      "ref": "8.1.4",
+      "title": "Period of Performance for this project: total of 120 calendar days from NTP. The"
+    },
+    {
+      "ref": "8.1.5",
+      "title": "Contractor’s material submittals may be returned, along with comments, to the"
+    },
+    {
+      "ref": "8.1.6",
+      "title": "The Contractor shall provide a minimum of 4 days’ notice before bringing any"
+    },
+    {
+      "ref": "8.1.7",
+      "title": "The Contractor shall request a pre-final inspection from the Contracting Officer"
+    },
+    {
+      "ref": "8.1.8",
+      "title": "The Contractor shall request a final inspection from the Contracting Officer no"
+    }
+  ],
+  "sections": [
+    {
+      "sowRef": "2",
+      "ourRef": null,
+      "subRef": null,
+      "srNo": null,
+      "title": "Design & Construction Tasks",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": "2.1",
+      "ourRef": null,
+      "subRef": "1",
+      "srNo": null,
+      "title": "Performance a Comprehensice Site Survey",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "1.1",
+          "description": "Site Supervision and engineering",
+          "unit": "LS",
+          "quantity": 1.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "1.2",
+          "description": "Site Investigation / Site Survey",
+          "unit": "LS",
+          "quantity": 1.0
+        }
+      ],
+      "subtotalLabel": "Total Amount in KWD for 2.1"
+    },
+    {
+      "sowRef": "2.2",
+      "ourRef": null,
+      "subRef": "2",
+      "srNo": null,
+      "title": "Develop 100% Design Contract drawings",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "2.1",
+          "description": "Design, Calculations,Schedule, Docuements and Submittals",
+          "unit": "LS",
+          "quantity": 1.0
+        }
+      ],
+      "subtotalLabel": "Total Amount in KWD for 2.2"
+    },
+    {
+      "sowRef": "2.3",
+      "ourRef": null,
+      "subRef": "3",
+      "srNo": null,
+      "title": "Performance Mobalization & De Mobalization",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "3.1",
+          "description": "To set up staging area",
+          "unit": "LS",
+          "quantity": 1.0
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "3.2",
+      "title": "To set up Storage area for material , Equipment and debris",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "3.3",
+      "title": "Supply and Installation of Temporary Utility Work, Facilities etc As required",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "3.4",
+      "title": "Temporary Signages/Fence",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "3.5",
+      "title": "Delivery of Item to site and from Site to Store",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "3.6",
+      "title": "Safety",
+      "items": [],
+      "subtotalLabel": "Total Amount in KWD for 2.3"
+    },
+    {
+      "sowRef": "2.4",
+      "ourRef": null,
+      "subRef": "4",
+      "srNo": null,
+      "title": "Repair MWD Obedience Area",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "4.1",
+      "srNo": null,
+      "title": "Civil works",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.1.1",
+          "description": "Relocation and Reinstallation of existing Training equipment and water storage shed before and after installation of Synthetic Turf.",
+          "unit": "LS",
+          "quantity": 1.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.1.2",
+          "description": "Existing soil removed from site and send to approved yard",
+          "unit": "m3",
+          "quantity": 130.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.1.3",
+          "description": "Excavation and compaction for Kerb concrete at North and south side of structure",
+          "unit": "LS",
+          "quantity": 1.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.1.4",
+          "description": "Supply & Casting of  Reinforced Concrete kerb Including Rebars, formwork & Ready mix concrete of grade K400 SRC  (0.152 mtrsX 0.457 mtrs X 28.7 mtrs) X 2",
+          "unit": "L.M",
+          "quantity": 28.7
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "4.2",
+      "srNo": null,
+      "title": "Plumbing works",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.2.1",
+          "description": "Excavation for new utility trench from existing main pipe line in the outside area of south end area of obedience area (between B717 and B701)",
+          "unit": "LM",
+          "quantity": 28.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.2.2",
+          "description": "Excavation for water supply line (0.6 mtr X0.8 mtr X28 mtrs)",
+          "unit": "m3",
+          "quantity": 12.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.2.3",
+          "description": "Supply and installation of 1/2 \" water supply line with all accessories and fittings",
+          "unit": "LM",
+          "quantity": 30.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.2.4",
+          "description": "Backfilling of water supply line",
+          "unit": "m3",
+          "quantity": 12.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.2.5",
+          "description": "Supply and installation of 1/2 \" brass Hose Bib with large lever and supporting stand at exeterior side of column D1, 1 meter above surrounding grade.",
+          "unit": "LS",
+          "quantity": 1.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.2.6",
+          "description": "Supply and Installation of Drainage sand below fabric membrane of Artificial Grass",
+          "unit": "m3",
+          "quantity": 125.0
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "4.3",
+      "srNo": null,
+      "title": "ARCHITECTURAL WORKS",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "Synthetic Turf System",
+          "unit": null,
+          "quantity": null
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.3.1",
+          "description": "Supply and installation of Synthetic turf [5m wide & 30m length] minimum.With 3 backing layer[dual-layer woven material coated with polyurethane called scrape coat, cover scrape coat with urethane and with geotextile nonwoven laminate",
+          "unit": "sq.m",
+          "quantity": 1270.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "Bird Netting System",
+          "unit": null,
+          "quantity": null
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.3.2",
+          "description": "Supply and installation of Bird netting with 3/4\" thk,heavy duty, polyethylene,40-pound break strength,UV stabilized,rot proof,waterproof,black mesh with stainless steel accessories,multi-purpose bracket,stainless steel fasteners with Zipper accessories,minimum 3m long.",
+          "unit": "sq.m",
+          "quantity": 1565.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "Bird Spike System",
+          "unit": null,
+          "quantity": null
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.3.3",
+          "description": "Supply and installation of Stainless steel spikes(3\" inch) with flexible UV stabilized polycarbonate with stainless steel multi-purpose brackets and Hilti type pins.",
+          "unit": "Mtrs",
+          "quantity": 50.0
+        }
+      ],
+      "subtotalLabel": "Total Amount in KWD for 2.4"
+    },
+    {
+      "sowRef": "2.5",
+      "ourRef": null,
+      "subRef": "5",
+      "srNo": null,
+      "title": "Provide As-Built Drawings",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.1",
+          "description": "Prepare & Submission of As Built drawings in Autocad & PDF",
+          "unit": "LS",
+          "quantity": 1.0
+        }
+      ],
+      "subtotalLabel": "Total Amount in KWD for 2.5"
+    },
+    {
+      "sowRef": "2.6",
+      "ourRef": null,
+      "subRef": "6",
+      "srNo": null,
+      "title": "DD Form 1354",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.1",
+          "description": "Prepare & Submission of D From 1354 as per the draft provided by Governemnet",
+          "unit": "LS",
+          "quantity": 1.0
+        }
+      ],
+      "subtotalLabel": "Total Amount in KWD for 2.6"
+    }
+  ],
+  "totals": {
+    "flatItemCount": 22
+  }
+}

@@ -1,0 +1,109 @@
+[
+  {
+    "slug": "1158-camp-moreell-lift-station",
+    "source": {
+      "sowPdf": "25.7.3 SOW Camp Moreell Lift Station Repair.pdf",
+      "boq": "1158-Priced BOQ-Camp Morell Lift station repair-BOQ...xlsb"
+    },
+    "projectNumber": "25-1004",
+    "projectName": "Camp Moreell-Repair of Lift Station.",
+    "sectionCount": 18,
+    "itemCount": 40,
+    "topUnits": [
+      [
+        "LS",
+        15
+      ],
+      [
+        "m3",
+        11
+      ],
+      [
+        "Nos",
+        6
+      ],
+      [
+        "LM",
+        5
+      ],
+      [
+        "No.s",
+        1
+      ]
+    ]
+  },
+  {
+    "slug": "1159-mwd-obedience-area",
+    "source": {
+      "sowPdf": "2025.7.28 SOW 24-1020 Repair MWD Obedience Area.pdf",
+      "boq": "1159-Priced BOQ-Repair MWD Obedience Area..xlsb"
+    },
+    "projectNumber": "24-107420",
+    "projectName": "Repair of MWD Obedience area.",
+    "sectionCount": 15,
+    "itemCount": 22,
+    "topUnits": [
+      [
+        "LS",
+        9
+      ],
+      [
+        "m3",
+        4
+      ],
+      [
+        "LM",
+        2
+      ],
+      [
+        "sq.m",
+        2
+      ],
+      [
+        "L.M",
+        1
+      ],
+      [
+        "Mtrs",
+        1
+      ]
+    ]
+  },
+  {
+    "slug": "1162-cargo-warehouse",
+    "source": {
+      "sowDocx": "Attachment 9.2 SOW 22-1023 Comm Cargo Warehouse_25 Feb 25.docx",
+      "boq": "1162-Construction of Communication Cargo warehouse-Ramana Reddy-Final one - Copy.xlsx"
+    },
+    "projectNumber": "22-1023",
+    "projectName": "Construction of communication cargo Warehouse",
+    "sectionCount": 96,
+    "itemCount": 344,
+    "topUnits": [
+      [
+        "Nos.",
+        38
+      ],
+      [
+        "LS",
+        32
+      ],
+      [
+        "m3",
+        30
+      ],
+      [
+        "nos.",
+        30
+      ],
+      [
+        "nos",
+        26
+      ],
+      [
+        "no.",
+        25
+      ]
+    ]
+  }
+]

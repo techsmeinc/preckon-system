@@ -1,0 +1,77 @@
+flowchart TD
+    subgraph IN["1 - Inputs (per project)"]
+        A1["Tender docs<br/>SOW - RFP - Spec - Addenda"]
+        A2["CAD drawings<br/>DWG - DXF - PDF"]
+    end
+    subgraph EX["2 - Grounding and extraction"]
+        B1["CAD extractor (Python/ezdxf)<br/>layers - blocks - schedules<br/>lengths/areas + footprint signal<br/>DWG to DXF via ODA<br/><b>no AI - deterministic</b>"]
+        B2["Doc extractor (PyMuPDF)<br/>sectioned text + tables<br/><b>no AI - deterministic</b>"]
+        B3["Vision pre-pass<br/>reads scans/photos/image tables<br/><b>VLM: Anthropic Haiku (default)</b>"]
+    end
+    subgraph ST["3 - Knowledge store (MySQL)"]
+        C1["cad_extractions<br/>structured summary JSON"]
+        C2["cad_chunks (text + vectors)<br/><b>Embeddings: OpenAI<br/>text-embedding-3-small</b>"]
+        C3["Hybrid retrieval<br/>BM25 + vector RRF + structural boost<br/><b>no AI - deterministic</b>"]
+    end
+    subgraph BQ["4 - Multi-agent BOQ pipeline"]
+        D1["SOW Outline Extractor<br/>numbered section tree<br/><b>LLM: Opus 4.8</b>"]
+        D2["Agent Designer<br/>invents specialist roster + checks<br/><b>LLM: Opus 4.8</b>"]
+        D3["Section agents (1 per SOW section)<br/>ReAct tool loop over CAD tools:<br/>count_blocks - get_layer_geometry - search<br/><b>LLM: Opus 4.8 (tool-calling)</b>"]
+        D4["Completeness Verifier<br/>fills scope gaps<br/><b>LLM: Opus 4.8</b>"]
+        D5["Estimator QA<br/>scope-type - quality - MEP testing check<br/><b>no AI - code, 0 tokens</b>"]
+    end
+    subgraph GR["Grounding rules (anti-hallucination)"]
+        E1["Quantities MUST trace to a CAD measure,<br/>a stated figure, or a QS formula - else provisional"]
+        E2["Units normalised to 9 standard tokens"]
+        E3["Crisp human price-list descriptions"]
+    end
+    subgraph OU["5 - Outputs"]
+        F1["Priced BOQ items<br/>sowRef/ourRef/srNo - drawing refs - scope-type"]
+        F2["CPM Work Programme<br/><b>LLM activities (Opus 4.8)</b> then<br/>CPM engine (code): deps + critical path"]
+        F3["Technical narrative<br/>grounded bid sections<br/><b>LLM: Opus 4.8</b>"]
+    end
+    subgraph RV["6 - Human-in-the-loop and export"]
+        G1["QS reviews and APPROVES each line<br/>only approved lines export<br/><b>human</b>"]
+        G2["AIGCC priced-BOQ Excel<br/>per-division sheets + Remarks<br/><b>no AI - code</b>"]
+        G3["Programme Gantt Excel - Word narrative<br/><b>no AI - code</b>"]
+    end
+    A1 --> B2 --> C2
+    A1 --> B3
+    A2 --> B1 --> C1
+    A2 --> B3
+    B3 --> C2
+    C1 --> C3
+    C2 --> C3
+    C3 --> D3
+    D1 --> D2 --> D3 --> D4 --> D5 --> F1
+    GR -. governs .-> D3
+    GR -. governs .-> D4
+    F1 --> F2
+    F1 --> F3
+    F1 --> G1 --> G2
+    F2 --> G3
+    F3 --> G3
+
+    subgraph LG["LEGEND - which AI runs where"]
+        L1["Reasoning LLM<br/>Anthropic Opus 4.8 (default)<br/>= outline, designer, section agents,<br/>verifier, schedule activities, narrative"]
+        L2["Vision VLM<br/>Anthropic Haiku (default)<br/>= vision pre-pass"]
+        L3["Embeddings<br/>OpenAI text-embedding-3-small<br/>= cad_chunks vectors"]
+        L4["Deterministic code - NO AI / 0 tokens<br/>= extractors, retrieval, Estimator QA,<br/>CPM math, Excel/Word export"]
+        L5["Provider is pluggable per run:<br/>Anthropic - OpenAI - OpenRouter - Groq - local Ollama"]
+    end
+
+    classDef reason fill:#1f6e7e,color:#fff,stroke:#155e6e,stroke-width:1px;
+    classDef vision fill:#2e7d32,color:#fff,stroke:#1b5e20,stroke-width:1px;
+    classDef embed fill:#6a4c93,color:#fff,stroke:#4a2f6e,stroke-width:1px;
+    classDef code fill:#fce4d6,color:#333,stroke:#d9772e,stroke-width:1px;
+    classDef human fill:#fff2cc,color:#333,stroke:#bf9000,stroke-width:1px;
+    class D1,D2,D3,D4,F2,F3 reason;
+    class B3 vision;
+    class C2 embed;
+    class B1,B2,C3,D5,G2,G3 code;
+    class G1 human;
+    class L1 reason;
+    class L2 vision;
+    class L3 embed;
+    class L4 code;
+    class L5 human;

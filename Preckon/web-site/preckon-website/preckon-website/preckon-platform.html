@@ -1,0 +1,476 @@
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Platform — Preckon</title>
+<meta name="description" content="One platform, seven layers of intelligence. See how Preckon chains tender, drawing, spec, quantity, cost and procurement intelligence — orchestrated by the Construction Copilot." />
+<meta name="theme-color" content="#0B1B2B" />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<link rel="manifest" href="site.webmanifest" />
+
+<script>try{var t=localStorage.getItem("preckon-theme")||((window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","light");}</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+  @import url('https://api.fontshare.com/v2/css?f[]=general-sans@500,600,700&display=swap');
+
+  :root{
+    --ink:#0B1B2B; --ink-deep:#06101C; --teal:#15C2A8; --teal-press:#0FA593; --teal-tint:#E8FAF6;
+    --slate-700:#334155; --slate-600:#475569; --slate-500:#64748B; --slate-400:#94A3B8;
+    --paper:#FBFCFE; --surface:#FFFFFF; --hairline:#E3E8EF; --signal:#F5A524;
+    --wash:linear-gradient(120deg,#0B1B2B 0%,#0E3A4A 52%,#15C2A8 100%);
+    --font-display:'General Sans','Inter',system-ui,sans-serif;
+    --font-body:'Inter',system-ui,sans-serif;
+    --font-mono:'JetBrains Mono',ui-monospace,'SF Mono',monospace;
+    --r-card:18px; --maxw:1180px;
+  }
+  *{box-sizing:border-box;} html,body{margin:0;}
+  body{
+    font-family:var(--font-body); color:var(--slate-700); background-color:var(--paper);
+    background-image:
+      linear-gradient(var(--hairline) 1px,transparent 1px),
+      linear-gradient(90deg,var(--hairline) 1px,transparent 1px),
+      linear-gradient(rgba(227,232,239,.5) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(227,232,239,.5) 1px,transparent 1px);
+    background-size:132px 132px,132px 132px,22px 22px,22px 22px;
+    -webkit-font-smoothing:antialiased; line-height:1.5;
+  }
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px;}
+  a{text-decoration:none;}
+
+  .btn{font-family:var(--font-body); font-weight:600; font-size:14.5px; border-radius:10px; padding:12px 20px; cursor:pointer; border:1.5px solid transparent; transition:all .2s ease; display:inline-flex; gap:8px; align-items:center;}
+  .btn-primary{background:var(--teal); color:var(--ink);}
+  .btn-primary:hover{background:var(--teal-press); transform:translateY(-1px);}
+  .btn-secondary{background:var(--surface); color:var(--ink); border-color:var(--ink);}
+  .btn-secondary:hover{background:var(--ink); color:#fff;}
+  .btn:focus-visible,a:focus-visible,button:focus-visible{outline:2px solid var(--teal-press); outline-offset:3px;}
+
+  /* NAV */
+  .nav{position:sticky; top:0; z-index:50; background:rgba(251,252,254,.82); backdrop-filter:saturate(140%) blur(10px); border-bottom:1px solid var(--hairline);}
+  .nav .wrap{display:flex; align-items:center; justify-content:space-between; height:64px;}
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand .mark{display:block; flex:none;}
+  .brand .wm{font-family:var(--font-display); font-weight:600; font-size:16px; color:var(--ink); letter-spacing:-.02em;}
+  .brand .wm .o{color:var(--teal);}
+  .nav-links{display:flex; gap:26px; align-items:center;}
+  .nav-links a{font-size:14px; color:var(--slate-600); font-weight:500;}
+  .nav-links a:hover,.nav-links a.active{color:var(--ink);}
+  .nav-links a.active{position:relative;}
+  .nav-links a.active::after{content:""; position:absolute; left:0; right:0; bottom:-22px; height:2px; background:var(--teal);}
+  @media(max-width:880px){ .nav-links{display:none;} }
+
+  /* section scaffolding */
+  .section{padding:74px 0;}
+  .kicker{font-family:var(--font-mono); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--teal-press); font-weight:600;}
+  .h2{font-family:var(--font-display); font-weight:600; font-size:clamp(26px,3.4vw,38px); letter-spacing:-.025em; color:var(--ink); margin:12px 0 0; line-height:1.08;}
+  .lede{font-size:16.5px; color:var(--slate-600); margin:14px 0 0; max-width:62ch;}
+  .center{text-align:center; margin:0 auto;} .center .lede{margin-left:auto; margin-right:auto;}
+  .reveal{opacity:0; transform:translateY(20px);}
+  .has-anim .reveal.in{opacity:1; transform:none; transition:opacity .6s ease, transform .6s ease;}
+
+  /* HERO */
+  .hero{padding:70px 0 20px;}
+  .eyebrow{font-family:var(--font-mono); font-size:11.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--teal-press); font-weight:600; display:inline-flex; gap:10px; align-items:center;}
+  .eyebrow::before{content:""; width:22px; height:1px; background:var(--teal);}
+  .hero h1{font-family:var(--font-display); font-weight:600; font-size:clamp(32px,4.6vw,50px); line-height:1.05; letter-spacing:-.03em; color:var(--ink); margin:16px 0 0; max-width:18ch;}
+  .hero h1 .hl{color:var(--teal-press);}
+  .hero p.sub{font-size:17.5px; color:var(--slate-600); margin:18px 0 0; max-width:62ch;}
+  .flowline{display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-top:26px;}
+  .flowline .chip{font-family:var(--font-mono); font-size:11.5px; font-weight:600; color:var(--ink); background:var(--teal-tint); border:1px solid #CFE9E3; border-radius:8px; padding:6px 10px;}
+  .flowline .arr{color:var(--teal); font-size:13px;}
+
+  /* ARCHITECTURE DIAGRAM */
+  .arch{margin-top:20px; display:flex; flex-direction:column; gap:12px;}
+  .band{border-radius:14px; padding:16px 22px; display:flex; align-items:center; gap:16px;}
+  .band .band-ic{width:40px; height:40px; border-radius:50%; display:grid; place-items:center; flex:none;}
+  .band b{font-family:var(--font-display); font-weight:600; font-size:15.5px; display:block;}
+  .band span.sub{font-size:13px;}
+  .band .band-tag{margin-left:auto; font-family:var(--font-mono); font-size:9.5px; letter-spacing:.14em; padding:4px 8px; border-radius:5px; white-space:nowrap;}
+  .band.copilot{background:var(--ink); color:#fff;}
+  .band.copilot .band-ic{border:1.5px solid var(--teal); background:rgba(21,194,168,.12); color:var(--teal);}
+  .band.copilot span.sub{color:#94A3B8;}
+  .band.copilot .band-tag{color:var(--teal); border:1px solid rgba(21,194,168,.4);}
+  .band.foundation{background:var(--surface); border:1px solid var(--hairline); color:var(--ink);}
+  .band.foundation .band-ic{border:1.5px solid var(--teal); background:var(--teal-tint); color:var(--teal-press);}
+  .band.foundation span.sub{color:var(--slate-500);}
+  .band.foundation .band-tag{color:var(--teal-press); border:1px solid var(--teal); background:var(--teal-tint);}
+
+  .chain-wrap{position:relative; padding:6px 0;}
+  .io-label{position:absolute; top:-16px; font-family:var(--font-mono); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--slate-400);}
+  .io-label.left{left:2px;} .io-label.right{right:2px;}
+  .chain{display:flex; gap:10px; position:relative; align-items:stretch;}
+  .chain::before{content:""; position:absolute; left:3%; right:3%; top:50%; height:2px; background:linear-gradient(90deg,var(--hairline),#CFE9E3); z-index:0;}
+  .mnode{position:relative; z-index:1; flex:1; background:var(--surface); border:1.5px solid var(--hairline); border-radius:14px; padding:16px 8px 14px; cursor:pointer; text-align:center; display:flex; flex-direction:column; align-items:center; gap:7px; transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease; font-family:inherit;}
+  .mnode:hover{border-color:#CFE9E3; transform:translateY(-3px);}
+  .mnode .iic{width:38px; height:38px; border-radius:50%; border:1.5px solid var(--teal); background:var(--teal-tint); display:grid; place-items:center; color:var(--teal-press); transition:all .2s ease;}
+  .mnode .nm{font-family:var(--font-display); font-weight:600; font-size:13.5px; color:var(--ink); line-height:1.1;}
+  .mnode .ly{font-family:var(--font-mono); font-size:9px; color:var(--slate-400); letter-spacing:.06em; text-transform:uppercase;}
+  .mnode .seq{position:absolute; top:8px; left:10px; font-family:var(--font-mono); font-size:9px; color:var(--slate-400);}
+  .mnode.active{border-color:var(--teal); box-shadow:0 16px 36px -22px rgba(21,194,168,.7);}
+  .mnode.active .iic{background:var(--teal); border-color:var(--teal); color:var(--ink);}
+
+  .detail{margin-top:18px; background:var(--surface); border:1px solid var(--hairline); border-radius:var(--r-card); overflow:hidden;}
+  .detail-head{display:flex; align-items:center; gap:12px; padding:18px 24px; border-bottom:1px solid var(--hairline); background:var(--paper);}
+  .detail-head .dn{font-family:var(--font-display); font-weight:600; font-size:18px; color:var(--ink);}
+  .detail-head .dl{font-family:var(--font-mono); font-size:11px; color:var(--teal-press); letter-spacing:.05em; text-transform:uppercase; border:1px solid var(--teal); background:var(--teal-tint); border-radius:6px; padding:3px 8px;}
+  .detail-head .dseq{margin-left:auto; font-family:var(--font-mono); font-size:11px; color:var(--slate-400);}
+  .detail-grid{display:grid; grid-template-columns:1fr 1.5fr 1fr;}
+  .detail-grid .cell{padding:22px 24px; border-right:1px solid var(--hairline);}
+  .detail-grid .cell:last-child{border-right:0;}
+  .detail-grid .lbl{font-family:var(--font-mono); font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--slate-400); margin-bottom:10px;}
+  .detail-grid .io{font-family:var(--font-mono); font-size:13px; color:var(--ink); font-weight:500; line-height:1.7;}
+  .detail-grid .io .u{color:var(--teal-press);}
+  .detail-grid .does{font-size:14px; color:var(--slate-600);}
+  @media(max-width:820px){
+    .chain{flex-wrap:wrap;} .chain::before{display:none;} .mnode{flex:1 1 40%;}
+    .detail-grid{grid-template-columns:1fr;} .detail-grid .cell{border-right:0; border-bottom:1px solid var(--hairline);} .detail-grid .cell:last-child{border-bottom:0;}
+    .band .band-tag{display:none;}
+  }
+  @media(max-width:480px){ .mnode{flex:1 1 100%;} }
+
+  /* FOUNDATION GRID */
+  .fgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:40px;}
+  .fcard{border:1px solid var(--hairline); border-radius:var(--r-card); background:var(--surface); padding:24px; transition:border-color .2s ease, transform .2s ease;}
+  .fcard:hover{border-color:#CFE9E3; transform:translateY(-2px);}
+  .fcard .iic{width:44px; height:44px; border-radius:50%; border:1.5px solid var(--teal); background:var(--teal-tint); display:grid; place-items:center; color:var(--teal-press); margin-bottom:14px;}
+  .fcard h4{font-family:var(--font-display); font-weight:600; font-size:16px; color:var(--ink); margin:0 0 6px;}
+  .fcard p{font-size:13.5px; color:var(--slate-500); margin:0;}
+  @media(max-width:820px){ .fgrid{grid-template-columns:1fr;} }
+
+  /* DARK INTELLIGENCE */
+  .night{background:var(--ink-deep); color:#E2E8F0; position:relative; overflow:hidden;}
+  .night::before{content:""; position:absolute; inset:0; background-image:linear-gradient(rgba(21,194,168,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(21,194,168,.06) 1px,transparent 1px); background-size:28px 28px;}
+  .night .wrap{position:relative; padding:80px 28px;}
+  .night .kicker{color:var(--teal);} .night .h2{color:#fff;} .night .lede{color:#94A3B8;}
+  .ngrid{display:grid; grid-template-columns:1.1fr 1fr; gap:48px; align-items:center; margin-top:40px;}
+  .nfeat{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .nf{background:rgba(255,255,255,.03); border:1px solid #14283B; border-radius:14px; padding:16px;}
+  .nf .iic{width:36px; height:36px; border-radius:50%; border:1.5px solid var(--teal); display:grid; place-items:center; color:var(--teal); margin-bottom:10px;}
+  .nf h5{font-family:var(--font-display); font-weight:600; margin:0 0 4px; color:#fff; font-size:14.5px;}
+  .nf p{margin:0; font-size:12.5px; color:#8597AB;}
+  .graph{position:relative; height:280px;}
+  .graph .gnode{position:absolute; width:11px; height:11px; border-radius:50%; background:var(--teal); box-shadow:0 0 18px 3px rgba(21,194,168,.55); animation:bob 4s ease-in-out infinite;}
+  .graph .gnode.w{background:#fff; width:8px; height:8px; box-shadow:0 0 12px 2px rgba(255,255,255,.4);}
+  @keyframes bob{0%,100%{transform:translateY(0);} 50%{transform:translateY(-7px);}}
+  @media(max-width:820px){ .ngrid{grid-template-columns:1fr;} .graph{height:200px;} }
+
+  /* CTA */
+  .finalcta{background:var(--wash); border-radius:var(--r-card); padding:48px; color:#fff; text-align:center;}
+  .finalcta h3{font-family:var(--font-display); font-weight:600; font-size:clamp(24px,3.4vw,34px); margin:0 0 10px; letter-spacing:-.02em;}
+  .finalcta p{margin:0 auto 22px; opacity:.85; font-size:15px; max-width:48ch;}
+  .finalcta .btn-primary{background:#fff; color:var(--ink);}
+  .finalcta .btn-primary:hover{background:var(--teal-tint);}
+
+  /* FOOTER */
+  footer.foot{border-top:1.5px solid var(--ink); background:var(--surface); margin-top:8px;}
+  footer.foot .top{display:grid; grid-template-columns:1.4fr repeat(3,1fr); gap:30px; padding:48px 0;}
+  footer.foot .blurb{font-size:13px; color:var(--slate-500); margin:14px 0 0; max-width:34ch;}
+  footer.foot .col h6{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.14em; color:var(--slate-400); text-transform:uppercase; margin:4px 0 14px;}
+  footer.foot .col a{display:block; font-size:13.5px; color:var(--slate-600); padding:5px 0;}
+  footer.foot .col a:hover{color:var(--teal-press);}
+  footer.foot .base{border-top:1px solid var(--hairline); display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; padding:16px 0;}
+  footer.foot .base .k{font-family:var(--font-mono); font-size:11px; color:var(--slate-500); letter-spacing:.06em;}
+  footer.foot .base .k b{color:var(--ink);}
+  @media(max-width:820px){ footer.foot .top{grid-template-columns:1fr 1fr;} }
+
+  @media (prefers-reduced-motion: reduce){ *{transition:none!important; animation:none!important;} }
+
+  /* ================= THEME: DARK ================= */
+  [data-theme="dark"]{
+    --paper:#0A1626; --surface:#10223A; --ink:#EAF1F8;
+    --slate-700:#C7D3E0; --slate-600:#A8B6C6; --slate-500:#8493A6; --slate-400:#6A7A8E; --slate-300:#37495E;
+    --hairline:#1E3350; --teal-tint:rgba(21,194,168,.15);
+  }
+  [data-theme="dark"] body{
+    background-image:
+      linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px),
+      linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);
+  }
+  [data-theme="dark"] .nav{background:rgba(10,22,38,.82); border-bottom-color:var(--hairline);}
+  [data-theme="dark"] .modnav{background:rgba(10,22,38,.92); border-bottom-color:var(--hairline);}
+  [data-theme="dark"] .btn-primary{color:#0B1B2B;}
+  [data-theme="dark"] .btn-secondary{background:var(--surface); color:var(--ink); border-color:var(--slate-400);}
+  [data-theme="dark"] .btn-secondary:hover{background:var(--ink); color:#0A1626;}
+  [data-theme="dark"] .finalcta .btn-primary,[data-theme="dark"] .cta .btn-primary{color:#0B1B2B;}
+  [data-theme="dark"] .flag,[data-theme="dark"] .mnode.active .iic{color:#0B1B2B;}
+  /* intentional dark accent blocks keep their own light text on navy */
+  [data-theme="dark"] .chead,[data-theme="dark"] .band.copilot,[data-theme="dark"] .own,
+  [data-theme="dark"] .finish,[data-theme="dark"] .usage,[data-theme="dark"] .copilot{background:#0B1B2B;}
+  [data-theme="dark"] footer.foot{border-top-color:var(--hairline);}
+  [data-theme="dark"] .cell{background:#14273D;}
+  [data-theme="dark"] .cell.on{background:#2C4055;}
+  [data-theme="dark"] .no,[data-theme="dark"] .mk.no{background:#1B2E44; color:var(--slate-400);}
+  [data-theme="dark"] .rtag.std{background:#1B2E44; color:var(--slate-400);}
+  /* nav tools */
+  .nav-tools{display:flex; align-items:center; gap:8px;}
+  .lang-select{font-family:var(--font-mono); font-size:11px; color:var(--slate-600); background:transparent;
+    border:1px solid var(--hairline); border-radius:8px; padding:6px 7px; cursor:pointer;}
+  .theme-toggle{width:34px; height:34px; border-radius:8px; border:1px solid var(--hairline); background:transparent;
+    color:var(--slate-600); display:grid; place-items:center; cursor:pointer; transition:all .2s ease;}
+  .theme-toggle:hover{color:var(--ink); border-color:var(--slate-400);}
+  .theme-toggle .ic-sun{display:none;}
+  [data-theme="dark"] .theme-toggle .ic-moon{display:none;}
+  [data-theme="dark"] .theme-toggle .ic-sun{display:block;}
+  [dir="rtl"] .eyebrow::before{margin-left:0;}
+</style>
+
+<script>
+  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){ document.documentElement.classList.add('has-anim'); }
+</script>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <svg class="mark" viewBox="0 0 48 56" width="25" height="29" fill="none" aria-hidden="true"><path d="M16 50V8h14a13 13 0 0 1 0 26H16" stroke="var(--ink)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="25" cy="21" r="3.6" fill="var(--teal)"/></svg>
+      <span class="wm">Preck<span class="o">o</span>n</span>
+    </a>
+    <div class="nav-links">
+      <a href="preckon-platform.html" class="active" data-i18n="nav.platform">Platform</a>
+      <a href="preckon-modules.html" data-i18n="nav.modules">Modules</a>
+      <a href="preckon-why.html" data-i18n="nav.why">Why us</a>
+      <a href="preckon-security.html" data-i18n="nav.security">Security</a>
+      <a href="preckon-pricing.html" data-i18n="nav.pricing">Pricing</a>
+    </div>
+    <div class="nav-tools">
+      <select class="lang-select" aria-label="Language" onchange="PK.setLang(this.value)"><option value="en">EN</option><option value="ar">العربية</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option></select>
+      <button class="theme-toggle" type="button" aria-label="Toggle theme" onclick="PK.toggleTheme()"><svg class="ic-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><svg class="ic-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19"/></svg></button>
+    </div>
+    <a class="btn btn-primary" href="preckon-demo.html" data-i18n="cta.demo">Book a demo</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">The platform</span>
+    <h1>One platform, <span class="hl">seven layers</span> of intelligence.</h1>
+    <p class="sub">Preckon isn't a single model bolted onto a viewer. It's a chain of specialized intelligence layers — each reading one kind of document, each handing structured output to the next — sitting on a shared foundation and orchestrated by the Construction Copilot.</p>
+    <div class="flowline">
+      <span class="chip">Documents</span><span class="arr">→</span>
+      <span class="chip">Requirements</span><span class="arr">→</span>
+      <span class="chip">Elements</span><span class="arr">→</span>
+      <span class="chip">BOQ</span><span class="arr">→</span>
+      <span class="chip">Estimate</span><span class="arr">→</span>
+      <span class="chip">Procurement</span>
+    </div>
+  </div>
+</header>
+
+<!-- ARCHITECTURE -->
+<section class="section" id="modules" style="padding-top:34px;">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="kicker">Architecture</span>
+      <h2 class="h2">How Preckon is built.</h2>
+      <p class="lede">Click any layer to see what it reads, what it does, and what it hands to the next.</p>
+    </div>
+
+    <div class="arch reveal">
+      <!-- Copilot -->
+      <div class="band copilot">
+        <span class="band-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2a4 4 0 0 1 4 4v1a4 4 0 0 1 0 8 4 4 0 0 1-8 0 4 4 0 0 1 0-8V6a4 4 0 0 1 4-4z"/><path d="M9 9h6"/></svg></span>
+        <div><b>Construction Copilot</b><span class="sub">Orchestration · conversational access to any layer · human-in-the-loop on every output</span></div>
+        <span class="band-tag">ORCHESTRATION</span>
+      </div>
+
+      <!-- module chain -->
+      <div class="chain-wrap">
+        <span class="io-label left">▸ Documents in</span>
+        <span class="io-label right">Procurement out ▸</span>
+        <div class="chain" role="tablist" aria-label="Platform modules">
+          <button class="mnode active" data-mod="tender" role="tab" aria-selected="true">
+            <span class="seq">01</span>
+            <span class="iic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></span>
+            <span class="nm">TenderLogix</span><span class="ly">Tender</span>
+          </button>
+          <button class="mnode" data-mod="draw" role="tab" aria-selected="false">
+            <span class="seq">02</span>
+            <span class="iic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 3v18M14 14l3 3"/></svg></span>
+            <span class="nm">DrawLogix</span><span class="ly">Drawing</span>
+          </button>
+          <button class="mnode" data-mod="doc" role="tab" aria-selected="false">
+            <span class="seq">03</span>
+            <span class="iic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg></span>
+            <span class="nm">DocLogix</span><span class="ly">Spec</span>
+          </button>
+          <button class="mnode" data-mod="quant" role="tab" aria-selected="false">
+            <span class="seq">04</span>
+            <span class="iic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 3h16v18H4z"/><path d="M8 7h8M8 11h8M8 15h4"/><circle cx="16" cy="16" r="2"/></svg></span>
+            <span class="nm">QuantLogix</span><span class="ly">Quantity</span>
+          </button>
+          <button class="mnode" data-mod="cost" role="tab" aria-selected="false">
+            <span class="seq">05</span>
+            <span class="iic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+            <span class="nm">CostLogix</span><span class="ly">Cost</span>
+          </button>
+          <button class="mnode" data-mod="procure" role="tab" aria-selected="false">
+            <span class="seq">06</span>
+            <span class="iic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg></span>
+            <span class="nm">ProcureLogix</span><span class="ly">Procurement</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Foundation -->
+      <div class="band foundation">
+        <span class="band-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg></span>
+        <div><b>Platform Foundation</b><span class="sub">Multi-tenant data · encryption &amp; audit spine · provider-independent AI orchestrator · construction knowledge graph</span></div>
+        <span class="band-tag">FOUNDATION</span>
+      </div>
+    </div>
+
+    <!-- detail panel -->
+    <div class="detail reveal" id="detail" aria-live="polite">
+      <div class="detail-head">
+        <span class="dn" id="d-name">TenderLogix</span>
+        <span class="dl" id="d-layer">Tender Intelligence</span>
+        <span class="dseq" id="d-seq">LAYER 01 / 06</span>
+      </div>
+      <div class="detail-grid">
+        <div class="cell"><div class="lbl">Reads</div><div class="io" id="d-in"></div></div>
+        <div class="cell"><div class="lbl">What it does</div><div class="does" id="d-does"></div></div>
+        <div class="cell"><div class="lbl">Hands off</div><div class="io" id="d-out"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOUNDATION DETAIL -->
+<section class="section" id="foundation" style="padding-top:10px;">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="kicker">The foundation</span>
+      <h2 class="h2">What every layer stands on.</h2>
+      <p class="lede">The modules are only as trustworthy as what's beneath them. Preckon's foundation is built for sensitive documents, enterprise scale, and outputs a reviewer can defend.</p>
+    </div>
+    <div class="fgrid reveal">
+      <div class="fcard"><span class="iic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><h4>Multi-tenant isolation</h4><p>Row-level security separates every client's data. One tenant's documents never touch another's.</p></div>
+      <div class="fcard"><span class="iic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg></span><h4>Immutable audit spine</h4><p>Every action and change is recorded — who, what, when — so any number can be traced to its origin.</p></div>
+      <div class="fcard"><span class="iic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3"/></svg></span><h4>Provider-independent AI</h4><p>An orchestrator routes each task to the right model. No lock-in, and no single vendor sees everything.</p></div>
+      <div class="fcard"><span class="iic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="M5 8v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M12 13v3"/></svg></span><h4>Construction knowledge graph</h4><p>Reasoning grounded in real construction logic — elements, assemblies, trades — not generic text.</p></div>
+      <div class="fcard"><span class="iic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><h4>Human-in-the-loop</h4><p>Review and correction is built into every layer. Nothing is costed or issued without a person confirming it.</p></div>
+      <div class="fcard"><span class="iic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></span><h4>White-labeling</h4><p>Per-tenant logo and brand color are first-class — run Preckon under your own identity.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- DARK INTELLIGENCE -->
+<section class="night">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="kicker">How it reasons</span>
+      <h2 class="h2">The orchestrator and the graph.</h2>
+      <p class="lede">Every layer draws on the same construction knowledge graph and the same provider-independent orchestrator — so the platform reasons about buildings, routes work to the best model for each task, and shows how it got there.</p>
+    </div>
+    <div class="ngrid reveal">
+      <div class="nfeat">
+        <div class="nf"><span class="iic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3"/></svg></span><h5>Task routing</h5><p>Each step goes to the model best suited to it.</p></div>
+        <div class="nf"><span class="iic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="M5 8v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M12 13v3"/></svg></span><h5>Knowledge graph</h5><p>Grounded in construction, not generic language.</p></div>
+        <div class="nf"><span class="iic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/></svg></span><h5>Provider independence</h5><p>No lock-in; data never pools with one vendor.</p></div>
+        <div class="nf"><span class="iic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><h5>Explainable</h5><p>Every output traces back to its source.</p></div>
+      </div>
+      <div class="graph" aria-hidden="true">
+        <div class="gnode" style="left:10%; top:24%;"></div>
+        <div class="gnode w" style="left:30%; top:58%; animation-delay:.4s;"></div>
+        <div class="gnode" style="left:48%; top:18%; animation-delay:.8s;"></div>
+        <div class="gnode w" style="left:60%; top:64%; animation-delay:1.2s;"></div>
+        <div class="gnode" style="left:78%; top:34%; animation-delay:1.6s;"></div>
+        <div class="gnode w" style="left:88%; top:72%; animation-delay:2s;"></div>
+        <svg style="position:absolute; inset:0; width:100%; height:100%;" stroke="rgba(21,194,168,.3)" stroke-width="1" fill="none">
+          <line x1="10%" y1="24%" x2="48%" y2="18%"/><line x1="48%" y1="18%" x2="78%" y2="34%"/>
+          <line x1="30%" y1="58%" x2="60%" y2="64%"/><line x1="60%" y1="64%" x2="88%" y2="72%"/>
+          <line x1="48%" y1="18%" x2="30%" y2="58%"/><line x1="78%" y1="34%" x2="60%" y2="64%"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section" style="padding-bottom:64px;">
+  <div class="wrap">
+    <div class="finalcta reveal">
+      <h3>See the whole chain on your project.</h3>
+      <p>Bring one drawing set. Watch it move through every layer — documents to a procurement package — in your first call.</p>
+      <a class="btn btn-primary" href="preckon-demo.html">Book a demo
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <a class="brand" href="index.html"><svg class="mark" viewBox="0 0 48 56" width="25" height="29" fill="none" aria-hidden="true"><path d="M16 50V8h14a13 13 0 0 1 0 26H16" stroke="var(--ink)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="25" cy="21" r="3.6" fill="var(--teal)"/></svg><span class="wm">Preck<span class="o">o</span>n</span></a>
+        <p class="blurb">From drawings to a defensible estimate. AI-native preconstruction, reviewed by your team.</p>
+      </div>
+      <div class="col"><h6>Platform</h6><a href="preckon-modules.html">Modules</a><a href="#foundation">Foundation</a><a href="index.html#how">How it works</a><a href="preckon-security.html">Security</a></div>
+      <div class="col"><h6>Company</h6><a href="preckon-pricing.html">Pricing</a><a href="index.html#partners">Design partners</a><a href="preckon-why.html">Why us</a><a href="preckon-demo.html">Contact</a></div>
+      <div class="col"><h6>Get started</h6><a href="preckon-demo.html">Book a demo</a><a href="index.html#partners">Design Partner Program</a><a href="index.html#how">Watch overview</a></div>
+    </div>
+    <div class="base">
+      <span class="k">© 2026 TechSME Inc. · Mississauga, ON</span>
+      <span class="k">SHEET <b>PLATFORM</b> · BUILT ON <b>DS-01</b></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const MODULES = {
+    tender:  { name:"TenderLogix",  layer:"Tender Intelligence",        seq:"01", in:"tender package<br>contract · scope <span class='u'>(PDF)</span>", does:"Extracts requirements, scope and obligations, then structures the project so every downstream layer knows what's being built.", out:"requirement register<br>project structure" },
+    draw:    { name:"DrawLogix",    layer:"Drawing Intelligence",       seq:"02", in:"drawings <span class='u'>(PDF · CAD)</span>", does:"Recognizes building elements — walls, columns, slabs — and measures their geometry directly off the drawings.", out:"recognized elements<br>measurements" },
+    doc:     { name:"DocLogix",     layer:"Specification Intelligence", seq:"03", in:"specifications", does:"Parses specification clauses and ties each one to the elements and items it governs, so quantities carry the right attributes.", out:"spec-matched attributes" },
+    quant:   { name:"QuantLogix",   layer:"Quantity Intelligence",      seq:"04", in:"elements + specs", does:"Computes quantities from measured elements and assembles the structured bill of quantities and takeoff.", out:"structured BOQ<br><span class='u'>1,240 line items</span>" },
+    cost:    { name:"CostLogix",    layer:"Cost Intelligence",          seq:"05", in:"structured BOQ", does:"Applies rates to every line and builds a costed, defensible estimate you can trace and adjust.", out:"costed estimate<br><span class='u'>$1,240,500</span>" },
+    procure: { name:"ProcureLogix", layer:"Procurement Intelligence",   seq:"06", in:"costed estimate", does:"Packages scopes and generates the RFQs needed to take the project to market for buyout.", out:"procurement packages<br>RFQs" }
+  };
+
+  const dName=document.getElementById('d-name'), dLayer=document.getElementById('d-layer'),
+        dSeq=document.getElementById('d-seq'), dIn=document.getElementById('d-in'),
+        dDoes=document.getElementById('d-does'), dOut=document.getElementById('d-out');
+
+  function select(key, nodes){
+    const m = MODULES[key]; if(!m) return;
+    dName.textContent=m.name; dLayer.textContent=m.layer; dSeq.textContent='LAYER '+m.seq+' / 06';
+    dIn.innerHTML=m.in; dDoes.textContent=m.does; dOut.innerHTML=m.out;
+    nodes.forEach(n=>{ const on = n.dataset.mod===key; n.classList.toggle('active',on); n.setAttribute('aria-selected', on?'true':'false'); });
+  }
+
+  const nodes = Array.from(document.querySelectorAll('.mnode'));
+  nodes.forEach(n=> n.addEventListener('click', ()=> select(n.dataset.mod, nodes)));
+  select('tender', nodes);
+
+  // scroll reveals
+  if(document.documentElement.classList.contains('has-anim')){
+    const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.12});
+    document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+  }
+</script>
+
+<script>
+(function(){
+  var root=document.documentElement;
+  var I18N={
+    en:{"nav.platform":"Platform","nav.modules":"Modules","nav.why":"Why us","nav.security":"Security","nav.pricing":"Pricing","cta.demo":"Book a demo"},
+    ar:{"nav.platform":"\u0627\u0644\u0645\u0646\u0635\u0629","nav.modules":"\u0627\u0644\u0648\u062d\u062f\u0627\u062a","nav.why":"\u0644\u0645\u0627\u0630\u0627 \u0646\u062d\u0646","nav.security":"\u0627\u0644\u0623\u0645\u0627\u0646","nav.pricing":"\u0627\u0644\u0623\u0633\u0639\u0627\u0631","cta.demo":"\u0627\u062d\u062c\u0632 \u0639\u0631\u0636\u064b\u0627"},
+    fr:{"nav.platform":"Plateforme","nav.modules":"Modules","nav.why":"Pourquoi nous","nav.security":"S\u00e9curit\u00e9","nav.pricing":"Tarifs","cta.demo":"R\u00e9server une d\u00e9mo"},
+    de:{"nav.platform":"Plattform","nav.modules":"Module","nav.why":"Warum wir","nav.security":"Sicherheit","nav.pricing":"Preise","cta.demo":"Demo buchen"},
+    es:{"nav.platform":"Plataforma","nav.modules":"M\u00f3dulos","nav.why":"Por qu\u00e9 nosotros","nav.security":"Seguridad","nav.pricing":"Precios","cta.demo":"Reservar una demo"}
+  };
+  var RTL={ar:1};
+  function st(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  function rd(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function theme(t){root.setAttribute("data-theme",t);st("preckon-theme",t);}
+  function lang(l){
+    root.setAttribute("lang",l);root.setAttribute("dir",RTL[l]?"rtl":"ltr");st("preckon-lang",l);
+    var d=I18N[l]||I18N.en;
+    document.querySelectorAll("[data-i18n]").forEach(function(el){var k=el.getAttribute("data-i18n");if(d[k])el.textContent=d[k];});
+    var s=document.querySelector(".lang-select");if(s)s.value=l;
+  }
+  window.PK={toggleTheme:function(){theme(root.getAttribute("data-theme")==="dark"?"light":"dark");},setLang:lang};
+  var sl=rd("preckon-lang");if(sl)lang(sl);
+})();
+</script>

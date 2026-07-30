@@ -1,0 +1,25 @@
+# Dependencies & build output (rebuilt inside the image)
+node_modules
+.next
+out
+
+# Local env & secrets — never bake these into an image
+.env
+.env.local
+.env.*.local
+
+# Tooling / VCS / test artifacts
+.git
+.gitignore
+.vscode
+.idea
+test-results
+playwright-report
+playwright/.cache
+e2e
+*.tsbuildinfo
+npm-debug.log*
+
+# Docs & misc that don't belong in the runtime image
+*.md
+storage

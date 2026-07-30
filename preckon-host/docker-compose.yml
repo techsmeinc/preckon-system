@@ -1,0 +1,80 @@
+# Preckon Host — app + MySQL 8 for a one-command local/prod-like run.
+#
+#   docker compose up --build          # build image, start db + app
+#   # then create the first Owner staff account (app must be up):
+#   docker compose run --rm seed
+#
+# App:   http://localhost:3000
+# MySQL: localhost:3307  (host) → 3306 (container)
+
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: preckon
+      MYSQL_DATABASE: preckon_host
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      # Schema + seed run once, on first init, in filename order.
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./db/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-ppreckon"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: "3306"
+      DATABASE_USER: root
+      DATABASE_PASSWORD: preckon
+      DATABASE_NAME: preckon_host
+      # CHANGE THESE for anything beyond local dev:
+      BETTER_AUTH_SECRET: change-me-to-a-long-random-string-min-32-chars
+      BETTER_AUTH_URL: http://localhost:3000
+      INTERNAL_SERVICE_TOKEN: change-me-service-token
+      EMAIL_PROVIDER: postmark
+      EMAIL_FROM_ADDRESS: noreply@preckon.com
+      # Provision tenants into the tenant plane (§1.5). host.docker.internal reaches
+      # the separately-composed tenant stack published on :3100. Token must match.
+      TENANT_PLANE_URL: http://host.docker.internal:3100
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "3000:3000"
+
+  # One-off helper: create the first Owner staff account against the running app.
+  # Uses the full build image (has dev deps + scripts). Run with:
+  #   docker compose run --rm seed
+  seed:
+    build:
+      context: .
+      target: builder
+    profiles: ["tools"]
+    depends_on:
+      - app
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: "3306"
+      DATABASE_USER: root
+      DATABASE_PASSWORD: preckon
+      DATABASE_NAME: preckon_host
+      BETTER_AUTH_URL: http://app:3000
+      OWNER_EMAIL: admin@techsme.com
+      OWNER_PASSWORD: preckon-admin-2026
+    # Create the Owner staff account, then register the demo tenant (matching the
+    # tenant plane's id) so the Host lists the workspace you actually log into.
+    command: ["sh", "-c", "npm run seed:owner && npm run seed:demo-tenant"]
+
+volumes:
+  db_data:

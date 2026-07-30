@@ -1,0 +1,92 @@
+========================================================================
+DrawLogix — Solutions Map
+"Don't start from a blank page. Get a usable drawing, finish it in AutoCAD."
+========================================================================
+
+WHO IT'S FOR
+------------
+AutoCAD drafters who don't want to start from scratch. DrawLogix does the
+tedious, repetitive setup, hands over a solid DXF, and they open it in
+AutoCAD to make the major design decisions and modifications.
+
+THE RULE EVERY FEATURE MUST PASS
+--------------------------------
+  (a) It kills a time sink, AND
+  (b) It hands off cleanly to AutoCAD.
+
+
+------------------------------------------------------------------------
+THE FOUR SOLUTIONS  (manual pain  ->  DrawLogix  ->  AutoCAD)
+------------------------------------------------------------------------
+
+1. BLANK-PAGE SETUP  ->  FIRST-PASS PLAN                    [BUILT]
+   Pain:   Laying out walls, rooms, doors, corridors from a brief/SOW.
+   Does:   Reads the SOW and generates a dimensioned, layered DXF
+           (walls, doors, windows, room labels, corridor, title block).
+   Result: Drafter opens it in AutoCAD with ~70% of the linework done
+           and just adjusts the layout. Saves hours of initial drafting.
+
+2. MANUAL MEASURING / COUNTING  ->  INSTANT TAKEOFF + BOM   [BUILT]
+   Pain:   Measuring every room area, counting doors/windows, tallying
+           wall lengths, pricing.
+   Does:   Upload an AutoCAD DXF -> auto quantities + priced BOM + CSV
+           (with unit auto-detect).
+   Result: Removes the whole manual quantity-survey step.
+
+3. REPETITIVE CLEANUP / STANDARDIZATION  ->  AI COPILOT     [BUILT]
+   Pain:   Renaming layers to office standards, batch find-replace on
+           labels, recolouring, adding title blocks / revision notes.
+   Does:   Upload DXF, instruct in plain English, export DXF.
+   Result: Removes the tedious drawing-management chores.
+
+4. MANUAL ANNOTATION  ->  AUTO-LABELING                     [NEXT]
+   Pain:   Labeling every room with its name + area and adding dimension
+           strings — one of the most tedious repetitive AutoCAD tasks.
+   Does:   Upload a plan with rooms -> detects each space and writes the
+           area/name tags + dimension strings onto proper layers ->
+           export the annotated DXF.
+   Result: A fully-tagged drawing to review, not a blank one.
+
+
+------------------------------------------------------------------------
+THE AUTOCAD-NATIVE HANDOFF  (foundation under all four)     [DELIVERED]
+------------------------------------------------------------------------
+Output is genuinely AutoCAD-ready so the "then modify" step is frictionless:
+
+  - Standard AIA layers:
+      A-WALL, A-AREA, A-DOOR, A-GLAZ, A-ANNO, A-DIMS, A-TTLB
+  - Rooms as CLOSED POLYLINES on A-AREA
+      -> AutoCAD AREA / HATCH / room-tag tools work immediately
+  - Door swings (leaf + arc) on A-DOOR
+  - Room tags, dimension strings, title block
+  - Units set to metres ($INSUNITS)
+
+Verified round-trip (buildDxf -> takeoff):
+  layers: A-WALL, A-AREA, A-DOOR, A-GLAZ, A-ANNO, A-DIMS, A-TTLB
+  spaces detected reliably: RECEPTION=24, OFFICE 1=30, OFFICE 2=30,
+                            WC=6, CIRCULATION=35  (floor 125 m2)
+
+
+------------------------------------------------------------------------
+WHY IT MATTERS FOR THE CLIENT
+------------------------------------------------------------------------
+Give a brief (or upload a rough DXF) -> get a layered, dimensioned,
+area-tagged DXF where AutoCAD's own tools already work -> spend time on
+the major parts and modifications, not on setup, labeling, or measuring.
+
+  => 60-70% time saving on the drudge work.
+
+
+------------------------------------------------------------------------
+STILL OPEN  (next builds)
+------------------------------------------------------------------------
+  - Auto-annotate an uploaded DXF: for plans that arrive as raw walls,
+    detect enclosed rooms from the wall linework and write area/name tags
+    back onto proper layers. (Needs wall-graph room detection — the most
+    ambitious piece; clean when the plan has room boundaries, harder on
+    wall-only drawings with door gaps.)
+  - Copilot, more edit power: batch-standardize to a layer template,
+    renumber rooms, offset walls, array/copy.
+  - Higher CAD fidelity in the viewer: INSERT/block symbols (doors,
+    furniture, title-block) and hatch/fill rendering.
+========================================================================
