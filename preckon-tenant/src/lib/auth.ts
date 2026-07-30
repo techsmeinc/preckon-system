@@ -25,6 +25,15 @@ export const auth = betterAuth({
       return [...new Set([...base, origin])];
     return base;
   },
+  // Better Auth throttles sign-in in production, which is what we want against
+  // credential stuffing. But the e2e suite signs in once per test and trips it
+  // after three, so the ceiling is env-tunable. Unset — as on any real
+  // deployment — the strict default stands.
+  rateLimit: {
+    customRules: {
+      "/sign-in/email": { window: 60, max: Number(process.env.AUTH_SIGNIN_MAX ?? 3) },
+    },
+  },
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,

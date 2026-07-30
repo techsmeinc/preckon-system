@@ -71,6 +71,9 @@ services:
       WORKER_URL: http://worker:4000
       CORE_URL: http://app:3000
       FILE_STORAGE_DIR: /app/.uploads
+      # Sign-in attempts per minute. Raise only to run the e2e suite, which signs
+      # in once per test; leave at the default on anything reachable publicly.
+      AUTH_SIGNIN_MAX: ${AUTH_SIGNIN_MAX:-3}
     volumes:
       - uploads:/app/.uploads
     ports:
