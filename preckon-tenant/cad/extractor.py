@@ -21,6 +21,8 @@ from __future__ import annotations
 
 import math
 import os
+import shutil
+import subprocess
 import tempfile
 from collections import defaultdict
 from dataclasses import asdict, dataclass, field
@@ -517,31 +519,63 @@ def _resolve_odafc_path() -> str | None:
     return None
 
 
+def _libredwg_convert(path: str, out_path: str) -> bool:
+    """Convert DWG→DXF with LibreDWG's dwg2dxf, which is built into this image.
+
+    LibreDWG is GPL and open source, so unlike the ODA File Converter it needs no
+    manual download or registration — which is the difference between .dwg
+    working out of the box and .dwg being a documented setup step nobody does.
+    Coverage is good for R13–R2018 but not perfect; ODA still wins when both are
+    present, and a failure here falls through to the ODA path rather than
+    ending the attempt.
+    """
+    exe = shutil.which("dwg2dxf")
+    if not exe:
+        return False
+    try:
+        proc = subprocess.run(
+            [exe, "-y", "-o", out_path, path],
+            capture_output=True, timeout=180, check=False,
+        )
+    except Exception:
+        return False
+    # dwg2dxf reports partial reads on its exit code, so trust the artefact:
+    # a non-trivial .dxf on disk means we got something ezdxf can open.
+    return os.path.exists(out_path) and os.path.getsize(out_path) > 1024
+
+
 def _convert_dwg_to_dxf(path: str) -> str:
-    """If the file is .dwg, attempt to convert via ezdxf's ODA File Converter
-    add-on. Requires ODA File Converter installed and on PATH, at a known
-    location, or pointed to by the env var EZDXF_ODAFC. Returns a path to a
-    temporary .dxf."""
+    """If the file is .dwg, convert it to DXF. Tries the ODA File Converter when
+    one is configured (best fidelity), then falls back to LibreDWG, which ships
+    in this image. Returns a path to a temporary .dxf."""
     if not path.lower().endswith(".dwg"):
         return path
-    try:
-        from ezdxf.addons import odafc  # type: ignore
-    except Exception as exc:
-        raise RuntimeError(f"DWG support requires ezdxf.addons.odafc ({exc})")
-    resolved = _resolve_odafc_path()
-    if not odafc.is_installed():
-        raise RuntimeError(
-            "DWG support requires the ODA File Converter, which was not found. "
-            "Install it (free, from opendesign.com) and either put it on PATH or "
-            "set EZDXF_ODAFC to ODAFileConverter.exe. "
-            f"(checked EZDXF_ODAFC={os.environ.get('EZDXF_ODAFC') or '(unset)'}, "
-            f"resolved={resolved or '(none)'})"
-        )
+
     out_dir = tempfile.mkdtemp(prefix="dwg2dxf_")
     out_path = os.path.join(out_dir, os.path.splitext(os.path.basename(path))[0] + ".dxf")
-    # ezdxf.addons.odafc.convert handles the shell-out
-    odafc.convert(path, out_path, version="R2018", replace=True)  # type: ignore[attr-defined]
-    return out_path
+
+    resolved = _resolve_odafc_path()
+    try:
+        from ezdxf.addons import odafc  # type: ignore
+        if odafc.is_installed():
+            odafc.convert(path, out_path, version="R2018", replace=True)  # type: ignore[attr-defined]
+            return out_path
+    except Exception:
+        # An ODA that is present but fails on this file is not the end of the
+        # road — LibreDWG may still read it.
+        pass
+
+    if _libredwg_convert(path, out_path):
+        return out_path
+
+    raise RuntimeError(
+        "This DWG could not be converted. LibreDWG could not read it, and no ODA "
+        "File Converter is configured. Re-save the drawing as DXF from AutoCAD, or "
+        "install the ODA File Converter (free, from opendesign.com) and point "
+        "EZDXF_ODAFC at it. "
+        f"(EZDXF_ODAFC={os.environ.get('EZDXF_ODAFC') or '(unset)'}, "
+        f"resolved={resolved or '(none)'}, dwg2dxf={shutil.which('dwg2dxf') or '(missing)'})"
+    )
 
 
 def _load_drawing(path: str):
