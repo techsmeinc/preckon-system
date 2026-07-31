@@ -58,6 +58,9 @@ test("the project workspace shows the chain", async ({ page }) => {
 });
 
 test("core loop: start a skeleton run, confirm scope, pursuit advances", async ({ page }) => {
+  // Two live agent steps run before the gate, so this one needs more than the
+  // suite's 60s default — otherwise the test dies before its own assertion does.
+  test.setTimeout(180_000);
   await signIn(page);
   await openFirstProject(page);
 
