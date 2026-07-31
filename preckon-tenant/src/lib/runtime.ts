@@ -274,6 +274,91 @@ export async function advanceRun(tenantId: string, runId: string): Promise<void>
   }
 }
 
+/**
+ * Everything an agent needs that is NOT an artifact: the project's identity, the
+ * uploaded files and their text, the parsed drawings, the rate book.
+ *
+ * Shared by both dispatch paths on purpose. The map fan-out used to build its
+ * own bare params and return early, so every child job — which is how per-sheet
+ * takeoff and every other fanned-out stage runs — reached the worker with no
+ * documents and no drawings at all. The agent could only invent, and did.
+ */
+async function buildAgentParams(
+  tenantId: string,
+  projectId: string,
+  agent: AgentRow,
+  base: Record<string, unknown>
+): Promise<Record<string, unknown>> {
+    // §7.4 — the Document agent reads file page text (an ingestion input, not an
+    // artifact type). The worker has no store access, so Core inlines the project's
+    // ingested files into the envelope params.
+    const params: Record<string, unknown> = { ...base };
+    // Inline the project's name/client so agents can ground their outputs in the
+    // real pursuit (rather than a hardcoded stub label).
+    const proj = await queryOne<{ name: string; client_name: string | null }>(
+      "SELECT name, client_name FROM project WHERE id = ? AND tenant_id = ?",
+      [projectId, tenantId]
+    );
+    if (proj) { params.project_name = proj.name; params.client_name = proj.client_name ?? ""; }
+    // §7.4 — agents that read the document set get the FILES, and the ones that
+    // must reason over their contents get the extracted PAGE TEXT inlined too.
+    // The worker has no store access by design, so if Core doesn't put the text in
+    // the envelope the agent cannot analyse the upload at all — it can only invent.
+    const readsDocuments =
+      agent.produces.some((p) => p.split(".").pop() === "document") ||
+      agent.consumes.some((c) => c.split(".").pop() === "document");
+
+    if (readsDocuments) {
+      const files = await query<{ id: string; filename: string; mime: string; page_count: number }>(
+        "SELECT id, filename, mime, page_count FROM file WHERE tenant_id = ? AND project_id = ? AND status = 'ingested' ORDER BY created_at ASC",
+        [tenantId, projectId]
+      );
+      params.files = files.map((f) => ({ id: f.id, filename: f.filename, page_count: f.page_count ?? 1, doc_type: "tender_letter" }));
+      params.documents = await inlineDocumentText(tenantId, files);
+    }
+
+    // CAD is inlined for anything that measures, prices or programmes — not just
+    // the drawings agent. A quantity surveyor pricing blockwork needs the wall
+    // runs; a planner sequencing the works needs to know there are 148 luminaires.
+    // The digest is already converted to metres and flags which numbers are
+    // trustworthy, so the agent never has to interpret raw drawing units.
+    const measuresWork = ["drawing_measurement", "boq_line", "cost_line", "schedule_activity", "spec_clause"];
+    if (agent.produces.some((p) => measuresWork.includes(p.split(".").pop() ?? "")) || readsDocuments) {
+      const drawings = await query<{ filename: string; summary: any }>(
+        `SELECT f.filename, c.summary
+           FROM cad_extraction c JOIN file f ON f.id = c.file_id
+          WHERE c.tenant_id = ? AND c.project_id = ?
+          ORDER BY f.created_at ASC LIMIT 20`,
+        [tenantId, projectId]
+      );
+      if (drawings.length) {
+        params.cad = cadDigest(
+          drawings.map((d) => ({
+            filename: d.filename,
+            // mysql2 gives JSON columns back parsed, but a driver/config change
+            // that returns a string shouldn't silently blank the drawings.
+            summary: typeof d.summary === "string" ? JSON.parse(d.summary) : d.summary,
+          })),
+          CAD_DIGEST_BUDGET
+        );
+      }
+    }
+
+    // The estimator prices against the tenant's own rate book (§M). Without it the
+    // agent invents rates from general knowledge instead of using the rates this
+    // contractor actually wins work at.
+    if (agent.produces.some((p) => p.split(".").pop() === "cost_line")) {
+      params.rate_book = await query(
+        `SELECT entry_key, payload FROM library_entry
+          WHERE tenant_id = ? AND status = 'active' AND collection IN ('rate_book','standard')
+          ORDER BY collection, entry_key LIMIT 400`,
+        [tenantId]
+      );
+    }
+
+    return params;
+}
+
 async function dispatchAgentStep(
   tenantId: string,
   projectId: string,
@@ -378,7 +463,11 @@ async function dispatchAgentStep(
         tier,
         promptRef,
         inputArtifacts: inputs,
-        params: { map_index: idx, map_item_id: itemId, __produce: produceSpec },
+        params: await buildAgentParams(tenantId, projectId, agent, {
+          map_index: idx,
+          map_item_id: itemId,
+          __produce: produceSpec,
+        }),
         idempotencyKey: `${childId}:${jobType}:0`,
       });
       await query("UPDATE workflow_run_step SET job_id = ? WHERE id = ?", [jobId, childId]);
@@ -399,72 +488,7 @@ async function dispatchAgentStep(
     step.id,
   ]);
 
-  // §7.4 — the Document agent reads file page text (an ingestion input, not an
-  // artifact type). The worker has no store access, so Core inlines the project's
-  // ingested files into the envelope params.
-  const params: Record<string, unknown> = { __produce: produceSpec };
-  // Inline the project's name/client so agents can ground their outputs in the
-  // real pursuit (rather than a hardcoded stub label).
-  const proj = await queryOne<{ name: string; client_name: string | null }>(
-    "SELECT name, client_name FROM project WHERE id = ? AND tenant_id = ?",
-    [projectId, tenantId]
-  );
-  if (proj) { params.project_name = proj.name; params.client_name = proj.client_name ?? ""; }
-  // §7.4 — agents that read the document set get the FILES, and the ones that
-  // must reason over their contents get the extracted PAGE TEXT inlined too.
-  // The worker has no store access by design, so if Core doesn't put the text in
-  // the envelope the agent cannot analyse the upload at all — it can only invent.
-  const readsDocuments =
-    agent.produces.some((p) => p.split(".").pop() === "document") ||
-    agent.consumes.some((c) => c.split(".").pop() === "document");
-
-  if (readsDocuments) {
-    const files = await query<{ id: string; filename: string; mime: string; page_count: number }>(
-      "SELECT id, filename, mime, page_count FROM file WHERE tenant_id = ? AND project_id = ? AND status = 'ingested' ORDER BY created_at ASC",
-      [tenantId, projectId]
-    );
-    params.files = files.map((f) => ({ id: f.id, filename: f.filename, page_count: f.page_count ?? 1, doc_type: "tender_letter" }));
-    params.documents = await inlineDocumentText(tenantId, files);
-  }
-
-  // CAD is inlined for anything that measures, prices or programmes — not just
-  // the drawings agent. A quantity surveyor pricing blockwork needs the wall
-  // runs; a planner sequencing the works needs to know there are 148 luminaires.
-  // The digest is already converted to metres and flags which numbers are
-  // trustworthy, so the agent never has to interpret raw drawing units.
-  const measuresWork = ["drawing_measurement", "boq_item", "cost_line", "schedule_activity", "spec_clause"];
-  if (agent.produces.some((p) => measuresWork.includes(p.split(".").pop() ?? "")) || readsDocuments) {
-    const drawings = await query<{ filename: string; summary: any }>(
-      `SELECT f.filename, c.summary
-         FROM cad_extraction c JOIN file f ON f.id = c.file_id
-        WHERE c.tenant_id = ? AND c.project_id = ?
-        ORDER BY f.created_at ASC LIMIT 20`,
-      [tenantId, projectId]
-    );
-    if (drawings.length) {
-      params.cad = cadDigest(
-        drawings.map((d) => ({
-          filename: d.filename,
-          // mysql2 gives JSON columns back parsed, but a driver/config change
-          // that returns a string shouldn't silently blank the drawings.
-          summary: typeof d.summary === "string" ? JSON.parse(d.summary) : d.summary,
-        })),
-        CAD_DIGEST_BUDGET
-      );
-    }
-  }
-
-  // The estimator prices against the tenant's own rate book (§M). Without it the
-  // agent invents rates from general knowledge instead of using the rates this
-  // contractor actually wins work at.
-  if (agent.produces.some((p) => p.split(".").pop() === "cost_line")) {
-    params.rate_book = await query(
-      `SELECT entry_key, payload FROM library_entry
-        WHERE tenant_id = ? AND status = 'active' AND collection IN ('rate_book','standard')
-        ORDER BY collection, entry_key LIMIT 400`,
-      [tenantId]
-    );
-  }
+  const params = await buildAgentParams(tenantId, projectId, agent, { __produce: produceSpec });
 
   const jobId = await enqueueJob({
     ctx,
