@@ -73,21 +73,27 @@ type an instruction into BIM Studio's prompt bar.
 
 ## Drawings (.dxf / .dwg)
 
-`.dxf` works with nothing extra — the `cad` sidecar parses it on upload.
+Both work with no extra setup. The `cad` sidecar parses DXF natively via ezdxf,
+and converts DWG with **LibreDWG**, which is built into the image — so there is
+nothing to download, register for, or install on the host.
 
-`.dwg` is proprietary and binary. ezdxf converts it through the **ODA File
-Converter**, a free download from opendesign.com. Install it on the host, then
-point the sidecar at it:
+The ODA File Converter is still preferred when present, because its fidelity on
+awkward older DWGs is better. To use it, install it on the host and set:
 
 ```bash
 # in /opt/preckon-tenant/.env
 EZDXF_ODAFC=/opt/ODAFileConverter/ODAFileConverter
 ```
 
-and mount it into the container. Without it a `.dwg` upload is marked **failed**
-with a message telling the estimator to export DXF — it is never silently
-ingested as unreadable bytes, because a drawing that looks understood but isn’t
-is how a BOQ quietly loses a discipline.
+then mount it into the `cad` container. The sidecar tries ODA first and falls
+back to LibreDWG, so configuring it can only improve results, never break them.
+
+If a DWG defeats both, the upload is marked **failed** with a message telling the
+estimator to re-save as DXF. It is never silently ingested as unreadable bytes —
+a drawing that looks understood but isn’t is how a BOQ quietly loses a discipline.
+
+Note the `cad` image builds LibreDWG from source, so the FIRST build takes a few
+minutes. Later builds hit the layer cache.
 
 ## Retiring stale artifacts
 
