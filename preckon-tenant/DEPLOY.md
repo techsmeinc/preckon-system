@@ -71,6 +71,43 @@ curl -s -o /dev/null -w '%{http_code}\n' -X POST \
 Then open <https://app.74.208.182.201.nip.io>, go to a project → **Drawings**, and
 type an instruction into BIM Studio's prompt bar.
 
+## The host plane (and the QA checklist it serves)
+
+The checklist is a static file in the host's `public/`, baked into the image at
+build time — so publishing an updated one means rebuilding the host, not copying
+a file into a running container (that would vanish on the next recreate).
+
+Build the bundle from the repo root:
+
+```bash
+cd /c/Users/IKIO/Downloads/New/Preckon-system
+rm -f preckon-host.tgz
+tar czf preckon-host.tgz \
+  --exclude=node_modules --exclude=.next --exclude=.git --exclude=test-results \
+  --exclude='*.tgz' --exclude=tsconfig.tsbuildinfo --exclude=.env \
+  preckon-host
+```
+
+From PowerShell:
+
+```powershell
+scp preckon-host.tgz root@74.208.182.201:/tmp/
+```
+
+Then on the server:
+
+```bash
+tar xzf /tmp/preckon-host.tgz -C /opt
+cd /opt/preckon-host
+docker compose up -d --build app
+curl -s -o /dev/null -w '%{http_code}\n' http://localhost:3000/checklist.html   # 200
+```
+
+The checklist is then at **`/checklist.html` on whatever origin serves the Host
+console** — append the path to the URL you already use to reach Host. Results are
+stored per browser in localStorage, so each tester keeps their own; Export CSV
+pulls from the same case list the page renders.
+
 ## Rate limiting
 
 `AUTH_SIGNIN_MAX` must stay unset on the server. Unset, sign-in throttles at 3

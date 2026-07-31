@@ -16,6 +16,9 @@ interface AuditEvent {
   target_id?: string;
   target_tenant_id?: string;
   metadata?: Record<string, unknown> | null;
+  // Selected and returned by /host/v1/audit-events; the detail row shows it to
+  // tie an entry to the request that caused it.
+  correlation_id?: string | null;
   ip?: string | null;
   user_agent?: string | null;
 }
