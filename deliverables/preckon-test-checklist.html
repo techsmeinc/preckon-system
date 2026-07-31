@@ -635,11 +635,11 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
   <td class="c-note"><input class="note" placeholder="notes…" data-id="H-41" /></td>
 </tr></tbody></table></div>
 </section><section class="suite" data-plane="Tenant">
-  <div class="suite-head"><h2>Tenant</h2><span class="count" data-plane-count="Tenant">0/45</span></div>
+  <div class="suite-head"><h2>Tenant</h2><span class="count" data-plane-count="Tenant">0/75</span></div>
   <div class="tblwrap"><table><thead><tr><th>ID</th><th>Test case</th><th>Pri</th><th>Result</th><th>Notes</th></tr></thead>
   <tbody><tr class="area-row"><td colspan="6"><span class="area">Auth</span></td></tr><tr class="case" data-id="T-01" data-plane="Tenant" data-pri="P1" data-area="Auth">
   <td class="c-id"><span class="mono">T-01</span></td>
-  <td class="c-name"><div class="nm">Sign in as owner</div><div class="steps"><b>Do:</b> Open tenant URL → owner@aigcc.group / password → Sign in</div><div class="exp"><b>Expect:</b> Lands on Overview; workspace renders</div></td>
+  <td class="c-name"><div class="nm">Sign in as owner</div><div class="steps"><b>Do:</b> Open the tenant URL → owner@cedarstone.build / password → Sign in</div><div class="exp"><b>Expect:</b> Lands on Dashboard; workspace renders as ‘Cedar &amp; Stone Builders’</div></td>
   <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-01">
@@ -651,7 +651,7 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-01" /></td>
 </tr><tr class="case" data-id="T-02" data-plane="Tenant" data-pri="P1" data-area="Auth">
   <td class="c-id"><span class="mono">T-02</span></td>
-  <td class="c-name"><div class="nm">Reject wrong password</div><div class="steps"><b>Do:</b> Wrong password → Sign in</div><div class="exp"><b>Expect:</b> Clear error; no session</div></td>
+  <td class="c-name"><div class="nm">Reject wrong password</div><div class="steps"><b>Do:</b> Wrong password → Sign in</div><div class="exp"><b>Expect:</b> Clear error; no session created</div></td>
   <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-02">
@@ -661,10 +661,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-02" /></td>
-</tr><tr class="case" data-id="T-03" data-plane="Tenant" data-pri="P1" data-area="Auth">
+</tr><tr class="case" data-id="T-03" data-plane="Tenant" data-pri="P2" data-area="Auth">
   <td class="c-id"><span class="mono">T-03</span></td>
-  <td class="c-name"><div class="nm">Session expiry → login</div><div class="steps"><b>Do:</b> Expired session → open a page</div><div class="exp"><b>Expect:</b> Auto-redirect to /login</div></td>
-  <td class="c-pri"><span class="pri pP1">P1</span></td>
+  <td class="c-name"><div class="nm">Sign-in throttling</div><div class="steps"><b>Do:</b> Fail sign-in four times inside a minute</div><div class="exp"><b>Expect:</b> Fourth attempt is rate-limited (429), not accepted</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-03">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -673,10 +673,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-03" /></td>
-</tr><tr class="case" data-id="T-04" data-plane="Tenant" data-pri="P2" data-area="Auth">
+</tr><tr class="case" data-id="T-04" data-plane="Tenant" data-pri="P1" data-area="Auth">
   <td class="c-id"><span class="mono">T-04</span></td>
-  <td class="c-name"><div class="nm">Host admin rejected</div><div class="steps"><b>Do:</b> Try host admin email on the tenant</div><div class="exp"><b>Expect:</b> Rejected (separate identity pool)</div></td>
-  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-name"><div class="nm">Session expiry → login</div><div class="steps"><b>Do:</b> Expired session → open any page</div><div class="exp"><b>Expect:</b> Auto-redirect to /login</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-04">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -685,10 +685,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-04" /></td>
-</tr><tr class="area-row"><td colspan="6"><span class="area">Overview</span></td></tr><tr class="case" data-id="T-05" data-plane="Tenant" data-pri="P1" data-area="Overview">
+</tr><tr class="case" data-id="T-05" data-plane="Tenant" data-pri="P2" data-area="Auth">
   <td class="c-id"><span class="mono">T-05</span></td>
-  <td class="c-name"><div class="nm">Greeting + KPIs</div><div class="steps"><b>Do:</b> Open Overview</div><div class="exp"><b>Expect:</b> Greets the owner; active projects / products / colleagues populated</div></td>
-  <td class="c-pri"><span class="pri pP1">P1</span></td>
+  <td class="c-name"><div class="nm">Host admin rejected</div><div class="steps"><b>Do:</b> Try a Host staff email on the tenant</div><div class="exp"><b>Expect:</b> Rejected — separate identity pool</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-05">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -697,10 +697,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-05" /></td>
-</tr><tr class="case" data-id="T-06" data-plane="Tenant" data-pri="P2" data-area="Overview">
+</tr><tr class="area-row"><td colspan="6"><span class="area">Language</span></td></tr><tr class="case" data-id="T-06" data-plane="Tenant" data-pri="P1" data-area="Language">
   <td class="c-id"><span class="mono">T-06</span></td>
-  <td class="c-name"><div class="nm">Module cards + recent projects</div><div class="steps"><b>Do:</b> Review Overview</div><div class="exp"><b>Expect:</b> Licensed modules as cards; recent projects table populated</div></td>
-  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-name"><div class="nm">Switcher sits before Search</div><div class="steps"><b>Do:</b> Look at the top bar</div><div class="exp"><b>Expect:</b> Language control is left of the Search field on every screen</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-06">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -709,9 +709,9 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-06" /></td>
-</tr><tr class="area-row"><td colspan="6"><span class="area">Projects</span></td></tr><tr class="case" data-id="T-07" data-plane="Tenant" data-pri="P1" data-area="Projects">
+</tr><tr class="case" data-id="T-07" data-plane="Tenant" data-pri="P1" data-area="Language">
   <td class="c-id"><span class="mono">T-07</span></td>
-  <td class="c-name"><div class="nm">List projects</div><div class="steps"><b>Do:</b> Open Projects</div><div class="exp"><b>Expect:</b> Portfolio listed with code, client, pursuit stage, status</div></td>
+  <td class="c-name"><div class="nm">Arabic switches to RTL</div><div class="steps"><b>Do:</b> Top bar → العربية</div><div class="exp"><b>Expect:</b> UI translates; dir=rtl; layout mirrors; digits stay Western</div></td>
   <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-07">
@@ -721,9 +721,9 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-07" /></td>
-</tr><tr class="case" data-id="T-08" data-plane="Tenant" data-pri="P1" data-area="Projects">
+</tr><tr class="case" data-id="T-08" data-plane="Tenant" data-pri="P1" data-area="Language">
   <td class="c-id"><span class="mono">T-08</span></td>
-  <td class="c-name"><div class="nm">Create project</div><div class="steps"><b>Do:</b> New project → name, code, client, pursuit → Create</div><div class="exp"><b>Expect:</b> Created on the domain&#x27;s lifecycle; opens workspace</div></td>
+  <td class="c-name"><div class="nm">French keeps LTR</div><div class="steps"><b>Do:</b> Top bar → Français</div><div class="exp"><b>Expect:</b> UI translates; direction stays LTR; no clipped labels</div></td>
   <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-08">
@@ -733,9 +733,9 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-08" /></td>
-</tr><tr class="case" data-id="T-09" data-plane="Tenant" data-pri="P2" data-area="Projects">
+</tr><tr class="case" data-id="T-09" data-plane="Tenant" data-pri="P2" data-area="Language">
   <td class="c-id"><span class="mono">T-09</span></td>
-  <td class="c-name"><div class="nm">Archive project</div><div class="steps"><b>Do:</b> Trash icon on a row → confirm</div><div class="exp"><b>Expect:</b> Removed from list; history retained; audited</div></td>
+  <td class="c-name"><div class="nm">No raw keys in any locale</div><div class="steps"><b>Do:</b> Walk the chain and Admin in all three languages</div><div class="exp"><b>Expect:</b> No untranslated identifiers such as ‘bundle.loading’ on screen</div></td>
   <td class="c-pri"><span class="pri pP2">P2</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-09">
@@ -745,9 +745,9 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-09" /></td>
-</tr><tr class="area-row"><td colspan="6"><span class="area">Pursuit</span></td></tr><tr class="case" data-id="T-10" data-plane="Tenant" data-pri="P1" data-area="Pursuit">
+</tr><tr class="case" data-id="T-10" data-plane="Tenant" data-pri="P1" data-area="Language">
   <td class="c-id"><span class="mono">T-10</span></td>
-  <td class="c-name"><div class="nm">Lifecycle stepper</div><div class="steps"><b>Do:</b> Open a project → Pursuit</div><div class="exp"><b>Expect:</b> Stepper shows stages; current stage highlighted</div></td>
+  <td class="c-name"><div class="nm">Per-user override beats workspace default</div><div class="steps"><b>Do:</b> Admin sets the workspace default; a user picks a different language</div><div class="exp"><b>Expect:</b> The user’s choice wins and survives reload; others keep the default</div></td>
   <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-10">
@@ -757,9 +757,9 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-10" /></td>
-</tr><tr class="case" data-id="T-11" data-plane="Tenant" data-pri="P1" data-area="Pursuit">
+</tr><tr class="area-row"><td colspan="6"><span class="area">Dashboard</span></td></tr><tr class="case" data-id="T-11" data-plane="Tenant" data-pri="P1" data-area="Dashboard">
   <td class="c-id"><span class="mono">T-11</span></td>
-  <td class="c-name"><div class="nm">Run autopilot</div><div class="steps"><b>Do:</b> Click Run automatically</div><div class="exp"><b>Expect:</b> Every workflow runs in order; lifecycle advances; 0 manual confirms</div></td>
+  <td class="c-name"><div class="nm">Greeting + review queue</div><div class="steps"><b>Do:</b> Open Dashboard</div><div class="exp"><b>Expect:</b> Greets the signed-in person; ‘Needs your review’ lists real pending items</div></td>
   <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-11">
@@ -769,9 +769,9 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-11" /></td>
-</tr><tr class="case" data-id="T-12" data-plane="Tenant" data-pri="P2" data-area="Pursuit">
+</tr><tr class="case" data-id="T-12" data-plane="Tenant" data-pri="P2" data-area="Dashboard">
   <td class="c-id"><span class="mono">T-12</span></td>
-  <td class="c-name"><div class="nm">What needs you</div><div class="steps"><b>Do:</b> On a non-autopilot project</div><div class="exp"><b>Expect:</b> &#x27;What needs you&#x27; + Next step show pending items to confirm</div></td>
+  <td class="c-name"><div class="nm">Chain bundles hydrate progressively</div><div class="steps"><b>Do:</b> Open Dashboard on a workspace with several projects</div><div class="exp"><b>Expect:</b> Cards fill in as each project resolves — no all-or-nothing skeleton</div></td>
   <td class="c-pri"><span class="pri pP2">P2</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-12">
@@ -781,10 +781,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-12" /></td>
-</tr><tr class="area-row"><td colspan="6"><span class="area">Modules</span></td></tr><tr class="case" data-id="T-13" data-plane="Tenant" data-pri="P1" data-area="Modules">
+</tr><tr class="case" data-id="T-13" data-plane="Tenant" data-pri="P2" data-area="Dashboard">
   <td class="c-id"><span class="mono">T-13</span></td>
-  <td class="c-name"><div class="nm">Module grid</div><div class="steps"><b>Do:</b> Open Modules</div><div class="exp"><b>Expect:</b> All licensed modules shown with friendly labels (not raw keys)</div></td>
-  <td class="c-pri"><span class="pri pP1">P1</span></td>
+  <td class="c-name"><div class="nm">Command palette</div><div class="steps"><b>Do:</b> ⌘K / Ctrl-K → type a screen name</div><div class="exp"><b>Expect:</b> Palette opens and navigates there</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-13">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -793,9 +793,9 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-13" /></td>
-</tr><tr class="case" data-id="T-14" data-plane="Tenant" data-pri="P1" data-area="Modules">
+</tr><tr class="area-row"><td colspan="6"><span class="area">Projects</span></td></tr><tr class="case" data-id="T-14" data-plane="Tenant" data-pri="P1" data-area="Projects">
   <td class="c-id"><span class="mono">T-14</span></td>
-  <td class="c-name"><div class="nm">Module workspace + start</div><div class="steps"><b>Do:</b> Open a module → Start a workflow</div><div class="exp"><b>Expect:</b> Run starts; outputs table populates for that module</div></td>
+  <td class="c-name"><div class="nm">List projects</div><div class="steps"><b>Do:</b> Open Projects</div><div class="exp"><b>Expect:</b> Portfolio listed with code, client, chain stage, status</div></td>
   <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-14">
@@ -805,10 +805,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-14" /></td>
-</tr><tr class="area-row"><td colspan="6"><span class="area">Runs</span></td></tr><tr class="case" data-id="T-15" data-plane="Tenant" data-pri="P2" data-area="Runs">
+</tr><tr class="case" data-id="T-15" data-plane="Tenant" data-pri="P1" data-area="Projects">
   <td class="c-id"><span class="mono">T-15</span></td>
-  <td class="c-name"><div class="nm">Runs list</div><div class="steps"><b>Do:</b> Open Runs</div><div class="exp"><b>Expect:</b> Runs listed by friendly workflow name + status</div></td>
-  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-name"><div class="nm">Create project</div><div class="steps"><b>Do:</b> New project → name, code, client → Create</div><div class="exp"><b>Expect:</b> Created on the domain’s lifecycle; opens the workspace</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-15">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -817,9 +817,9 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-15" /></td>
-</tr><tr class="case" data-id="T-16" data-plane="Tenant" data-pri="P2" data-area="Runs">
+</tr><tr class="case" data-id="T-16" data-plane="Tenant" data-pri="P2" data-area="Projects">
   <td class="c-id"><span class="mono">T-16</span></td>
-  <td class="c-name"><div class="nm">Run detail timeline</div><div class="steps"><b>Do:</b> Open a run</div><div class="exp"><b>Expect:</b> Steps timeline with gates/map; statuses correct</div></td>
+  <td class="c-name"><div class="nm">Archive project</div><div class="steps"><b>Do:</b> Trash icon on a row → confirm</div><div class="exp"><b>Expect:</b> Removed from the list; history retained; audited</div></td>
   <td class="c-pri"><span class="pri pP2">P2</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-16">
@@ -829,10 +829,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-16" /></td>
-</tr><tr class="case" data-id="T-17" data-plane="Tenant" data-pri="P2" data-area="Runs">
+</tr><tr class="area-row"><td colspan="6"><span class="area">Chain</span></td></tr><tr class="case" data-id="T-17" data-plane="Tenant" data-pri="P1" data-area="Chain">
   <td class="c-id"><span class="mono">T-17</span></td>
-  <td class="c-name"><div class="nm">Re-run stale</div><div class="steps"><b>Do:</b> Edit a confirmed artifact → Re-run stale</div><div class="exp"><b>Expect:</b> Only stale-producing steps re-run; outputs superseded</div></td>
-  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-name"><div class="nm">Chain progress on the project</div><div class="steps"><b>Do:</b> Open a project</div><div class="exp"><b>Expect:</b> ‘Chain progress’ shows Documents → Tender → Drawings → Specs → BOQ → Estimate → Schedule → Procurement with per-stage status</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-17">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -841,9 +841,9 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-17" /></td>
-</tr><tr class="area-row"><td colspan="6"><span class="area">Review</span></td></tr><tr class="case" data-id="T-18" data-plane="Tenant" data-pri="P1" data-area="Review">
+</tr><tr class="case" data-id="T-18" data-plane="Tenant" data-pri="P1" data-area="Chain">
   <td class="c-id"><span class="mono">T-18</span></td>
-  <td class="c-name"><div class="nm">Review queue</div><div class="steps"><b>Do:</b> Open Review (on a project with pending)</div><div class="exp"><b>Expect:</b> Pending proposals listed with type label + agent</div></td>
+  <td class="c-name"><div class="nm">Stage tabs open their own surface</div><div class="steps"><b>Do:</b> Click each stage tab in turn</div><div class="exp"><b>Expect:</b> Each renders its purpose-built surface, not a generic table; none errors</div></td>
   <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-18">
@@ -853,10 +853,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-18" /></td>
-</tr><tr class="case" data-id="T-19" data-plane="Tenant" data-pri="P1" data-area="Review">
+</tr><tr class="case" data-id="T-19" data-plane="Tenant" data-pri="P2" data-area="Chain">
   <td class="c-id"><span class="mono">T-19</span></td>
-  <td class="c-name"><div class="nm">Confirm proposal</div><div class="steps"><b>Do:</b> Confirm a pending artifact</div><div class="exp"><b>Expect:</b> Confirmed; gate resumes; lifecycle may advance</div></td>
-  <td class="c-pri"><span class="pri pP1">P1</span></td>
+  <td class="c-name"><div class="nm">Stage status is honest</div><div class="steps"><b>Do:</b> Compare a stage chip against its artifacts</div><div class="exp"><b>Expect:</b> Complete / Needs review / Processing / Pending match the underlying records</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-19">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -865,10 +865,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-19" /></td>
-</tr><tr class="case" data-id="T-20" data-plane="Tenant" data-pri="P2" data-area="Review">
+</tr><tr class="area-row"><td colspan="6"><span class="area">Documents</span></td></tr><tr class="case" data-id="T-20" data-plane="Tenant" data-pri="P1" data-area="Documents">
   <td class="c-id"><span class="mono">T-20</span></td>
-  <td class="c-name"><div class="nm">Reject / Edit</div><div class="steps"><b>Do:</b> Reject one; edit another</div><div class="exp"><b>Expect:</b> Reject terminal; edit creates a new version + marks downstream stale</div></td>
-  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-name"><div class="nm">Upload + ingest</div><div class="steps"><b>Do:</b> Documents → upload a tender PDF</div><div class="exp"><b>Expect:</b> File ingested; friendly type and status; page text extracted</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-20">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -877,10 +877,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-20" /></td>
-</tr><tr class="case" data-id="T-21" data-plane="Tenant" data-pri="P3" data-area="Review">
+</tr><tr class="case" data-id="T-21" data-plane="Tenant" data-pri="P1" data-area="Documents">
   <td class="c-id"><span class="mono">T-21</span></td>
-  <td class="c-name"><div class="nm">Inspect payload</div><div class="steps"><b>Do:</b> Click Inspect</div><div class="exp"><b>Expect:</b> Readable key/value payload (not a raw JSON dump)</div></td>
-  <td class="c-pri"><span class="pri pP3">P3</span></td>
+  <td class="c-name"><div class="nm">Document text reaches the agents</div><div class="steps"><b>Do:</b> Run a stage that reads documents after uploading</div><div class="exp"><b>Expect:</b> Output references the uploaded content — not generic filler</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-21">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -889,9 +889,9 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-21" /></td>
-</tr><tr class="area-row"><td colspan="6"><span class="area">Trace</span></td></tr><tr class="case" data-id="T-22" data-plane="Tenant" data-pri="P1" data-area="Trace">
+</tr><tr class="area-row"><td colspan="6"><span class="area">BIM Studio</span></td></tr><tr class="case" data-id="T-22" data-plane="Tenant" data-pri="P1" data-area="BIM Studio">
   <td class="c-id"><span class="mono">T-22</span></td>
-  <td class="c-name"><div class="nm">Artifact graph</div><div class="steps"><b>Do:</b> Open Trace</div><div class="exp"><b>Expect:</b> Artifacts grouped by type with human labels (not bare UUIDs)</div></td>
+  <td class="c-name"><div class="nm">All disciplines present</div><div class="steps"><b>Do:</b> Drawings → BIM Studio</div><div class="exp"><b>Expect:</b> Ribbon shows Architecture, Structural, Civil, Electrical, Mechanical, Plumbing, Fire with their catalog items</div></td>
   <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-22">
@@ -901,10 +901,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-22" /></td>
-</tr><tr class="case" data-id="T-23" data-plane="Tenant" data-pri="P2" data-area="Trace">
+</tr><tr class="case" data-id="T-23" data-plane="Tenant" data-pri="P1" data-area="BIM Studio">
   <td class="c-id"><span class="mono">T-23</span></td>
-  <td class="c-name"><div class="nm">Lineage detail</div><div class="steps"><b>Do:</b> Select an artifact</div><div class="exp"><b>Expect:</b> Provenance + producing job (model) + audit trail shown</div></td>
-  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-name"><div class="nm">Place an element</div><div class="steps"><b>Do:</b> Pick a catalog item, e.g. Wall</div><div class="exp"><b>Expect:</b> Element is added, drawn on the plan, and counted in the legend</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-23">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -913,9 +913,9 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-23" /></td>
-</tr><tr class="case" data-id="T-24" data-plane="Tenant" data-pri="P1" data-area="Trace">
+</tr><tr class="case" data-id="T-24" data-plane="Tenant" data-pri="P1" data-area="BIM Studio">
   <td class="c-id"><span class="mono">T-24</span></td>
-  <td class="c-name"><div class="nm">Verify audit chain</div><div class="steps"><b>Do:</b> Click Verify audit chain</div><div class="exp"><b>Expect:</b> Reports chain OK</div></td>
+  <td class="c-name"><div class="nm">Walls are legible on the plan</div><div class="steps"><b>Do:</b> Draw walls and partitions</div><div class="exp"><b>Expect:</b> They read as dark bands against the slab — not invisible on the sheet</div></td>
   <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-24">
@@ -925,9 +925,9 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-24" /></td>
-</tr><tr class="area-row"><td colspan="6"><span class="area">Colleagues</span></td></tr><tr class="case" data-id="T-25" data-plane="Tenant" data-pri="P2" data-area="Colleagues">
+</tr><tr class="case" data-id="T-25" data-plane="Tenant" data-pri="P2" data-area="BIM Studio">
   <td class="c-id"><span class="mono">T-25</span></td>
-  <td class="c-name"><div class="nm">Personas roster</div><div class="steps"><b>Do:</b> Open Colleagues</div><div class="exp"><b>Expect:</b> Personas listed with names (not blank); default marked</div></td>
+  <td class="c-name"><div class="nm">Undo / redo</div><div class="steps"><b>Do:</b> Ctrl-Z then Ctrl-Shift-Z</div><div class="exp"><b>Expect:</b> Last command reverses and reapplies</div></td>
   <td class="c-pri"><span class="pri pP2">P2</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-25">
@@ -937,10 +937,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-25" /></td>
-</tr><tr class="case" data-id="T-26" data-plane="Tenant" data-pri="P2" data-area="Colleagues">
+</tr><tr class="case" data-id="T-26" data-plane="Tenant" data-pri="P1" data-area="BIM Studio">
   <td class="c-id"><span class="mono">T-26</span></td>
-  <td class="c-name"><div class="nm">Chat with a colleague</div><div class="steps"><b>Do:</b> Send a message</div><div class="exp"><b>Expect:</b> Assistant replies; scoped review lens shows in-scope items</div></td>
-  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-name"><div class="nm">Save with concurrency check</div><div class="steps"><b>Do:</b> Save; then save again from a stale second tab</div><div class="exp"><b>Expect:</b> First save succeeds; the stale one is refused, not silently overwritten</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-26">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -949,9 +949,9 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-26" /></td>
-</tr><tr class="area-row"><td colspan="6"><span class="area">Documents</span></td></tr><tr class="case" data-id="T-27" data-plane="Tenant" data-pri="P2" data-area="Documents">
+</tr><tr class="case" data-id="T-27" data-plane="Tenant" data-pri="P2" data-area="BIM Studio">
   <td class="c-id"><span class="mono">T-27</span></td>
-  <td class="c-name"><div class="nm">Upload + ingest</div><div class="steps"><b>Do:</b> Upload a PDF</div><div class="exp"><b>Expect:</b> File ingested; appears with friendly type + status</div></td>
+  <td class="c-name"><div class="nm">One canvas only</div><div class="steps"><b>Do:</b> Scroll the Drawings stage</div><div class="exp"><b>Expect:</b> BIM Studio is the only drawing canvas; measurements appear as a register below</div></td>
   <td class="c-pri"><span class="pri pP2">P2</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-27">
@@ -961,10 +961,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-27" /></td>
-</tr><tr class="area-row"><td colspan="6"><span class="area">Standards</span></td></tr><tr class="case" data-id="T-28" data-plane="Tenant" data-pri="P2" data-area="Standards">
+</tr><tr class="area-row"><td colspan="6"><span class="area">BIM assistant</span></td></tr><tr class="case" data-id="T-28" data-plane="Tenant" data-pri="P1" data-area="BIM assistant">
   <td class="c-id"><span class="mono">T-28</span></td>
-  <td class="c-name"><div class="nm">Rules + validate</div><div class="steps"><b>Do:</b> Open Standards → Validate</div><div class="exp"><b>Expect:</b> Rules listed; violations (if any) shown as readable fields</div></td>
-  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-name"><div class="nm">Draw from a prompt</div><div class="steps"><b>Do:</b> Type ‘Draw a 12 by 8 m clinic with a corridor, then doors and windows’ → Draw</div><div class="exp"><b>Expect:</b> Model appears: closed external walls, two corridor partitions, hosted doors and windows</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-28">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -973,10 +973,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-28" /></td>
-</tr><tr class="area-row"><td colspan="6"><span class="area">Assistant</span></td></tr><tr class="case" data-id="T-29" data-plane="Tenant" data-pri="P2" data-area="Assistant">
+</tr><tr class="case" data-id="T-29" data-plane="Tenant" data-pri="P1" data-area="BIM assistant">
   <td class="c-id"><span class="mono">T-29</span></td>
-  <td class="c-name"><div class="nm">Current domain</div><div class="steps"><b>Do:</b> Open Assistant</div><div class="exp"><b>Expect:</b> Shows workspace, assistant name, module count</div></td>
-  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-name"><div class="nm">Reports a missing API key plainly</div><div class="steps"><b>Do:</b> Unset ANTHROPIC_API_KEY on the worker → Draw</div><div class="exp"><b>Expect:</b> Clear message that the key is not set — no silent no-op, no stack trace</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-29">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -985,9 +985,9 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-29" /></td>
-</tr><tr class="case" data-id="T-30" data-plane="Tenant" data-pri="P2" data-area="Assistant">
+</tr><tr class="case" data-id="T-30" data-plane="Tenant" data-pri="P2" data-area="BIM assistant">
   <td class="c-id"><span class="mono">T-30</span></td>
-  <td class="c-name"><div class="nm">Tailor domain</div><div class="steps"><b>Do:</b> Rename assistant / a module label → Save</div><div class="exp"><b>Expect:</b> Change persists and re-projects (visible in Modules)</div></td>
+  <td class="c-name"><div class="nm">Specialist scoping</div><div class="steps"><b>Do:</b> Choose Electrical → ask for lighting</div><div class="exp"><b>Expect:</b> Only electrical elements are added; it cannot clear the model or place another discipline</div></td>
   <td class="c-pri"><span class="pri pP2">P2</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-30">
@@ -997,10 +997,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-30" /></td>
-</tr><tr class="case" data-id="T-31" data-plane="Tenant" data-pri="P3" data-area="Assistant">
+</tr><tr class="case" data-id="T-31" data-plane="Tenant" data-pri="P2" data-area="BIM assistant">
   <td class="c-id"><span class="mono">T-31</span></td>
-  <td class="c-name"><div class="nm">Industry templates</div><div class="steps"><b>Do:</b> Review &#x27;Choose your industry&#x27;</div><div class="exp"><b>Expect:</b> Construction template shown (focused vertical)</div></td>
-  <td class="c-pri"><span class="pri pP3">P3</span></td>
+  <td class="c-name"><div class="nm">Nothing saved on a failed run</div><div class="steps"><b>Do:</b> Interrupt a draw mid-way</div><div class="exp"><b>Expect:</b> The model is unchanged — commands persist once, at the end</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-31">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -1009,10 +1009,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-31" /></td>
-</tr><tr class="area-row"><td colspan="6"><span class="area">Library</span></td></tr><tr class="case" data-id="T-32" data-plane="Tenant" data-pri="P2" data-area="Library">
+</tr><tr class="case" data-id="T-32" data-plane="Tenant" data-pri="P3" data-area="BIM assistant">
   <td class="c-id"><span class="mono">T-32</span></td>
-  <td class="c-name"><div class="nm">Add entry</div><div class="steps"><b>Do:</b> Add entry → collection + fields → Add</div><div class="exp"><b>Expect:</b> Entry appears grouped by collection</div></td>
-  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-name"><div class="nm">Audited</div><div class="steps"><b>Do:</b> Draw, then open Trace</div><div class="exp"><b>Expect:</b> A bim.agent entry records the specialist and instruction</div></td>
+  <td class="c-pri"><span class="pri pP3">P3</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-32">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -1021,10 +1021,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-32" /></td>
-</tr><tr class="case" data-id="T-33" data-plane="Tenant" data-pri="P2" data-area="Library">
+</tr><tr class="area-row"><td colspan="6"><span class="area">Takeoff</span></td></tr><tr class="case" data-id="T-33" data-plane="Tenant" data-pri="P1" data-area="Takeoff">
   <td class="c-id"><span class="mono">T-33</span></td>
-  <td class="c-name"><div class="nm">Edit (version)</div><div class="steps"><b>Do:</b> Edit an entry → Save</div><div class="exp"><b>Expect:</b> Version increments; new values shown; history kept</div></td>
-  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-name"><div class="nm">Measure into BOQ</div><div class="steps"><b>Do:</b> BIM Studio → Measure into BOQ</div><div class="exp"><b>Expect:</b> One drawing_measurement per measured item, as source ‘human’ (no review needed)</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-33">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -1033,10 +1033,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-33" /></td>
-</tr><tr class="case" data-id="T-34" data-plane="Tenant" data-pri="P3" data-area="Library">
+</tr><tr class="case" data-id="T-34" data-plane="Tenant" data-pri="P1" data-area="Takeoff">
   <td class="c-id"><span class="mono">T-34</span></td>
-  <td class="c-name"><div class="nm">Remove entry</div><div class="steps"><b>Do:</b> Remove an entry</div><div class="exp"><b>Expect:</b> Dropped from active list (soft)</div></td>
-  <td class="c-pri"><span class="pri pP3">P3</span></td>
+  <td class="c-name"><div class="nm">Quantities net openings</div><div class="steps"><b>Do:</b> Check a wall carrying windows</div><div class="exp"><b>Expect:</b> Elevational area = length × height less each opening; the working shows in Method</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-34">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -1045,10 +1045,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-34" /></td>
-</tr><tr class="area-row"><td colspan="6"><span class="area">Users &amp; roles</span></td></tr><tr class="case" data-id="T-35" data-plane="Tenant" data-pri="P1" data-area="Users &amp; roles">
+</tr><tr class="case" data-id="T-35" data-plane="Tenant" data-pri="P2" data-area="Takeoff">
   <td class="c-id"><span class="mono">T-35</span></td>
-  <td class="c-name"><div class="nm">People + roles</div><div class="steps"><b>Do:</b> Open Users &amp; roles</div><div class="exp"><b>Expect:</b> Team + roles listed; tiers shown as labels</div></td>
-  <td class="c-pri"><span class="pri pP1">P1</span></td>
+  <td class="c-name"><div class="nm">Re-measuring supersedes</div><div class="steps"><b>Do:</b> Edit the model → Measure again</div><div class="exp"><b>Expect:</b> Previous BIM-derived measurements are superseded, not duplicated</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-35">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -1057,9 +1057,9 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-35" /></td>
-</tr><tr class="case" data-id="T-36" data-plane="Tenant" data-pri="P1" data-area="Users &amp; roles">
+</tr><tr class="case" data-id="T-36" data-plane="Tenant" data-pri="P1" data-area="Takeoff">
   <td class="c-id"><span class="mono">T-36</span></td>
-  <td class="c-name"><div class="nm">Add user</div><div class="steps"><b>Do:</b> Add user → email, role → Add</div><div class="exp"><b>Expect:</b> User added; temp password shown in a copyable panel</div></td>
+  <td class="c-name"><div class="nm">Takeoff register</div><div class="steps"><b>Do:</b> Scroll below the Studio</div><div class="exp"><b>Expect:</b> Measurements listed with quantity, confidence and status; any row can be opened</div></td>
   <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-36">
@@ -1069,10 +1069,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-36" /></td>
-</tr><tr class="case" data-id="T-37" data-plane="Tenant" data-pri="P2" data-area="Users &amp; roles">
+</tr><tr class="area-row"><td colspan="6"><span class="area">Stages</span></td></tr><tr class="case" data-id="T-37" data-plane="Tenant" data-pri="P1" data-area="Stages">
   <td class="c-id"><span class="mono">T-37</span></td>
-  <td class="c-name"><div class="nm">Assign roles</div><div class="steps"><b>Do:</b> Roles → toggle → Save</div><div class="exp"><b>Expect:</b> User&#x27;s roles update</div></td>
-  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-name"><div class="nm">Tender surface</div><div class="steps"><b>Do:</b> Open Tender</div><div class="exp"><b>Expect:</b> Scope, dates and conditions readable; proposals reviewable in place</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-37">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -1081,10 +1081,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-37" /></td>
-</tr><tr class="case" data-id="T-38" data-plane="Tenant" data-pri="P2" data-area="Users &amp; roles">
+</tr><tr class="case" data-id="T-38" data-plane="Tenant" data-pri="P1" data-area="Stages">
   <td class="c-id"><span class="mono">T-38</span></td>
-  <td class="c-name"><div class="nm">Activate/Deactivate</div><div class="steps"><b>Do:</b> Deactivate then activate a user</div><div class="exp"><b>Expect:</b> Status flips</div></td>
-  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-name"><div class="nm">Specs surface</div><div class="steps"><b>Do:</b> Open Specs</div><div class="exp"><b>Expect:</b> Specification clauses grouped and traceable to their document page</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-38">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -1093,10 +1093,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-38" /></td>
-</tr><tr class="case" data-id="T-39" data-plane="Tenant" data-pri="P2" data-area="Users &amp; roles">
+</tr><tr class="case" data-id="T-39" data-plane="Tenant" data-pri="P1" data-area="Stages">
   <td class="c-id"><span class="mono">T-39</span></td>
-  <td class="c-name"><div class="nm">Custom role CRUD</div><div class="steps"><b>Do:</b> Create role → permissions → Save; edit; delete</div><div class="exp"><b>Expect:</b> Custom role works; system roles protected (read-only)</div></td>
-  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-name"><div class="nm">BOQ surface</div><div class="steps"><b>Do:</b> Open BOQ</div><div class="exp"><b>Expect:</b> Items grouped by division with normalised units; quantities trace to measurements</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-39">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -1105,10 +1105,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-39" /></td>
-</tr><tr class="area-row"><td colspan="6"><span class="area">Settings</span></td></tr><tr class="case" data-id="T-40" data-plane="Tenant" data-pri="P2" data-area="Settings">
+</tr><tr class="case" data-id="T-40" data-plane="Tenant" data-pri="P1" data-area="Stages">
   <td class="c-id"><span class="mono">T-40</span></td>
-  <td class="c-name"><div class="nm">Plan + edition</div><div class="steps"><b>Do:</b> Open Settings &amp; plan</div><div class="exp"><b>Expect:</b> Edition, seats, licensed products, features shown; no dev URLs</div></td>
-  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-name"><div class="nm">Estimate surface</div><div class="steps"><b>Do:</b> Open Estimate</div><div class="exp"><b>Expect:</b> Rate × quantity = amount on every line; totals foot correctly</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-40">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -1117,10 +1117,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-40" /></td>
-</tr><tr class="area-row"><td colspan="6"><span class="area">UX/Responsive</span></td></tr><tr class="case" data-id="T-41" data-plane="Tenant" data-pri="P2" data-area="UX/Responsive">
+</tr><tr class="case" data-id="T-41" data-plane="Tenant" data-pri="P1" data-area="Stages">
   <td class="c-id"><span class="mono">T-41</span></td>
-  <td class="c-name"><div class="nm">Collapse + mobile</div><div class="steps"><b>Do:</b> Toggle sidebar; shrink &lt; 860px</div><div class="exp"><b>Expect:</b> Rail collapse; off-canvas drawer; tables scroll; drawers full-width</div></td>
-  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-name"><div class="nm">Schedule surface</div><div class="steps"><b>Do:</b> Open Schedule</div><div class="exp"><b>Expect:</b> Activities sequenced with durations derived from quantities and output rates</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-41">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -1129,10 +1129,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-41" /></td>
-</tr><tr class="area-row"><td colspan="6"><span class="area">UX/Copy</span></td></tr><tr class="case" data-id="T-42" data-plane="Tenant" data-pri="P1" data-area="UX/Copy">
+</tr><tr class="case" data-id="T-42" data-plane="Tenant" data-pri="P2" data-area="Stages">
   <td class="c-id"><span class="mono">T-42</span></td>
-  <td class="c-name"><div class="nm">No placeholder/dev copy</div><div class="steps"><b>Do:</b> Skim every page</div><div class="exp"><b>Expect:</b> No &#x27;Riverside&#x27;, §refs, &#x27;walking-skeleton&#x27;, raw keys as titles</div></td>
-  <td class="c-pri"><span class="pri pP1">P1</span></td>
+  <td class="c-name"><div class="nm">Procurement surface</div><div class="steps"><b>Do:</b> Open Procurement</div><div class="exp"><b>Expect:</b> Packages listed against their BOQ items</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-42">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -1141,9 +1141,9 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-42" /></td>
-</tr><tr class="area-row"><td colspan="6"><span class="area">Data</span></td></tr><tr class="case" data-id="T-43" data-plane="Tenant" data-pri="P1" data-area="Data">
+</tr><tr class="area-row"><td colspan="6"><span class="area">Review</span></td></tr><tr class="case" data-id="T-43" data-plane="Tenant" data-pri="P1" data-area="Review">
   <td class="c-id"><span class="mono">T-43</span></td>
-  <td class="c-name"><div class="nm">Tenant isolation</div><div class="steps"><b>Do:</b> Confirm only this tenant&#x27;s data shows</div><div class="exp"><b>Expect:</b> No cross-tenant projects/artifacts/users visible</div></td>
+  <td class="c-name"><div class="nm">Confirm on the producing stage</div><div class="steps"><b>Do:</b> Accept a pending proposal from its own stage tab</div><div class="exp"><b>Expect:</b> Confirmed there — no separate Review screen; gate resumes</div></td>
   <td class="c-pri"><span class="pri pP1">P1</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-43">
@@ -1153,10 +1153,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-43" /></td>
-</tr><tr class="case" data-id="T-44" data-plane="Tenant" data-pri="P1" data-area="Data">
+</tr><tr class="case" data-id="T-44" data-plane="Tenant" data-pri="P2" data-area="Review">
   <td class="c-id"><span class="mono">T-44</span></td>
-  <td class="c-name"><div class="nm">Audit chain integrity</div><div class="steps"><b>Do:</b> Run through a pursuit → Verify</div><div class="exp"><b>Expect:</b> Chain verifies OK after many operations</div></td>
-  <td class="c-pri"><span class="pri pP1">P1</span></td>
+  <td class="c-name"><div class="nm">Edit marks downstream stale</div><div class="steps"><b>Do:</b> Correct a confirmed quantity</div><div class="exp"><b>Expect:</b> New version created; dependent artifacts flagged stale</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-44">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -1165,10 +1165,10 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-44" /></td>
-</tr><tr class="case" data-id="T-45" data-plane="Tenant" data-pri="P1" data-area="Data">
+</tr><tr class="case" data-id="T-45" data-plane="Tenant" data-pri="P2" data-area="Review">
   <td class="c-id"><span class="mono">T-45</span></td>
-  <td class="c-name"><div class="nm">Autopilot completeness</div><div class="steps"><b>Do:</b> Autopilot a fresh project end-to-end</div><div class="exp"><b>Expect:</b> Reaches terminal/clarifying; artifacts populated; 0 pending left</div></td>
-  <td class="c-pri"><span class="pri pP1">P1</span></td>
+  <td class="c-name"><div class="nm">Accept all high-confidence</div><div class="steps"><b>Do:</b> Use Accept all where offered</div><div class="exp"><b>Expect:</b> Only high-confidence proposals are confirmed; flagged ones remain</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
   <td class="c-status">
      <div class="seg" role="group" aria-label="Result for T-45">
        <button class="s pass" data-v="pass" title="Pass">Pass</button>
@@ -1177,6 +1177,366 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
      </div>
   </td>
   <td class="c-note"><input class="note" placeholder="notes…" data-id="T-45" /></td>
+</tr><tr class="area-row"><td colspan="6"><span class="area">Runs</span></td></tr><tr class="case" data-id="T-46" data-plane="Tenant" data-pri="P2" data-area="Runs">
+  <td class="c-id"><span class="mono">T-46</span></td>
+  <td class="c-name"><div class="nm">Runs list</div><div class="steps"><b>Do:</b> Project → Runs</div><div class="exp"><b>Expect:</b> Runs listed by friendly workflow name and status</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-46">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-46" /></td>
+</tr><tr class="case" data-id="T-47" data-plane="Tenant" data-pri="P1" data-area="Runs">
+  <td class="c-id"><span class="mono">T-47</span></td>
+  <td class="c-name"><div class="nm">Run detail timeline</div><div class="steps"><b>Do:</b> Open a run</div><div class="exp"><b>Expect:</b> Step timeline with gates; statuses correct; pauses at the scope gate</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-47">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-47" /></td>
+</tr><tr class="case" data-id="T-48" data-plane="Tenant" data-pri="P2" data-area="Runs">
+  <td class="c-id"><span class="mono">T-48</span></td>
+  <td class="c-name"><div class="nm">Real agents produce real output</div><div class="steps"><b>Do:</b> With a key set, run the chain on an uploaded tender</div><div class="exp"><b>Expect:</b> Each step takes real model time and its output differs per project — not identical stub text</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-48">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-48" /></td>
+</tr><tr class="case" data-id="T-49" data-plane="Tenant" data-pri="P2" data-area="Runs">
+  <td class="c-id"><span class="mono">T-49</span></td>
+  <td class="c-name"><div class="nm">Re-run stale</div><div class="steps"><b>Do:</b> Edit a confirmed artifact → Re-run stale</div><div class="exp"><b>Expect:</b> Only stale-producing steps re-run; outputs superseded</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-49">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-49" /></td>
+</tr><tr class="area-row"><td colspan="6"><span class="area">Copilot</span></td></tr><tr class="case" data-id="T-50" data-plane="Tenant" data-pri="P2" data-area="Copilot">
+  <td class="c-id"><span class="mono">T-50</span></td>
+  <td class="c-name"><div class="nm">Workspace Copilot</div><div class="steps"><b>Do:</b> Sidebar → Copilot</div><div class="exp"><b>Expect:</b> Answers with workspace context</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-50">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-50" /></td>
+</tr><tr class="case" data-id="T-51" data-plane="Tenant" data-pri="P1" data-area="Copilot">
+  <td class="c-id"><span class="mono">T-51</span></td>
+  <td class="c-name"><div class="nm">Per-project Copilot</div><div class="steps"><b>Do:</b> Open a project → Ask Copilot</div><div class="exp"><b>Expect:</b> Answers from that project’s own records; does not leak another project’s data</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-51">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-51" /></td>
+</tr><tr class="area-row"><td colspan="6"><span class="area">Trace</span></td></tr><tr class="case" data-id="T-52" data-plane="Tenant" data-pri="P1" data-area="Trace">
+  <td class="c-id"><span class="mono">T-52</span></td>
+  <td class="c-name"><div class="nm">Artifact graph</div><div class="steps"><b>Do:</b> Project → Trace</div><div class="exp"><b>Expect:</b> Artifacts grouped by type with human labels, not bare UUIDs</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-52">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-52" /></td>
+</tr><tr class="case" data-id="T-53" data-plane="Tenant" data-pri="P2" data-area="Trace">
+  <td class="c-id"><span class="mono">T-53</span></td>
+  <td class="c-name"><div class="nm">Lineage detail</div><div class="steps"><b>Do:</b> Select an artifact</div><div class="exp"><b>Expect:</b> Provenance, producing job and model, and audit trail shown</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-53">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-53" /></td>
+</tr><tr class="case" data-id="T-54" data-plane="Tenant" data-pri="P1" data-area="Trace">
+  <td class="c-id"><span class="mono">T-54</span></td>
+  <td class="c-name"><div class="nm">Verify audit chain</div><div class="steps"><b>Do:</b> Click Verify audit chain</div><div class="exp"><b>Expect:</b> Reports the hash chain intact</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-54">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-54" /></td>
+</tr><tr class="area-row"><td colspan="6"><span class="area">Colleagues</span></td></tr><tr class="case" data-id="T-55" data-plane="Tenant" data-pri="P2" data-area="Colleagues">
+  <td class="c-id"><span class="mono">T-55</span></td>
+  <td class="c-name"><div class="nm">Personas roster</div><div class="steps"><b>Do:</b> Project → Colleagues</div><div class="exp"><b>Expect:</b> Personas listed with names; default marked</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-55">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-55" /></td>
+</tr><tr class="case" data-id="T-56" data-plane="Tenant" data-pri="P2" data-area="Colleagues">
+  <td class="c-id"><span class="mono">T-56</span></td>
+  <td class="c-name"><div class="nm">Chat with a colleague</div><div class="steps"><b>Do:</b> Send a message</div><div class="exp"><b>Expect:</b> Replies in scope; the review lens shows only in-scope items</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-56">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-56" /></td>
+</tr><tr class="area-row"><td colspan="6"><span class="area">Standards</span></td></tr><tr class="case" data-id="T-57" data-plane="Tenant" data-pri="P2" data-area="Standards">
+  <td class="c-id"><span class="mono">T-57</span></td>
+  <td class="c-name"><div class="nm">Rules + validate</div><div class="steps"><b>Do:</b> Project → Standards → Validate</div><div class="exp"><b>Expect:</b> Rules listed; violations shown as readable fields</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-57">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-57" /></td>
+</tr><tr class="area-row"><td colspan="6"><span class="area">Library</span></td></tr><tr class="case" data-id="T-58" data-plane="Tenant" data-pri="P2" data-area="Library">
+  <td class="c-id"><span class="mono">T-58</span></td>
+  <td class="c-name"><div class="nm">Add entry</div><div class="steps"><b>Do:</b> Library → Add entry → collection + fields</div><div class="exp"><b>Expect:</b> Entry appears grouped by collection</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-58">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-58" /></td>
+</tr><tr class="case" data-id="T-59" data-plane="Tenant" data-pri="P2" data-area="Library">
+  <td class="c-id"><span class="mono">T-59</span></td>
+  <td class="c-name"><div class="nm">Edit creates a version</div><div class="steps"><b>Do:</b> Edit an entry → Save</div><div class="exp"><b>Expect:</b> Version increments; history kept</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-59">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-59" /></td>
+</tr><tr class="case" data-id="T-60" data-plane="Tenant" data-pri="P2" data-area="Library">
+  <td class="c-id"><span class="mono">T-60</span></td>
+  <td class="c-name"><div class="nm">Rate book reaches the estimator</div><div class="steps"><b>Do:</b> Add a rate, then run Estimate</div><div class="exp"><b>Expect:</b> The estimate uses library rates rather than inventing them</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-60">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-60" /></td>
+</tr><tr class="area-row"><td colspan="6"><span class="area">Admin</span></td></tr><tr class="case" data-id="T-61" data-plane="Tenant" data-pri="P1" data-area="Admin">
+  <td class="c-id"><span class="mono">T-61</span></td>
+  <td class="c-name"><div class="nm">Team + roles</div><div class="steps"><b>Do:</b> Admin → Team</div><div class="exp"><b>Expect:</b> People and roles listed; tiers shown as labels</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-61">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-61" /></td>
+</tr><tr class="case" data-id="T-62" data-plane="Tenant" data-pri="P1" data-area="Admin">
+  <td class="c-id"><span class="mono">T-62</span></td>
+  <td class="c-name"><div class="nm">Add user</div><div class="steps"><b>Do:</b> Add user → email, role → Add</div><div class="exp"><b>Expect:</b> User added; temporary password shown in a copyable panel</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-62">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-62" /></td>
+</tr><tr class="case" data-id="T-63" data-plane="Tenant" data-pri="P2" data-area="Admin">
+  <td class="c-id"><span class="mono">T-63</span></td>
+  <td class="c-name"><div class="nm">Custom role CRUD</div><div class="steps"><b>Do:</b> Create a role → permissions → Save; edit; delete</div><div class="exp"><b>Expect:</b> Custom role works; system roles stay read-only</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-63">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-63" /></td>
+</tr><tr class="case" data-id="T-64" data-plane="Tenant" data-pri="P2" data-area="Admin">
+  <td class="c-id"><span class="mono">T-64</span></td>
+  <td class="c-name"><div class="nm">Branding</div><div class="steps"><b>Do:</b> Admin → Branding → workspace name + brand colour → Save</div><div class="exp"><b>Expect:</b> Name and colour apply across the app for everyone</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-64">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-64" /></td>
+</tr><tr class="case" data-id="T-65" data-plane="Tenant" data-pri="P2" data-area="Admin">
+  <td class="c-id"><span class="mono">T-65</span></td>
+  <td class="c-name"><div class="nm">Workspace default language</div><div class="steps"><b>Do:</b> Admin → Branding → language → Save for everyone</div><div class="exp"><b>Expect:</b> New sessions without a personal choice open in that language</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-65">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-65" /></td>
+</tr><tr class="case" data-id="T-66" data-plane="Tenant" data-pri="P2" data-area="Admin">
+  <td class="c-id"><span class="mono">T-66</span></td>
+  <td class="c-name"><div class="nm">Plan + usage</div><div class="steps"><b>Do:</b> Admin → Plan</div><div class="exp"><b>Expect:</b> Edition, seats, licensed products and usage shown; no dev URLs</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-66">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-66" /></td>
+</tr><tr class="area-row"><td colspan="6"><span class="area">Settings</span></td></tr><tr class="case" data-id="T-67" data-plane="Tenant" data-pri="P2" data-area="Settings">
+  <td class="c-id"><span class="mono">T-67</span></td>
+  <td class="c-name"><div class="nm">Profile + preferences</div><div class="steps"><b>Do:</b> Settings → Profile / Preferences</div><div class="exp"><b>Expect:</b> Name, currency, date format and theme persist</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-67">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-67" /></td>
+</tr><tr class="case" data-id="T-68" data-plane="Tenant" data-pri="P2" data-area="Settings">
+  <td class="c-id"><span class="mono">T-68</span></td>
+  <td class="c-name"><div class="nm">Notifications</div><div class="steps"><b>Do:</b> Settings → Notifications → toggle</div><div class="exp"><b>Expect:</b> Choices persist</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-68">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-68" /></td>
+</tr><tr class="area-row"><td colspan="6"><span class="area">UX</span></td></tr><tr class="case" data-id="T-69" data-plane="Tenant" data-pri="P2" data-area="UX">
+  <td class="c-id"><span class="mono">T-69</span></td>
+  <td class="c-name"><div class="nm">Collapse + mobile</div><div class="steps"><b>Do:</b> Toggle the sidebar; shrink below 860px</div><div class="exp"><b>Expect:</b> Rail collapse; off-canvas drawer; tables scroll; drawers go full-width</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-69">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-69" /></td>
+</tr><tr class="case" data-id="T-70" data-plane="Tenant" data-pri="P1" data-area="UX">
+  <td class="c-id"><span class="mono">T-70</span></td>
+  <td class="c-name"><div class="nm">No placeholder or dev copy</div><div class="steps"><b>Do:</b> Skim every page in all three languages</div><div class="exp"><b>Expect:</b> No ‘Riverside’ leftovers, §refs, ‘walking-skeleton’, or raw keys as titles</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-70">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-70" /></td>
+</tr><tr class="case" data-id="T-71" data-plane="Tenant" data-pri="P2" data-area="UX">
+  <td class="c-id"><span class="mono">T-71</span></td>
+  <td class="c-name"><div class="nm">Errors read as errors</div><div class="steps"><b>Do:</b> Trigger a failure, e.g. draw with no key</div><div class="exp"><b>Expect:</b> Message is styled as a failure, not a green success tick</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-71">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-71" /></td>
+</tr><tr class="area-row"><td colspan="6"><span class="area">Data</span></td></tr><tr class="case" data-id="T-72" data-plane="Tenant" data-pri="P1" data-area="Data">
+  <td class="c-id"><span class="mono">T-72</span></td>
+  <td class="c-name"><div class="nm">Tenant isolation</div><div class="steps"><b>Do:</b> Confirm only this tenant’s data is visible</div><div class="exp"><b>Expect:</b> No cross-tenant projects, artifacts or users</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-72">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-72" /></td>
+</tr><tr class="case" data-id="T-73" data-plane="Tenant" data-pri="P1" data-area="Data">
+  <td class="c-id"><span class="mono">T-73</span></td>
+  <td class="c-name"><div class="nm">Audit chain integrity</div><div class="steps"><b>Do:</b> Work a project through the whole chain → Verify</div><div class="exp"><b>Expect:</b> Chain verifies after many operations</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-73">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-73" /></td>
+</tr><tr class="case" data-id="T-74" data-plane="Tenant" data-pri="P1" data-area="Data">
+  <td class="c-id"><span class="mono">T-74</span></td>
+  <td class="c-name"><div class="nm">End-to-end chain completeness</div><div class="steps"><b>Do:</b> Upload a real tender and run every stage</div><div class="exp"><b>Expect:</b> Reaches Procurement with artifacts at each stage and nothing left pending</div></td>
+  <td class="c-pri"><span class="pri pP1">P1</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-74">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-74" /></td>
+</tr><tr class="case" data-id="T-75" data-plane="Tenant" data-pri="P2" data-area="Data">
+  <td class="c-id"><span class="mono">T-75</span></td>
+  <td class="c-name"><div class="nm">The API key never leaves the worker</div><div class="steps"><b>Do:</b> Inspect the app container’s environment</div><div class="exp"><b>Expect:</b> ANTHROPIC_API_KEY is absent there; only the worker holds it</div></td>
+  <td class="c-pri"><span class="pri pP2">P2</span></td>
+  <td class="c-status">
+     <div class="seg" role="group" aria-label="Result for T-75">
+       <button class="s pass" data-v="pass" title="Pass">Pass</button>
+       <button class="s fail" data-v="fail" title="Fail">Fail</button>
+       <button class="s blk"  data-v="blocked" title="Blocked">Blk</button>
+     </div>
+  </td>
+  <td class="c-note"><input class="note" placeholder="notes…" data-id="T-75" /></td>
 </tr></tbody></table></div>
 </section><section class="suite" data-plane="Deployment">
   <div class="suite-head"><h2>Deployment</h2><span class="count" data-plane-count="Deployment">0/14</span></div>
@@ -1355,7 +1715,7 @@ tr.case[data-status="blocked"]{background:var(--ambertint);}
 </div>
 
 <script>
-const TESTS=[{"id": "H-01", "plane": "Host", "area": "Auth", "name": "Sign in as owner", "steps": "Open host URL \u2192 enter admin@techsme.com / password \u2192 Sign in", "expected": "Lands on Overview; sidebar + top bar render", "pri": "P1"}, {"id": "H-02", "plane": "Host", "area": "Auth", "name": "Reject wrong password", "steps": "Enter admin email + wrong password \u2192 Sign in", "expected": "Clear error message; no session created", "pri": "P1"}, {"id": "H-03", "plane": "Host", "area": "Auth", "name": "Session expiry \u2192 login", "steps": "With an expired/cleared session, open /tenants", "expected": "Auto-redirects to the login screen (no error panel)", "pri": "P1"}, {"id": "H-04", "plane": "Host", "area": "Auth", "name": "Sign out", "steps": "Click sign out in the sidebar", "expected": "Returns to login; protected pages inaccessible", "pri": "P2"}, {"id": "H-05", "plane": "Host", "area": "Overview", "name": "KPI tiles populate", "steps": "Open Overview", "expected": "Tenants, MRR, active/past-due show real numbers (not all 0/\u2014)", "pri": "P1"}, {"id": "H-06", "plane": "Host", "area": "Overview", "name": "Recurring revenue + attention", "steps": "Review Overview cards", "expected": "MRR by currency listed; 'needs attention' shows the past-due tenant", "pri": "P2"}, {"id": "H-07", "plane": "Host", "area": "Overview", "name": "Recent activity + system status", "steps": "Scroll Overview", "expected": "Audit activity feed populated; system status reads Healthy", "pri": "P2"}, {"id": "H-08", "plane": "Host", "area": "Tenants", "name": "List all tenants", "steps": "Open Tenants", "expected": "All customer orgs listed with edition, status, region, seats", "pri": "P1"}, {"id": "H-09", "plane": "Host", "area": "Tenants", "name": "Filter by status", "steps": "Click Active / Trial / Suspended tabs", "expected": "List filters correctly to the chosen status", "pri": "P2"}, {"id": "H-10", "plane": "Host", "area": "Tenants", "name": "Search", "steps": "Type a name in search", "expected": "List narrows to matches", "pri": "P3"}, {"id": "H-11", "plane": "Host", "area": "Tenants", "name": "Open tenant drawer", "steps": "Click a tenant row", "expected": "Drawer shows detail + real usage/entitlement counts", "pri": "P1"}, {"id": "H-12", "plane": "Host", "area": "Tenants", "name": "Create tenant", "steps": "New tenant \u2192 name, subdomain, owner email, edition \u2192 Create", "expected": "Tenant created; owner credentials + Open-workspace link shown", "pri": "P1"}, {"id": "H-13", "plane": "Host", "area": "Tenants", "name": "Suspend / restore", "steps": "Suspend a tenant, then restore", "expected": "Status flips; audited; reversible", "pri": "P2"}, {"id": "H-14", "plane": "Host", "area": "Tenants", "name": "Impersonate", "steps": "Click impersonate on a tenant", "expected": "Opens that tenant workspace as its owner (audited)", "pri": "P2"}, {"id": "H-15", "plane": "Host", "area": "Subscriptions", "name": "Billing summary", "steps": "Open Subscriptions", "expected": "MRR, status counts, billing health all populated", "pri": "P1"}, {"id": "H-16", "plane": "Host", "area": "Subscriptions", "name": "Invoices list", "steps": "Review invoices", "expected": "Invoices with numbers + paid/open status (no raw UUIDs)", "pri": "P2"}, {"id": "H-17", "plane": "Host", "area": "Subscriptions", "name": "Invoice actions", "steps": "On an open invoice \u2192 Retry / Remind", "expected": "Action succeeds with a confirmation toast", "pri": "P3"}, {"id": "H-18", "plane": "Host", "area": "Editions", "name": "Edition cards + counts", "steps": "Open Editions", "expected": "Each edition card shows module/feature/tenant counts", "pri": "P1"}, {"id": "H-19", "plane": "Host", "area": "Editions", "name": "Feature matrix", "steps": "Open the matrix", "expected": "Editions \u00d7 features grid renders with cell states", "pri": "P2"}, {"id": "H-20", "plane": "Host", "area": "Editions", "name": "Edit edition features", "steps": "Open an edition \u2192 toggle a feature \u2192 Save", "expected": "Change persists; matrix reflects it", "pri": "P2"}, {"id": "H-21", "plane": "Host", "area": "Features", "name": "Feature catalog", "steps": "Open Features", "expected": "Features grouped by category; type/status shown", "pri": "P2"}, {"id": "H-22", "plane": "Host", "area": "Features", "name": "Create feature", "steps": "Add feature \u2192 key, name, type \u2192 Save", "expected": "Feature appears in the catalog", "pri": "P3"}, {"id": "H-23", "plane": "Host", "area": "Pricing", "name": "Edition prices", "steps": "Open Pricing", "expected": "Each edition shows real monthly/annual prices (not 'Custom')", "pri": "P1"}, {"id": "H-24", "plane": "Host", "area": "Pricing", "name": "Edit a price", "steps": "Edit an edition price \u2192 Save", "expected": "New amount persists and displays formatted", "pri": "P2"}, {"id": "H-25", "plane": "Host", "area": "Pricing", "name": "Usage rates + coupons", "steps": "Review usage rates / coupons", "expected": "Metered rates listed; coupon create works", "pri": "P3"}, {"id": "H-26", "plane": "Host", "area": "Observability", "name": "Queues + workers", "steps": "Open Observability", "expected": "Queue depth, worker heartbeats, throughput chart render", "pri": "P1"}, {"id": "H-27", "plane": "Host", "area": "Observability", "name": "AI health", "steps": "Review AI health panel", "expected": "Providers/models with success rate + latency shown", "pri": "P2"}, {"id": "H-28", "plane": "Host", "area": "Observability", "name": "Failed jobs", "steps": "Review failed jobs (if any) \u2192 Retry/Resolve", "expected": "Tenant shown by name (not UUID); actions work", "pri": "P2"}, {"id": "H-29", "plane": "Host", "area": "Audit", "name": "Audit log list + filter", "steps": "Open Audit \u2192 filter by action/date", "expected": "Events listed; filter narrows results", "pri": "P2"}, {"id": "H-30", "plane": "Host", "area": "Audit", "name": "Verify chain", "steps": "Click Verify audit chain", "expected": "Reports chain integrity OK", "pri": "P1"}, {"id": "H-31", "plane": "Host", "area": "Audit", "name": "Export", "steps": "Click export", "expected": "Audit export produced/downloaded", "pri": "P3"}, {"id": "H-32", "plane": "Host", "area": "Notifications", "name": "Inbox + bell", "steps": "Open Notifications / bell", "expected": "Inbox populated; unread badge count correct", "pri": "P2"}, {"id": "H-33", "plane": "Host", "area": "Notifications", "name": "Mark read / read all", "steps": "Mark one, then all read", "expected": "Unread count decrements to 0", "pri": "P3"}, {"id": "H-34", "plane": "Host", "area": "Notifications", "name": "Compose broadcast", "steps": "Compose \u2192 audience \u2192 Send", "expected": "Broadcast recorded; audience preview correct", "pri": "P3"}, {"id": "H-35", "plane": "Host", "area": "Users & roles", "name": "Host users list", "steps": "Open Host users & roles", "expected": "Admin user + roles + permission matrix render", "pri": "P2"}, {"id": "H-36", "plane": "Host", "area": "Users & roles", "name": "Add host user", "steps": "Add user \u2192 email, role \u2192 Save", "expected": "User created; can sign in", "pri": "P2"}, {"id": "H-37", "plane": "Host", "area": "Users & roles", "name": "Create/edit role", "steps": "New role \u2192 pick permissions \u2192 Save", "expected": "Role created; permission counts correct; system roles read-only", "pri": "P2"}, {"id": "H-38", "plane": "Host", "area": "Settings", "name": "General / Security tabs", "steps": "Open Settings tabs", "expected": "Values render; no 'not wired' dev disclaimers", "pri": "P2"}, {"id": "H-39", "plane": "Host", "area": "Settings", "name": "AI providers / Email", "steps": "Review AI + Email tabs", "expected": "Providers/routing/domains manageable; no secrets leaked", "pri": "P3"}, {"id": "H-40", "plane": "Host", "area": "UX/Responsive", "name": "Sidebar collapse + mobile", "steps": "Toggle collapse; shrink window < 860px", "expected": "Collapses to rail; hamburger drawer on mobile; tables scroll", "pri": "P2"}, {"id": "H-41", "plane": "Host", "area": "UX/Copy", "name": "No placeholder/dev copy", "steps": "Skim every page", "expected": "No 'coming soon', 'localhost', TODO, spec-refs, raw UUIDs as labels", "pri": "P1"}, {"id": "T-01", "plane": "Tenant", "area": "Auth", "name": "Sign in as owner", "steps": "Open tenant URL \u2192 owner@aigcc.group / password \u2192 Sign in", "expected": "Lands on Overview; workspace renders", "pri": "P1"}, {"id": "T-02", "plane": "Tenant", "area": "Auth", "name": "Reject wrong password", "steps": "Wrong password \u2192 Sign in", "expected": "Clear error; no session", "pri": "P1"}, {"id": "T-03", "plane": "Tenant", "area": "Auth", "name": "Session expiry \u2192 login", "steps": "Expired session \u2192 open a page", "expected": "Auto-redirect to /login", "pri": "P1"}, {"id": "T-04", "plane": "Tenant", "area": "Auth", "name": "Host admin rejected", "steps": "Try host admin email on the tenant", "expected": "Rejected (separate identity pool)", "pri": "P2"}, {"id": "T-05", "plane": "Tenant", "area": "Overview", "name": "Greeting + KPIs", "steps": "Open Overview", "expected": "Greets the owner; active projects / products / colleagues populated", "pri": "P1"}, {"id": "T-06", "plane": "Tenant", "area": "Overview", "name": "Module cards + recent projects", "steps": "Review Overview", "expected": "Licensed modules as cards; recent projects table populated", "pri": "P2"}, {"id": "T-07", "plane": "Tenant", "area": "Projects", "name": "List projects", "steps": "Open Projects", "expected": "Portfolio listed with code, client, pursuit stage, status", "pri": "P1"}, {"id": "T-08", "plane": "Tenant", "area": "Projects", "name": "Create project", "steps": "New project \u2192 name, code, client, pursuit \u2192 Create", "expected": "Created on the domain's lifecycle; opens workspace", "pri": "P1"}, {"id": "T-09", "plane": "Tenant", "area": "Projects", "name": "Archive project", "steps": "Trash icon on a row \u2192 confirm", "expected": "Removed from list; history retained; audited", "pri": "P2"}, {"id": "T-10", "plane": "Tenant", "area": "Pursuit", "name": "Lifecycle stepper", "steps": "Open a project \u2192 Pursuit", "expected": "Stepper shows stages; current stage highlighted", "pri": "P1"}, {"id": "T-11", "plane": "Tenant", "area": "Pursuit", "name": "Run autopilot", "steps": "Click Run automatically", "expected": "Every workflow runs in order; lifecycle advances; 0 manual confirms", "pri": "P1"}, {"id": "T-12", "plane": "Tenant", "area": "Pursuit", "name": "What needs you", "steps": "On a non-autopilot project", "expected": "'What needs you' + Next step show pending items to confirm", "pri": "P2"}, {"id": "T-13", "plane": "Tenant", "area": "Modules", "name": "Module grid", "steps": "Open Modules", "expected": "All licensed modules shown with friendly labels (not raw keys)", "pri": "P1"}, {"id": "T-14", "plane": "Tenant", "area": "Modules", "name": "Module workspace + start", "steps": "Open a module \u2192 Start a workflow", "expected": "Run starts; outputs table populates for that module", "pri": "P1"}, {"id": "T-15", "plane": "Tenant", "area": "Runs", "name": "Runs list", "steps": "Open Runs", "expected": "Runs listed by friendly workflow name + status", "pri": "P2"}, {"id": "T-16", "plane": "Tenant", "area": "Runs", "name": "Run detail timeline", "steps": "Open a run", "expected": "Steps timeline with gates/map; statuses correct", "pri": "P2"}, {"id": "T-17", "plane": "Tenant", "area": "Runs", "name": "Re-run stale", "steps": "Edit a confirmed artifact \u2192 Re-run stale", "expected": "Only stale-producing steps re-run; outputs superseded", "pri": "P2"}, {"id": "T-18", "plane": "Tenant", "area": "Review", "name": "Review queue", "steps": "Open Review (on a project with pending)", "expected": "Pending proposals listed with type label + agent", "pri": "P1"}, {"id": "T-19", "plane": "Tenant", "area": "Review", "name": "Confirm proposal", "steps": "Confirm a pending artifact", "expected": "Confirmed; gate resumes; lifecycle may advance", "pri": "P1"}, {"id": "T-20", "plane": "Tenant", "area": "Review", "name": "Reject / Edit", "steps": "Reject one; edit another", "expected": "Reject terminal; edit creates a new version + marks downstream stale", "pri": "P2"}, {"id": "T-21", "plane": "Tenant", "area": "Review", "name": "Inspect payload", "steps": "Click Inspect", "expected": "Readable key/value payload (not a raw JSON dump)", "pri": "P3"}, {"id": "T-22", "plane": "Tenant", "area": "Trace", "name": "Artifact graph", "steps": "Open Trace", "expected": "Artifacts grouped by type with human labels (not bare UUIDs)", "pri": "P1"}, {"id": "T-23", "plane": "Tenant", "area": "Trace", "name": "Lineage detail", "steps": "Select an artifact", "expected": "Provenance + producing job (model) + audit trail shown", "pri": "P2"}, {"id": "T-24", "plane": "Tenant", "area": "Trace", "name": "Verify audit chain", "steps": "Click Verify audit chain", "expected": "Reports chain OK", "pri": "P1"}, {"id": "T-25", "plane": "Tenant", "area": "Colleagues", "name": "Personas roster", "steps": "Open Colleagues", "expected": "Personas listed with names (not blank); default marked", "pri": "P2"}, {"id": "T-26", "plane": "Tenant", "area": "Colleagues", "name": "Chat with a colleague", "steps": "Send a message", "expected": "Assistant replies; scoped review lens shows in-scope items", "pri": "P2"}, {"id": "T-27", "plane": "Tenant", "area": "Documents", "name": "Upload + ingest", "steps": "Upload a PDF", "expected": "File ingested; appears with friendly type + status", "pri": "P2"}, {"id": "T-28", "plane": "Tenant", "area": "Standards", "name": "Rules + validate", "steps": "Open Standards \u2192 Validate", "expected": "Rules listed; violations (if any) shown as readable fields", "pri": "P2"}, {"id": "T-29", "plane": "Tenant", "area": "Assistant", "name": "Current domain", "steps": "Open Assistant", "expected": "Shows workspace, assistant name, module count", "pri": "P2"}, {"id": "T-30", "plane": "Tenant", "area": "Assistant", "name": "Tailor domain", "steps": "Rename assistant / a module label \u2192 Save", "expected": "Change persists and re-projects (visible in Modules)", "pri": "P2"}, {"id": "T-31", "plane": "Tenant", "area": "Assistant", "name": "Industry templates", "steps": "Review 'Choose your industry'", "expected": "Construction template shown (focused vertical)", "pri": "P3"}, {"id": "T-32", "plane": "Tenant", "area": "Library", "name": "Add entry", "steps": "Add entry \u2192 collection + fields \u2192 Add", "expected": "Entry appears grouped by collection", "pri": "P2"}, {"id": "T-33", "plane": "Tenant", "area": "Library", "name": "Edit (version)", "steps": "Edit an entry \u2192 Save", "expected": "Version increments; new values shown; history kept", "pri": "P2"}, {"id": "T-34", "plane": "Tenant", "area": "Library", "name": "Remove entry", "steps": "Remove an entry", "expected": "Dropped from active list (soft)", "pri": "P3"}, {"id": "T-35", "plane": "Tenant", "area": "Users & roles", "name": "People + roles", "steps": "Open Users & roles", "expected": "Team + roles listed; tiers shown as labels", "pri": "P1"}, {"id": "T-36", "plane": "Tenant", "area": "Users & roles", "name": "Add user", "steps": "Add user \u2192 email, role \u2192 Add", "expected": "User added; temp password shown in a copyable panel", "pri": "P1"}, {"id": "T-37", "plane": "Tenant", "area": "Users & roles", "name": "Assign roles", "steps": "Roles \u2192 toggle \u2192 Save", "expected": "User's roles update", "pri": "P2"}, {"id": "T-38", "plane": "Tenant", "area": "Users & roles", "name": "Activate/Deactivate", "steps": "Deactivate then activate a user", "expected": "Status flips", "pri": "P2"}, {"id": "T-39", "plane": "Tenant", "area": "Users & roles", "name": "Custom role CRUD", "steps": "Create role \u2192 permissions \u2192 Save; edit; delete", "expected": "Custom role works; system roles protected (read-only)", "pri": "P2"}, {"id": "T-40", "plane": "Tenant", "area": "Settings", "name": "Plan + edition", "steps": "Open Settings & plan", "expected": "Edition, seats, licensed products, features shown; no dev URLs", "pri": "P2"}, {"id": "T-41", "plane": "Tenant", "area": "UX/Responsive", "name": "Collapse + mobile", "steps": "Toggle sidebar; shrink < 860px", "expected": "Rail collapse; off-canvas drawer; tables scroll; drawers full-width", "pri": "P2"}, {"id": "T-42", "plane": "Tenant", "area": "UX/Copy", "name": "No placeholder/dev copy", "steps": "Skim every page", "expected": "No 'Riverside', \u00a7refs, 'walking-skeleton', raw keys as titles", "pri": "P1"}, {"id": "T-43", "plane": "Tenant", "area": "Data", "name": "Tenant isolation", "steps": "Confirm only this tenant's data shows", "expected": "No cross-tenant projects/artifacts/users visible", "pri": "P1"}, {"id": "T-44", "plane": "Tenant", "area": "Data", "name": "Audit chain integrity", "steps": "Run through a pursuit \u2192 Verify", "expected": "Chain verifies OK after many operations", "pri": "P1"}, {"id": "T-45", "plane": "Tenant", "area": "Data", "name": "Autopilot completeness", "steps": "Autopilot a fresh project end-to-end", "expected": "Reaches terminal/clarifying; artifacts populated; 0 pending left", "pri": "P1"}, {"id": "D-01", "plane": "Deployment", "area": "Infra", "name": "Both planes up", "steps": "docker compose up on host + tenant", "expected": "All containers healthy; apps serve 200", "pri": "P1"}, {"id": "D-02", "plane": "Deployment", "area": "Infra", "name": "Seed reproducible", "steps": "Run seed scripts on a fresh volume", "expected": "Catalog + demo tenant(s) created without error", "pri": "P1"}, {"id": "D-03", "plane": "Deployment", "area": "Infra", "name": "HTTPS (host)", "steps": "Open the host over its domain", "expected": "Valid TLS; login works; cookies stick", "pri": "P1"}, {"id": "D-04", "plane": "Deployment", "area": "Infra", "name": "HTTPS (tenant)", "steps": "Open the tenant over its domain", "expected": "Valid TLS; login works", "pri": "P2"}, {"id": "D-05", "plane": "Deployment", "area": "Infra", "name": "Reverse proxy", "steps": "Both apps reachable behind nginx", "expected": "Correct app served per hostname; no port clash", "pri": "P2"}, {"id": "D-06", "plane": "Deployment", "area": "Security", "name": "Secrets rotated", "steps": "Inspect env/override", "expected": "BETTER_AUTH_SECRET 32+, DB pw + service token not defaults", "pri": "P1"}, {"id": "D-07", "plane": "Deployment", "area": "Security", "name": "DB not exposed", "steps": "Port scan the public IP", "expected": "MySQL (3306/3307) not publicly reachable", "pri": "P1"}, {"id": "D-08", "plane": "Deployment", "area": "Security", "name": "Admin password changed", "steps": "Change seeded admin password", "expected": "Default demo password no longer valid", "pri": "P1"}, {"id": "D-09", "plane": "Deployment", "area": "Provisioning", "name": "Host \u2192 tenant bootstrap", "steps": "Create a tenant in the host", "expected": "Tenant provisioned live in the tenant plane (not mirror)", "pri": "P2"}, {"id": "D-10", "plane": "Deployment", "area": "Ops", "name": "Logs + restart", "steps": "Tail logs; restart a service", "expected": "Logs clean; service recovers; data persists", "pri": "P2"}, {"id": "D-11", "plane": "Deployment", "area": "Ops", "name": "Update flow", "steps": "git pull \u2192 up --build", "expected": "New build deploys without data loss", "pri": "P2"}, {"id": "D-12", "plane": "Deployment", "area": "Perf", "name": "Basic load", "steps": "Click through main pages", "expected": "Pages respond < ~1s; no console errors", "pri": "P2"}, {"id": "D-13", "plane": "Deployment", "area": "Backup", "name": "DB volume backup", "steps": "Dump the MySQL volume", "expected": "Backup produced; restorable", "pri": "P3"}, {"id": "D-14", "plane": "Deployment", "area": "Compat", "name": "Cross-browser", "steps": "Open in Chrome + one other", "expected": "Renders + works in both", "pri": "P3"}];
+const TESTS=[{"id": "H-01", "plane": "Host", "area": "Auth", "name": "Sign in as owner", "steps": "Open host URL → enter admin@techsme.com / password → Sign in", "expected": "Lands on Overview; sidebar + top bar render", "pri": "P1"}, {"id": "H-02", "plane": "Host", "area": "Auth", "name": "Reject wrong password", "steps": "Enter admin email + wrong password → Sign in", "expected": "Clear error message; no session created", "pri": "P1"}, {"id": "H-03", "plane": "Host", "area": "Auth", "name": "Session expiry → login", "steps": "With an expired/cleared session, open /tenants", "expected": "Auto-redirects to the login screen (no error panel)", "pri": "P1"}, {"id": "H-04", "plane": "Host", "area": "Auth", "name": "Sign out", "steps": "Click sign out in the sidebar", "expected": "Returns to login; protected pages inaccessible", "pri": "P2"}, {"id": "H-05", "plane": "Host", "area": "Overview", "name": "KPI tiles populate", "steps": "Open Overview", "expected": "Tenants, MRR, active/past-due show real numbers (not all 0/—)", "pri": "P1"}, {"id": "H-06", "plane": "Host", "area": "Overview", "name": "Recurring revenue + attention", "steps": "Review Overview cards", "expected": "MRR by currency listed; 'needs attention' shows the past-due tenant", "pri": "P2"}, {"id": "H-07", "plane": "Host", "area": "Overview", "name": "Recent activity + system status", "steps": "Scroll Overview", "expected": "Audit activity feed populated; system status reads Healthy", "pri": "P2"}, {"id": "H-08", "plane": "Host", "area": "Tenants", "name": "List all tenants", "steps": "Open Tenants", "expected": "All customer orgs listed with edition, status, region, seats", "pri": "P1"}, {"id": "H-09", "plane": "Host", "area": "Tenants", "name": "Filter by status", "steps": "Click Active / Trial / Suspended tabs", "expected": "List filters correctly to the chosen status", "pri": "P2"}, {"id": "H-10", "plane": "Host", "area": "Tenants", "name": "Search", "steps": "Type a name in search", "expected": "List narrows to matches", "pri": "P3"}, {"id": "H-11", "plane": "Host", "area": "Tenants", "name": "Open tenant drawer", "steps": "Click a tenant row", "expected": "Drawer shows detail + real usage/entitlement counts", "pri": "P1"}, {"id": "H-12", "plane": "Host", "area": "Tenants", "name": "Create tenant", "steps": "New tenant → name, subdomain, owner email, edition → Create", "expected": "Tenant created; owner credentials + Open-workspace link shown", "pri": "P1"}, {"id": "H-13", "plane": "Host", "area": "Tenants", "name": "Suspend / restore", "steps": "Suspend a tenant, then restore", "expected": "Status flips; audited; reversible", "pri": "P2"}, {"id": "H-14", "plane": "Host", "area": "Tenants", "name": "Impersonate", "steps": "Click impersonate on a tenant", "expected": "Opens that tenant workspace as its owner (audited)", "pri": "P2"}, {"id": "H-15", "plane": "Host", "area": "Subscriptions", "name": "Billing summary", "steps": "Open Subscriptions", "expected": "MRR, status counts, billing health all populated", "pri": "P1"}, {"id": "H-16", "plane": "Host", "area": "Subscriptions", "name": "Invoices list", "steps": "Review invoices", "expected": "Invoices with numbers + paid/open status (no raw UUIDs)", "pri": "P2"}, {"id": "H-17", "plane": "Host", "area": "Subscriptions", "name": "Invoice actions", "steps": "On an open invoice → Retry / Remind", "expected": "Action succeeds with a confirmation toast", "pri": "P3"}, {"id": "H-18", "plane": "Host", "area": "Editions", "name": "Edition cards + counts", "steps": "Open Editions", "expected": "Each edition card shows module/feature/tenant counts", "pri": "P1"}, {"id": "H-19", "plane": "Host", "area": "Editions", "name": "Feature matrix", "steps": "Open the matrix", "expected": "Editions × features grid renders with cell states", "pri": "P2"}, {"id": "H-20", "plane": "Host", "area": "Editions", "name": "Edit edition features", "steps": "Open an edition → toggle a feature → Save", "expected": "Change persists; matrix reflects it", "pri": "P2"}, {"id": "H-21", "plane": "Host", "area": "Features", "name": "Feature catalog", "steps": "Open Features", "expected": "Features grouped by category; type/status shown", "pri": "P2"}, {"id": "H-22", "plane": "Host", "area": "Features", "name": "Create feature", "steps": "Add feature → key, name, type → Save", "expected": "Feature appears in the catalog", "pri": "P3"}, {"id": "H-23", "plane": "Host", "area": "Pricing", "name": "Edition prices", "steps": "Open Pricing", "expected": "Each edition shows real monthly/annual prices (not 'Custom')", "pri": "P1"}, {"id": "H-24", "plane": "Host", "area": "Pricing", "name": "Edit a price", "steps": "Edit an edition price → Save", "expected": "New amount persists and displays formatted", "pri": "P2"}, {"id": "H-25", "plane": "Host", "area": "Pricing", "name": "Usage rates + coupons", "steps": "Review usage rates / coupons", "expected": "Metered rates listed; coupon create works", "pri": "P3"}, {"id": "H-26", "plane": "Host", "area": "Observability", "name": "Queues + workers", "steps": "Open Observability", "expected": "Queue depth, worker heartbeats, throughput chart render", "pri": "P1"}, {"id": "H-27", "plane": "Host", "area": "Observability", "name": "AI health", "steps": "Review AI health panel", "expected": "Providers/models with success rate + latency shown", "pri": "P2"}, {"id": "H-28", "plane": "Host", "area": "Observability", "name": "Failed jobs", "steps": "Review failed jobs (if any) → Retry/Resolve", "expected": "Tenant shown by name (not UUID); actions work", "pri": "P2"}, {"id": "H-29", "plane": "Host", "area": "Audit", "name": "Audit log list + filter", "steps": "Open Audit → filter by action/date", "expected": "Events listed; filter narrows results", "pri": "P2"}, {"id": "H-30", "plane": "Host", "area": "Audit", "name": "Verify chain", "steps": "Click Verify audit chain", "expected": "Reports chain integrity OK", "pri": "P1"}, {"id": "H-31", "plane": "Host", "area": "Audit", "name": "Export", "steps": "Click export", "expected": "Audit export produced/downloaded", "pri": "P3"}, {"id": "H-32", "plane": "Host", "area": "Notifications", "name": "Inbox + bell", "steps": "Open Notifications / bell", "expected": "Inbox populated; unread badge count correct", "pri": "P2"}, {"id": "H-33", "plane": "Host", "area": "Notifications", "name": "Mark read / read all", "steps": "Mark one, then all read", "expected": "Unread count decrements to 0", "pri": "P3"}, {"id": "H-34", "plane": "Host", "area": "Notifications", "name": "Compose broadcast", "steps": "Compose → audience → Send", "expected": "Broadcast recorded; audience preview correct", "pri": "P3"}, {"id": "H-35", "plane": "Host", "area": "Users & roles", "name": "Host users list", "steps": "Open Host users & roles", "expected": "Admin user + roles + permission matrix render", "pri": "P2"}, {"id": "H-36", "plane": "Host", "area": "Users & roles", "name": "Add host user", "steps": "Add user → email, role → Save", "expected": "User created; can sign in", "pri": "P2"}, {"id": "H-37", "plane": "Host", "area": "Users & roles", "name": "Create/edit role", "steps": "New role → pick permissions → Save", "expected": "Role created; permission counts correct; system roles read-only", "pri": "P2"}, {"id": "H-38", "plane": "Host", "area": "Settings", "name": "General / Security tabs", "steps": "Open Settings tabs", "expected": "Values render; no 'not wired' dev disclaimers", "pri": "P2"}, {"id": "H-39", "plane": "Host", "area": "Settings", "name": "AI providers / Email", "steps": "Review AI + Email tabs", "expected": "Providers/routing/domains manageable; no secrets leaked", "pri": "P3"}, {"id": "H-40", "plane": "Host", "area": "UX/Responsive", "name": "Sidebar collapse + mobile", "steps": "Toggle collapse; shrink window < 860px", "expected": "Collapses to rail; hamburger drawer on mobile; tables scroll", "pri": "P2"}, {"id": "H-41", "plane": "Host", "area": "UX/Copy", "name": "No placeholder/dev copy", "steps": "Skim every page", "expected": "No 'coming soon', 'localhost', TODO, spec-refs, raw UUIDs as labels", "pri": "P1"}, {"id": "T-01", "plane": "Tenant", "area": "Auth", "name": "Sign in as owner", "steps": "Open the tenant URL → owner@cedarstone.build / password → Sign in", "expected": "Lands on Dashboard; workspace renders as ‘Cedar &amp; Stone Builders’", "pri": "P1"}, {"id": "T-02", "plane": "Tenant", "area": "Auth", "name": "Reject wrong password", "steps": "Wrong password → Sign in", "expected": "Clear error; no session created", "pri": "P1"}, {"id": "T-03", "plane": "Tenant", "area": "Auth", "name": "Sign-in throttling", "steps": "Fail sign-in four times inside a minute", "expected": "Fourth attempt is rate-limited (429), not accepted", "pri": "P2"}, {"id": "T-04", "plane": "Tenant", "area": "Auth", "name": "Session expiry → login", "steps": "Expired session → open any page", "expected": "Auto-redirect to /login", "pri": "P1"}, {"id": "T-05", "plane": "Tenant", "area": "Auth", "name": "Host admin rejected", "steps": "Try a Host staff email on the tenant", "expected": "Rejected — separate identity pool", "pri": "P2"}, {"id": "T-06", "plane": "Tenant", "area": "Language", "name": "Switcher sits before Search", "steps": "Look at the top bar", "expected": "Language control is left of the Search field on every screen", "pri": "P1"}, {"id": "T-07", "plane": "Tenant", "area": "Language", "name": "Arabic switches to RTL", "steps": "Top bar → العربية", "expected": "UI translates; dir=rtl; layout mirrors; digits stay Western", "pri": "P1"}, {"id": "T-08", "plane": "Tenant", "area": "Language", "name": "French keeps LTR", "steps": "Top bar → Français", "expected": "UI translates; direction stays LTR; no clipped labels", "pri": "P1"}, {"id": "T-09", "plane": "Tenant", "area": "Language", "name": "No raw keys in any locale", "steps": "Walk the chain and Admin in all three languages", "expected": "No untranslated identifiers such as ‘bundle.loading’ on screen", "pri": "P2"}, {"id": "T-10", "plane": "Tenant", "area": "Language", "name": "Per-user override beats workspace default", "steps": "Admin sets the workspace default; a user picks a different language", "expected": "The user’s choice wins and survives reload; others keep the default", "pri": "P1"}, {"id": "T-11", "plane": "Tenant", "area": "Dashboard", "name": "Greeting + review queue", "steps": "Open Dashboard", "expected": "Greets the signed-in person; ‘Needs your review’ lists real pending items", "pri": "P1"}, {"id": "T-12", "plane": "Tenant", "area": "Dashboard", "name": "Chain bundles hydrate progressively", "steps": "Open Dashboard on a workspace with several projects", "expected": "Cards fill in as each project resolves — no all-or-nothing skeleton", "pri": "P2"}, {"id": "T-13", "plane": "Tenant", "area": "Dashboard", "name": "Command palette", "steps": "⌘K / Ctrl-K → type a screen name", "expected": "Palette opens and navigates there", "pri": "P2"}, {"id": "T-14", "plane": "Tenant", "area": "Projects", "name": "List projects", "steps": "Open Projects", "expected": "Portfolio listed with code, client, chain stage, status", "pri": "P1"}, {"id": "T-15", "plane": "Tenant", "area": "Projects", "name": "Create project", "steps": "New project → name, code, client → Create", "expected": "Created on the domain’s lifecycle; opens the workspace", "pri": "P1"}, {"id": "T-16", "plane": "Tenant", "area": "Projects", "name": "Archive project", "steps": "Trash icon on a row → confirm", "expected": "Removed from the list; history retained; audited", "pri": "P2"}, {"id": "T-17", "plane": "Tenant", "area": "Chain", "name": "Chain progress on the project", "steps": "Open a project", "expected": "‘Chain progress’ shows Documents → Tender → Drawings → Specs → BOQ → Estimate → Schedule → Procurement with per-stage status", "pri": "P1"}, {"id": "T-18", "plane": "Tenant", "area": "Chain", "name": "Stage tabs open their own surface", "steps": "Click each stage tab in turn", "expected": "Each renders its purpose-built surface, not a generic table; none errors", "pri": "P1"}, {"id": "T-19", "plane": "Tenant", "area": "Chain", "name": "Stage status is honest", "steps": "Compare a stage chip against its artifacts", "expected": "Complete / Needs review / Processing / Pending match the underlying records", "pri": "P2"}, {"id": "T-20", "plane": "Tenant", "area": "Documents", "name": "Upload + ingest", "steps": "Documents → upload a tender PDF", "expected": "File ingested; friendly type and status; page text extracted", "pri": "P1"}, {"id": "T-21", "plane": "Tenant", "area": "Documents", "name": "Document text reaches the agents", "steps": "Run a stage that reads documents after uploading", "expected": "Output references the uploaded content — not generic filler", "pri": "P1"}, {"id": "T-22", "plane": "Tenant", "area": "BIM Studio", "name": "All disciplines present", "steps": "Drawings → BIM Studio", "expected": "Ribbon shows Architecture, Structural, Civil, Electrical, Mechanical, Plumbing, Fire with their catalog items", "pri": "P1"}, {"id": "T-23", "plane": "Tenant", "area": "BIM Studio", "name": "Place an element", "steps": "Pick a catalog item, e.g. Wall", "expected": "Element is added, drawn on the plan, and counted in the legend", "pri": "P1"}, {"id": "T-24", "plane": "Tenant", "area": "BIM Studio", "name": "Walls are legible on the plan", "steps": "Draw walls and partitions", "expected": "They read as dark bands against the slab — not invisible on the sheet", "pri": "P1"}, {"id": "T-25", "plane": "Tenant", "area": "BIM Studio", "name": "Undo / redo", "steps": "Ctrl-Z then Ctrl-Shift-Z", "expected": "Last command reverses and reapplies", "pri": "P2"}, {"id": "T-26", "plane": "Tenant", "area": "BIM Studio", "name": "Save with concurrency check", "steps": "Save; then save again from a stale second tab", "expected": "First save succeeds; the stale one is refused, not silently overwritten", "pri": "P1"}, {"id": "T-27", "plane": "Tenant", "area": "BIM Studio", "name": "One canvas only", "steps": "Scroll the Drawings stage", "expected": "BIM Studio is the only drawing canvas; measurements appear as a register below", "pri": "P2"}, {"id": "T-28", "plane": "Tenant", "area": "BIM assistant", "name": "Draw from a prompt", "steps": "Type ‘Draw a 12 by 8 m clinic with a corridor, then doors and windows’ → Draw", "expected": "Model appears: closed external walls, two corridor partitions, hosted doors and windows", "pri": "P1"}, {"id": "T-29", "plane": "Tenant", "area": "BIM assistant", "name": "Reports a missing API key plainly", "steps": "Unset ANTHROPIC_API_KEY on the worker → Draw", "expected": "Clear message that the key is not set — no silent no-op, no stack trace", "pri": "P1"}, {"id": "T-30", "plane": "Tenant", "area": "BIM assistant", "name": "Specialist scoping", "steps": "Choose Electrical → ask for lighting", "expected": "Only electrical elements are added; it cannot clear the model or place another discipline", "pri": "P2"}, {"id": "T-31", "plane": "Tenant", "area": "BIM assistant", "name": "Nothing saved on a failed run", "steps": "Interrupt a draw mid-way", "expected": "The model is unchanged — commands persist once, at the end", "pri": "P2"}, {"id": "T-32", "plane": "Tenant", "area": "BIM assistant", "name": "Audited", "steps": "Draw, then open Trace", "expected": "A bim.agent entry records the specialist and instruction", "pri": "P3"}, {"id": "T-33", "plane": "Tenant", "area": "Takeoff", "name": "Measure into BOQ", "steps": "BIM Studio → Measure into BOQ", "expected": "One drawing_measurement per measured item, as source ‘human’ (no review needed)", "pri": "P1"}, {"id": "T-34", "plane": "Tenant", "area": "Takeoff", "name": "Quantities net openings", "steps": "Check a wall carrying windows", "expected": "Elevational area = length × height less each opening; the working shows in Method", "pri": "P1"}, {"id": "T-35", "plane": "Tenant", "area": "Takeoff", "name": "Re-measuring supersedes", "steps": "Edit the model → Measure again", "expected": "Previous BIM-derived measurements are superseded, not duplicated", "pri": "P2"}, {"id": "T-36", "plane": "Tenant", "area": "Takeoff", "name": "Takeoff register", "steps": "Scroll below the Studio", "expected": "Measurements listed with quantity, confidence and status; any row can be opened", "pri": "P1"}, {"id": "T-37", "plane": "Tenant", "area": "Stages", "name": "Tender surface", "steps": "Open Tender", "expected": "Scope, dates and conditions readable; proposals reviewable in place", "pri": "P1"}, {"id": "T-38", "plane": "Tenant", "area": "Stages", "name": "Specs surface", "steps": "Open Specs", "expected": "Specification clauses grouped and traceable to their document page", "pri": "P1"}, {"id": "T-39", "plane": "Tenant", "area": "Stages", "name": "BOQ surface", "steps": "Open BOQ", "expected": "Items grouped by division with normalised units; quantities trace to measurements", "pri": "P1"}, {"id": "T-40", "plane": "Tenant", "area": "Stages", "name": "Estimate surface", "steps": "Open Estimate", "expected": "Rate × quantity = amount on every line; totals foot correctly", "pri": "P1"}, {"id": "T-41", "plane": "Tenant", "area": "Stages", "name": "Schedule surface", "steps": "Open Schedule", "expected": "Activities sequenced with durations derived from quantities and output rates", "pri": "P1"}, {"id": "T-42", "plane": "Tenant", "area": "Stages", "name": "Procurement surface", "steps": "Open Procurement", "expected": "Packages listed against their BOQ items", "pri": "P2"}, {"id": "T-43", "plane": "Tenant", "area": "Review", "name": "Confirm on the producing stage", "steps": "Accept a pending proposal from its own stage tab", "expected": "Confirmed there — no separate Review screen; gate resumes", "pri": "P1"}, {"id": "T-44", "plane": "Tenant", "area": "Review", "name": "Edit marks downstream stale", "steps": "Correct a confirmed quantity", "expected": "New version created; dependent artifacts flagged stale", "pri": "P2"}, {"id": "T-45", "plane": "Tenant", "area": "Review", "name": "Accept all high-confidence", "steps": "Use Accept all where offered", "expected": "Only high-confidence proposals are confirmed; flagged ones remain", "pri": "P2"}, {"id": "T-46", "plane": "Tenant", "area": "Runs", "name": "Runs list", "steps": "Project → Runs", "expected": "Runs listed by friendly workflow name and status", "pri": "P2"}, {"id": "T-47", "plane": "Tenant", "area": "Runs", "name": "Run detail timeline", "steps": "Open a run", "expected": "Step timeline with gates; statuses correct; pauses at the scope gate", "pri": "P1"}, {"id": "T-48", "plane": "Tenant", "area": "Runs", "name": "Real agents produce real output", "steps": "With a key set, run the chain on an uploaded tender", "expected": "Each step takes real model time and its output differs per project — not identical stub text", "pri": "P2"}, {"id": "T-49", "plane": "Tenant", "area": "Runs", "name": "Re-run stale", "steps": "Edit a confirmed artifact → Re-run stale", "expected": "Only stale-producing steps re-run; outputs superseded", "pri": "P2"}, {"id": "T-50", "plane": "Tenant", "area": "Copilot", "name": "Workspace Copilot", "steps": "Sidebar → Copilot", "expected": "Answers with workspace context", "pri": "P2"}, {"id": "T-51", "plane": "Tenant", "area": "Copilot", "name": "Per-project Copilot", "steps": "Open a project → Ask Copilot", "expected": "Answers from that project’s own records; does not leak another project’s data", "pri": "P1"}, {"id": "T-52", "plane": "Tenant", "area": "Trace", "name": "Artifact graph", "steps": "Project → Trace", "expected": "Artifacts grouped by type with human labels, not bare UUIDs", "pri": "P1"}, {"id": "T-53", "plane": "Tenant", "area": "Trace", "name": "Lineage detail", "steps": "Select an artifact", "expected": "Provenance, producing job and model, and audit trail shown", "pri": "P2"}, {"id": "T-54", "plane": "Tenant", "area": "Trace", "name": "Verify audit chain", "steps": "Click Verify audit chain", "expected": "Reports the hash chain intact", "pri": "P1"}, {"id": "T-55", "plane": "Tenant", "area": "Colleagues", "name": "Personas roster", "steps": "Project → Colleagues", "expected": "Personas listed with names; default marked", "pri": "P2"}, {"id": "T-56", "plane": "Tenant", "area": "Colleagues", "name": "Chat with a colleague", "steps": "Send a message", "expected": "Replies in scope; the review lens shows only in-scope items", "pri": "P2"}, {"id": "T-57", "plane": "Tenant", "area": "Standards", "name": "Rules + validate", "steps": "Project → Standards → Validate", "expected": "Rules listed; violations shown as readable fields", "pri": "P2"}, {"id": "T-58", "plane": "Tenant", "area": "Library", "name": "Add entry", "steps": "Library → Add entry → collection + fields", "expected": "Entry appears grouped by collection", "pri": "P2"}, {"id": "T-59", "plane": "Tenant", "area": "Library", "name": "Edit creates a version", "steps": "Edit an entry → Save", "expected": "Version increments; history kept", "pri": "P2"}, {"id": "T-60", "plane": "Tenant", "area": "Library", "name": "Rate book reaches the estimator", "steps": "Add a rate, then run Estimate", "expected": "The estimate uses library rates rather than inventing them", "pri": "P2"}, {"id": "T-61", "plane": "Tenant", "area": "Admin", "name": "Team + roles", "steps": "Admin → Team", "expected": "People and roles listed; tiers shown as labels", "pri": "P1"}, {"id": "T-62", "plane": "Tenant", "area": "Admin", "name": "Add user", "steps": "Add user → email, role → Add", "expected": "User added; temporary password shown in a copyable panel", "pri": "P1"}, {"id": "T-63", "plane": "Tenant", "area": "Admin", "name": "Custom role CRUD", "steps": "Create a role → permissions → Save; edit; delete", "expected": "Custom role works; system roles stay read-only", "pri": "P2"}, {"id": "T-64", "plane": "Tenant", "area": "Admin", "name": "Branding", "steps": "Admin → Branding → workspace name + brand colour → Save", "expected": "Name and colour apply across the app for everyone", "pri": "P2"}, {"id": "T-65", "plane": "Tenant", "area": "Admin", "name": "Workspace default language", "steps": "Admin → Branding → language → Save for everyone", "expected": "New sessions without a personal choice open in that language", "pri": "P2"}, {"id": "T-66", "plane": "Tenant", "area": "Admin", "name": "Plan + usage", "steps": "Admin → Plan", "expected": "Edition, seats, licensed products and usage shown; no dev URLs", "pri": "P2"}, {"id": "T-67", "plane": "Tenant", "area": "Settings", "name": "Profile + preferences", "steps": "Settings → Profile / Preferences", "expected": "Name, currency, date format and theme persist", "pri": "P2"}, {"id": "T-68", "plane": "Tenant", "area": "Settings", "name": "Notifications", "steps": "Settings → Notifications → toggle", "expected": "Choices persist", "pri": "P2"}, {"id": "T-69", "plane": "Tenant", "area": "UX", "name": "Collapse + mobile", "steps": "Toggle the sidebar; shrink below 860px", "expected": "Rail collapse; off-canvas drawer; tables scroll; drawers go full-width", "pri": "P2"}, {"id": "T-70", "plane": "Tenant", "area": "UX", "name": "No placeholder or dev copy", "steps": "Skim every page in all three languages", "expected": "No ‘Riverside’ leftovers, §refs, ‘walking-skeleton’, or raw keys as titles", "pri": "P1"}, {"id": "T-71", "plane": "Tenant", "area": "UX", "name": "Errors read as errors", "steps": "Trigger a failure, e.g. draw with no key", "expected": "Message is styled as a failure, not a green success tick", "pri": "P2"}, {"id": "T-72", "plane": "Tenant", "area": "Data", "name": "Tenant isolation", "steps": "Confirm only this tenant’s data is visible", "expected": "No cross-tenant projects, artifacts or users", "pri": "P1"}, {"id": "T-73", "plane": "Tenant", "area": "Data", "name": "Audit chain integrity", "steps": "Work a project through the whole chain → Verify", "expected": "Chain verifies after many operations", "pri": "P1"}, {"id": "T-74", "plane": "Tenant", "area": "Data", "name": "End-to-end chain completeness", "steps": "Upload a real tender and run every stage", "expected": "Reaches Procurement with artifacts at each stage and nothing left pending", "pri": "P1"}, {"id": "T-75", "plane": "Tenant", "area": "Data", "name": "The API key never leaves the worker", "steps": "Inspect the app container’s environment", "expected": "ANTHROPIC_API_KEY is absent there; only the worker holds it", "pri": "P2"}, {"id": "D-01", "plane": "Deployment", "area": "Infra", "name": "Both planes up", "steps": "docker compose up on host + tenant", "expected": "All containers healthy; apps serve 200", "pri": "P1"}, {"id": "D-02", "plane": "Deployment", "area": "Infra", "name": "Seed reproducible", "steps": "Run seed scripts on a fresh volume", "expected": "Catalog + demo tenant(s) created without error", "pri": "P1"}, {"id": "D-03", "plane": "Deployment", "area": "Infra", "name": "HTTPS (host)", "steps": "Open the host over its domain", "expected": "Valid TLS; login works; cookies stick", "pri": "P1"}, {"id": "D-04", "plane": "Deployment", "area": "Infra", "name": "HTTPS (tenant)", "steps": "Open the tenant over its domain", "expected": "Valid TLS; login works", "pri": "P2"}, {"id": "D-05", "plane": "Deployment", "area": "Infra", "name": "Reverse proxy", "steps": "Both apps reachable behind nginx", "expected": "Correct app served per hostname; no port clash", "pri": "P2"}, {"id": "D-06", "plane": "Deployment", "area": "Security", "name": "Secrets rotated", "steps": "Inspect env/override", "expected": "BETTER_AUTH_SECRET 32+, DB pw + service token not defaults", "pri": "P1"}, {"id": "D-07", "plane": "Deployment", "area": "Security", "name": "DB not exposed", "steps": "Port scan the public IP", "expected": "MySQL (3306/3307) not publicly reachable", "pri": "P1"}, {"id": "D-08", "plane": "Deployment", "area": "Security", "name": "Admin password changed", "steps": "Change seeded admin password", "expected": "Default demo password no longer valid", "pri": "P1"}, {"id": "D-09", "plane": "Deployment", "area": "Provisioning", "name": "Host → tenant bootstrap", "steps": "Create a tenant in the host", "expected": "Tenant provisioned live in the tenant plane (not mirror)", "pri": "P2"}, {"id": "D-10", "plane": "Deployment", "area": "Ops", "name": "Logs + restart", "steps": "Tail logs; restart a service", "expected": "Logs clean; service recovers; data persists", "pri": "P2"}, {"id": "D-11", "plane": "Deployment", "area": "Ops", "name": "Update flow", "steps": "git pull → up --build", "expected": "New build deploys without data loss", "pri": "P2"}, {"id": "D-12", "plane": "Deployment", "area": "Perf", "name": "Basic load", "steps": "Click through main pages", "expected": "Pages respond < ~1s; no console errors", "pri": "P2"}, {"id": "D-13", "plane": "Deployment", "area": "Backup", "name": "DB volume backup", "steps": "Dump the MySQL volume", "expected": "Backup produced; restorable", "pri": "P3"}, {"id": "D-14", "plane": "Deployment", "area": "Compat", "name": "Cross-browser", "steps": "Open in Chrome + one other", "expected": "Renders + works in both", "pri": "P3"}];
 const KEY="preckon-qa-v1";
 let store=JSON.parse(localStorage.getItem(KEY)||"{}");
 const save=()=>localStorage.setItem(KEY,JSON.stringify(store));
