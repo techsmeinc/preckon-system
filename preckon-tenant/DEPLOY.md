@@ -71,6 +71,39 @@ curl -s -o /dev/null -w '%{http_code}\n' -X POST \
 Then open <https://app.74.208.182.201.nip.io>, go to a project → **Drawings**, and
 type an instruction into BIM Studio's prompt bar.
 
+## Drawings (.dxf / .dwg)
+
+`.dxf` works with nothing extra — the `cad` sidecar parses it on upload.
+
+`.dwg` is proprietary and binary. ezdxf converts it through the **ODA File
+Converter**, a free download from opendesign.com. Install it on the host, then
+point the sidecar at it:
+
+```bash
+# in /opt/preckon-tenant/.env
+EZDXF_ODAFC=/opt/ODAFileConverter/ODAFileConverter
+```
+
+and mount it into the container. Without it a `.dwg` upload is marked **failed**
+with a message telling the estimator to export DXF — it is never silently
+ingested as unreadable bytes, because a drawing that looks understood but isn’t
+is how a BOQ quietly loses a discipline.
+
+## Retiring stale artifacts
+
+A project that ran against the stub agents (before `ANTHROPIC_API_KEY` was set)
+carries records that look real but aren’t. To clear them without breaking
+provenance:
+
+```bash
+node scripts/retire-artifacts.mjs --project <pid> --before 2026-08-01 --dry-run
+node scripts/retire-artifacts.mjs --project <pid> --before 2026-08-01   --reason "stub-agent output"
+```
+
+It supersedes rather than deletes — downstream records keep their lineage — and
+writes one audit entry through the chain’s stored procedure. Verify after with
+`GET /api/v1/audit/verify`.
+
 ## The host plane (and the QA checklist it serves)
 
 The checklist is a static file in the host's `public/`, baked into the image at
