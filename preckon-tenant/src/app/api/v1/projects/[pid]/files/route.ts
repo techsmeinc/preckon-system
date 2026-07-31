@@ -58,7 +58,7 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
     // A .dxf is ASCII, so the UTF-8 fallback would "succeed" and fill the store
     // with entity codes; a .dwg is binary and would fill it with mojibake.
     // Neither is readable by an agent. Parse it properly instead.
-    cad = await extractCad(path.join(STORAGE_DIR, storageKey));
+    cad = await extractCad(path.join(STORAGE_DIR, storageKey), file.name);
     pages = cad.ok && cad.summary
       ? [cadAsPageText(cad.summary)]
       : [`[This drawing could not be read: ${cad.error}]`];

@@ -260,12 +260,12 @@ export interface CadExtractOutcome {
 
 /** Parse a drawing. Never throws: a drawing we can't read must not fail the
  *  upload — the file is still stored and the estimator is told why. */
-export async function extractCad(storagePath: string): Promise<CadExtractOutcome> {
+export async function extractCad(storagePath: string, filename?: string): Promise<CadExtractOutcome> {
   try {
     const res = await fetch(`${CAD_URL}/extract`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ path: storagePath }),
+      body: JSON.stringify({ path: storagePath, filename }),
       signal: AbortSignal.timeout(120_000),
     });
     const body = await res.json().catch(() => null);

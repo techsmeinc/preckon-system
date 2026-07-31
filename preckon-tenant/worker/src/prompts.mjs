@@ -54,6 +54,15 @@ function cadBlock(env) {
   return cad ? String(cad) : "";
 }
 
+/** The CAD block with its framing, or nothing at all when no drawing was
+ *  uploaded — an empty heading reads as "the drawings were blank". */
+function cadFacts(env) {
+  const cad = cadBlock(env);
+  if (!cad) return "";
+  return `CAD FACTS — measured by the drawing parser, not by a model. These numbers are real and already converted to metres. Cite the layer or block you take each one from.
+${cad}`;
+}
+
 /** Attached to any stage that produces a quantity. */
 const QUANTITY_RULES = `HOW TO QUANTIFY — every number you emit must be traceable.
 
@@ -106,8 +115,7 @@ ${JSON.stringify(env.inputs?.params?.files ?? [])}
 DOCUMENTS:
 ${documentsBlock(env, 40_000)}
 
-${cadBlock(env) ? `CAD FACTS — measured from the uploaded drawings by the parser, not by a model. These numbers are real.
-${cadBlock(env)}` : ""}`,
+${cadFacts(env)}`,
   }),
 
   "tender.extract_summary": (env) => ({
@@ -122,7 +130,55 @@ Capture every obligation that could disqualify a bid: bonds, insurances, certifi
     user: `${projectBlock(env)}
 
 TENDER DOCUMENTS:
-${documentsBlock(env, 70_000)}`,
+${documentsBlock(env, 70_000)}
+
+${cadFacts(env)}`,
+  }),
+
+  // The drawings stage, now that Core parses .dxf/.dwg. Both of these were
+  // deterministic stubs before: with no CAD facts in the envelope there was
+  // genuinely nothing for a model to read, so they returned the same two
+  // sheets for every project.
+  "drawing.index": (env) => ({
+    maxTokens: 3000,
+    system: `You are a document controller building the drawing register for a tender pack.
+${HOUSE_RULES}
+Return {"outputs":[{"type":"drawing_index","payload":{
+  "sheet_no":"as printed on the sheet, e.g. A-101","title":"the sheet title",
+  "discipline":"architectural|structural|civil|electrical|mechanical|plumbing|fire",
+  "revision":"as printed","scale":"as printed, e.g. 1:100","file_id":"the id of the file it came from","page_no":number}}]}
+Take sheet numbers, titles, revisions and scales from the TITLE BLOCK and sheet names in the CAD facts, and from the drawing register or sheet list in the documents. Infer the discipline from the sheet prefix (A/S/C/E/M/P/FP) or the layer naming, not from guesswork. One record per sheet that actually exists. If the pack contains no drawings, return an empty outputs array rather than inventing a register.`,
+    user: `${projectBlock(env)}
+
+${cadFacts(env)}
+
+DOCUMENTS (may contain a drawing register or sheet list):
+${documentsBlock(env, 40_000)}`,
+  }),
+
+  "drawing.takeoff": (env) => ({
+    maxTokens: 8000,
+    system: `You are a quantity surveyor taking off quantities from drawings.
+${HOUSE_RULES}
+Return {"outputs":[{"type":"drawing_measurement","payload":{
+  "sheet_no":"the sheet this was measured from","item":"what was measured, e.g. External wall - 200mm blockwork",
+  "quantity":number,"unit":"one of ${STANDARD_UNITS.join(" ")}","location":"where on the drawing, e.g. Gridline A-D",
+  "method":"exactly how this number was arrived at"}}]}
+
+${DISCIPLINE_UNITS}
+
+Measure what the drawings actually contain, discipline by discipline. Counted items come from block counts; runs from layer lengths; areas from the largest closed outline on a layer. Prefer fewer, defensible measurements over broad coverage — every line here becomes a BOQ quantity, and one wrong number propagates all the way to the bid.`,
+    user: `${projectBlock(env)}
+
+${cadFacts(env)}
+
+${QUANTITY_RULES}
+
+DRAWING REGISTER AND UPSTREAM RECORDS:
+${recordsBlock(env, 20_000)}
+
+DOCUMENTS (schedules, notes and specifications that dimension the drawings):
+${documentsBlock(env, 40_000)}`,
   }),
 
   "spec.extract_clauses": (env) => ({
@@ -136,7 +192,9 @@ NORMATIVE means it constrains a material, a dimension, a grade, a test or a work
     user: `${projectBlock(env)}
 
 SPECIFICATION DOCUMENTS:
-${documentsBlock(env, 70_000)}`,
+${documentsBlock(env, 70_000)}
+
+${cadFacts(env)}`,
   }),
 
   "boq.derive_lines": (env) => ({
@@ -160,7 +218,11 @@ CONFIRMED UPSTREAM RECORDS (tender summary, specification clauses, drawing measu
 ${recordsBlock(env, 45_000)}
 
 SOURCE DOCUMENTS:
-${documentsBlock(env, 45_000)}`,
+${documentsBlock(env, 45_000)}
+
+${cadFacts(env)}
+
+${QUANTITY_RULES}`,
   }),
 
   "cost.price_lines": (env) => ({
@@ -179,7 +241,11 @@ BOQ LINES AND UPSTREAM RECORDS:
 ${recordsBlock(env, 50_000)}
 
 RATE BOOK (the tenant's library — prefer these):
-${JSON.stringify(env.inputs?.params?.rate_book ?? []).slice(0, 20_000)}`,
+${JSON.stringify(env.inputs?.params?.rate_book ?? []).slice(0, 20_000)}
+
+${cadFacts(env)}
+
+${QUANTITY_RULES}`,
   }),
 
   "schedule.build_programme": (env) => ({
@@ -193,7 +259,11 @@ Size each duration from the QUANTITY it delivers divided by a realistic crew out
     user: `${projectBlock(env)}
 
 PRICED BOQ AND UPSTREAM RECORDS:
-${recordsBlock(env, 50_000)}`,
+${recordsBlock(env, 50_000)}
+
+${cadFacts(env)}
+
+${QUANTITY_RULES}`,
   }),
 
   "procure.build_packages": (env) => ({
@@ -207,7 +277,9 @@ Group by what one subcontractor or supplier would actually bid as a single scope
     user: `${projectBlock(env)}
 
 PRICED BOQ AND UPSTREAM RECORDS:
-${recordsBlock(env, 50_000)}`,
+${recordsBlock(env, 50_000)}
+
+${cadFacts(env)}`,
   }),
 
   "risk.assess": (env) => ({
@@ -224,7 +296,9 @@ RECORDS:
 ${recordsBlock(env, 30_000)}
 
 DOCUMENTS:
-${documentsBlock(env, 30_000)}`,
+${documentsBlock(env, 30_000)}
+
+${cadFacts(env)}`,
   }),
 
   "rfi.detect": (env) => ({
@@ -241,7 +315,9 @@ RECORDS:
 ${recordsBlock(env, 30_000)}
 
 DOCUMENTS:
-${documentsBlock(env, 30_000)}`,
+${documentsBlock(env, 30_000)}
+
+${cadFacts(env)}`,
   }),
 };
 
@@ -264,7 +340,9 @@ CONFIRMED UPSTREAM RECORDS:
 ${recordsBlock(env, 20_000)}
 
 SOURCE DOCUMENTS:
-${documentsBlock(env, 60_000)}`,
+${documentsBlock(env, 60_000)}
+
+${cadFacts(env)}`,
   };
 }
 
@@ -294,7 +372,11 @@ CONFIRMED UPSTREAM RECORDS:
 ${recordsBlock(env, 25_000)}
 
 SOURCE DOCUMENTS:
-${documentsBlock(env, 45_000)}`,
+${documentsBlock(env, 45_000)}
+
+${cadFacts(env)}
+
+${QUANTITY_RULES}`,
   };
 }
 

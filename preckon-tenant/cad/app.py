@@ -35,6 +35,9 @@ SUPPORTED = (".dxf", ".dwg")
 
 class PathRequest(BaseModel):
     path: str
+    # Storage keys carry a uuid prefix. Agents cite this name in their working,
+    # so pass the name the estimator uploaded, not the key on disk.
+    filename: str | None = None
 
 
 def _checked(path: str) -> str:
@@ -57,7 +60,10 @@ def health() -> dict[str, bool]:
 def post_extract(req: PathRequest) -> dict:
     real = _checked(req.path)
     try:
-        return extract_dxf(real)
+        out = extract_dxf(real)
+        if req.filename:
+            out["file"] = req.filename
+        return out
     except HTTPException:
         raise
     except RuntimeError as exc:
