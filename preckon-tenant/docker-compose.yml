@@ -53,6 +53,23 @@ services:
     ports:
       - "4000:4000"
 
+  # The CAD extraction sidecar (§5.1, same trust boundary as the worker): parses
+  # .dxf/.dwg into a measured summary. No DB driver, no credentials, and the
+  # uploads volume is read-only — it is a pure function of the bytes it is given.
+  cad:
+    build: ./cad
+    restart: unless-stopped
+    environment:
+      FILE_STORAGE_DIR: /app/.uploads
+      # DWG is proprietary and binary. ezdxf converts it via the ODA File
+      # Converter; without it .dwg uploads fail with a clear message telling the
+      # estimator to export DXF. .dxf never needs it.
+      EZDXF_ODAFC: ${EZDXF_ODAFC:-}
+    volumes:
+      - uploads:/app/.uploads:ro
+    expose:
+      - "7400"
+
   app:
     build: .
     restart: unless-stopped
@@ -69,6 +86,7 @@ services:
       BETTER_AUTH_URL: http://localhost:3100
       INTERNAL_SERVICE_TOKEN: change-me-service-token
       WORKER_URL: http://worker:4000
+      CAD_URL: http://cad:7400
       CORE_URL: http://app:3000
       FILE_STORAGE_DIR: /app/.uploads
       # Sign-in attempts per minute. Raise only to run the e2e suite, which signs
