@@ -33,6 +33,17 @@ function documentsBlock(env, budget = 60_000) {
     .join("\n\n");
 }
 
+/** The uploaded files with their REAL ids. Records that reference a file (a
+ *  drawing register, a measurement) must carry an id that exists, so the agent
+ *  has to be told what the ids are — a filename alone isn't enough. */
+function filesBlock(env) {
+  const files = env.inputs?.params?.files ?? [];
+  if (!files.length) return "(no files)";
+  return files
+    .map((f) => `${f.id}  ${f.filename} (${f.page_count} page${f.page_count === 1 ? "" : "s"})`)
+    .join("\n");
+}
+
 /** The upstream artifacts this stage consumes, as compact JSON. */
 function recordsBlock(env, budget = 40_000) {
   const arts = env.inputs?.artifacts ?? [];
@@ -146,9 +157,12 @@ ${HOUSE_RULES}
 Return {"outputs":[{"type":"drawing_index","payload":{
   "sheet_no":"as printed on the sheet, e.g. A-101","title":"the sheet title",
   "discipline":"architectural|structural|civil|electrical|mechanical|plumbing|fire",
-  "revision":"as printed","scale":"as printed, e.g. 1:100","file_id":"the id of the file it came from","page_no":number}}]}
+  "revision":"as printed","scale":"as printed, e.g. 1:100","file_id":"the id of the file it came from, copied EXACTLY from the UPLOADED FILES list","page_no":number}}]}
 Take sheet numbers, titles, revisions and scales from the TITLE BLOCK and sheet names in the CAD facts, and from the drawing register or sheet list in the documents. Infer the discipline from the sheet prefix (A/S/C/E/M/P/FP) or the layer naming, not from guesswork. One record per sheet that actually exists. If the pack contains no drawings, return an empty outputs array rather than inventing a register.`,
     user: `${projectBlock(env)}
+
+UPLOADED FILES — "file_id" MUST be one of these ids, copied character for character:
+${filesBlock(env)}
 
 ${cadFacts(env)}
 
