@@ -10,8 +10,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY extractor.py app.py ./
 
-# Non-root: this parses untrusted files from the internet.
-RUN useradd --system --uid 1001 cad
+# Non-root: this parses untrusted files from the internet. ezdxf wants a
+# writable cache for its font metrics; without a home it warns on every call.
+RUN useradd --system --uid 1001 --create-home --home-dir /home/cad cad  && mkdir -p /home/cad/.cache/ezdxf && chown -R cad:cad /home/cad
+ENV HOME=/home/cad
 USER cad
 
 EXPOSE 7400

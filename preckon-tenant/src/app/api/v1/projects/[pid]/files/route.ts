@@ -7,6 +7,7 @@ import { query } from "@/lib/db";
 import { newId } from "@/lib/ids";
 import { actorFromCtx, useCase } from "@/lib/usecase";
 import { errBadRequest } from "@/lib/errors";
+import { cadAsPageText, extractCad, isCadFile, renderCad, type CadExtractOutcome } from "@/lib/cad";
 
 const STORAGE_DIR = process.env.FILE_STORAGE_DIR ?? "./.uploads";
 
@@ -15,7 +16,14 @@ export const GET = route<{ pid: string }>(async (_req, ctx, { pid }) => {
   requirePermission(ctx, "artifact.read");
   await requireProject(ctx, pid);
   const rows = await query(
-    "SELECT id, filename, mime, size_bytes, status, page_count, created_at FROM file WHERE tenant_id = ? AND project_id = ? ORDER BY created_at DESC",
+    `SELECT f.id, f.filename, f.mime, f.size_bytes, f.status, f.page_count, f.created_at,
+            c.units AS cad_units, c.layer_count AS cad_layers, c.block_count AS cad_blocks,
+            c.sheet_count AS cad_sheets, c.warnings AS cad_warnings,
+            c.svg IS NOT NULL AS cad_has_svg
+       FROM file f
+       LEFT JOIN cad_extraction c ON c.file_id = f.id
+      WHERE f.tenant_id = ? AND f.project_id = ?
+      ORDER BY f.created_at DESC`,
     [ctx.tenantId, pid]
   );
   return ok(rows);
@@ -41,9 +49,20 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
   const storageKey = path.join(ctx.tenantId, pid, `${id}-${file.name}`);
   await fs.writeFile(path.join(STORAGE_DIR, storageKey), buf);
 
-  // Extract text (non-LLM ingestion, §7.2). PDFs via pdf-parse; else treat as UTF-8.
+  // Extract text (non-LLM ingestion, §7.2). PDFs via pdf-parse; CAD via the
+  // sidecar; else treat as UTF-8.
   let pages: string[] = [];
-  if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+  let cad: CadExtractOutcome | null = null;
+
+  if (isCadFile(file.name)) {
+    // A .dxf is ASCII, so the UTF-8 fallback would "succeed" and fill the store
+    // with entity codes; a .dwg is binary and would fill it with mojibake.
+    // Neither is readable by an agent. Parse it properly instead.
+    cad = await extractCad(path.join(STORAGE_DIR, storageKey));
+    pages = cad.ok && cad.summary
+      ? [cadAsPageText(cad.summary)]
+      : [`[This drawing could not be read: ${cad.error}]`];
+  } else if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
     try {
       const pdf = (await import("pdf-parse/lib/pdf-parse.js")).default as any;
       const parsed = await pdf(buf);
@@ -56,21 +75,62 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
     pages = [buf.toString("utf8")];
   }
 
+  // Rendered outside the transaction: it is slow, entirely optional, and a
+  // drawing that measures fine but won't render is still fully useful.
+  const svg = cad?.ok ? await renderCad(path.join(STORAGE_DIR, storageKey)) : null;
+
   await useCase(actorFromCtx(ctx), async (_conn, audit) => {
+    // A drawing we couldn't parse is 'failed', not 'ingested'. The bytes are
+    // kept either way, but the chain must not treat an unreadable file as
+    // understood — that is how a BOQ ends up quietly missing a discipline.
+    const status = cad && !cad.ok ? "failed" : "ingested";
     await query(
       `INSERT INTO file (id, tenant_id, project_id, storage_key, filename, mime, size_bytes, checksum, status, page_count, uploaded_by)
-       VALUES (?,?,?,?,?,?,?,?, 'ingested', ?, ?)`,
-      [id, ctx.tenantId, pid, storageKey, file.name, file.type || "application/octet-stream", buf.length, checksum, pages.length, ctx.user.id]
+       VALUES (?,?,?,?,?,?,?,?, ?, ?, ?)`,
+      [id, ctx.tenantId, pid, storageKey, file.name, file.type || "application/octet-stream", buf.length, checksum, status, pages.length, ctx.user.id]
     );
     let n = 1;
     for (const text of pages) {
       await query(
-        "INSERT INTO file_page (id, tenant_id, file_id, page_no, text, method) VALUES (?,?,?,?,?, 'native')",
-        [newId(), ctx.tenantId, id, n++, text.slice(0, 200000)]
+        "INSERT INTO file_page (id, tenant_id, file_id, page_no, text, method) VALUES (?,?,?,?,?, ?)",
+        [newId(), ctx.tenantId, id, n++, text.slice(0, 200000), cad ? "cad" : "native"]
       );
     }
-    audit({ action: "file.upload", targetKind: "file", targetId: id, projectId: pid, summary: { filename: file.name, pages: pages.length } });
+    if (cad?.ok && cad.summary) {
+      const s = cad.summary;
+      await query(
+        `INSERT INTO cad_extraction (file_id, tenant_id, project_id, units, layer_count, block_count, sheet_count, summary, warnings, svg)
+         VALUES (?,?,?,?,?,?,?,?,?,?)`,
+        [
+          id, ctx.tenantId, pid, s.units ?? null,
+          (s.layers ?? []).length,
+          Object.values(s.blockInstanceCounts ?? {}).reduce((t, b) => t + (b.total ?? 0), 0),
+          (s.sheets ?? []).length,
+          JSON.stringify(s), JSON.stringify(s.warnings ?? []), svg,
+        ]
+      );
+    }
+    audit({
+      action: "file.upload",
+      targetKind: "file",
+      targetId: id,
+      projectId: pid,
+      summary: {
+        filename: file.name,
+        pages: pages.length,
+        ...(cad ? { cad: cad.ok, ...(cad.ok ? {} : { error: cad.error }) } : {}),
+      },
+    });
   });
 
-  return ok({ id, filename: file.name, pages: pages.length, status: "ingested" }, 201);
+  return ok(
+    {
+      id,
+      filename: file.name,
+      pages: pages.length,
+      status: cad && !cad.ok ? "failed" : "ingested",
+      ...(cad && !cad.ok ? { error: cad.error } : {}),
+    },
+    201
+  );
 });

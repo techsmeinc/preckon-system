@@ -6,6 +6,7 @@ import { errNotFound } from "./errors";
 import { newId } from "./ids";
 import { enqueueJob, recordJobResult, type JobInputArtifact, type JobResult } from "./jobs";
 import type { Tier } from "./constants";
+import { cadDigest } from "./cad";
 
 // ── §4 The workflow runtime: Preckon Core's deterministic scheduler. No LLM.
 // It materializes a step per node, dispatches steps whose upstream completed,
@@ -426,6 +427,33 @@ async function dispatchAgentStep(
     params.documents = await inlineDocumentText(tenantId, files);
   }
 
+  // CAD is inlined for anything that measures, prices or programmes — not just
+  // the drawings agent. A quantity surveyor pricing blockwork needs the wall
+  // runs; a planner sequencing the works needs to know there are 148 luminaires.
+  // The digest is already converted to metres and flags which numbers are
+  // trustworthy, so the agent never has to interpret raw drawing units.
+  const measuresWork = ["drawing_measurement", "boq_item", "cost_line", "schedule_activity", "spec_clause"];
+  if (agent.produces.some((p) => measuresWork.includes(p.split(".").pop() ?? "")) || readsDocuments) {
+    const drawings = await query<{ filename: string; summary: any }>(
+      `SELECT f.filename, c.summary
+         FROM cad_extraction c JOIN file f ON f.id = c.file_id
+        WHERE c.tenant_id = ? AND c.project_id = ?
+        ORDER BY f.created_at ASC LIMIT 20`,
+      [tenantId, projectId]
+    );
+    if (drawings.length) {
+      params.cad = cadDigest(
+        drawings.map((d) => ({
+          filename: d.filename,
+          // mysql2 gives JSON columns back parsed, but a driver/config change
+          // that returns a string shouldn't silently blank the drawings.
+          summary: typeof d.summary === "string" ? JSON.parse(d.summary) : d.summary,
+        })),
+        CAD_DIGEST_BUDGET
+      );
+    }
+  }
+
   // The estimator prices against the tenant's own rate book (§M). Without it the
   // agent invents rates from general knowledge instead of using the rates this
   // contractor actually wins work at.
@@ -463,6 +491,9 @@ async function dispatchAgentStep(
  * silently reasoning over a third of the document.
  */
 const DOC_TEXT_BUDGET = Number(process.env.AGENT_DOC_TEXT_BUDGET ?? 120_000);
+// The CAD digest is dense — every line is a number the agent may price from —
+// so it gets its own budget rather than competing with the specification text.
+const CAD_DIGEST_BUDGET = Number(process.env.AGENT_CAD_BUDGET ?? 20_000);
 
 async function inlineDocumentText(
   tenantId: string,

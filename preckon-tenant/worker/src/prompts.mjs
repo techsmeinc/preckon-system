@@ -41,6 +41,48 @@ function recordsBlock(env, budget = 40_000) {
   return JSON.stringify(rows).slice(0, budget);
 }
 
+/**
+ * The parsed drawings, already measured and converted to metres by Core.
+ *
+ * This block is the difference between a BOQ that is priced off a real design
+ * and one that is a plausible guess. It is presented as FACTS, and the grounding
+ * rule below makes citing them mandatory — because the failure mode that ruins
+ * an estimate is not a missing line, it is a confident quantity nobody measured.
+ */
+function cadBlock(env) {
+  const cad = env.inputs?.params?.cad;
+  return cad ? String(cad) : "";
+}
+
+/** Attached to any stage that produces a quantity. */
+const QUANTITY_RULES = `HOW TO QUANTIFY — every number you emit must be traceable.
+
+A quantity may come from exactly one of these, and you must say which in "method":
+  (a) A CAD FACT above — a block count (exact, use directly for nr), a layer run
+      length in m, or a layer's LARGEST closed area in m². Write the layer or
+      block name into "method", e.g. "count of DOOR_SINGLE_900 = 5 (A-DOOR)".
+  (b) A FIGURE STATED in the documents — a schedule row, a spec clause, a
+      drawing note. Quote it in "method" with where it came from.
+  (c) A DERIVATION from (a) and (b) using a standard QS formula, allowed ONLY
+      when every input is a real measured or stated number — never an assumed
+      one. Put the formula and its inputs in "method", e.g.
+      "96 m² footprint x 0.2 m slab = 19.2 m3".
+
+If you cannot do any of those, DO NOT INVENT A NUMBER. Emit the item with the
+correct unit for what it measures, quantity 1, confidence low, and write
+"provisional — not yet measured" in "method". A provisional line an estimator
+can see and fix is useful; a fabricated quantity they cannot tell apart from a
+measured one is worse than no line at all.
+
+Never downgrade a measurable item to a lump sum just because you could not
+measure it. Paving stays m2, pipework stays m, concrete stays m3, doors stay nr.
+Lump sums are for genuinely non-measurable scope: mobilisation, design,
+submittals, testing and commissioning, making good.
+
+Use the LARGEST closed area on a layer as its area, never the summed total —
+the sum adds every overlapping outline, furniture polygon and hatch boundary
+and over-counts real floor area many times over.`;
+
 function projectBlock(env) {
   const p = env.inputs?.params ?? {};
   return `PROJECT: ${p.project_name ?? "(unnamed)"}${p.client_name ? `  ·  CLIENT: ${p.client_name}` : ""}`;
@@ -62,7 +104,10 @@ FILES:
 ${JSON.stringify(env.inputs?.params?.files ?? [])}
 
 DOCUMENTS:
-${documentsBlock(env, 40_000)}`,
+${documentsBlock(env, 40_000)}
+
+${cadBlock(env) ? `CAD FACTS — measured from the uploaded drawings by the parser, not by a model. These numbers are real.
+${cadBlock(env)}` : ""}`,
   }),
 
   "tender.extract_summary": (env) => ({
