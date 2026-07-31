@@ -304,9 +304,20 @@ async function buildAgentParams(
     // must reason over their contents get the extracted PAGE TEXT inlined too.
     // The worker has no store access by design, so if Core doesn't put the text in
     // the envelope the agent cannot analyse the upload at all — it can only invent.
+    //
+    // The declared consumes/produces are not sufficient here. The BOQ agent
+    // consumes tender_summary and spec_clause, so on that test alone it would
+    // read the SOW only second-hand, through another agent's summary of it. That
+    // is precisely how scope goes missing: a preliminaries clause or an
+    // "as required" instruction that no upstream stage happened to extract can
+    // never appear in the bill. Anything that measures, prices or programmes
+    // gets the source documents.
+    const shortType = (t: string) => t.split(".").pop() ?? t;
+    const WORKS_FROM_SOURCE = ["boq_line", "cost_line", "schedule_activity", "drawing_measurement", "procurement_package", "risk", "rfi"];
     const readsDocuments =
-      agent.produces.some((p) => p.split(".").pop() === "document") ||
-      agent.consumes.some((c) => c.split(".").pop() === "document");
+      agent.produces.some((p) => shortType(p) === "document") ||
+      agent.consumes.some((c) => shortType(c) === "document") ||
+      agent.produces.some((p) => WORKS_FROM_SOURCE.includes(shortType(p)));
 
     if (readsDocuments) {
       const files = await query<{ id: string; filename: string; mime: string; page_count: number }>(
@@ -323,7 +334,7 @@ async function buildAgentParams(
     // The digest is already converted to metres and flags which numbers are
     // trustworthy, so the agent never has to interpret raw drawing units.
     const measuresWork = ["drawing_measurement", "boq_line", "cost_line", "schedule_activity", "spec_clause"];
-    if (agent.produces.some((p) => measuresWork.includes(p.split(".").pop() ?? "")) || readsDocuments) {
+    if (agent.produces.some((p) => measuresWork.includes(shortType(p))) || readsDocuments) {
       const drawings = await query<{ filename: string; summary: any }>(
         `SELECT f.filename, c.summary
            FROM cad_extraction c JOIN file f ON f.id = c.file_id
