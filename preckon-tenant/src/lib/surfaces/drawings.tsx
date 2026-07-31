@@ -16,6 +16,7 @@ import { qty, confPct } from "@/lib/chain";
 import { useCan } from "@/lib/ui";
 import { useI18n } from "@/lib/i18n";
 import { BimStudioPanel } from "@/lib/bim/panel";
+import { ParsedSheets } from "@/lib/bim/sheets";
 import {
   ReviewDrawer, StageEmpty, StageHeader, pendingOf, useArtifactActions, type SurfaceProps,
 } from "./common";
@@ -61,6 +62,7 @@ export default function DrawingsSurface({ pid, stage, artifacts, rows, workflows
     return (
       <>
         <StageHeader stage={stage} workflows={workflows} runs={runs} pid={pid} reload={reload} />
+        <ParsedSheets pid={pid} />
         <BimStudioPanel pid={pid} onMeasured={reload} />
         <StageEmpty title={t("draw.emptyTitle")} sub={t("draw.emptySub")} />
       </>
@@ -73,6 +75,8 @@ export default function DrawingsSurface({ pid, stage, artifacts, rows, workflows
         stage={stage} workflows={workflows} runs={runs} pid={pid} reload={reload}
         right={highConf.length > 1 ? <button className="mini sm" disabled={busy} onClick={() => confirmMany(highConf)}>{t("stage.acceptAll")}</button> : undefined}
       />
+
+      <ParsedSheets pid={pid} />
 
       <BimStudioPanel pid={pid} onMeasured={reload} />
 

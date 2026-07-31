@@ -208,6 +208,7 @@ export const en = {
   "docs.notClassified": "not classified yet",
   "docs.ingested": "Ingested {name}",
   "docs.uploadFail": "Upload failed",
+  "docs.cadRead": "read as CAD · {units} · {layers} layers · {blocks} blocks · {sheets} sheets",
 
   /* ── shared surface machinery ─────────────────────────────────────────── */
   "stage.run": "Run",
@@ -304,6 +305,17 @@ export const en = {
   "draw.registerTitle": "Takeoff register",
   "draw.registerSub": "Quantities measured from the drawings — read from the model above, or extracted from an issued sheet. Check the working before you accept.",
   "draw.allSheets": "All sheets",
+
+  "cad.title": "Issued drawings",
+  "cad.sub": "What the parser read from each uploaded .dxf/.dwg — the same facts the agents were given.",
+  "cad.measured": "Measured",
+  "cad.units": "Units",
+  "cad.footprint": "Footprint",
+  "cad.sheets": "Sheets",
+  "cad.blocks": "Block counts",
+  "cad.layers": "Layers",
+  "cad.notes": "Notes",
+  "cad.noRender": "This drawing measured cleanly but could not be rendered.",
 
   /* ── specs (DocLogix) ─────────────────────────────────────────────────── */
   "specs.emptyTitle": "Specs not parsed yet",

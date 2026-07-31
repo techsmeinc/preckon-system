@@ -210,6 +210,7 @@ export const fr: Dict = {
   "docs.notClassified": "pas encore classé",
   "docs.ingested": "{name} intégré",
   "docs.uploadFail": "Échec de l’import",
+  "docs.cadRead": "lu comme CAO · {units} · {layers} calques · {blocks} blocs · {sheets} planches",
 
   /* ── shared surface machinery ─────────────────────────────────────────── */
   "stage.run": "Exécuter",
@@ -306,6 +307,17 @@ export const fr: Dict = {
   "draw.registerTitle": "Registre de métré",
   "draw.registerSub": "Quantités mesurées sur les plans — relevées du modèle ci-dessus ou extraites d’une planche émise. Vérifiez le calcul avant d’accepter.",
   "draw.allSheets": "Toutes les planches",
+
+  "cad.title": "Plans émis",
+  "cad.sub": "Ce que l’analyseur a lu dans chaque .dxf/.dwg — les faits mêmes fournis aux agents.",
+  "cad.measured": "Mesuré",
+  "cad.units": "Unités",
+  "cad.footprint": "Emprise",
+  "cad.sheets": "Planches",
+  "cad.blocks": "Nombre de blocs",
+  "cad.layers": "Calques",
+  "cad.notes": "Notes",
+  "cad.noRender": "Ce plan a été mesuré correctement mais n’a pas pu être affiché.",
 
   /* ── specs (DocLogix) ─────────────────────────────────────────────────── */
   "specs.emptyTitle": "CCTP pas encore analysé",

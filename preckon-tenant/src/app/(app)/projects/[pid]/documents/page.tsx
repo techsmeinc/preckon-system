@@ -91,7 +91,22 @@ export default function DocumentsPage({ params }: { params: Promise<{ pid: strin
                 const d = docFor(f.id);
                 return (
                   <tr key={f.id}>
-                    <td><div className="t-name">{f.filename}</div><div className="t-sub">{fileKind(f.mime)}</div></td>
+                    <td>
+                      <div className="t-name">{f.filename}</div>
+                      <div className="t-sub">{fileKind(f.mime, f.filename)}</div>
+                      {/* A drawing that was parsed says so in the terms an
+                          estimator checks first: units, and how much is in it. */}
+                      {f.cad_layers != null && (
+                        <div className="t-sub mono" style={{ marginTop: 2 }}>
+                          {t("docs.cadRead", {
+                            units: f.cad_units ?? "?",
+                            layers: f.cad_layers,
+                            blocks: f.cad_blocks,
+                            sheets: f.cad_sheets,
+                          })}
+                        </div>
+                      )}
+                    </td>
                     <td>{d ? <span className="stage">{humanize(d.payload?.doc_type ?? "document")}</span> : <span className="csub">{t("docs.notClassified")}</span>}</td>
                     <td className="r num">{f.page_count ?? "—"}</td>
                     <td className="r num">{f.size_bytes ? (f.size_bytes / 1024).toFixed(0) + " KB" : "—"}</td>
@@ -108,7 +123,11 @@ export default function DocumentsPage({ params }: { params: Promise<{ pid: strin
   );
 }
 
-function fileKind(mime?: string): string {
+function fileKind(mime?: string, filename?: string): string {
+  // Browsers send no useful mime for .dxf/.dwg — it arrives as
+  // application/octet-stream, which would read as "octet-stream" in the table.
+  if (filename && /\.dxf$/i.test(filename)) return "CAD drawing (DXF)";
+  if (filename && /\.dwg$/i.test(filename)) return "CAD drawing (DWG)";
   if (!mime) return "—";
   if (mime.includes("pdf")) return "PDF";
   if (mime.includes("word") || mime.includes("msword") || mime.includes("officedocument.wordprocessing")) return "Word";

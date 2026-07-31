@@ -209,6 +209,7 @@ export const ar: Dict = {
   "docs.notClassified": "لم يُصنَّف بعد",
   "docs.ingested": "تم استيعاب {name}",
   "docs.uploadFail": "فشل الرفع",
+  "docs.cadRead": "قُرئ كرسم CAD · {units} · {layers} طبقة · {blocks} كتلة · {sheets} لوحة",
 
   /* ── shared surface machinery ─────────────────────────────────────────── */
   "stage.run": "تشغيل",
@@ -305,6 +306,17 @@ export const ar: Dict = {
   "draw.registerTitle": "سجل الحصر",
   "draw.registerSub": "الكميات المقاسة من الرسومات — مقروءة من النموذج أعلاه أو مستخرجة من لوحة صادرة. راجع طريقة الحساب قبل القبول.",
   "draw.allSheets": "كل اللوحات",
+
+  "cad.title": "الرسومات الصادرة",
+  "cad.sub": "ما قرأه المحلّل من كل ملف ‎.dxf/.dwg‎ — نفس الحقائق المعطاة للوكلاء.",
+  "cad.measured": "المقاسات",
+  "cad.units": "الوحدات",
+  "cad.footprint": "مساحة البناء",
+  "cad.sheets": "اللوحات",
+  "cad.blocks": "عدد الكتل",
+  "cad.layers": "الطبقات",
+  "cad.notes": "ملاحظات",
+  "cad.noRender": "تم قياس الرسم بنجاح لكن تعذّر عرضه.",
 
   /* ── specs (DocLogix) ─────────────────────────────────────────────────── */
   "specs.emptyTitle": "لم تُحلَّل المواصفات بعد",
