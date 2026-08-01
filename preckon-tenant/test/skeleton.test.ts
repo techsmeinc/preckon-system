@@ -10,7 +10,10 @@ import { handleSupervisorResult } from "@/lib/persona";
 import { verifyChain } from "@/lib/audit";
 import type { AuditActor } from "@/lib/audit";
 
-const TENANT = "00000000-0000-7000-8000-000000000001";
+// Two workspace ids are in play across the demo stack: …000001 is the one the
+// HOST plane registers, …0000a1 the standalone tenant seed. Which exists depends
+// on how this box was seeded, so let the environment say.
+const TENANT = process.env.TEST_TENANT_ID ?? "00000000-0000-7000-8000-0000000000a1";
 let projectId: string;
 let userId: string;
 const actor: AuditActor = { tenantId: TENANT, actorId: "test-user", actorKind: "user" };
@@ -30,11 +33,20 @@ async function currentByType(type: string, status?: string) {
 
 beforeAll(async () => {
   // Requires the catalog + demo tenant to be seeded (npm run seed).
+  // The demo workspace has been reseeded under different owner identities
+  // (riverside → aigcc → cedarstone), so pin to a role rather than an address:
+  // any owner of this tenant can drive the skeleton.
   const owner = await queryOne<{ id: string }>(
-    "SELECT id FROM app_user WHERE tenant_id = ? AND email = 'owner@riverside.build'",
+    `SELECT u.id FROM app_user u
+       JOIN user_role ur ON ur.user_id = u.id
+       JOIN tenant_role r ON r.id = ur.role_id
+      WHERE u.tenant_id = ? AND r.\`key\` = 'owner' AND u.status = 'active'
+      ORDER BY u.created_at ASC LIMIT 1`,
     [TENANT]
   );
-  if (!owner) throw new Error("Seed not run — execute `npm run seed` against the test DB first.");
+  if (!owner) {
+    throw new Error(`No active owner on tenant ${TENANT} — run "npm run seed" against the test DB first.`);
+  }
   userId = owner.id;
   actor.actorId = userId;
 
