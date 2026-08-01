@@ -121,6 +121,20 @@ export const SCHEMAS: Record<string, any> = {
       wbs: { type: "string" },
       // Grouping band on the Gantt, named after this project's real structure.
       phase: { type: "string" },
+      // Tree position. A "section" is a summary row whose dates and duration are
+      // rolled up from its children rather than stated; "activity" is real work.
+      // `parent` names the row above it, matching the same convention as
+      // depends_on — names, not ids, because an edit supersedes the id.
+      kind: { type: "string", enum: ["section", "activity"] },
+      parent: { type: "string" },
+      // Ordering within a parent. Programmes are read top to bottom in build
+      // order, which is not the order an agent happened to emit them in.
+      seq: { type: "integer" },
+      // Progress, 0-100.
+      percent_complete: { type: "number", minimum: 0, maximum: 100 },
+      // Who is carrying it. A project member's user id, or a free-text crew name
+      // for a subcontractor who has no login.
+      assignee: { type: "string" },
       duration_days: { type: "number", minimum: 0 },
       predecessors: { type: "array", items: { type: "string" } },
       depends_on: {
