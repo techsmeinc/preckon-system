@@ -459,3 +459,98 @@ ${recordsBlock(env, 45_000)}`,
 export function hasPrompt(jobType) {
   return Object.prototype.hasOwnProperty.call(PROMPTS, jobType);
 }
+
+/* ── The Agent Designer ────────────────────────────────────────────────────── */
+
+/**
+ * Invent the specialist roster for THIS project.
+ *
+ * This is the piece that separates a multi-agent bill from a bill written by
+ * one agent in several passes. A fixed roster of trades prices every project as
+ * if it were the same building: a kennel refurbishment gets an "Architectural
+ * Specialist" who knows nothing about kennel flooring, and the turf sub-base
+ * quietly goes unpriced. The designer reads the scope and decides who is needed
+ * — "Synthetic Turf Specialist", "Submersible Pump Specialist" — and what the
+ * verifier should confirm at the end.
+ */
+export function designerPrompt(env, outline) {
+  return {
+    maxTokens: 4000,
+    system: `You are a principal construction consultant designing the multi-agent system that will price ONE specific project's bill of quantities.
+
+You decide who the specialists are, what each knows, which scope sections each owns, and what must be checked at the end. All of it tailored to THIS project.
+
+Return ONLY JSON:
+{"projectType":"free text — invent the phrase, do not pick from a list, e.g. 'Bank Branch Interior Refurbishment'",
+ "projectDescription":"2-3 factual sentences on what this project actually is, grounded in the documents",
+ "scopeAreas":["major scope area", "..."],
+ "reasoning":"one paragraph: how you chose this roster, citing the documents' own wording",
+ "specialists":[{"key":"slug","label":"Human Label","expertise":"what they know, tailored to THIS project",
+   "vocabulary":["domain term"],"measurementGuide":"one sentence on how this scope is measured here",
+   "typicalItems":["example item description"],"ownedSections":["the code of a division this specialist owns"]}],
+ "verifierChecks":[{"key":"slug","topic":"short topic","description":"what to confirm exists in the bill",
+   "rationale":"why it matters for THIS project, quoting the documents","measurementHint":"e.g. m2 of turf area"}]}
+
+RULES
+  • INVENT the specialists. Do not default to a fixed trade list. If the scope is turf, the specialist is a Synthetic Turf Specialist, not an Architectural Specialist.
+  • Every division in the outline must be owned by exactly one specialist, by its code. Distribute so each has a coherent scope.
+  • Generic specialists are fine for standard preamble scope — site survey, design submittals, mobilisation, closeout — because those recur on nearly every project.
+  • 5-12 specialists. More fragments the work; fewer makes any one too broad.
+  • 6-12 verifier checks, each SPECIFIC to this project and grounded in its wording, each mapping to a concrete BOQ item that ought to exist. Not "is electrical covered?".
+  • BE CONSERVATIVE. If the documents never mention HVAC, do not invent an HVAC specialist or an HVAC check. Inventing scope is as damaging as missing it.`,
+    user: `${projectBlock(env)}
+
+THE DIVISIONS ALREADY IDENTIFIED (own every one of these by code):
+${JSON.stringify(outline)}
+
+${programmeSignalsBlock(env) ? "" : ""}SOURCE DOCUMENTS:
+${documentsBlock(env, 60_000)}
+
+${cadFacts(env)}`,
+  };
+}
+
+/* ── The Completeness Verifier ─────────────────────────────────────────────── */
+
+/**
+ * Audit one of the designer's project-specific checks against the bill.
+ *
+ * Runs per check rather than as one "is anything missing?" pass, because a
+ * single broad question returns a single vague answer. A narrow, falsifiable
+ * question — "does the bill include sub-base preparation for the new turf?" —
+ * either finds the line or produces the line that was missing.
+ */
+export function verifierPrompt(env, check, lines) {
+  return {
+    maxTokens: 3000,
+    system: `You are a senior quantity surveyor auditing a bill of quantities for ONE specific omission.
+${HOUSE_RULES}
+You are given a check designed for this project, and the bill as it stands. Decide whether the bill already covers it.
+
+Return ONLY JSON:
+{"covered":true|false,
+ "evidence":"if covered — the code(s) and description(s) of the lines that cover it",
+ "outputs":[{"type":"boq_line","payload":{"code":"","description":"","quantity":number,"unit":"one of ${STANDARD_UNITS.join(" ")}","trade":"","notes":"why this was missing and how you quantified it"}}]}
+
+If it IS covered, return covered true, the evidence, and an EMPTY outputs array. Do not duplicate a line that already exists — a bill with the same work priced twice is worse than one with it priced once.
+
+If it is NOT covered, return covered false and the missing line(s). Quantify them by the same rules as the rest of the bill: from a CAD fact, from a figure stated in the documents, or from a derivation of both. Where you cannot, emit the item with the right unit, quantity 1 and "provisional — not yet measured" in notes. Keep it to the few lines the check actually implies.
+
+Only raise scope the documents support. A check that turns out not to apply to this project is answered covered=true with evidence "not in scope — <reason>".`,
+    user: `${projectBlock(env)}
+
+THE CHECK
+topic: ${check.topic}
+confirm: ${check.description}
+why it matters: ${check.rationale}
+${check.measurementHint ? `expected measure: ${check.measurementHint}` : ""}
+
+THE BILL AS IT STANDS
+${JSON.stringify(lines.map((l) => ({ code: l.payload?.code, description: l.payload?.description, quantity: l.payload?.quantity, unit: l.payload?.unit, trade: l.payload?.trade }))).slice(0, 45_000)}
+
+${cadFacts(env)}
+
+SOURCE DOCUMENTS:
+${documentsBlock(env, 35_000)}`,
+  };
+}
