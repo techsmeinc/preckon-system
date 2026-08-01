@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 // @ts-expect-error — the worker's stub agents are plain JS, imported for the in-process dispatcher.
 import { computeJobResult } from "../worker/src/agents.mjs";
 import { pool, query, queryOne } from "@/lib/db";
@@ -57,6 +57,24 @@ beforeAll(async () => {
     [projectId, TENANT, "Skeleton Test Project", userId]
   );
   await query("INSERT INTO project_member (tenant_id, project_id, user_id) VALUES (?,?,?)", [TENANT, projectId, userId]);
+});
+
+// Remove the scratch project afterwards. Without this it lands at the top of the
+// workspace's project list — where the e2e suite opens "the first project" and
+// finds a shell with no proposals to review. A unit test must not change what
+// the next test sees.
+afterAll(async () => {
+  if (!projectId) return;
+  // artifact, workflow_run and bim_document reference the project WITHOUT a
+  // delete cascade, so the parent row has to be cleared from the leaves up.
+  // Provenance and run steps hang off those in turn.
+  await query("DELETE p FROM artifact_provenance p JOIN artifact a ON a.id = p.artifact_id WHERE a.project_id = ?", [projectId]);
+  await query("DELETE s FROM workflow_run_step s JOIN workflow_run r ON r.id = s.run_id WHERE r.project_id = ?", [projectId]);
+  await query("DELETE FROM ai_job WHERE project_id = ?", [projectId]);
+  await query("DELETE FROM artifact WHERE project_id = ?", [projectId]);
+  await query("DELETE FROM workflow_run WHERE project_id = ?", [projectId]);
+  await query("DELETE FROM bim_document WHERE project_id = ?", [projectId]);
+  await query("DELETE FROM project WHERE id = ? AND tenant_id = ?", [projectId, TENANT]);
 });
 
 describe("§S walking skeleton — end to end", () => {
