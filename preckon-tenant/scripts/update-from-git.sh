@@ -50,6 +50,14 @@ if want tenant && [ -d /opt/preckon-tenant ]; then
     echo "   $m"
     docker compose exec -T db mysql -uroot -ppreckon preckon_tenant < "$m"
   done
+  # Artifact payload schemas live in the DATABASE, registered from the pack at
+  # seed time — they are not read from source. Skipping this leaves the server
+  # validating against the previous shape, and every agent or editor write that
+  # uses a newly added field fails with "Payload invalid for <type>". Idempotent
+  # (ON DUPLICATE KEY UPDATE), so it is safe on every deploy.
+  echo "→ re-registering the pack catalog (artifact schemas)"
+  docker compose --profile tools run --rm seed || echo "  ! catalog seed failed — new payload fields will be rejected"
+
   echo "→ building tenant (first cad build compiles LibreDWG — a few minutes)"
   docker compose build app worker cad
   docker compose up -d app worker cad
