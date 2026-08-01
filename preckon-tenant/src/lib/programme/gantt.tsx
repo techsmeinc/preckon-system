@@ -73,8 +73,24 @@ export function ProgrammeGantt({
     });
   }, [tree, collapsed, onlyCritical, assignee]);
 
-  const dayW = Math.max(2, 8 * zoom);
-  const chartW = Math.max(320, (total + 2) * dayW);
+  // Fit the programme to the track at zoom 1, the way a Gantt is expected to
+  // open, then let zoom scale from there. A fixed day width leaves a 3-week job
+  // squeezed into a corner of a wide screen, and a fixed minimum chart width
+  // makes zoom do nothing at all until the programme outgrows it.
+  const [trackW, setTrackW] = useState(720);
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    const measure = () => setTrackW(Math.max(280, el.clientWidth));
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const fitW = trackW / Math.max(total + 2, 1);
+  const dayW = Math.max(1.5, fitW * zoom);
+  const chartW = Math.max(trackW, (total + 2) * dayW);
   const x = (d: number) => d * dayW;
 
   const fmtDay = (d: number) => {
