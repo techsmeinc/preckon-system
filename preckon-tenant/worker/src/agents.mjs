@@ -137,7 +137,7 @@ async function withClaude(env, base, template) {
  * question gets a vague answer. A narrow, falsifiable one either finds the line
  * or produces the line that was missing.
  */
-async function runBoqRoster(env, model) {
+export async function runBoqRoster(env, model, call = callAnthropic) {
   const trace = [];
   const note = (stage, message) => {
     trace.push({ stage, message, at: new Date().toISOString() });
@@ -146,7 +146,7 @@ async function runBoqRoster(env, model) {
 
   // 1. Outline
   const outlineReq = outlinePrompt(env);
-  const outlineText = await callAnthropic(model, outlineReq.system, outlineReq.user, outlineReq.maxTokens);
+  const outlineText = await call(model, outlineReq.system, outlineReq.user, outlineReq.maxTokens);
   const outline = extractJson(outlineText);
   let sections = Array.isArray(outline?.sections) ? outline.sections : [];
   if (!sections.length) throw new Error("BOQ outline returned no work divisions");
@@ -157,7 +157,7 @@ async function runBoqRoster(env, model) {
   let roster = null;
   try {
     const dReq = designerPrompt(env, sections);
-    const dText = await callAnthropic(model, dReq.system, dReq.user, dReq.maxTokens);
+    const dText = await call(model, dReq.system, dReq.user, dReq.maxTokens);
     const d = extractJson(dText);
     if (Array.isArray(d?.specialists) && d.specialists.length) {
       roster = d;
@@ -179,7 +179,7 @@ async function runBoqRoster(env, model) {
   const runSection = async (sec) => {
     try {
       const req = sectionPrompt(env, sec, specialistFor(sec), roster);
-      const text = await callAnthropic(model, req.system, req.user, req.maxTokens);
+      const text = await call(model, req.system, req.user, req.maxTokens);
       const parsed = extractJson(text);
       const rows = Array.isArray(parsed) ? parsed : parsed?.outputs;
       return Array.isArray(rows) ? rows : [];
@@ -211,7 +211,7 @@ async function runBoqRoster(env, model) {
     const runCheck = async (check) => {
       try {
         const req = verifierPrompt(env, check, lines);
-        const text = await callAnthropic(model, req.system, req.user, req.maxTokens);
+        const text = await call(model, req.system, req.user, req.maxTokens);
         const v = extractJson(text);
         return {
           check,
