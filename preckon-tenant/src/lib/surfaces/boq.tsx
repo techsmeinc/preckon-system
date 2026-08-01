@@ -52,8 +52,6 @@ export default function BoqSurface({ pid, stage, artifacts, rows, workflows, run
     return (
       <>
         <StageHeader stage={stage} workflows={workflows} runs={runs} pid={pid} reload={reload} />
-
-      <BoqPipeline pid={pid} />
         <StageEmpty title={t("boq.emptyTitle")} sub={t("boq.emptySub")} />
       </>
     );
@@ -62,6 +60,10 @@ export default function BoqSurface({ pid, stage, artifacts, rows, workflows, run
   return (
     <>
       <StageHeader stage={stage} workflows={workflows} runs={runs} pid={pid} reload={reload} />
+
+      {/* Who priced this bill, and what was audited. Above the lines because it
+          is the context you need before reading any of them. */}
+      <BoqPipeline pid={pid} />
 
       <div className="boq-sum">
         <div className="s"><div className="k">{t("boq.pricedValue")}</div><div className="v">{totals.minor ? money(totals.minor, totals.ccy) : "—"}</div></div>
