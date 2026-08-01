@@ -39,7 +39,7 @@ const STAGES = [
   { tab: "Specs", url: /modules\/doclogix/, marker: /Clauses|Specs not parsed/ },
   { tab: "BOQ", url: /modules\/quantlogix/, marker: /Bill of quantities|BOQ not ready/ },
   { tab: "Estimate", url: /modules\/costlogix/, marker: /Priced bill|Estimate not started/ },
-  { tab: "Schedule", url: /modules\/schedulelogix/, marker: /Construction programme|Programme not started/ },
+  { tab: "Schedule", url: /modules\/schedulelogix/, marker: /Work programme|Programme not started/ },
   { tab: "Procurement", url: /modules\/procurelogix/, marker: /Procurement packages|No packages yet/ },
 ];
 

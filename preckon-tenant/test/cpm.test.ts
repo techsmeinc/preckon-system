@@ -151,3 +151,14 @@ describe("activity tree", () => {
     expect(tree.length).toBeLessThanOrEqual(2);
   });
 });
+
+describe("sections are not milestones", () => {
+  it("does not treat an empty zero-duration section as a milestone", () => {
+    const r = computeCpm([
+      { id: "s", status: "confirmed", payload: { activity: "Fit-out", kind: "section", duration_days: 0, depends_on: [] } },
+      { id: "m", status: "confirmed", payload: { activity: "Handover", duration_days: 0, is_milestone: true, depends_on: [] } },
+    ]);
+    expect(r.nodes.find((n) => n.name === "Fit-out")!.milestone).toBe(false);
+    expect(r.nodes.find((n) => n.name === "Handover")!.milestone).toBe(true);
+  });
+});

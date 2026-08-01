@@ -89,7 +89,11 @@ export function computeCpm(rows: any[]): CpmResult {
       name: String(p.activity ?? "Activity"),
       phase: String(p.phase ?? p.trade ?? ""),
       dur: Math.max(0, num(p.duration_days, 0)),
-      milestone: p.is_milestone === true || num(p.duration_days, -1) === 0,
+      // A section spans its children and legitimately has no duration of its
+      // own; only a real zero-duration ACTIVITY is a milestone. Without this an
+      // empty section draws itself as a handover diamond.
+      milestone: String(p.kind ?? "") !== "section"
+        && (p.is_milestone === true || num(p.duration_days, -1) === 0),
       links: linksOf(p),
       es: 0, ef: 0, ls: 0, lf: 0, float: 0,
       critical: false,
