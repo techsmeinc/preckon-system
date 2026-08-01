@@ -405,10 +405,24 @@ ${cadFacts(env)}`,
   };
 }
 
-export function sectionPrompt(env, section) {
+export function sectionPrompt(env, section, specialist = null, roster = null) {
+  // The designer's persona, when it produced one for this division. A brief
+  // written for THIS project ("kennel flooring, drainage falls, hose-down
+  // detailing") reaches for the right items; a generic trade label does not.
+  const persona = specialist
+    ? `You are the ${specialist.label} on a ${roster?.projectType ?? "construction"} project.
+
+WHAT YOU KNOW: ${specialist.expertise}
+HOW THIS SCOPE IS MEASURED HERE: ${specialist.measurementGuide}
+${specialist.vocabulary?.length ? `TERMS TO REACH FOR: ${specialist.vocabulary.join(", ")}` : ""}
+${specialist.typicalItems?.length ? `ITEMS YOU TYPICALLY PRODUCE: ${specialist.typicalItems.join("; ")}` : ""}
+${roster?.projectDescription ? `THE PROJECT: ${roster.projectDescription}` : ""}`
+    : `You are a ${section.specialist || section.trade || "works"} specialist estimator.`;
+
   return {
     maxTokens: 4000,
-    system: `You are a ${section.specialist || section.trade || "works"} specialist estimator. You are pricing ONE division of a bill of quantities: "${section.code} ${section.title}".
+    system: `${persona}
+You are pricing ONE division of a bill of quantities: "${section.code} ${section.title}".
 ${HOUSE_RULES}
 Return {"outputs":[{"type":"boq_line","payload":{
   "code":"${section.code}.1","description":"","quantity":number,"unit":"one of ${STANDARD_UNITS.join(" ")}",
