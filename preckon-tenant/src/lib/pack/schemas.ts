@@ -106,6 +106,12 @@ export const SCHEMAS: Record<string, any> = {
       rate_book_ref: { type: "string" },
     },
   },
+  // A programme activity. `predecessors` (names, finish-to-start) is the simple
+  // form and stays required; `depends_on` is the real schedule network — typed
+  // links with lag, which is what makes the critical path mean anything. A
+  // programme built only of FS-by-name links cannot express two trades starting
+  // together, a wall that must finish with its services, or a 7-day concrete
+  // cure, so it computes a float that no planner would recognise.
   schedule_activity: {
     type: "object",
     additionalProperties: false,
@@ -113,10 +119,37 @@ export const SCHEMAS: Record<string, any> = {
     properties: {
       activity: { type: "string" },
       wbs: { type: "string" },
+      // Grouping band on the Gantt, named after this project's real structure.
+      phase: { type: "string" },
       duration_days: { type: "number", minimum: 0 },
       predecessors: { type: "array", items: { type: "string" } },
+      depends_on: {
+        type: "array",
+        items: {
+          type: "object",
+          additionalProperties: false,
+          required: ["activity"],
+          properties: {
+            // The predecessor's activity name, matched exactly.
+            activity: { type: "string" },
+            type: { type: "string", enum: ["FS", "SS", "FF", "SF"] },
+            // Days of lag; negative is a lead (an overlap).
+            lag_days: { type: "integer" },
+          },
+        },
+      },
       start_offset_days: { type: "integer" },
+      // Zero-duration marker: commencement, sectional completion, handover.
+      is_milestone: { type: "boolean" },
       trade: { type: "string" },
+      sow_ref: { type: "string" },
+      // Why this duration — a stated contract period, or the quantity and output
+      // rate it was sized from. The difference between a programme you can
+      // defend in a meeting and a row of plausible bars.
+      basis: { type: "string" },
+      // BOQ codes this activity delivers, so a bar traces to the lines that
+      // sized it and a priced scope with no bar is visible.
+      boq_refs: { type: "array", items: { type: "string" } },
     },
   },
   procurement_package: {

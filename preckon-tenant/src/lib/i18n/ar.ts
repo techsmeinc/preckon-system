@@ -413,6 +413,18 @@ export const ar: Dict = {
   "sched.noPredecessors": "لا توجد سوابق — يمكن أن يبدأ هذا النشاط في اليوم الأول.",
   "sched.fieldDuration": "المدة (أيام)",
   "sched.barTitle": "{name} · اليوم {from}–{to}",
+  "sched.unphased": "بدون مرحلة",
+  "sched.uncovered": "{n} بند مسعّر بلا نشاط ينفّذه — نطاق دون وقت مخصّص.",
+  "sched.milestoneAt": "{name} — اليوم {day}",
+  "sched.floatDays": "{n} يوم سماح",
+  "sched.dates": "التواريخ",
+  "sched.dayRange": "اليوم {from} ← {to}",
+  "sched.float": "السماح",
+  "sched.onCriticalPath": "على المسار الحرج",
+  "sched.follows": "يلي",
+  "sched.unknownLinks": "سوابق غير معروفة",
+  "sched.basis": "الأساس",
+  "sched.delivers": "ينفّذ بنود",
 
   /* ── procurement (ProcureLogix) ───────────────────────────────────────── */
   "proc.emptyTitle": "لا توجد حزم بعد",

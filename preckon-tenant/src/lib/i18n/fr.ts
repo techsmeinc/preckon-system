@@ -414,6 +414,18 @@ export const fr: Dict = {
   "sched.noPredecessors": "Aucun antécédent — cette tâche peut démarrer au premier jour.",
   "sched.fieldDuration": "Durée (jours)",
   "sched.barTitle": "{name} · jour {from}–{to}",
+  "sched.unphased": "Hors phase",
+  "sched.uncovered": "{n} ligne(s) chiffrée(s) sans activité correspondante — du périmètre sans temps alloué.",
+  "sched.milestoneAt": "{name} — jour {day}",
+  "sched.floatDays": "{n} jours de marge",
+  "sched.dates": "Dates",
+  "sched.dayRange": "jour {from} → {to}",
+  "sched.float": "Marge",
+  "sched.onCriticalPath": "sur le chemin critique",
+  "sched.follows": "Suit",
+  "sched.unknownLinks": "Antécédents inconnus",
+  "sched.basis": "Base",
+  "sched.delivers": "Réalise le poste",
 
   /* ── procurement (ProcureLogix) ───────────────────────────────────────── */
   "proc.emptyTitle": "Aucun lot",

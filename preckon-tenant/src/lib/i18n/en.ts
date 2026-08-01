@@ -412,6 +412,18 @@ export const en = {
   "sched.noPredecessors": "No predecessors — this activity can start on day one.",
   "sched.fieldDuration": "Duration (days)",
   "sched.barTitle": "{name} · day {from}–{to}",
+  "sched.unphased": "Unphased",
+  "sched.uncovered": "{n} priced line(s) have no activity delivering them — scope with no time allowed.",
+  "sched.milestoneAt": "{name} — day {day}",
+  "sched.floatDays": "{n} days float",
+  "sched.dates": "Dates",
+  "sched.dayRange": "day {from} → {to}",
+  "sched.float": "Float",
+  "sched.onCriticalPath": "on the critical path",
+  "sched.follows": "Follows",
+  "sched.unknownLinks": "Unknown predecessors",
+  "sched.basis": "Basis",
+  "sched.delivers": "Delivers BOQ",
 
   /* ── procurement (ProcureLogix) ───────────────────────────────────────── */
   "proc.emptyTitle": "No packages yet",

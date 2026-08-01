@@ -162,3 +162,77 @@ export function sequence(activities) {
   }
   return activities;
 }
+
+/* ── Programme intelligence ───────────────────────────────────────────────── */
+
+/**
+ * Words that mark a sentence as carrying time, phasing or sequence meaning.
+ * Ported from the TenderLogix planner.
+ */
+const TIME_SIGNAL =
+  /\b(programme|program|gantt|milestone|phase[ds]?|phasing|stage[s]?|duration|commence(ment)?|mobilis|mobiliz|completion|sectional|handover|hand[-\s]?over|weeks?|months?|\d+\s*days?|calendar|deadline|by\s+\d|within\s+\d|no later than|practical completion|substantial completion|defects?\s+liability|testing|commissioning|snagging|occupancy|possession|lead[-\s]?time|delivery\s+period|construction\s+period|contract\s+period|time\s+for\s+completion|critical\s+path|float|sequence|prior to|concurrent|shift|working hours|night work|road closure|access)\b/i;
+
+/**
+ * Pull the sentences that carry timing, phasing or milestone information out of
+ * the tender text.
+ *
+ * The reason this exists: a stated contract period is one line in a hundred
+ * pages, and a budgeted excerpt truncates it away. Hoisting those sentences to
+ * the front of the prompt is the difference between a programme that honours
+ * "time for completion: 18 months" and one that invents its own end date.
+ */
+export function programmeSignals(documents, maxChars = 6000) {
+  const seen = new Set();
+  const kept = [];
+  let used = 0;
+  for (const d of documents ?? []) {
+    const pieces = String(d.text ?? "")
+      .split(/\r?\n|(?<=[.;:])\s+/)
+      .map((s) => s.trim().replace(/\s+/g, " "))
+      .filter((s) => s.length >= 8 && s.length <= 320);
+    for (const p of pieces) {
+      if (!TIME_SIGNAL.test(p)) continue;
+      const key = p.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      kept.push(`[${d.filename}] ${p}`);
+      used += p.length + 1;
+      if (used >= maxChars) return kept.join("\n");
+    }
+  }
+  return kept.join("\n");
+}
+
+/**
+ * Roll the priced bill up by trade so the planner sees where the work volume
+ * actually sits, without 200 individual lines crowding out the tender text.
+ * Carries the codes so an activity can cite the lines it delivers.
+ */
+export function boqDigest(records, maxChars = 5000) {
+  const items = (records ?? [])
+    .filter((r) => (String(r.type ?? "").split(".").pop() ?? "") === "boq_line")
+    .map((r) => r.payload ?? {});
+  if (items.length === 0) return "";
+
+  const byTrade = new Map();
+  for (const it of items) {
+    const trade = String(it.trade || "Uncategorised").trim();
+    const e = byTrade.get(trade) ?? { n: 0, units: new Set(), codes: [], samples: [] };
+    e.n++;
+    if (it.unit) e.units.add(String(it.unit));
+    if (e.codes.length < 12 && it.code) e.codes.push(String(it.code));
+    if (e.samples.length < 3 && it.description) e.samples.push(String(it.description).slice(0, 70));
+    byTrade.set(trade, e);
+  }
+
+  const lines = [];
+  let used = 0;
+  // Heaviest trades first: those are the ones that should drive the longest bars.
+  for (const [trade, e] of [...byTrade.entries()].sort((a, b) => b[1].n - a[1].n)) {
+    const line = `• ${trade} — ${e.n} line(s) [${[...e.units].slice(0, 6).join(", ")}] codes ${e.codes.join(",")}: ${e.samples.join("; ")}`;
+    if (used + line.length > maxChars) break;
+    lines.push(line);
+    used += line.length + 1;
+  }
+  return lines.join("\n");
+}

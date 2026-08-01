@@ -11,7 +11,7 @@
 // only place real document content enters the worker.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { DESCRIPTION_GUIDE, DECOMPOSITION_GUIDE, DISCIPLINE_UNITS, STANDARD_UNITS } from "./knowledge.mjs";
+import { DESCRIPTION_GUIDE, DECOMPOSITION_GUIDE, DISCIPLINE_UNITS, STANDARD_UNITS , programmeSignals, boqDigest } from "./knowledge.mjs";
 
 const HOUSE_RULES = `GROUND EVERY OUTPUT IN THE EVIDENCE PROVIDED.
 - Use only what the DOCUMENTS and INPUT RECORDS actually say. Never invent a figure, a party, a date or a standard.
@@ -102,6 +102,24 @@ submittals, testing and commissioning, making good.
 Use the LARGEST closed area on a layer as its area, never the summed total —
 the sum adds every overlapping outline, furniture polygon and hatch boundary
 and over-counts real floor area many times over.`;
+
+/** Time, phasing and sequence clues hoisted out of the tender text. A stated
+ *  contract period is one line in a hundred pages; a budgeted excerpt would
+ *  truncate it away, and the programme would then invent its own end date. */
+function programmeSignalsBlock(env) {
+  const sig = programmeSignals(env.inputs?.params?.documents ?? []);
+  return sig
+    ? `TIME AND PHASING STATED IN THE DOCUMENTS — these are binding. Quote the wording in "basis" wherever you use one.
+${sig}`
+    : "";
+}
+
+/** The priced bill rolled up by trade: where the work volume actually sits. */
+function boqDigestBlock(env) {
+  const d = boqDigest(env.inputs?.artifacts ?? []);
+  return d ? `PRICED SCOPE BY TRADE — every trade here needs at least one activity, and the heavier ones the longer bars.
+${d}` : "";
+}
 
 function projectBlock(env) {
   const p = env.inputs?.params ?? {};
@@ -262,22 +280,49 @@ ${cadFacts(env)}
 ${QUANTITY_RULES}`,
   }),
 
+  // The work programme. Rebuilt on TenderLogix's planner: a connected dependency
+  // network with typed links and lag, milestones, phases, and durations that
+  // either quote a stated contract period or show the quantity ÷ output rate
+  // they came from. The critical path is computed by Core from the network —
+  // the model's job is to state the logic honestly, not to nominate a path.
   "schedule.build_programme": (env) => ({
-    maxTokens: 5000,
-    system: `You are a planner building a construction programme from a priced bill.
+    maxTokens: 8000,
+    system: `You are a senior planning engineer preparing the baseline work programme for ONE specific project.
 ${HOUSE_RULES}
 Return {"outputs":[{"type":"schedule_activity","payload":{
-  "activity":"short activity name","wbs":"1.2","duration_days":number,
-  "predecessors":["the exact activity names this follows"],"start_offset_days":integer,"trade":""}}]}
-Size each duration from the QUANTITY it delivers divided by a realistic crew output rate — never a round guess — and name the driving quantity in the activity where it helps. Sequence by real construction logic: enabling works and mobilisation, substructure, frame, envelope, then services and finishes in overlapping trades, then testing, commissioning and handover. Predecessors must name activities that exist in your own output. Include mobilisation and testing/commissioning. 12-30 activities: enough to plan against, not a task list.`,
+  "activity":"the activity name, specific to this project's scope",
+  "phase":"grouping band named after THIS project's real structure",
+  "wbs":"1.2","duration_days":number,"start_offset_days":integer,
+  "is_milestone":true|false,
+  "predecessors":["exact activity names this follows"],
+  "depends_on":[{"activity":"exact name of an activity in this same output","type":"FS|SS|FF|SF","lag_days":integer}],
+  "trade":"","sow_ref":"","basis":"why this duration",
+  "boq_refs":["the BOQ codes this activity delivers"]}}]}
+
+BUILD A CONNECTED NETWORK. Every activity except commencement must list at least one entry in "depends_on", naming an activity that appears in your own output. Use FS for normal sequence, SS where two trades start together, FF where they must finish together, and lag_days for a lead or a wait — a concrete cure is FS with lag, a follow-on trade one floor behind is SS with lag. Negative lag is an overlap. The network must be acyclic and must chain from commencement through to completion, so there is one continuous longest path. Core computes the critical path and float from these links, so state the real logic; do not label activities critical yourself.
+
+KEEP THE DATES CONSISTENT WITH THE LINKS. start_offset_days must equal the latest of its predecessors' constraints — for FS that is the predecessor's finish plus lag, for SS its start plus lag. Activities that genuinely run in parallel share a predecessor and overlap.
+
+HONOUR STATED TIME EXACTLY. If the documents state a contract period, time for completion, sectional completion dates, a mobilisation period, possession dates, lead times or a required sequence, use them verbatim and quote the wording in "basis". Do not invent a different total. Where the documents are silent, size the duration from the QUANTITY the activity delivers divided by a realistic crew output rate, and write that working into "basis" — e.g. "96 m2 slab / 32 m2 per day = 3 days". A duration with no basis is a guess dressed as a plan.
+
+COVER THE PRICED SCOPE. Every trade carrying real work volume in the bill must appear in at least one activity, and the heavier trades must drive the longer bars. Put the BOQ codes an activity delivers into "boq_refs" — a priced line no bar delivers is scope that will be built without time allowed for it.
+
+MILESTONES are zero-duration with is_milestone true: commencement at day 0, any sectional completions the documents name, practical completion, handover.
+
+Sequence by real construction logic — enabling works and mobilisation, substructure, frame, envelope, then services and finishes in overlapping trades, then testing, commissioning and handover — but derive the PHASES from this project. A fit-out, a roads package, an MEP retrofit and a new build do not share phases. 12-30 activities: enough to plan against, not a task list.`,
     user: `${projectBlock(env)}
 
+${programmeSignalsBlock(env)}
+
+${boqDigestBlock(env)}
+
 PRICED BOQ AND UPSTREAM RECORDS:
-${recordsBlock(env, 50_000)}
+${recordsBlock(env, 40_000)}
 
 ${cadFacts(env)}
 
-${QUANTITY_RULES}`,
+SOURCE DOCUMENTS:
+${documentsBlock(env, 40_000)}`,
   }),
 
   "procure.build_packages": (env) => ({
