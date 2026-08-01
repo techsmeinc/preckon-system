@@ -123,7 +123,9 @@ export function ProgrammeGantt({
     if (dependents.length && !confirm(t("prog.confirmDeleteLinked", { n: dependents.length, name: node.name }))) return;
     setBusy(true);
     try {
-      await api.post(`/projects/${pid}/artifacts/${node.a.id}/reject`, {});
+      // Not /reject: that is a verdict on a pending proposal and throws once the
+      // activity has been accepted — precisely when restructuring happens.
+      await api.del(`/projects/${pid}/programme/${node.a.id}`);
       for (const d of dependents) {
         await api.patch(`/projects/${pid}/artifacts/${d.a.id}`, {
           payload: {
