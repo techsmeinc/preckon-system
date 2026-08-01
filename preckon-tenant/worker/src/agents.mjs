@@ -236,8 +236,31 @@ function postProcess(env, outputs) {
     }
 
     if (kind === "schedule_activity") {
-      p.duration_days = Math.max(1, Math.round(Number(p.duration_days) || 1));
-      if (!Array.isArray(p.predecessors)) p.predecessors = [];
+      // A milestone is an instant, not a day of work. The one-day floor below is
+      // right for real activities and wrong for these — left in place it draws a
+      // bar for handover and pushes the completion date out by a day per
+      // milestone. Zero is what makes it render as a diamond on its date.
+      p.is_milestone = p.is_milestone === true;
+      p.duration_days = p.is_milestone
+        ? 0
+        : Math.max(1, Math.round(Number(p.duration_days) || 1));
+
+      // Normalise the network. Self-references and links to activities outside
+      // this batch would otherwise become dangling edges in the CPM.
+      if (Array.isArray(p.depends_on)) {
+        p.depends_on = p.depends_on
+          .filter((d) => d && typeof d.activity === "string" && d.activity !== p.activity)
+          .map((d) => ({
+            activity: d.activity,
+            type: ["FS", "SS", "FF", "SF"].includes(String(d.type)) ? d.type : "FS",
+            lag_days: Math.round(Number(d.lag_days) || 0),
+          }));
+      }
+      // Keep the plain-name form in step with the typed one, so anything reading
+      // `predecessors` (the older shape) still sees the same logic.
+      if (!Array.isArray(p.predecessors) || p.predecessors.length === 0) {
+        p.predecessors = (p.depends_on ?? []).map((d) => d.activity);
+      }
       activities.push(p);
     }
   }
