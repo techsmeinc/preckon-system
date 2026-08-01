@@ -199,3 +199,86 @@ export function uncoveredBoq(activities: any[], boqLines: any[]): any[] {
     return code && !covered.has(code);
   });
 }
+
+/* ── The activity tree ────────────────────────────────────────────────────── */
+
+export interface TreeNode extends CpmNode {
+  depth: number;
+  children: TreeNode[];
+  isSection: boolean;
+  /** Duration-weighted progress. A section is only as done as the work under it. */
+  percent: number;
+}
+
+const nameOf = (n: CpmNode) => n.name;
+
+/**
+ * Arrange the computed activities into the tree the Gantt draws.
+ *
+ * A section carries no dates of its own — it spans its children, and reports
+ * their duration-weighted progress. Stating a section's dates separately is how
+ * summary rows drift out of step with the work beneath them.
+ *
+ * Rows whose declared parent doesn't exist are promoted to the root rather than
+ * dropped: losing an activity because someone renamed its section is worse than
+ * showing it in the wrong place.
+ */
+export function buildTree(nodes: CpmNode[]): TreeNode[] {
+  const wrap = (n: CpmNode): TreeNode => ({
+    ...n,
+    depth: 0,
+    children: [],
+    isSection: String(n.a.payload?.kind ?? "") === "section",
+    percent: Math.max(0, Math.min(100, Number(n.a.payload?.percent_complete ?? 0) || 0)),
+  });
+  const all = nodes.map(wrap);
+  const byName = new Map(all.map((n) => [nameOf(n), n]));
+
+  const roots: TreeNode[] = [];
+  for (const n of all) {
+    const parentName = String(n.a.payload?.parent ?? "");
+    const parent = parentName ? byName.get(parentName) : undefined;
+    if (parent && parent !== n) {
+      parent.children.push(n);
+    } else {
+      roots.push(n);
+    }
+  }
+
+  // Guard against a parent cycle (A parents B parents A), which would otherwise
+  // recurse forever on the first render.
+  const seen = new Set<TreeNode>();
+  const order = (list: TreeNode[], depth: number): TreeNode[] => {
+    const out: TreeNode[] = [];
+    const sorted = [...list].sort((a, b) => {
+      const sa = Number(a.a.payload?.seq ?? Number.MAX_SAFE_INTEGER);
+      const sb = Number(b.a.payload?.seq ?? Number.MAX_SAFE_INTEGER);
+      return sa - sb || a.es - b.es || a.name.localeCompare(b.name);
+    });
+    for (const n of sorted) {
+      if (seen.has(n)) continue;
+      seen.add(n);
+      n.depth = depth;
+      // A section spans its children.
+      if (n.children.length) {
+        const kids = order(n.children, depth + 1);
+        if (n.isSection) {
+          n.es = Math.min(...kids.map((k) => k.es));
+          n.ef = Math.max(...kids.map((k) => k.ef));
+          n.dur = n.ef - n.es;
+          const work = kids.reduce((t, k) => t + k.dur, 0);
+          n.percent = work > 0
+            ? Math.round(kids.reduce((t, k) => t + k.percent * k.dur, 0) / work)
+            : 0;
+          n.critical = kids.some((k) => k.critical);
+          n.float = Math.min(...kids.map((k) => k.float));
+        }
+        out.push(n, ...kids);
+      } else {
+        out.push(n);
+      }
+    }
+    return out;
+  };
+  return order(roots, 0);
+}

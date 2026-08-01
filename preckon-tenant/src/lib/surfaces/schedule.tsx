@@ -17,6 +17,9 @@ import { qty } from "@/lib/chain";
 import { ofType } from "@/lib/project";
 import { useI18n } from "@/lib/i18n";
 import { computeCpm, uncoveredBoq, type CpmNode } from "@/lib/cpm";
+import { ProgrammeGantt } from "@/lib/programme/gantt";
+import { api } from "@/lib/apiclient";
+import { useApi } from "@/lib/ui";
 import {
   ReviewDrawer, StageEmpty, StageHeader, pendingOf, useArtifactActions, type SurfaceProps,
 } from "./common";
@@ -29,7 +32,20 @@ export default function ScheduleSurface({ pid, stage, artifacts, rows, workflows
   const { pending, highConf } = pendingOf(rows);
 
   const { nodes, total, criticalPath, warnings } = useMemo(() => computeCpm(rows), [rows]);
+  const prog = useApi<{ commencement_date: string | null; members: any[] }>(`/projects/${pid}/programme`);
   const boqLines = useMemo(() => ofType(artifacts ?? [], "boq_line"), [artifacts]);
+  // A bar's cost is the sum of the priced lines it delivers. Derived rather than
+  // stored: a cost typed onto an activity drifts from the bill the moment a rate
+  // changes, and then two numbers in the same bid disagree.
+  const costByCode = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const c of ofType(artifacts ?? [], "cost_line")) {
+      const code = String(c.payload?.boq_code ?? "").trim();
+      if (code) m.set(code, (m.get(code) ?? 0) + Number(c.payload?.amount_minor ?? 0));
+    }
+    return m;
+  }, [artifacts]);
+  const currency = String(ofType(artifacts ?? [], "cost_line")[0]?.payload?.currency ?? "USD");
   const uncovered = useMemo(() => uncoveredBoq(rows, boqLines), [rows, boqLines]);
 
   if (rows.length === 0) {
@@ -85,120 +101,19 @@ export default function ScheduleSurface({ pid, stage, artifacts, rows, workflows
         </div>
       )}
 
-      <div className="card" style={{ padding: "16px 18px" }}>
-        <div className="chead">
-          <div>
-            <h3>{t("sched.title")}</h3>
-            <div className="csub">{t("sched.titleSub")}</div>
-          </div>
-        </div>
-
-        <div className="gantt">
-          <div className="gantt-head">
-            <div className="glbl">{t("sched.colActivity")}</div>
-            <div className="gaxis">
-              {marks.map((d) => (
-                <span key={d} className="wk" style={{ insetInlineStart: `${pct(d)}%` }}>W{Math.round(d / 7)}</span>
-              ))}
-            </div>
-          </div>
-
-          {phases.map((ph) => (
-            <div key={ph.name}>
-              {phases.length > 1 && (
-                <div className="gphase"><span>{ph.name}</span></div>
-              )}
-              {ph.items.map((n) => (
-                <div className="grow" key={n.a.id}>
-                  <button className="glbl" onClick={() => { setSel(n.a.id); setReview(n.a); }} title={n.name}>
-                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{n.name}</span>
-                    {n.flagged && <span className="sd review" />}
-                  </button>
-                  <div className="gtrack">
-                    {marks.map((d) => (
-                      <div key={d} className="gwk-grid" style={{ insetInlineStart: `${pct(d)}%` }} />
-                    ))}
-                    {n.milestone ? (
-                      // A milestone has no duration, so a bar would misrepresent
-                      // it as a period of work. It gets a diamond on its date.
-                      <button
-                        className={"gmile" + (n.critical ? " crit" : "") + (sel === n.a.id ? " sel" : "")}
-                        style={{ insetInlineStart: `${pct(n.es)}%` }}
-                        onClick={() => { setSel(n.a.id); setReview(n.a); }}
-                        title={t("sched.milestoneAt", { name: n.name, day: n.es })}
-                      />
-                    ) : (
-                      <>
-                        {/* Float drawn behind the bar: how far it can slip. */}
-                        {n.float > 0 && (
-                          <div
-                            className="gfloat"
-                            style={{ insetInlineStart: `${pct(n.ef)}%`, width: `${Math.max(0.4, pct(n.float))}%` }}
-                            title={t("sched.floatDays", { n: n.float })}
-                          />
-                        )}
-                        <button
-                          className={"gbar " + (n.flagged ? "flag" : n.critical ? "crit" : "norm") + (sel === n.a.id ? " sel" : "")}
-                          style={{ insetInlineStart: `${pct(n.es)}%`, width: `${Math.max(1.5, pct(n.dur))}%` }}
-                          onClick={() => { setSel(n.a.id); setReview(n.a); }}
-                          title={t("sched.barTitle", { name: n.name, from: n.es, to: n.ef })}
-                        >
-                          <span className="gd">{n.dur}d</span>
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-
-        <div className="leg">
-          <span><i style={{ background: "var(--brand)" }} />{t("sched.legendCritical")}</span>
-          <span><i style={{ background: "var(--slate-400)" }} />{t("sched.legendFloat")}</span>
-          <span><i style={{ background: "var(--amber)" }} />{t("sched.legendReview")}</span>
-        </div>
-
-        {/* The working behind the selected bar. This is what makes a programme
-            defensible rather than decorative. */}
-        {selNode && (
-          <div className="dwg-det" style={{ marginTop: 14 }}>
-            <div className="dt">{selNode.name}</div>
-            <div className="dk">
-              {selNode.phase || t("sched.unphased")}
-              {selNode.a.payload?.trade ? ` · ${selNode.a.payload.trade}` : ""}
-              {selNode.a.payload?.sow_ref ? ` · SOW ${selNode.a.payload.sow_ref}` : ""}
-            </div>
-            <div className="trow-lbl" style={{ marginTop: 12 }}>
-              {t("sched.dates")} <b className="mono">{t("sched.dayRange", { from: selNode.es, to: selNode.ef })}</b>
-            </div>
-            <div className="trow-lbl">
-              {t("sched.float")}{" "}
-              <b className="mono">{selNode.critical ? t("sched.onCriticalPath") : t("sched.floatDays", { n: selNode.float })}</b>
-            </div>
-            {selNode.links.length > 0 && (
-              <div className="trow-lbl">
-                {t("sched.follows")}{" "}
-                <b>{selNode.links.map((l) => `${l.activity} (${l.type}${l.lag_days ? `${l.lag_days > 0 ? "+" : ""}${l.lag_days}d` : ""})`).join(", ")}</b>
-              </div>
-            )}
-            {selNode.danglingRefs.length > 0 && (
-              <div className="trow-lbl">
-                {t("sched.unknownLinks")} <b className="conf warn">{selNode.danglingRefs.join(", ")}</b>
-              </div>
-            )}
-            {selNode.a.payload?.basis && (
-              <div className="trow-lbl">{t("sched.basis")} <b>{selNode.a.payload.basis}</b></div>
-            )}
-            {(selNode.a.payload?.boq_refs ?? []).length > 0 && (
-              <div className="trow-lbl">
-                {t("sched.delivers")} <b className="mono">{(selNode.a.payload.boq_refs as string[]).join(", ")}</b>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      <ProgrammeGantt
+        pid={pid}
+        rows={rows}
+        costByCode={costByCode}
+        currency={currency}
+        commencement={prog.data?.commencement_date ?? null}
+        members={prog.data?.members ?? []}
+        reload={() => { reload(); prog.reload(); }}
+        onSettings={async (iso) => {
+          await api.put(`/projects/${pid}/programme`, { commencement_date: iso });
+          prog.reload();
+        }}
+      />
 
       <ReviewDrawer
         open={!!review}

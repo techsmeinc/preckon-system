@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeCpm, uncoveredBoq } from "@/lib/cpm";
+import { buildTree, computeCpm, uncoveredBoq } from "@/lib/cpm";
 
 const act = (activity: string, duration_days: number, depends_on: any[] = [], extra: any = {}) => ({
   id: activity, status: "confirmed",
@@ -108,5 +108,46 @@ describe("CPM", () => {
       { payload: { code: "9.1", description: "Light fittings" } },
     ];
     expect(uncoveredBoq(acts, boq).map((b) => b.payload.code)).toEqual(["9.1"]);
+  });
+});
+
+describe("activity tree", () => {
+  const row = (activity: string, extra: any = {}) => ({
+    id: activity, status: "confirmed",
+    payload: { activity, duration_days: 0, depends_on: [], ...extra },
+  });
+
+  it("spans a section over its children and weights their progress", () => {
+    const r = computeCpm([
+      row("Substructure", { kind: "section" }),
+      row("Excavate", { duration_days: 4, parent: "Substructure", percent_complete: 100, seq: 1 }),
+      row("Pour", { duration_days: 6, parent: "Substructure", percent_complete: 0, seq: 2,
+                    depends_on: [{ activity: "Excavate", type: "FS", lag_days: 0 }] }),
+    ]);
+    const tree = buildTree(r.nodes);
+    const sec = tree.find((n) => n.name === "Substructure")!;
+    expect(sec.isSection).toBe(true);
+    expect(sec.es).toBe(0);
+    expect(sec.ef).toBe(10);                 // spans both children
+    expect(sec.dur).toBe(10);
+    expect(sec.percent).toBe(40);            // 4 days done of 10, duration-weighted
+    expect(tree.map((n) => n.name)).toEqual(["Substructure", "Excavate", "Pour"]);
+    expect(tree.find((n) => n.name === "Excavate")!.depth).toBe(1);
+  });
+
+  it("promotes an orphan rather than dropping it", () => {
+    const tree = buildTree(computeCpm([
+      row("Widget", { duration_days: 3, parent: "A section that was renamed" }),
+    ]).nodes);
+    expect(tree).toHaveLength(1);
+    expect(tree[0].depth).toBe(0);
+  });
+
+  it("does not recurse forever on a parent cycle", () => {
+    const tree = buildTree(computeCpm([
+      row("A", { duration_days: 1, parent: "B" }),
+      row("B", { duration_days: 1, parent: "A" }),
+    ]).nodes);
+    expect(tree.length).toBeLessThanOrEqual(2);
   });
 });

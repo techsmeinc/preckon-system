@@ -677,3 +677,106 @@ input[type=color]{width:46px; height:34px; border:1px solid var(--hairline); bor
   background:var(--slate-500); border-radius:2px;}
 .gmile.crit{background:var(--brand);}
 .gmile.sel{outline:2px solid var(--ink); outline-offset:2px;}
+
+/* ── Work programme (editable Gantt) ───────────────────────────────────────── */
+.prog{padding:16px 18px;}
+.prog-actions{display:flex; gap:8px;}
+.prog-bar{display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:10px 0 12px;
+  border-bottom:1px solid var(--hairline); margin-bottom:10px;}
+.prog-field{display:flex; align-items:center; gap:7px; font-size:12px; color:var(--slate-500);}
+.prog-field input{font-family:var(--font-mono); font-size:12px; padding:5px 8px; border:1px solid var(--hairline);
+  border-radius:7px; background:var(--panel-2); color:var(--ink);}
+.prog-stat{font-size:12px; color:var(--slate-500);}
+.zoomctl2{display:inline-flex; gap:4px; margin-inline-start:auto;}
+.zoomctl2 button{width:26px; height:26px; border:1px solid var(--hairline); border-radius:7px;
+  background:var(--panel-2); color:var(--ink); cursor:pointer; font-size:14px; line-height:1;}
+
+/* The grid and the timeline scroll together vertically, the timeline alone
+   horizontally — a programme is read row by row across many weeks. */
+.prog-wrap{display:flex; border:1px solid var(--hairline); border-radius:10px; overflow:hidden;}
+.prog-grid{flex:none; min-width:0; background:var(--panel);}
+.prog-track{flex:1; overflow-x:auto; overflow-y:hidden; position:relative;}
+
+.prog-hrow{display:flex; align-items:center; height:30px; background:var(--panel-2);
+  border-bottom:1px solid var(--hairline); font-size:10.5px; font-weight:700;
+  letter-spacing:.05em; text-transform:uppercase; color:var(--slate-500);}
+.prog-axis{position:relative;}
+.ptick{position:absolute; padding-inline-start:4px; white-space:nowrap; font-size:10px;}
+
+.prow{display:flex; align-items:center; border-bottom:1px solid var(--hairline); cursor:pointer; font-size:12.5px;}
+.prow:hover{background:var(--panel-2);}
+.prow.on{background:color-mix(in srgb, var(--brand) 8%, transparent);}
+.prow.sec{background:var(--panel-2); font-weight:650;}
+.pc{padding:0 8px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;}
+.pc-act{width:280px; display:flex; align-items:center; gap:5px;}
+.pc-who{width:118px;}
+.pc-d{width:86px; font-size:11px; color:var(--slate-500);}
+.pc-n{width:52px; font-size:11px;}
+.pc-p{width:104px;}
+.pc-c{width:96px; text-align:end; font-size:11px;}
+
+.ptw{border:0; background:none; cursor:pointer; color:var(--slate-500); width:14px; padding:0; font-size:10px;}
+.ptw-spacer{width:14px; display:inline-block;}
+.pmi{width:7px; height:7px; background:var(--brand); transform:rotate(45deg); flex:none;}
+.pname{cursor:text; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.pname-in{font:inherit; width:100%; border:1px solid var(--brand); border-radius:5px; padding:2px 5px;
+  background:var(--panel); color:var(--ink);}
+.pcrit{font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+  color:var(--brand); background:color-mix(in srgb, var(--brand) 12%, transparent);
+  padding:1px 5px; border-radius:4px; flex:none;}
+.prow-tools{display:none; gap:2px; margin-inline-start:auto; flex:none;}
+.prow:hover .prow-tools{display:inline-flex;}
+.prow-tools button{border:0; background:none; cursor:pointer; font-size:11px; padding:2px 4px;
+  color:var(--slate-500); border-radius:4px;}
+.prow-tools button:hover{background:var(--panel); color:var(--ink);}
+.passign{font:inherit; font-size:11px; width:100%; border:0; background:none; color:var(--ink); cursor:pointer;}
+
+.ppct{display:flex; align-items:center; gap:6px; cursor:pointer;}
+.ppct-track{flex:1; height:5px; border-radius:3px; background:var(--hairline); overflow:hidden;}
+.ppct-fill{display:block; height:100%; background:var(--brand);}
+.ppct b{font-size:10.5px; font-family:var(--font-mono); color:var(--slate-500); min-width:30px; text-align:end;}
+.ppct-in{width:100%; font:inherit; font-size:11px; border:1px solid var(--brand); border-radius:5px; padding:1px 4px;
+  background:var(--panel); color:var(--ink);}
+
+.ptrow{position:relative; border-bottom:1px solid var(--hairline);}
+.ptrow.on{background:color-mix(in srgb, var(--brand) 8%, transparent);}
+.pgrid{position:absolute; top:0; bottom:0; width:1px; background:var(--hairline); opacity:.5;}
+.pbar{position:absolute; top:50%; transform:translateY(-50%); height:16px; border-radius:5px; border:0;
+  background:var(--slate-400); cursor:pointer; padding:0; overflow:hidden;}
+.pbar.crit{background:var(--brand);}
+.pbar.flag{background:var(--amber);}
+.pbar.on{outline:2px solid var(--ink); outline-offset:1px;}
+.pbar-done{display:block; height:100%; background:rgba(0,0,0,.28);}
+.psec{position:absolute; top:50%; transform:translateY(-50%); height:8px; border-radius:2px;
+  background:var(--slate-600);}
+.pfloat{position:absolute; top:50%; transform:translateY(-50%); height:5px; border-radius:3px;
+  background:repeating-linear-gradient(90deg, var(--slate-300) 0 3px, transparent 3px 6px);}
+.pdiamond{position:absolute; top:50%; width:11px; height:11px; margin-inline-start:-5px;
+  transform:translateY(-50%) rotate(45deg); background:var(--slate-500); border-radius:2px;}
+.pdiamond.crit{background:var(--brand);}
+
+.parrows{position:absolute; inset-block-start:30px; inset-inline-start:0; pointer-events:none; z-index:1;}
+.parrow{fill:none; stroke:var(--slate-400); stroke-width:1.2; opacity:.65;}
+.parrow.crit{stroke:var(--brand); opacity:.85;}
+.pahfill{fill:var(--slate-400);}
+
+/* The activity editor. Anchored rather than modal: a planner adjusts a link and
+   watches the bars move, which a dialog over the chart would hide. */
+.pedit{margin-top:14px; border:1px solid var(--hairline); border-radius:10px; padding:14px; background:var(--panel-2);}
+.pedit-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
+.pedit-grid{display:flex; gap:16px; flex-wrap:wrap; align-items:end; margin-bottom:14px;}
+.pedit-grid label{display:flex; flex-direction:column; gap:4px; font-size:11.5px; color:var(--slate-500);}
+.pedit-grid input[type=number]{width:110px; font-family:var(--font-mono); font-size:12px; padding:5px 8px;
+  border:1px solid var(--hairline); border-radius:7px; background:var(--panel); color:var(--ink);}
+.pedit-links{margin-bottom:12px;}
+.pedit-lh{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;
+  font-size:11.5px; font-weight:650; color:var(--slate-500);}
+.pedit-link{display:flex; gap:6px; margin-bottom:5px;}
+.pedit-link select, .pedit-link input{font-size:11.5px; padding:4px 6px; border:1px solid var(--hairline);
+  border-radius:6px; background:var(--panel); color:var(--ink);}
+.pedit-link select:first-child{flex:1; min-width:0;}
+.pedit-link input{width:64px; font-family:var(--font-mono);}
+.pedit-basis{display:flex; flex-direction:column; gap:4px; font-size:11.5px; color:var(--slate-500);}
+.pedit-basis textarea{font:inherit; font-size:12px; padding:6px 8px; border:1px solid var(--hairline);
+  border-radius:7px; background:var(--panel); color:var(--ink); resize:vertical;}
+.pedit-foot{display:flex; justify-content:flex-end; margin-top:12px;}
