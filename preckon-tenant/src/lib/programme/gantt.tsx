@@ -208,7 +208,7 @@ export function ProgrammeGantt({
   const rowIndex = new Map(visible.map((n, i) => [n.name, i]));
 
   return (
-    <div className="card prog">
+    <div className="card wprog">
       <div className="chead">
         <div>
           <h3>{t("prog.title")}</h3>
