@@ -91,6 +91,10 @@ export const SCHEMAS: Record<string, any> = {
       unit: { type: "string" },
       trade: { type: "string" },
       notes: { type: "string" },
+      // Set when the Completeness Verifier found this line missing and priced
+      // it. Worth showing: a line nobody asked for, added because a check said
+      // it should exist, deserves a closer read than one the scope named.
+      verified_by: { type: "string" },
     },
   },
   cost_line: {

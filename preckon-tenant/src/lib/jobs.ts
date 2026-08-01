@@ -42,6 +42,9 @@ export interface JobResult {
   outputs?: JobOutput[];
   // supervisor jobs return a chat message + deviation proposals instead of outputs
   message?: { role: "assistant"; content: string; referenced_artifact_ids?: string[] };
+  /** For the multi-agent bill: the specialist roster the designer invented and
+   *  the verifier's verdicts. Provenance of the run, not a proposal. */
+  roster?: Record<string, unknown> | null;
   deviations?: Array<{
     kind: "rerun_step" | "insert_review_gate" | "skip_step" | "request_review" | "flag";
     target_step_id?: string | null;
@@ -171,13 +174,14 @@ export async function recordJobResult(result: JobResult): Promise<{
 
   const status = result.status === "succeeded" ? "succeeded" : "failed";
   await query(
-    `UPDATE ai_job SET status = ?, result = ?, error = ?, trace_id = ?,
+    `UPDATE ai_job SET status = ?, result = ?, roster = COALESCE(?, roster), error = ?, trace_id = ?,
         input_tokens = ?, output_tokens = ?, cost_minor = ?, model = COALESCE(?, model),
         started_at = COALESCE(started_at, NOW(3)), ended_at = NOW(3)
       WHERE id = ?`,
     [
       status,
       JSON.stringify(result.outputs ?? result.message ?? null),
+      result.roster ? JSON.stringify(result.roster) : null,
       result.error ? JSON.stringify(result.error) : null,
       result.trace_id ?? null,
       result.usage?.input_tokens ?? null,

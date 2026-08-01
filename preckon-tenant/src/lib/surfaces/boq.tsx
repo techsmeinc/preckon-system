@@ -6,6 +6,7 @@
 import { Fragment, useMemo, useState } from "react";
 import { ofType } from "@/lib/project";
 import { money, qty, confPct } from "@/lib/chain";
+import { BoqPipeline } from "@/lib/boq/pipeline";
 import {
   ReviewDrawer, StageEmpty, StageHeader, StatusCell, pendingOf, useArtifactActions, type SurfaceProps,
 } from "./common";
@@ -51,6 +52,8 @@ export default function BoqSurface({ pid, stage, artifacts, rows, workflows, run
     return (
       <>
         <StageHeader stage={stage} workflows={workflows} runs={runs} pid={pid} reload={reload} />
+
+      <BoqPipeline pid={pid} />
         <StageEmpty title={t("boq.emptyTitle")} sub={t("boq.emptySub")} />
       </>
     );

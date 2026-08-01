@@ -4,7 +4,7 @@
 // nondeterminism. Swapping in real Claude calls is a change to THIS file only;
 // the trust boundary (worker has no store access) is unchanged.
 
-import { PROMPTS, hasPrompt, supervisorPrompt, outlinePrompt, sectionPrompt } from "./prompts.mjs";
+import { PROMPTS, hasPrompt, supervisorPrompt, outlinePrompt, sectionPrompt, designerPrompt, verifierPrompt } from "./prompts.mjs";
 import {
   normalizeUnit, normalizeMeasurementUnit, quantityConfidence, validateQuantity, sequence,
 } from "./knowledge.mjs";
@@ -73,12 +73,16 @@ async function withClaude(env, base, template) {
 
   // The bill is built by a roster, not a single call.
   if (env.job_type === "boq.derive_lines") {
-    const outputs = postProcess(env, await runBoqRoster(env, model));
+    const { lines, roster } = await runBoqRoster(env, model);
+    const outputs = postProcess(env, lines);
     for (const o of outputs) {
       if (!o.provenance || !o.provenance.length) o.provenance = ids(env);
       if (o.confidence == null) o.confidence = CONF;
     }
-    return { ...base, status: "succeeded", outputs };
+    // The roster travels back on the result so Core can store it and the BOQ
+    // screen can show WHO priced the bill and what was checked. Without it the
+    // pipeline is invisible and a reviewer cannot judge its coverage.
+    return { ...base, status: "succeeded", outputs, roster };
   }
 
   // A stage with its own brief reasons about its own job. Anything else (a
@@ -113,61 +117,137 @@ async function withClaude(env, base, template) {
 }
 
 /**
- * The multi-agent bill run, ported from the TenderLogix pipeline:
+ * The multi-agent bill run, ported from the TenderLogix pipeline.
  *
- *   outline  → read the scope into work divisions
- *   agents   → one specialist per division, run concurrently
- *   recover  → re-dispatch the divisions that came back empty
+ *   1  outline    read the scope into work divisions
+ *   2  designer   INVENT the specialists this project needs, and the checks the
+ *                 bill must pass at the end
+ *   3  sections   one designed specialist per division, run concurrently
+ *   4  verifier   audit each project-specific check against the bill, and price
+ *                 whatever it finds missing
  *
- * Why not one call: a single prompt asked for a whole bill spends its budget on
- * the first few divisions and gives the rest one token line each. Splitting by
- * division gives every trade a full budget and a specialist brief, and makes a
- * failure local — one empty division instead of a thin bill.
+ * Why a designer rather than a fixed trade list: a fixed roster prices every
+ * project as if it were the same building. A kennel refurbishment gets an
+ * "Architectural Specialist" with no reason to think about hose-down detailing
+ * or turf sub-base, and that scope is quietly never priced. Letting a consultant
+ * agent read the scope and decide this job needs a Synthetic Turf Specialist is
+ * the whole difference.
+ *
+ * Why a per-check verifier rather than one "anything missing?" pass: a broad
+ * question gets a vague answer. A narrow, falsifiable one either finds the line
+ * or produces the line that was missing.
  */
 async function runBoqRoster(env, model) {
+  const trace = [];
+  const note = (stage, message) => {
+    trace.push({ stage, message, at: new Date().toISOString() });
+    console.log(`[worker] boq/${stage}: ${message}`);
+  };
+
+  // 1. Outline
   const outlineReq = outlinePrompt(env);
   const outlineText = await callAnthropic(model, outlineReq.system, outlineReq.user, outlineReq.maxTokens);
   const outline = extractJson(outlineText);
   let sections = Array.isArray(outline?.sections) ? outline.sections : [];
-
-  // No outline is a hard failure, not a reason to invent a bill.
   if (!sections.length) throw new Error("BOQ outline returned no work divisions");
   sections = sections.slice(0, 16);
-  console.log(`[worker] BOQ roster: ${sections.length} divisions — ${sections.map((s) => s.title).join(", ")}`);
+  note("outline", `${sections.length} divisions - ${sections.map((x) => x.title).join(", ")}`);
 
-  const runSection = async (s) => {
+  // 2. Agent Designer
+  let roster = null;
+  try {
+    const dReq = designerPrompt(env, sections);
+    const dText = await callAnthropic(model, dReq.system, dReq.user, dReq.maxTokens);
+    const d = extractJson(dText);
+    if (Array.isArray(d?.specialists) && d.specialists.length) {
+      roster = d;
+      note("designer", `${d.projectType ?? "project"} - ${d.specialists.length} specialist(s), ${(d.verifierChecks ?? []).length} check(s)`);
+    }
+  } catch (e) {
+    note("designer", `failed (${e.message})`);
+  }
+  // A failed designer must not stop the bill. The section agents still run,
+  // just with the outline's generic trade brief instead of a designed persona.
+  if (!roster) note("designer", "no roster - pricing with generic trade specialists");
+
+  const specialistFor = (section) =>
+    roster
+      ? roster.specialists.find((sp) => (sp.ownedSections ?? []).map(String).includes(String(section.code))) ?? null
+      : null;
+
+  // 3. Section agents
+  const runSection = async (sec) => {
     try {
-      const req = sectionPrompt(env, s);
+      const req = sectionPrompt(env, sec, specialistFor(sec), roster);
       const text = await callAnthropic(model, req.system, req.user, req.maxTokens);
       const parsed = extractJson(text);
       const rows = Array.isArray(parsed) ? parsed : parsed?.outputs;
       return Array.isArray(rows) ? rows : [];
     } catch (e) {
-      console.error(`[worker] division ${s.code} ${s.title} failed:`, e.message);
+      console.error(`[worker] division ${sec.code} ${sec.title} failed:`, e.message);
       return [];
     }
   };
 
-  // Bounded concurrency: enough to keep the run short, low enough to stay well
-  // inside the provider's rate limit on a long bill.
   let results = await mapLimit(sections, 4, runSection);
 
   // Recover empty divisions once. A division that produced nothing is usually a
-  // transient provider error, not an absence of scope — dropping it silently
-  // would leave a hole in the bill that nobody notices until tender return.
-  const empty = sections.filter((_, i) => results[i].length === 0);
-  if (empty.length) {
-    console.log(`[worker] retrying ${empty.length} empty division(s)`);
-    const retried = await mapLimit(empty, 2, runSection);
-    let r = 0;
-    results = results.map((rows, i) => (rows.length === 0 ? retried[r++] : rows));
+  // transient provider error, not an absence of scope - dropping it silently
+  // leaves a hole nobody notices until tender return.
+  const emptyIdx = results.map((r, i) => (r.length === 0 ? i : -1)).filter((i) => i >= 0);
+  if (emptyIdx.length) {
+    note("sections", `retrying ${emptyIdx.length} empty division(s)`);
+    const retried = await mapLimit(emptyIdx.map((i) => sections[i]), 2, runSection);
+    emptyIdx.forEach((i, k) => { results[i] = retried[k]; });
   }
 
   const lines = results.flat();
   if (!lines.length) throw new Error("no BOQ lines produced across any division");
-  const stillEmpty = results.filter((r) => r.length === 0).length;
-  if (stillEmpty) console.log(`[worker] ${stillEmpty} division(s) still empty after retry`);
-  return lines;
+  note("sections", `${lines.length} line(s) from ${results.filter((r) => r.length).length}/${sections.length} division(s)`);
+
+  // 4. Completeness Verifier
+  const checks = (roster?.verifierChecks ?? []).slice(0, 12);
+  if (checks.length) {
+    const runCheck = async (check) => {
+      try {
+        const req = verifierPrompt(env, check, lines);
+        const text = await callAnthropic(model, req.system, req.user, req.maxTokens);
+        const v = extractJson(text);
+        return {
+          check,
+          covered: v?.covered !== false,
+          evidence: v?.evidence ?? null,
+          added: Array.isArray(v?.outputs) ? v.outputs : [],
+        };
+      } catch (e) {
+        // A check that errors is reported as unknown, never as passed. A
+        // verifier that silently approves is worse than no verifier.
+        return { check, covered: null, evidence: `check failed: ${e.message}`, added: [] };
+      }
+    };
+    const verdicts = await mapLimit(checks, 3, runCheck);
+    const gaps = verdicts.filter((v) => v.covered === false && v.added.length);
+    for (const g of gaps) {
+      for (const row of g.added) {
+        row.payload = { ...(row.payload ?? {}), verified_by: g.check.topic };
+        lines.push(row);
+      }
+    }
+    note(
+      "verifier",
+      `${verdicts.filter((v) => v.covered === true).length}/${checks.length} covered; ` +
+        `${gaps.length} gap(s) priced (${gaps.reduce((t, g) => t + g.added.length, 0)} line(s))`
+    );
+    roster.verdicts = verdicts.map((v) => ({
+      key: v.check.key,
+      topic: v.check.topic,
+      covered: v.covered,
+      evidence: v.evidence,
+      added: v.added.length,
+    }));
+  }
+
+  return { lines, roster: roster ? { ...roster, trace } : { trace, isFallback: true } };
 }
 
 async function mapLimit(items, limit, fn) {
