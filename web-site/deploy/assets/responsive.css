@@ -218,6 +218,26 @@
   .boq-row .desc{ font-size:11.5px; }
 }
 
+/* ------------------------------- 8. reduced-motion / no-JS visibility */
+/* The scroll reveals and the hero animation start at opacity:0 and are only
+   revealed by script. That script is skipped entirely when the visitor has
+   "reduce motion" set, which left 24 sections and the whole BOQ panel blank —
+   i.e. the page appeared empty below the hero. Show the finished state
+   instead of animating to it. */
+html:not(.has-anim) .reveal,
+html:not(.has-anim) .boq-row,
+html:not(.has-anim) .boq-total,
+html:not(.has-anim) .proc-chip,
+html:not(.has-anim) .recog,
+html:not(.has-anim) .dimanno{
+  opacity:1 !important;
+  transform:none !important;
+}
+html:not(.has-anim) .plan .stroke{
+  stroke-dasharray:none !important;
+  stroke-dashoffset:0 !important;
+}
+
 /* ------------------------------------------------------- 6. RTL buttons */
 /* Arabic body copy needs 1.75 leading, but a button inheriting it renders
    ~3px taller than its Latin counterpart and sits unevenly in the 64px bar. */

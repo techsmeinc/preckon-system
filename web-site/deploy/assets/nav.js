@@ -87,3 +87,15 @@
 
   place();
 })();
+
+/* The hero's estimated value is counted up by the animation script, which is
+   skipped under reduced motion — leaving a permanent "$0". Fill in the final
+   figure so the panel still reads correctly. Paired with the
+   html:not(.has-anim) rules in responsive.css. */
+(function () {
+  if (document.documentElement.classList.contains('has-anim')) return;
+  var el = document.getElementById('costnum');
+  if (el && /^\$?0$/.test(el.textContent.trim())) {
+    el.textContent = '$1,240,500';
+  }
+})();
