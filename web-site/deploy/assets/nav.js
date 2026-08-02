@@ -43,7 +43,9 @@
   wrap.appendChild(btn);
 
   var mqPanel = window.matchMedia('(max-width:880px)');
-  var mqNarrow = window.matchMedia('(max-width:430px)');
+  // Once the controls are grouped the CTA fits comfortably down to ~375px,
+  // so it only relocates on genuinely small phones (320/360).
+  var mqNarrow = window.matchMedia('(max-width:374px)');
 
   function place() {
     // language select: in the panel on mobile/tablet, in the bar otherwise

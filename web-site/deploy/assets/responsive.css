@@ -25,7 +25,16 @@
 
 @media (max-width:880px){
   .navtoggle{ display:grid; }
-  .nav .wrap{ gap:10px; }
+
+  /* .nav-links is absolutely positioned on mobile, so it leaves the flex row.
+     space-between then strands the remaining controls across the full width —
+     the theme toggle floats mid-bar and the CTA looks unanchored. Pin the brand
+     left and cluster everything else against the opposite edge instead.
+     margin-inline-end keeps this correct in RTL. */
+  .nav .wrap{ justify-content:flex-start; gap:9px; }
+  .brand{ margin-inline-end:auto; }
+  .nav-tools{ gap:6px; }
+  .nav-cta .btn, .nav .wrap > .btn{ padding:11px 15px; font-size:13.5px; }
 
   /* The panel IS the existing .nav-links list — no duplicated markup,
      so every page stays in sync automatically. */
