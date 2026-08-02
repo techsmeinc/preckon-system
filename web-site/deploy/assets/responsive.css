@@ -195,11 +195,14 @@
    overlapping text. Stack the two panels so each gets the full width. */
 @media (max-width:600px){
   .demo-body{ grid-template-columns:1fr; min-height:0; }
+  /* Full width makes the plan SVG (height:100%) scale to ~760px tall, so the
+     drawing half needs an explicit height once stacked. */
   .demo-draw{
     border-right:0 !important; border-left:0 !important;
     border-bottom:1px solid var(--hairline);
-    min-height:190px;
+    min-height:0; height:215px;
   }
+  .demo-draw .plan{ height:170px; margin-top:14px !important; }
   .demo-out{ padding:16px 18px 20px; }
   .demo-out .pcap{ white-space:nowrap; }
   /* the pulse travels horizontally between the two halves — meaningless once
