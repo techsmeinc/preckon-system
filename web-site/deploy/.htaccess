@@ -1,0 +1,94 @@
+# ============================================================
+#  Preckon marketing site — Apache config for IONOS webhosting
+#  Canonical host: https://www.preckon.com
+# ============================================================
+
+Options -Indexes +FollowSymLinks
+DirectoryIndex index.html
+ErrorDocument 404 /404.html
+
+AddDefaultCharset UTF-8
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # ---------- 1. Force HTTPS ----------
+  # Both conditions must fail https for the redirect to fire, so this stays
+  # correct whether TLS terminates at Apache or at the IONOS proxy.
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteRule ^ https://www.preckon.com%{REQUEST_URI} [R=301,L]
+
+  # ---------- 2. Force www ----------
+  RewriteCond %{HTTP_HOST} !^www\.preckon\.com$ [NC]
+  RewriteRule ^ https://www.preckon.com%{REQUEST_URI} [R=301,L]
+
+  # ---------- 3. Legacy .html URLs -> clean URLs (301) ----------
+  # Guarded on THE_REQUEST (the original request line) so internal rewrites
+  # in section 4 can never re-trigger these and cause a redirect loop.
+  RewriteCond %{THE_REQUEST} \s/+(index|preckon-home)\.html[\s?] [NC]
+  RewriteRule ^ / [R=301,L]
+
+  RewriteCond %{THE_REQUEST} \s/+preckon-(platform|modules|why|security|pricing|about|demo)\.html[\s?] [NC]
+  RewriteRule ^ /%1 [R=301,L]
+
+  # Drop trailing slashes on page routes: /platform/ -> /platform
+  RewriteCond %{THE_REQUEST} \s/+(platform|modules|why|security|pricing|about|demo)/[\s?] [NC]
+  RewriteRule ^ /%1 [R=301,L]
+
+  # ---------- 4. Clean URLs -> actual files (internal) ----------
+  RewriteRule ^(platform|modules|why|security|pricing|about|demo)/?$ preckon-$1.html [L]
+</IfModule>
+
+# ---------- Compression ----------
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
+  AddOutputFilterByType DEFLATE application/javascript application/x-javascript
+  AddOutputFilterByType DEFLATE application/json application/manifest+json
+  AddOutputFilterByType DEFLATE image/svg+xml application/xml
+</IfModule>
+
+# ---------- Caching ----------
+# Pages are short-lived so content edits go live quickly; static assets are
+# long-lived. Rename an asset file if you need to bust its cache.
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault                          "access plus 1 month"
+  ExpiresByType text/html                 "access plus 10 minutes"
+  ExpiresByType image/svg+xml             "access plus 1 year"
+  ExpiresByType image/png                 "access plus 1 year"
+  ExpiresByType image/x-icon              "access plus 1 year"
+  ExpiresByType application/manifest+json "access plus 1 week"
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(png|svg|ico|webp|jpg|jpeg|woff2?)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "public, max-age=600, must-revalidate"
+  </FilesMatch>
+
+  # ---------- Security headers ----------
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), interest-cohort=()"
+  # HSTS: starts at 1 year. Only add "preload" once you are certain every
+  # preckon.com subdomain will serve HTTPS forever.
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  Header unset X-Powered-By
+</IfModule>
+
+# ---------- MIME types ----------
+<IfModule mod_mime.c>
+  AddType application/manifest+json .webmanifest
+  AddType image/svg+xml            .svg
+  AddType image/x-icon             .ico
+</IfModule>
+
+# ---------- Block dotfiles ----------
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>

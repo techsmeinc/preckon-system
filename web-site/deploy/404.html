@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Page not found — Preckon</title>
+<meta name="description" content="That page isn't here. Head back to Preckon — AI-native preconstruction, from drawings to a defensible estimate." />
+<meta name="theme-color" content="#0B1B2B" />
+<meta name="robots" content="noindex" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+
+<script>try{var t=localStorage.getItem("preckon-theme")||((window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","light");}</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+  @import url('https://api.fontshare.com/v2/css?f[]=general-sans@500,600,700&display=swap');
+
+  :root{
+    --ink:#0B1B2B; --teal:#15C2A8; --teal-press:#0FA593; --teal-tint:#E8FAF6;
+    --slate-700:#334155; --slate-600:#475569; --slate-500:#64748B; --slate-400:#94A3B8;
+    --paper:#FBFCFE; --surface:#FFFFFF; --hairline:#E3E8EF;
+    --font-display:'General Sans','Inter',system-ui,sans-serif;
+    --font-body:'Inter',system-ui,sans-serif;
+    --font-mono:'JetBrains Mono',ui-monospace,'SF Mono',monospace;
+    --r-card:18px; --maxw:1180px;
+  }
+  [data-theme="dark"]{
+    --paper:#0A1626; --surface:#10223A; --ink:#EAF1F8;
+    --slate-700:#C7D3E0; --slate-600:#A8B6C6; --slate-500:#8493A6; --slate-400:#6A7A8E;
+    --hairline:#1E3350; --teal-tint:rgba(21,194,168,.15);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    font-family:var(--font-body); color:var(--slate-700); background-color:var(--paper);
+    background-image:
+      linear-gradient(var(--hairline) 1px,transparent 1px),
+      linear-gradient(90deg,var(--hairline) 1px,transparent 1px),
+      linear-gradient(rgba(227,232,239,.5) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(227,232,239,.5) 1px,transparent 1px);
+    background-size:132px 132px,132px 132px,22px 22px,22px 22px;
+    -webkit-font-smoothing:antialiased; line-height:1.5;
+    min-height:100vh; display:flex; flex-direction:column;
+  }
+  [data-theme="dark"] body{
+    background-image:
+      linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px),
+      linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);
+  }
+  a{text-decoration:none;}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px; width:100%;}
+
+  .nav{border-bottom:1px solid var(--hairline); background:var(--paper);}
+  .nav .wrap{display:flex; align-items:center; height:64px;}
+  .brand{display:flex; align-items:center; gap:11px;}
+  .brand .wm{font-family:var(--font-display); font-weight:600; font-size:16px; color:var(--ink); letter-spacing:-.02em;}
+  .brand .wm .o{color:var(--teal);}
+
+  main{flex:1; display:grid; place-items:center; padding:70px 0;}
+  .card{text-align:center; max-width:560px;}
+  .code{font-family:var(--font-mono); font-size:11.5px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--teal-press); font-weight:600; display:inline-flex; gap:10px; align-items:center;}
+  .code::before{content:""; width:22px; height:1px; background:var(--teal);}
+  h1{font-family:var(--font-display); font-weight:600; font-size:clamp(30px,5vw,46px); line-height:1.06;
+    letter-spacing:-.03em; color:var(--ink); margin:18px 0 0;}
+  p.sub{font-size:16.5px; color:var(--slate-600); margin:16px auto 0; max-width:46ch;}
+
+  /* measured-line motif — the missing dimension */
+  .dim{display:flex; align-items:center; color:var(--slate-400); margin:34px 0 0;}
+  .dim .tick{width:1px; height:13px; background:var(--slate-400); flex:none;}
+  .dim .rule{height:1px; background:var(--slate-400); flex:1;}
+  .dim .lab{font-family:var(--font-mono); font-size:10px; letter-spacing:.12em; color:var(--slate-500);
+    text-transform:uppercase; padding:0 12px; white-space:nowrap;}
+
+  .btn{font-family:var(--font-body); font-weight:600; font-size:14.5px; border-radius:10px; padding:12px 20px;
+    cursor:pointer; border:1.5px solid transparent; transition:all .2s ease; display:inline-flex; gap:8px; align-items:center;}
+  .btn-primary{background:var(--teal); color:#0B1B2B;}
+  .btn-primary:hover{background:var(--teal-press); transform:translateY(-1px);}
+  .btn-secondary{background:var(--surface); color:var(--ink); border-color:var(--ink);}
+  [data-theme="dark"] .btn-secondary{border-color:var(--slate-400);}
+  .btn-secondary:hover{background:var(--ink); color:var(--paper);}
+  .actions{display:flex; gap:13px; flex-wrap:wrap; justify-content:center; margin-top:30px;}
+  .btn:focus-visible,a:focus-visible{outline:2px solid var(--teal-press); outline-offset:3px;}
+
+  .elsewhere{margin-top:36px; display:flex; gap:22px; flex-wrap:wrap; justify-content:center;}
+  .elsewhere a{font-size:13.5px; color:var(--slate-600); font-weight:500;}
+  .elsewhere a:hover{color:var(--teal-press);}
+
+  footer{border-top:1px solid var(--hairline); background:var(--surface);}
+  footer .wrap{display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; padding:16px 28px;}
+  footer .k{font-family:var(--font-mono); font-size:11px; color:var(--slate-500); letter-spacing:.06em;}
+  footer .k b{color:var(--ink);}
+
+  @media (prefers-reduced-motion: reduce){ *{transition:none!important; animation:none!important;} }
+</style>
+
+<nav class="nav">
+  <div class="wrap">
+    <a class="brand" href="/">
+      <svg viewBox="0 0 48 56" width="25" height="29" fill="none" aria-hidden="true"><path d="M16 50V8h14a13 13 0 0 1 0 26H16" stroke="var(--ink)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="25" cy="21" r="3.6" fill="var(--teal)"/></svg>
+      <span class="wm">Preck<span class="o">o</span>n</span>
+    </a>
+  </div>
+</nav>
+
+<main>
+  <div class="wrap">
+    <div class="card">
+      <span class="code">Error 404</span>
+      <h1>This sheet isn't in the set.</h1>
+      <p class="sub">The page you're looking for has moved or never existed. Everything else is exactly where you left it.</p>
+
+      <div class="dim" aria-hidden="true">
+        <span class="tick"></span><span class="rule"></span>
+        <span class="lab">Page not found</span>
+        <span class="rule"></span><span class="tick"></span>
+      </div>
+
+      <div class="actions">
+        <a class="btn btn-primary" href="/">Back to home
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="btn btn-secondary" href="/demo">Book a demo</a>
+      </div>
+
+      <div class="elsewhere">
+        <a href="/platform">Platform</a>
+        <a href="/modules">Modules</a>
+        <a href="/why">Why us</a>
+        <a href="/security">Security</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/about">About</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="k">© 2026 TechSME Inc. · Mississauga, ON</span>
+    <span class="k">SHEET <b>404</b> · BUILT ON <b>DS-01</b></span>
+  </div>
+</footer>
