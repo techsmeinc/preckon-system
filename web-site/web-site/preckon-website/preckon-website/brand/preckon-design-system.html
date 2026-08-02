@@ -1,0 +1,539 @@
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Preckon — Design System DS-01</title>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+  @import url('https://api.fontshare.com/v2/css?f[]=general-sans@500,600,700&display=swap');
+
+  :root {
+    /* Core tokens */
+    --ink: #0B1B2B;
+    --ink-deep: #06101C;
+    --teal: #15C2A8;
+    --teal-press: #0FA593;
+    --teal-tint: #E8FAF6;
+    --slate-700: #334155;
+    --slate-600: #475569;
+    --slate-500: #64748B;
+    --slate-400: #94A3B8;
+    --paper: #FBFCFE;
+    --surface: #FFFFFF;
+    --hairline: #E3E8EF;
+    --signal: #F5A524;
+
+    --wash: linear-gradient(120deg, #0B1B2B 0%, #0E3A4A 52%, #15C2A8 100%);
+
+    --font-display: 'General Sans', 'Inter', system-ui, sans-serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+
+    --r-card: 18px;
+    --r-sm: 10px;
+    --maxw: 1180px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--slate-700);
+    background-color: var(--paper);
+    /* Blueprint grid: fine + coarse, like engineering paper */
+    background-image:
+      linear-gradient(var(--hairline) 1px, transparent 1px),
+      linear-gradient(90deg, var(--hairline) 1px, transparent 1px),
+      linear-gradient(rgba(227,232,239,.5) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(227,232,239,.5) 1px, transparent 1px);
+    background-size: 132px 132px, 132px 132px, 22px 22px, 22px 22px;
+    background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 28px; }
+
+  /* ---------- Drawing-sheet title block ---------- */
+  .sheethead {
+    border-bottom: 1.5px solid var(--ink);
+    background: var(--surface);
+  }
+  .sheethead .wrap {
+    display: flex; align-items: stretch; justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  .tb-main { padding: 26px 0; }
+  .tb-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--teal-press); font-weight: 600; margin: 0 0 8px;
+  }
+  .tb-title {
+    font-family: var(--font-display); font-weight: 600;
+    font-size: clamp(26px, 4vw, 38px); color: var(--ink);
+    letter-spacing: -.02em; line-height: 1.05; margin: 0;
+  }
+  .tb-sub { margin: 8px 0 0; color: var(--slate-500); font-size: 15px; max-width: 46ch; }
+  .tb-meta {
+    align-self: stretch; display: grid; grid-template-columns: 1fr 1fr;
+    border-left: 1px solid var(--hairline);
+  }
+  .tb-cell {
+    padding: 12px 18px; border-bottom: 1px solid var(--hairline);
+    min-width: 130px;
+  }
+  .tb-cell:nth-child(odd) { border-right: 1px solid var(--hairline); }
+  .tb-cell .k { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--slate-400); }
+  .tb-cell .v { font-family: var(--font-mono); font-size: 13px; color: var(--ink); font-weight: 500; margin-top: 3px; }
+
+  /* ---------- Section scaffolding ---------- */
+  section { padding: 64px 0 8px; }
+  .sec-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 6px; }
+  .sec-ref {
+    font-family: var(--font-mono); font-weight: 600; font-size: 12px;
+    color: var(--teal-press); letter-spacing: .1em;
+    border: 1px solid var(--teal); border-radius: 6px; padding: 3px 8px;
+    background: var(--teal-tint); white-space: nowrap;
+  }
+  .sec-title {
+    font-family: var(--font-display); font-weight: 600;
+    font-size: clamp(20px, 2.6vw, 27px); color: var(--ink);
+    letter-spacing: -.015em; margin: 0;
+  }
+  .sec-note { color: var(--slate-500); font-size: 14.5px; margin: 10px 0 30px; max-width: 64ch; }
+
+  /* dimension-line divider (signature motif) */
+  .dim {
+    display: flex; align-items: center; gap: 0; margin: 4px 0 30px;
+    color: var(--slate-400);
+  }
+  .dim .tick { width: 1px; height: 13px; background: var(--slate-400); flex: none; }
+  .dim .rule { height: 1px; background: var(--slate-400); flex: 1; position: relative; }
+  .dim .lab {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em;
+    color: var(--slate-500); text-transform: uppercase; padding: 0 12px; white-space: nowrap;
+  }
+  .dim .rule.draw { transform-origin: left; }
+
+  /* ---------- Color ---------- */
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px,1fr)); gap: 14px; }
+  .sw { border: 1px solid var(--hairline); border-radius: var(--r-sm); overflow: hidden; background: var(--surface); }
+  .sw .chip { height: 78px; position: relative; }
+  .sw .chip::after {
+    content: attr(data-dim); position: absolute; left: 8px; bottom: 7px;
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: .1em;
+    color: rgba(255,255,255,.7); background: rgba(6,16,28,.28);
+    padding: 2px 5px; border-radius: 4px;
+  }
+  .sw .meta { padding: 10px 12px 12px; }
+  .sw .name { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .sw .hex { font-family: var(--font-mono); font-size: 12px; color: var(--slate-500); margin-top: 2px; }
+  .sw .role { font-size: 11.5px; color: var(--slate-400); margin-top: 5px; }
+
+  .washcard {
+    margin-top: 16px; border-radius: var(--r-card); overflow: hidden;
+    border: 1px solid var(--hairline); display: grid; grid-template-columns: 1.3fr 1fr;
+  }
+  .washcard .vis { background: var(--wash); min-height: 150px; position: relative; }
+  .washcard .vis .stamp {
+    position: absolute; left: 18px; bottom: 16px; color: #fff;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; opacity: .92;
+  }
+  .washcard .vis .node {
+    position: absolute; width: 8px; height: 8px; border-radius: 50%;
+    background: #fff; box-shadow: 0 0 0 5px rgba(255,255,255,.14);
+  }
+  .washcard .body { padding: 22px; background: var(--surface); }
+  .washcard .body h4 { font-family: var(--font-display); margin: 0 0 6px; color: var(--ink); font-size: 16px; }
+  .washcard .body p { margin: 0; font-size: 13.5px; color: var(--slate-500); }
+  .washcard .body code { font-family: var(--font-mono); font-size: 12px; color: var(--teal-press); }
+
+  /* ---------- Type ---------- */
+  .type-rows { border: 1px solid var(--hairline); border-radius: var(--r-card); overflow: hidden; background: var(--surface); }
+  .trow { display: grid; grid-template-columns: 150px 1fr; gap: 18px; padding: 20px 22px; border-bottom: 1px solid var(--hairline); align-items: center; }
+  .trow:last-child { border-bottom: 0; }
+  .trow .tag { font-family: var(--font-mono); font-size: 10.5px; color: var(--slate-500); letter-spacing: .08em; }
+  .trow .tag b { display: block; color: var(--ink); font-weight: 600; font-size: 11px; margin-bottom: 4px; letter-spacing: .12em; }
+  .d-xl { font-family: var(--font-display); font-weight: 600; font-size: clamp(30px,5vw,46px); color: var(--ink); letter-spacing: -.025em; line-height: 1; }
+  .d-l  { font-family: var(--font-display); font-weight: 600; font-size: 26px; color: var(--ink); letter-spacing: -.015em; }
+  .b-l  { font-family: var(--font-body); font-size: 17px; color: var(--slate-700); }
+  .b-s  { font-family: var(--font-body); font-size: 13.5px; color: var(--slate-500); }
+  .mono-demo { font-family: var(--font-mono); font-size: 16px; color: var(--ink); font-weight: 500; }
+  .mono-demo .u { color: var(--slate-400); }
+
+  .rule-callout {
+    margin-top: 16px; display: flex; gap: 14px; align-items: flex-start;
+    background: var(--teal-tint); border: 1px solid #BDEDE4; border-radius: var(--r-sm);
+    padding: 14px 16px;
+  }
+  .rule-callout .ico { color: var(--teal-press); flex: none; margin-top: 1px; }
+  .rule-callout p { margin: 0; font-size: 13.5px; color: var(--ink); }
+  .rule-callout .ex { font-family: var(--font-mono); color: var(--teal-press); }
+
+  /* ---------- Components grid ---------- */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--hairline);
+    border-radius: var(--r-card); padding: 24px;
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 14px 40px -22px rgba(11,27,43,.4); border-color: #CFE9E3; }
+
+  /* icon in circle motif */
+  .iic { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center;
+    border: 1.5px solid var(--teal); color: var(--teal-press); background: var(--teal-tint);
+    transition: transform .3s ease; }
+  .card:hover .iic { transform: rotate(-6deg) scale(1.04); }
+  .feat-title { font-family: var(--font-display); font-weight: 600; font-size: 18px; color: var(--ink); margin: 16px 0 6px; }
+  .feat-body { font-size: 13.5px; color: var(--slate-500); margin: 0; }
+
+  /* module (Logix) card */
+  .mod { position: relative; overflow: hidden; }
+  .mod .seq { font-family: var(--font-mono); font-size: 11px; color: var(--slate-400); letter-spacing: .12em; }
+  .mod .name { font-family: var(--font-display); font-weight: 600; font-size: 19px; color: var(--ink); margin: 6px 0 2px; }
+  .mod .layer { font-family: var(--font-mono); font-size: 11.5px; color: var(--teal-press); letter-spacing: .06em; text-transform: uppercase; }
+  .mod .desc { font-size: 13px; color: var(--slate-500); margin: 12px 0 0; }
+  .mod .edge { position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--teal); opacity: .85; }
+
+  /* stat block */
+  .stat { text-align: left; }
+  .stat .num { font-family: var(--font-mono); font-weight: 600; font-size: 30px; color: var(--ink); letter-spacing: -.01em; }
+  .stat .num .un { color: var(--teal-press); font-size: 18px; }
+  .stat .cap { font-size: 12.5px; color: var(--slate-500); margin-top: 4px; }
+
+  /* buttons */
+  .btns { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .btn { font-family: var(--font-body); font-weight: 600; font-size: 14.5px; border-radius: 10px;
+    padding: 12px 20px; cursor: pointer; border: 1.5px solid transparent; transition: all .2s ease; display: inline-flex; gap: 8px; align-items: center; text-decoration: none; }
+  .btn-primary { background: var(--teal); color: var(--ink); }
+  .btn-primary:hover { background: var(--teal-press); transform: translateY(-1px); }
+  .btn-secondary { background: var(--surface); color: var(--ink); border-color: var(--ink); }
+  .btn-secondary:hover { background: var(--ink); color: #fff; }
+  .btn-ghost { background: transparent; color: var(--ink); }
+  .btn-ghost:hover { color: var(--teal-press); }
+  .btn-ghost svg { transition: transform .2s ease; }
+  .btn-ghost:hover svg { transform: translateX(3px); }
+  .btn:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--teal-press); outline-offset: 3px; }
+
+  /* comparison row */
+  .cmp { border: 1px solid var(--hairline); border-radius: var(--r-card); overflow: hidden; background: var(--surface); }
+  .cmp .crow { display: grid; grid-template-columns: 1.6fr repeat(3,1fr); align-items: center; }
+  .cmp .chead { background: var(--ink); color: #fff; }
+  .cmp .chead > div { padding: 13px 16px; font-family: var(--font-mono); font-size: 11.5px; letter-spacing: .04em; }
+  .cmp .chead .us { color: var(--teal); font-weight: 600; }
+  .cmp .crow:not(.chead) { border-top: 1px solid var(--hairline); }
+  .cmp .crow:not(.chead) > div { padding: 13px 16px; font-size: 13.5px; }
+  .cmp .lab { color: var(--slate-700); font-weight: 500; }
+  .cmp .mk { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; font-size: 12px; }
+  .cmp .yes { background: var(--teal-tint); color: var(--teal-press); }
+  .cmp .no { background: #F1F5F9; color: var(--slate-400); }
+  .cmp .col-us { background: rgba(21,194,168,.05); }
+
+  /* form */
+  .form { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--r-card); padding: 22px; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12.5px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+  .field input {
+    width: 100%; padding: 11px 13px; border: 1.5px solid var(--hairline); border-radius: 10px;
+    font-family: var(--font-body); font-size: 14px; color: var(--ink); background: var(--paper); transition: border-color .2s ease; }
+  .field input::placeholder { color: var(--slate-400); }
+  .field input:focus { border-color: var(--teal); }
+
+  /* CTA banner (Intelligence Wash) */
+  .cta {
+    margin-top: 16px; background: var(--wash); border-radius: var(--r-card); padding: 34px;
+    color: #fff; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; overflow: hidden; position: relative;
+  }
+  .cta h3 { font-family: var(--font-display); font-weight: 600; font-size: clamp(20px,3vw,26px); margin: 0 0 6px; letter-spacing: -.01em; }
+  .cta p { margin: 0; opacity: .82; font-size: 14px; max-width: 42ch; }
+  .cta .btn-primary { background: #fff; color: var(--ink); }
+  .cta .btn-primary:hover { background: var(--teal-tint); }
+
+  /* ---------- The one dark moment: blueprint night ---------- */
+  .night {
+    margin-top: 16px; background: var(--ink-deep); border-radius: var(--r-card);
+    padding: 34px; color: #E2E8F0; position: relative; overflow: hidden;
+    border: 1px solid #102234;
+  }
+  .night::before {
+    content: ""; position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(21,194,168,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(21,194,168,.06) 1px, transparent 1px);
+    background-size: 26px 26px; pointer-events: none;
+  }
+  .night .eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: .2em; color: var(--teal); text-transform: uppercase; position: relative; }
+  .night h3 { font-family: var(--font-display); font-weight: 600; font-size: 22px; color: #fff; margin: 10px 0 8px; position: relative; }
+  .night p { position: relative; color: #94A3B8; font-size: 14px; margin: 0 0 18px; max-width: 52ch; }
+  .graph { position: relative; height: 120px; }
+  .gnode { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 16px 2px rgba(21,194,168,.6); }
+  .gnode.dim2 { background: #fff; box-shadow: 0 0 10px 1px rgba(255,255,255,.4); width: 7px; height: 7px; }
+
+  footer.foot { margin-top: 72px; border-top: 1.5px solid var(--ink); background: var(--surface); }
+  footer.foot .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 20px 28px; }
+  footer.foot .k { font-family: var(--font-mono); font-size: 11px; color: var(--slate-500); letter-spacing: .08em; }
+  footer.foot .k b { color: var(--ink); font-weight: 600; }
+
+  @media (max-width: 760px) {
+    .tb-meta { width: 100%; border-left: 0; margin-top: 4px; }
+    .grid2, .grid3, .washcard, .cmp .crow { grid-template-columns: 1fr; }
+    .cmp .chead { display: none; }
+    .cmp .crow:not(.chead) > div { border-top: 1px solid var(--hairline); }
+    .trow { grid-template-columns: 1fr; gap: 8px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+
+<!-- ===================== TITLE BLOCK ===================== -->
+<header class="sheethead">
+  <div class="wrap">
+    <div class="tb-main">
+      <p class="tb-eyebrow" style="display:flex;align-items:center;gap:10px;"><svg viewBox="0 0 48 56" width="18" height="21" fill="none" aria-hidden="true"><path d="M16 50V8h14a13 13 0 0 1 0 26H16" stroke="var(--ink)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="25" cy="21" r="3.6" fill="var(--teal)"/></svg> Preckon — Brand &amp; Design System</p>
+      <h1 class="tb-title">The system the website is built from.</h1>
+      <p class="tb-sub">Tokens, type, the signature motif, and core components. Light-first, drawing-native, enterprise-grade. Foundation for every page that follows.</p>
+    </div>
+    <div class="tb-meta">
+      <div class="tb-cell"><div class="k">Sheet</div><div class="v">DS-01</div></div>
+      <div class="tb-cell"><div class="k">Rev</div><div class="v">0.1</div></div>
+      <div class="tb-cell"><div class="k">Lane</div><div class="v">Light-first</div></div>
+      <div class="tb-cell"><div class="k">Scale</div><div class="v">1 : 1</div></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ===================== COLOR ===================== -->
+  <section>
+    <div class="sec-head"><span class="sec-ref">01 / COLOR</span><h2 class="sec-title">Blueprint navy, intelligence teal</h2></div>
+    <p class="sec-note">Navy is the drawing ink; teal is the intelligence signal. Slate carries text, paper carries the page, amber gets exactly one highlight role and never more.</p>
+
+    <div class="swatches">
+      <div class="sw"><div class="chip" data-dim="PRIMARY" style="background:#0B1B2B"></div><div class="meta"><div class="name">Blueprint Navy</div><div class="hex">--ink · #0B1B2B</div><div class="role">Text, dark surfaces, ink</div></div></div>
+      <div class="sw"><div class="chip" data-dim="DARK BG" style="background:#06101C"></div><div class="meta"><div class="name">Ink Deep</div><div class="hex">--ink-deep · #06101C</div><div class="role">Blueprint-night background</div></div></div>
+      <div class="sw"><div class="chip" data-dim="ACCENT" style="background:#15C2A8"></div><div class="meta"><div class="name">Intelligence Teal</div><div class="hex">--teal · #15C2A8</div><div class="role">Primary accent / signal</div></div></div>
+      <div class="sw"><div class="chip" data-dim="HOVER" style="background:#0FA593"></div><div class="meta"><div class="name">Teal Press</div><div class="hex">--teal-press · #0FA593</div><div class="role">Hover / active</div></div></div>
+      <div class="sw"><div class="chip" data-dim="WASH" style="background:#E8FAF6"></div><div class="meta"><div class="name">Teal Tint</div><div class="hex">--teal-tint · #E8FAF6</div><div class="role">Soft accent surfaces</div></div></div>
+      <div class="sw"><div class="chip" data-dim="BODY" style="background:#334155"></div><div class="meta"><div class="name">Slate 700</div><div class="hex">--slate-700 · #334155</div><div class="role">Body text</div></div></div>
+      <div class="sw"><div class="chip" data-dim="PAGE" style="background:#FBFCFE;border-bottom:1px solid #E3E8EF"></div><div class="meta"><div class="name">Paper</div><div class="hex">--paper · #FBFCFE</div><div class="role">Default page ground</div></div></div>
+      <div class="sw"><div class="chip" data-dim="HIGHLIGHT 1×" style="background:#F5A524"></div><div class="meta"><div class="name">Signal Amber</div><div class="hex">--signal · #F5A524</div><div class="role">One highlight role · &lt;5%</div></div></div>
+    </div>
+
+    <div class="washcard">
+      <div class="vis" id="washvis">
+        <div class="node" style="left:14%;top:30%"></div>
+        <div class="node" style="left:42%;top:62%"></div>
+        <div class="node" style="left:70%;top:38%"></div>
+        <div class="node" style="left:88%;top:70%"></div>
+        <span class="stamp">INTELLIGENCE WASH</span>
+      </div>
+      <div class="body">
+        <h4>The Intelligence Wash</h4>
+        <p>Navy → deep-teal → teal. Used sparingly: the hero accent, the dark AI section, and key CTA banners. Never a full-page background.<br><br><code>#0B1B2B → #0E3A4A → #15C2A8</code></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TYPE ===================== -->
+  <section>
+    <div class="sec-head"><span class="sec-ref">02 / TYPE</span><h2 class="sec-title">Grotesk for voice, mono for measure</h2></div>
+    <p class="sec-note">General Sans speaks; Inter carries the reading; JetBrains Mono carries every measured value. That last rule is the signature — it makes the site read as a measurement instrument, not a brochure.</p>
+
+    <div class="type-rows">
+      <div class="trow"><div class="tag"><b>DISPLAY</b>General Sans · 600</div><div class="d-xl">From drawings to decisions.</div></div>
+      <div class="trow"><div class="tag"><b>HEADING</b>General Sans · 600</div><div class="d-l">A costed BOQ in hours, not weeks.</div></div>
+      <div class="trow"><div class="tag"><b>BODY · LG</b>Inter · 400</div><div class="b-l">Every quantity is traceable to the line on the drawing it came from — and every estimate shows its reasoning.</div></div>
+      <div class="trow"><div class="tag"><b>BODY · SM</b>Inter · 400</div><div class="b-s">Reviewed by your estimators, audited end to end. Nothing auto-commits.</div></div>
+      <div class="trow"><div class="tag"><b>DATA</b>JetBrains Mono · 500</div><div class="mono-demo">4,820&nbsp;<span class="u">m²</span> · 1,240&nbsp;<span class="u">line items</span> · $1,240,500 · <span class="u">BOQ-04.12</span></div></div>
+    </div>
+
+    <div class="rule-callout">
+      <span class="ico" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 6v3M7 6v2M11 6v3M15 6v2M19 6v3"/><path d="M3 14h18v4H3z"/></svg>
+      </span>
+      <p><b>The rule:</b> anything that is a measured value — area, count, money, code, dimension — renders in mono. <span class="ex">4,820 m²</span>, <span class="ex">$1,240,500</span>, <span class="ex">BOQ-04.12</span>. Prose never does.</p>
+    </div>
+  </section>
+
+  <!-- ===================== SIGNATURE MOTIF ===================== -->
+  <section>
+    <div class="sec-head"><span class="sec-ref">03 / MOTIF</span><h2 class="sec-title">The measured line</h2></div>
+    <p class="sec-note">The dimension line — leader ticks, a mono label, the grammar of a technical drawing — is the connective tissue of the whole site. It divides sections and threads the page: a line that picks up a number.</p>
+
+    <div class="dim"><span class="tick"></span><span class="rule draw"></span><span class="lab">drawing → quantity</span><span class="rule draw"></span><span class="tick"></span></div>
+
+    <div class="grid3">
+      <div class="card">
+        <div class="seq" style="font-family:var(--font-mono);font-size:11px;color:var(--slate-400);letter-spacing:.12em">DETAIL A</div>
+        <div style="margin:16px 0 6px;display:flex;align-items:center;gap:0;color:var(--teal-press)">
+          <span style="width:1px;height:16px;background:var(--teal)"></span>
+          <span style="flex:1;height:1.5px;background:var(--teal)"></span>
+          <span style="font-family:var(--font-mono);font-size:11px;padding:0 8px">2,400</span>
+          <span style="flex:1;height:1.5px;background:var(--teal)"></span>
+          <span style="width:1px;height:16px;background:var(--teal)"></span>
+        </div>
+        <p class="feat-body">Dimension divider — section break with a measured label.</p>
+      </div>
+      <div class="card">
+        <div class="seq" style="font-family:var(--font-mono);font-size:11px;color:var(--slate-400);letter-spacing:.12em">DETAIL B</div>
+        <div style="margin:16px 0 6px">
+          <svg width="100%" height="40" viewBox="0 0 200 40" fill="none" stroke="var(--teal)" stroke-width="1.5">
+            <path d="M4 30 L60 30 L80 12 L130 12 L150 28 L196 28" stroke="var(--slate-400)"/>
+            <circle cx="80" cy="12" r="3" fill="var(--teal)" stroke="none"/>
+            <circle cx="130" cy="12" r="3" fill="var(--teal)" stroke="none"/>
+            <line x1="80" y1="12" x2="80" y2="4" stroke-dasharray="2 2"/><line x1="130" y1="12" x2="130" y2="4" stroke-dasharray="2 2"/>
+          </svg>
+        </div>
+        <p class="feat-body">Leader callout — a recognized element flagged on a drawing.</p>
+      </div>
+      <div class="card">
+        <div class="seq" style="font-family:var(--font-mono);font-size:11px;color:var(--slate-400);letter-spacing:.12em">DETAIL C</div>
+        <div style="margin:16px 0 6px;font-family:var(--font-mono);font-size:12px;color:var(--ink);border:1px dashed var(--hairline);border-radius:8px;padding:8px 10px">
+          <span style="color:var(--teal-press)">›</span> CONC.GR-30 &nbsp;<span style="color:var(--slate-400)">→</span>&nbsp; 84.6 m³
+        </div>
+        <p class="feat-body">Trace tag — the line item with its source, in mono.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== COMPONENTS ===================== -->
+  <section>
+    <div class="sec-head"><span class="sec-ref">04 / COMPONENTS</span><h2 class="sec-title">Core component set</h2></div>
+    <p class="sec-note">The kit every page composes from. Icon-in-circle carries over from the decks; the module card, stat block, comparison matrix and CTA inherit the tokens above.</p>
+
+    <!-- buttons -->
+    <div class="dim"><span class="tick"></span><span class="rule"></span><span class="lab">buttons & actions</span><span class="rule"></span><span class="tick"></span></div>
+    <div class="card">
+      <div class="btns">
+        <a class="btn btn-primary" href="#">Book a demo
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="btn btn-secondary" href="#">Join the design partner program</a>
+        <a class="btn btn-ghost" href="#">Watch the 90-second overview
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- feature + module cards -->
+    <div class="dim" style="margin-top:30px"><span class="tick"></span><span class="rule"></span><span class="lab">feature card · module card</span><span class="rule"></span><span class="tick"></span></div>
+    <div class="grid2">
+      <div class="card">
+        <div class="iic" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3v18M3 8l9-5 9 5M5 10v8l7 4 7-4v-8"/></svg>
+        </div>
+        <h3 class="feat-title">Explainable by design</h3>
+        <p class="feat-body">Every quantity links back to the element it was measured from, so a reviewer can audit the number in one click.</p>
+      </div>
+      <div class="card mod">
+        <span class="edge"></span>
+        <div class="seq">MODULE 04 / 06</div>
+        <div class="name">QuantLogix</div>
+        <div class="layer">Quantity Intelligence</div>
+        <p class="desc">Generates the BOQ and takeoff directly from drawings and specifications — measured, structured, and ready to cost.</p>
+      </div>
+    </div>
+
+    <!-- stats -->
+    <div class="dim" style="margin-top:30px"><span class="tick"></span><span class="rule"></span><span class="lab">metric block</span><span class="rule"></span><span class="tick"></span></div>
+    <div class="grid3">
+      <div class="card stat"><div class="num">6<span class="un">&nbsp;hrs</span></div><div class="cap">From tender package to costed BOQ</div></div>
+      <div class="card stat"><div class="num">1,240<span class="un">&nbsp;items</span></div><div class="cap">Line items generated and validated</div></div>
+      <div class="card stat"><div class="num">100<span class="un">%</span></div><div class="cap">Quantities traceable to source</div></div>
+    </div>
+
+    <!-- comparison -->
+    <div class="dim" style="margin-top:30px"><span class="tick"></span><span class="rule"></span><span class="lab">comparison matrix</span><span class="rule"></span><span class="tick"></span></div>
+    <div class="cmp">
+      <div class="crow chead">
+        <div>Capability</div><div>Takeoff tools</div><div>CostX</div><div class="us">Preckon</div>
+      </div>
+      <div class="crow">
+        <div class="lab">Reads raw drawings & specs</div>
+        <div><span class="mk yes">✓</span></div><div><span class="mk no">–</span></div><div class="col-us"><span class="mk yes">✓</span></div>
+      </div>
+      <div class="crow">
+        <div class="lab">Generates the BOQ</div>
+        <div><span class="mk no">–</span></div><div><span class="mk yes">✓</span></div><div class="col-us"><span class="mk yes">✓</span></div>
+      </div>
+      <div class="crow">
+        <div class="lab">Costed estimate → procurement</div>
+        <div><span class="mk no">–</span></div><div><span class="mk no">–</span></div><div class="col-us"><span class="mk yes">✓</span></div>
+      </div>
+    </div>
+
+    <!-- form -->
+    <div class="dim" style="margin-top:30px"><span class="tick"></span><span class="rule"></span><span class="lab">demo request</span><span class="rule"></span><span class="tick"></span></div>
+    <div class="grid2">
+      <div class="form">
+        <div class="field"><label for="n">Full name</label><input id="n" placeholder="Jordan Mensah"></div>
+        <div class="field"><label for="c">Company</label><input id="c" placeholder="Apex Constructors"></div>
+        <div class="field"><label for="e">Work email</label><input id="e" placeholder="jordan@apex.build"></div>
+        <a class="btn btn-primary" href="#" style="width:100%;justify-content:center">Request your demo</a>
+      </div>
+      <div style="display:flex;flex-direction:column;justify-content:center;gap:10px">
+        <div style="font-family:var(--font-mono);font-size:11px;color:var(--teal-press);letter-spacing:.14em">FORM VOICE</div>
+        <p style="margin:0;color:var(--slate-600);font-size:14px">Labels name what the person controls. Buttons say what happens. <b style="color:var(--ink)">Request your demo</b> → toast reads <b style="color:var(--ink)">Demo requested</b>. No "Submit," no apologies in errors.</p>
+      </div>
+    </div>
+
+    <!-- CTA banner -->
+    <div class="dim" style="margin-top:30px"><span class="tick"></span><span class="rule"></span><span class="lab">cta banner</span><span class="rule"></span><span class="tick"></span></div>
+    <div class="cta">
+      <div>
+        <h3>See a real tender become a BOQ.</h3>
+        <p>Bring one drawing set. Watch it become a costed, traceable bill of quantities — live.</p>
+      </div>
+      <a class="btn btn-primary" href="#">Book a demo</a>
+    </div>
+
+    <!-- dark moment -->
+    <div class="dim" style="margin-top:30px"><span class="tick"></span><span class="rule"></span><span class="lab">the one dark moment · blueprint night</span><span class="rule"></span><span class="tick"></span></div>
+    <div class="night">
+      <div class="eyebrow">The intelligence layer</div>
+      <h3>One orchestrator. Many providers. Your data isolated.</h3>
+      <p>The single dark section on the site. A construction knowledge graph, provider-independent AI, and human review — shown as a glowing network against blueprint-night navy. Used once, so it lands.</p>
+      <div class="graph" aria-hidden="true">
+        <div class="gnode" style="left:8%;top:30%"></div>
+        <div class="gnode dim2" style="left:26%;top:64%"></div>
+        <div class="gnode" style="left:40%;top:24%"></div>
+        <div class="gnode dim2" style="left:54%;top:70%"></div>
+        <div class="gnode" style="left:68%;top:36%"></div>
+        <div class="gnode dim2" style="left:84%;top:58%"></div>
+        <svg style="position:absolute;inset:0;width:100%;height:100%" stroke="rgba(21,194,168,.35)" stroke-width="1" fill="none">
+          <line x1="8%" y1="30%" x2="40%" y2="24%"/><line x1="40%" y1="24%" x2="68%" y2="36%"/>
+          <line x1="26%" y1="64%" x2="54%" y2="70%"/><line x1="54%" y1="70%" x2="84%" y2="58%"/>
+          <line x1="40%" y1="24%" x2="26%" y2="64%"/><line x1="68%" y1="36%" x2="84%" y2="58%"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <span class="k"><b>Preckon</b> — Design System</span>
+    <span class="k">SHEET <b>DS-01</b> · REV <b>0.1</b></span>
+    <span class="k">NEXT: <b>Homepage</b></span>
+  </div>
+</footer>
+
+<script>
+  // One orchestrated moment: dimension rules draw in on first view. Reduced-motion safe.
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduce && 'IntersectionObserver' in window) {
+    document.querySelectorAll('.dim .rule.draw').forEach(el => {
+      el.style.transform = 'scaleX(0)';
+      el.style.transition = 'transform .7s cubic-bezier(.2,.7,.2,1)';
+    });
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.style.transform = 'scaleX(1)'; io.unobserve(e.target); } });
+    }, { threshold: .4 });
+    document.querySelectorAll('.dim .rule.draw').forEach(el => io.observe(el));
+  }
+</script>

@@ -1,0 +1,371 @@
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Book a demo — Preckon</title>
+<meta name="description" content="Bring one drawing set and watch it become a costed, traceable BOQ — live. Book a Preckon demo, or reach sales, support and the Design Partner Program." />
+<meta name="theme-color" content="#0B1B2B" />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<link rel="manifest" href="site.webmanifest" />
+
+<script>try{var t=localStorage.getItem("preckon-theme")||((window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","light");}</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+  @import url('https://api.fontshare.com/v2/css?f[]=general-sans@500,600,700&display=swap');
+
+  :root{
+    --ink:#0B1B2B; --ink-deep:#06101C; --teal:#15C2A8; --teal-press:#0FA593; --teal-tint:#E8FAF6;
+    --slate-700:#334155; --slate-600:#475569; --slate-500:#64748B; --slate-400:#94A3B8;
+    --paper:#FBFCFE; --surface:#FFFFFF; --hairline:#E3E8EF; --signal:#F5A524; --danger:#DC2626;
+    --wash:linear-gradient(120deg,#0B1B2B 0%,#0E3A4A 52%,#15C2A8 100%);
+    --font-display:'General Sans','Inter',system-ui,sans-serif;
+    --font-body:'Inter',system-ui,sans-serif;
+    --font-mono:'JetBrains Mono',ui-monospace,'SF Mono',monospace;
+    --r-card:18px; --maxw:1180px;
+  }
+  *{box-sizing:border-box;} html,body{margin:0;}
+  body{
+    font-family:var(--font-body); color:var(--slate-700); background-color:var(--paper);
+    background-image:
+      linear-gradient(var(--hairline) 1px,transparent 1px),
+      linear-gradient(90deg,var(--hairline) 1px,transparent 1px),
+      linear-gradient(rgba(227,232,239,.5) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(227,232,239,.5) 1px,transparent 1px);
+    background-size:132px 132px,132px 132px,22px 22px,22px 22px;
+    -webkit-font-smoothing:antialiased; line-height:1.5;
+  }
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px;}
+  a{text-decoration:none;}
+
+  .btn{font-family:var(--font-body); font-weight:600; font-size:14.5px; border-radius:10px; padding:12px 20px; cursor:pointer; border:1.5px solid transparent; transition:all .2s ease; display:inline-flex; gap:8px; align-items:center; justify-content:center;}
+  .btn-primary{background:var(--teal); color:var(--ink);} .btn-primary:hover{background:var(--teal-press); transform:translateY(-1px);}
+  .btn:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--teal-press); outline-offset:2px;}
+
+  /* NAV */
+  .nav{position:sticky; top:0; z-index:50; background:rgba(251,252,254,.85); backdrop-filter:saturate(140%) blur(10px); border-bottom:1px solid var(--hairline);}
+  .nav .wrap{display:flex; align-items:center; justify-content:space-between; height:64px;}
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand .mark{display:block; flex:none;}
+  .brand .wm{font-family:var(--font-display); font-weight:600; font-size:16px; color:var(--ink); letter-spacing:-.02em;}
+  .brand .wm .o{color:var(--teal);}
+  .nav-links{display:flex; gap:26px; align-items:center;}
+  .nav-links a{font-size:14px; color:var(--slate-600); font-weight:500;}
+  .nav-links a:hover{color:var(--ink);}
+  @media(max-width:880px){ .nav-links{display:none;} }
+
+  .kicker{font-family:var(--font-mono); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--teal-press); font-weight:600;}
+  .reveal{opacity:0; transform:translateY(20px);} .has-anim .reveal.in{opacity:1; transform:none; transition:opacity .6s ease, transform .6s ease;}
+
+  /* HERO / SPLIT */
+  .split{display:grid; grid-template-columns:1fr 1.05fr; gap:52px; align-items:start; padding:66px 0 40px;}
+  .eyebrow{font-family:var(--font-mono); font-size:11.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--teal-press); font-weight:600; display:inline-flex; gap:10px; align-items:center;}
+  .eyebrow::before{content:""; width:22px; height:1px; background:var(--teal);}
+  .split h1{font-family:var(--font-display); font-weight:600; font-size:clamp(30px,4vw,44px); line-height:1.06; letter-spacing:-.03em; color:var(--ink); margin:16px 0 0; max-width:15ch;}
+  .split h1 .hl{color:var(--teal-press);}
+  .split p.sub{font-size:16.5px; color:var(--slate-600); margin:16px 0 0; max-width:44ch;}
+  .expect{list-style:none; margin:28px 0 0; padding:0;}
+  .expect li{display:flex; gap:13px; align-items:flex-start; padding:11px 0; border-bottom:1px dashed var(--hairline);}
+  .expect li:last-child{border-bottom:0;}
+  .expect .ei{width:34px; height:34px; border-radius:50%; border:1.5px solid var(--teal); background:var(--teal-tint); display:grid; place-items:center; color:var(--teal-press); flex:none;}
+  .expect b{display:block; color:var(--ink); font-size:14px; font-weight:600;}
+  .expect span{font-size:13px; color:var(--slate-500);}
+  .assure{display:flex; gap:9px; align-items:center; margin-top:22px; font-size:13px; color:var(--slate-500);}
+  .assure svg{color:var(--teal-press); flex:none;}
+  @media(max-width:900px){ .split{grid-template-columns:1fr; gap:34px; padding-top:52px;} }
+
+  /* FORM CARD */
+  .formcard{background:var(--surface); border:1px solid var(--hairline); border-radius:var(--r-card); box-shadow:0 30px 70px -46px rgba(11,27,43,.5); padding:30px; position:relative;}
+  .formcard .fhead{font-family:var(--font-display); font-weight:600; font-size:19px; color:var(--ink); margin:0 0 4px;}
+  .formcard .fsub{font-size:13px; color:var(--slate-500); margin:0 0 22px;}
+  .frow{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .field{margin-bottom:15px;}
+  .field.full{grid-column:1 / -1;}
+  .field label{display:block; font-size:12.5px; font-weight:600; color:var(--ink); margin-bottom:6px;}
+  .field label .req{color:var(--teal-press);}
+  .field input,.field select,.field textarea{width:100%; padding:11px 13px; border:1.5px solid var(--hairline); border-radius:10px; font-family:var(--font-body); font-size:14px; color:var(--ink); background:var(--paper); transition:border-color .2s ease;}
+  .field textarea{resize:vertical; min-height:84px;}
+  .field input::placeholder,.field textarea::placeholder{color:var(--slate-400);}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--teal);}
+  .field.err input,.field.err select{border-color:var(--danger);}
+  .field .msg{font-size:11.5px; color:var(--danger); margin-top:5px; display:none;}
+  .field.err .msg{display:block;}
+  .consent{font-size:11.5px; color:var(--slate-400); margin:6px 0 16px;}
+  .consent a{color:var(--teal-press);}
+  .formcard .submit{width:100%;}
+  /* success state */
+  .success{display:none; text-align:center; padding:26px 8px;}
+  .success.on{display:block;}
+  .formbody.hide{display:none;}
+  .success .tick{width:60px; height:60px; border-radius:50%; background:var(--teal-tint); border:1.5px solid var(--teal); display:grid; place-items:center; color:var(--teal-press); margin:0 auto 18px;}
+  .success h3{font-family:var(--font-display); font-weight:600; font-size:21px; color:var(--ink); margin:0 0 8px;}
+  .success p{font-size:14px; color:var(--slate-600); margin:0 auto; max-width:36ch;}
+  .success .ref{font-family:var(--font-mono); font-size:11px; color:var(--slate-400); margin-top:16px;}
+
+  /* CONTACT ROUTES */
+  .routes-sec{padding:24px 0 74px;}
+  .routes{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:34px;}
+  .route{border:1px solid var(--hairline); border-radius:var(--r-card); background:var(--surface); padding:22px; transition:border-color .2s ease, transform .2s ease;}
+  .route:hover{border-color:#CFE9E3; transform:translateY(-2px);}
+  .route .iic{width:40px; height:40px; border-radius:50%; border:1.5px solid var(--teal); background:var(--teal-tint); display:grid; place-items:center; color:var(--teal-press); margin-bottom:12px;}
+  .route h4{font-family:var(--font-display); font-weight:600; font-size:15px; color:var(--ink); margin:0 0 5px;}
+  .route p{font-size:12.5px; color:var(--slate-500); margin:0 0 10px;}
+  .route a{font-family:var(--font-mono); font-size:12px; color:var(--teal-press);}
+  @media(max-width:820px){ .routes{grid-template-columns:1fr 1fr;} }
+  @media(max-width:480px){ .routes{grid-template-columns:1fr;} }
+
+  /* FOOTER */
+  footer.foot{border-top:1.5px solid var(--ink); background:var(--surface);}
+  footer.foot .top{display:grid; grid-template-columns:1.4fr repeat(3,1fr); gap:30px; padding:48px 0;}
+  footer.foot .blurb{font-size:13px; color:var(--slate-500); margin:14px 0 0; max-width:34ch;}
+  footer.foot .col h6{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.14em; color:var(--slate-400); text-transform:uppercase; margin:4px 0 14px;}
+  footer.foot .col a{display:block; font-size:13.5px; color:var(--slate-600); padding:5px 0;} footer.foot .col a:hover{color:var(--teal-press);}
+  footer.foot .base{border-top:1px solid var(--hairline); display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; padding:16px 0;}
+  footer.foot .base .k{font-family:var(--font-mono); font-size:11px; color:var(--slate-500); letter-spacing:.06em;} footer.foot .base .k b{color:var(--ink);}
+  @media(max-width:820px){ footer.foot .top{grid-template-columns:1fr 1fr;} }
+
+  @media (prefers-reduced-motion: reduce){ *{transition:none!important; animation:none!important;} }
+
+  /* ================= THEME: DARK ================= */
+  [data-theme="dark"]{
+    --paper:#0A1626; --surface:#10223A; --ink:#EAF1F8;
+    --slate-700:#C7D3E0; --slate-600:#A8B6C6; --slate-500:#8493A6; --slate-400:#6A7A8E; --slate-300:#37495E;
+    --hairline:#1E3350; --teal-tint:rgba(21,194,168,.15);
+  }
+  [data-theme="dark"] body{
+    background-image:
+      linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px),
+      linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);
+  }
+  [data-theme="dark"] .nav{background:rgba(10,22,38,.82); border-bottom-color:var(--hairline);}
+  [data-theme="dark"] .modnav{background:rgba(10,22,38,.92); border-bottom-color:var(--hairline);}
+  [data-theme="dark"] .btn-primary{color:#0B1B2B;}
+  [data-theme="dark"] .btn-secondary{background:var(--surface); color:var(--ink); border-color:var(--slate-400);}
+  [data-theme="dark"] .btn-secondary:hover{background:var(--ink); color:#0A1626;}
+  [data-theme="dark"] .finalcta .btn-primary,[data-theme="dark"] .cta .btn-primary{color:#0B1B2B;}
+  [data-theme="dark"] .flag,[data-theme="dark"] .mnode.active .iic{color:#0B1B2B;}
+  /* intentional dark accent blocks keep their own light text on navy */
+  [data-theme="dark"] .chead,[data-theme="dark"] .band.copilot,[data-theme="dark"] .own,
+  [data-theme="dark"] .finish,[data-theme="dark"] .usage,[data-theme="dark"] .copilot{background:#0B1B2B;}
+  [data-theme="dark"] footer.foot{border-top-color:var(--hairline);}
+  [data-theme="dark"] .cell{background:#14273D;}
+  [data-theme="dark"] .cell.on{background:#2C4055;}
+  [data-theme="dark"] .no,[data-theme="dark"] .mk.no{background:#1B2E44; color:var(--slate-400);}
+  [data-theme="dark"] .rtag.std{background:#1B2E44; color:var(--slate-400);}
+  /* nav tools */
+  .nav-tools{display:flex; align-items:center; gap:8px;}
+  .lang-select{font-family:var(--font-mono); font-size:11px; color:var(--slate-600); background:transparent;
+    border:1px solid var(--hairline); border-radius:8px; padding:6px 7px; cursor:pointer;}
+  .theme-toggle{width:34px; height:34px; border-radius:8px; border:1px solid var(--hairline); background:transparent;
+    color:var(--slate-600); display:grid; place-items:center; cursor:pointer; transition:all .2s ease;}
+  .theme-toggle:hover{color:var(--ink); border-color:var(--slate-400);}
+  .theme-toggle .ic-sun{display:none;}
+  [data-theme="dark"] .theme-toggle .ic-moon{display:none;}
+  [data-theme="dark"] .theme-toggle .ic-sun{display:block;}
+  [dir="rtl"] .eyebrow::before{margin-left:0;}
+</style>
+
+<script>
+  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){ document.documentElement.classList.add('has-anim'); }
+</script>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <svg class="mark" viewBox="0 0 48 56" width="25" height="29" fill="none" aria-hidden="true"><path d="M16 50V8h14a13 13 0 0 1 0 26H16" stroke="var(--ink)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="25" cy="21" r="3.6" fill="var(--teal)"/></svg>
+      <span class="wm">Preck<span class="o">o</span>n</span>
+    </a>
+    <div class="nav-links">
+      <a href="preckon-platform.html" data-i18n="nav.platform">Platform</a>
+      <a href="preckon-modules.html" data-i18n="nav.modules">Modules</a>
+      <a href="preckon-why.html" data-i18n="nav.why">Why us</a>
+      <a href="preckon-security.html" data-i18n="nav.security">Security</a>
+      <a href="preckon-pricing.html" data-i18n="nav.pricing">Pricing</a>
+    </div>
+    <div class="nav-tools">
+      <select class="lang-select" aria-label="Language" onchange="PK.setLang(this.value)"><option value="en">EN</option><option value="ar">العربية</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option></select>
+      <button class="theme-toggle" type="button" aria-label="Toggle theme" onclick="PK.toggleTheme()"><svg class="ic-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><svg class="ic-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19"/></svg></button>
+    </div>
+    <a class="btn btn-primary" href="#form">Book a demo</a>
+  </div>
+</nav>
+
+<!-- SPLIT -->
+<header class="wrap">
+  <div class="split">
+    <div class="reveal">
+      <span class="eyebrow">Book a demo</span>
+      <h1>See a real tender become a <span class="hl">BOQ.</span></h1>
+      <p class="sub">Bring one drawing set. We'll run it through the whole chain — documents to a costed, traceable bill of quantities — live on the call. No slides.</p>
+      <ul class="expect">
+        <li><span class="ei"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg></span><div><b>About 30 minutes</b><span>Enough to see the full chain run end to end.</span></div></li>
+        <li><span class="ei"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 3v18"/></svg></span><div><b>Bring your own drawing set</b><span>We work on a real project of yours, not a canned demo.</span></div></li>
+        <li><span class="ei"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/></svg></span><div><b>Security team welcome</b><span>We'll answer IT and procurement questions on the spot.</span></div></li>
+      </ul>
+      <div class="assure">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        Your documents stay yours — isolated, encrypted, never used to train shared models.
+      </div>
+    </div>
+
+    <!-- FORM -->
+    <div class="formcard reveal" id="form">
+      <div class="formbody" id="formbody">
+        <h2 class="fhead">Request your demo</h2>
+        <p class="fsub">Tell us a little about your team and we'll be in touch within one business day.</p>
+        <form id="demoform" novalidate>
+          <div class="frow">
+            <div class="field"><label for="name">Full name <span class="req">*</span></label><input id="name" name="name" type="text" placeholder="Jordan Mensah" autocomplete="name"><div class="msg">Please enter your name.</div></div>
+            <div class="field"><label for="company">Company <span class="req">*</span></label><input id="company" name="company" type="text" placeholder="Apex Constructors" autocomplete="organization"><div class="msg">Please enter your company.</div></div>
+          </div>
+          <div class="field full"><label for="email">Work email <span class="req">*</span></label><input id="email" name="email" type="email" placeholder="jordan@apex.build" autocomplete="email"><div class="msg">Please enter a valid work email.</div></div>
+          <div class="frow">
+            <div class="field"><label for="role">Your role</label>
+              <select id="role" name="role">
+                <option value="">Select…</option>
+                <option>Estimator</option>
+                <option>Preconstruction lead</option>
+                <option>Quantity surveyor</option>
+                <option>Owner / Director</option>
+                <option>Procurement</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field"><label for="bids">Bids per month</label>
+              <select id="bids" name="bids">
+                <option value="">Select…</option>
+                <option>1–5</option>
+                <option>6–20</option>
+                <option>20+</option>
+                <option>Not sure yet</option>
+              </select>
+            </div>
+          </div>
+          <div class="field full"><label for="notes">Anything specific you want to see?</label><textarea id="notes" name="notes" placeholder="e.g. concrete-heavy project, our method of measurement, integration questions…"></textarea></div>
+          <p class="consent">By submitting, you agree to be contacted about Preckon. We don't share your details. See our <a href="#">privacy notice</a>.</p>
+          <button type="submit" class="btn btn-primary submit">Request your demo
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </form>
+      </div>
+
+      <div class="success" id="success" role="status" aria-live="polite">
+        <div class="tick"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l4 4 10-10"/></svg></div>
+        <h3>Demo requested</h3>
+        <p>Thanks — we'll reach out within one business day to find a time. Have a drawing set ready and we'll run it live.</p>
+        <div class="ref" id="refline">REF · PRECKON-DEMO</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- CONTACT ROUTES -->
+<section class="routes-sec">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="kicker">Other ways to reach us</span>
+    </div>
+    <div class="routes reveal">
+      <div class="route">
+        <span class="iic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 4h16v16H4z"/><path d="m4 6 8 6 8-6"/></svg></span>
+        <h4>Sales &amp; demos</h4><p>Pricing, procurement, and enterprise questions.</p>
+        <a href="mailto:sales@preckon.com">sales@preckon.com</a>
+      </div>
+      <div class="route">
+        <span class="iic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>
+        <h4>Support</h4><p>Already using Preckon and need a hand.</p>
+        <a href="mailto:support@preckon.com">support@preckon.com</a>
+      </div>
+      <div class="route">
+        <span class="iic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a5 5 0 0 1 10 0v1"/><path d="M16 3.1a3 3 0 0 1 0 5.8M21 20v-1a5 5 0 0 0-3.5-4.8"/></svg></span>
+        <h4>Design partners</h4><p>Run real bids and shape the roadmap.</p>
+        <a href="index.html#partners">Apply to the program →</a>
+      </div>
+      <div class="route">
+        <span class="iic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg></span>
+        <h4>Everything else</h4><p>General enquiries and partnerships.</p>
+        <a href="mailto:hello@preckon.com">hello@preckon.com</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <a class="brand" href="index.html"><svg class="mark" viewBox="0 0 48 56" width="25" height="29" fill="none" aria-hidden="true"><path d="M16 50V8h14a13 13 0 0 1 0 26H16" stroke="var(--ink)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="25" cy="21" r="3.6" fill="var(--teal)"/></svg><span class="wm">Preck<span class="o">o</span>n</span></a>
+        <p class="blurb">From drawings to a defensible estimate. AI-native preconstruction, reviewed by your team.</p>
+      </div>
+      <div class="col"><h6>Platform</h6><a href="preckon-platform.html">Architecture</a><a href="preckon-modules.html">Modules</a><a href="preckon-platform.html#foundation">Foundation</a><a href="preckon-security.html">Security</a></div>
+      <div class="col"><h6>Company</h6><a href="preckon-about.html">About</a><a href="preckon-pricing.html">Pricing</a><a href="preckon-why.html">Why us</a><a href="index.html#partners">Design partners</a></div>
+      <div class="col"><h6>Get started</h6><a href="#form">Book a demo</a><a href="index.html#partners">Design Partner Program</a><a href="index.html#how">Watch overview</a></div>
+    </div>
+    <div class="base">
+      <span class="k">© 2026 TechSME Inc. · Mississauga, ON</span>
+      <span class="k">SHEET <b>DEMO</b> · BUILT ON <b>DS-01</b></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // reveals
+  if(document.documentElement.classList.contains('has-anim')){
+    const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.1});
+    document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+  }
+
+  // form validation + success state (front-end only — wire to your CRM/backend)
+  const form = document.getElementById('demoform');
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  function setErr(id, on){ document.getElementById(id).closest('.field').classList.toggle('err', on); }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    const name = document.getElementById('name'), company = document.getElementById('company'), email = document.getElementById('email');
+    let ok = true;
+    const nOk = name.value.trim().length > 1; setErr('name', !nOk); ok = ok && nOk;
+    const cOk = company.value.trim().length > 1; setErr('company', !cOk); ok = ok && cOk;
+    const eOk = emailRe.test(email.value.trim()); setErr('email', !eOk); ok = ok && eOk;
+    if(!ok){ const first = form.querySelector('.field.err input'); if(first) first.focus(); return; }
+
+    // success
+    const ref = 'PRECKON-DEMO-' + Math.random().toString(36).slice(2,7).toUpperCase();
+    document.getElementById('refline').textContent = 'REF · ' + ref;
+    document.getElementById('formbody').classList.add('hide');
+    const s = document.getElementById('success'); s.classList.add('on');
+    document.getElementById('form').scrollIntoView({behavior:'smooth', block:'center'});
+  });
+
+  // clear error as the user types
+  ['name','company','email'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', ()=> setErr(id, false));
+  });
+</script>
+
+<script>
+(function(){
+  var root=document.documentElement;
+  var I18N={
+    en:{"nav.platform":"Platform","nav.modules":"Modules","nav.why":"Why us","nav.security":"Security","nav.pricing":"Pricing","cta.demo":"Book a demo"},
+    ar:{"nav.platform":"\u0627\u0644\u0645\u0646\u0635\u0629","nav.modules":"\u0627\u0644\u0648\u062d\u062f\u0627\u062a","nav.why":"\u0644\u0645\u0627\u0630\u0627 \u0646\u062d\u0646","nav.security":"\u0627\u0644\u0623\u0645\u0627\u0646","nav.pricing":"\u0627\u0644\u0623\u0633\u0639\u0627\u0631","cta.demo":"\u0627\u062d\u062c\u0632 \u0639\u0631\u0636\u064b\u0627"},
+    fr:{"nav.platform":"Plateforme","nav.modules":"Modules","nav.why":"Pourquoi nous","nav.security":"S\u00e9curit\u00e9","nav.pricing":"Tarifs","cta.demo":"R\u00e9server une d\u00e9mo"},
+    de:{"nav.platform":"Plattform","nav.modules":"Module","nav.why":"Warum wir","nav.security":"Sicherheit","nav.pricing":"Preise","cta.demo":"Demo buchen"},
+    es:{"nav.platform":"Plataforma","nav.modules":"M\u00f3dulos","nav.why":"Por qu\u00e9 nosotros","nav.security":"Seguridad","nav.pricing":"Precios","cta.demo":"Reservar una demo"}
+  };
+  var RTL={ar:1};
+  function st(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  function rd(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function theme(t){root.setAttribute("data-theme",t);st("preckon-theme",t);}
+  function lang(l){
+    root.setAttribute("lang",l);root.setAttribute("dir",RTL[l]?"rtl":"ltr");st("preckon-lang",l);
+    var d=I18N[l]||I18N.en;
+    document.querySelectorAll("[data-i18n]").forEach(function(el){var k=el.getAttribute("data-i18n");if(d[k])el.textContent=d[k];});
+    var s=document.querySelector(".lang-select");if(s)s.value=l;
+  }
+  window.PK={toggleTheme:function(){theme(root.getAttribute("data-theme")==="dark"?"light":"dark");},setLang:lang};
+  var sl=rd("preckon-lang");if(sl)lang(sl);
+})();
+</script>
