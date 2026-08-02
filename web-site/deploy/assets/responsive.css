@@ -144,3 +144,35 @@
 
 /* long unbroken strings (emails, refs) must never force a scrollbar */
 .route a, .ref, .boq-row .code, .demo-chrome .file{ overflow-wrap:anywhere; }
+
+/* ------------------------------------------------ 5. ultra-narrow phones */
+/* A CSS grid track defaults to min-width:auto, so a long word ("Infrastructure")
+   can force its column wider than its 1fr share and push the page sideways.
+   This bit the Industries grid on a folded Galaxy (280px). */
+.mods > *, .ind-grid > *, .sec-grid > *, .steps > *, .price-grid > *,
+.stats-band > *, .nfeat > *, .fgrid > *, footer.foot .top > *{ min-width:0; }
+
+@media (max-width:400px){
+  .ind-grid, .sec-grid{ grid-template-columns:1fr; }
+  footer.foot .top{ grid-template-columns:1fr; gap:22px; }
+}
+@media (max-width:340px){
+  /* The hero highlight is nowrap by design, which sets a 275px minimum and
+     pushes the page sideways on a folded phone. Below 340px, wrapping beats
+     a horizontal scrollbar; 360px and up keep the intended single line. */
+  .hero h1 .hl{ white-space:normal; }
+  .hero .wrap > *, .section .wrap > *{ min-width:0; }
+}
+@media (max-width:300px){
+  .wrap{ padding:0 12px; }
+  .nav .wrap{ gap:6px; }
+  .brand .wm{ font-size:14px; }
+  .brand .mark{ width:21px; height:24px; }
+  .hero h1{ font-size:26px; }
+  .h2{ font-size:22px; }
+}
+
+/* ------------------------------------------------------- 6. RTL buttons */
+/* Arabic body copy needs 1.75 leading, but a button inheriting it renders
+   ~3px taller than its Latin counterpart and sits unevenly in the 64px bar. */
+[dir="rtl"] .btn, [dir="rtl"] .lang-select, [dir="rtl"] .navtoggle{ line-height:1.25; }
