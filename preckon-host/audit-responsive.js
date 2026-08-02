@@ -66,7 +66,7 @@ const SIZES = [
         // interactive targets smaller than ~40px
         document.querySelectorAll('a.btn,button,select,input,textarea').forEach(el => {
           const b = el.getBoundingClientRect();
-          if (b.height > 0 && b.height < 38) out.touch.push(`${el.tagName.toLowerCase()}.${(el.className||'').toString().split(' ')[0]}:${Math.round(b.height)}px`);
+          if (b.height > 0 && b.height < 38 && b.left > -500 && b.top > -500) out.touch.push(`${el.tagName.toLowerCase()}.${(el.className||'').toString().split(' ')[0]}:${Math.round(b.height)}px`);
         });
         out.touch = [...new Set(out.touch)].slice(0, 3);
         return r0 = out;

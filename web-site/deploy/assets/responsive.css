@@ -1,0 +1,134 @@
+/* ============================================================
+   Preckon — responsive layer
+   Loaded after each page's inline <style>, so equal-specificity
+   rules here win. Covers phones, tablets and small laptops.
+
+   Three things the base design was missing:
+     1. no way to navigate below 880px (nav links were display:none)
+     2. micro-labels down to 8px, unreadable on a phone
+     3. tap targets under the 44px accessibility minimum
+   ============================================================ */
+
+/* ---------------------------------------------------------- 1. mobile nav */
+.navtoggle{
+  display:none; width:42px; height:42px; flex:none;
+  border:1px solid var(--hairline); border-radius:10px;
+  background:transparent; color:var(--ink);
+  place-items:center; cursor:pointer;
+  transition:border-color .2s ease, color .2s ease;
+}
+.navtoggle:hover{ border-color:var(--slate-400); }
+.navtoggle:focus-visible{ outline:2px solid var(--teal-press); outline-offset:2px; }
+.navtoggle .ic-close{ display:none; }
+.nav.open .navtoggle .ic-open{ display:none; }
+.nav.open .navtoggle .ic-close{ display:block; }
+
+@media (max-width:880px){
+  .navtoggle{ display:grid; }
+  .nav .wrap{ gap:10px; }
+
+  /* The panel IS the existing .nav-links list — no duplicated markup,
+     so every page stays in sync automatically. */
+  .nav-links{
+    display:flex !important;
+    position:absolute; top:100%; left:0; right:0;
+    flex-direction:column; align-items:stretch; gap:0;
+    padding:6px 28px 18px;
+    background:var(--paper);
+    border-bottom:1px solid var(--hairline);
+    box-shadow:0 26px 44px -30px rgba(11,27,43,.55);
+    max-height:calc(100vh - 64px);
+    max-height:calc(100dvh - 64px);
+    overflow-y:auto;
+    opacity:0; transform:translateY(-10px); pointer-events:none;
+    transition:opacity .18s ease, transform .18s ease;
+  }
+  .nav.open .nav-links{ opacity:1; transform:none; pointer-events:auto; }
+  .nav-links a{
+    font-size:16px; color:var(--ink); padding:14px 2px;
+    border-bottom:1px solid var(--hairline);
+  }
+  .nav-links a:last-child{ border-bottom:0; }
+}
+
+/* controls relocated into the panel by nav.js */
+.nav-extra{ display:none; }
+@media (max-width:880px){
+  .nav-extra{
+    display:flex; align-items:center; gap:12px;
+    padding-top:14px; margin-top:2px;
+    border-top:1px solid var(--hairline);
+  }
+  .nav-extra .lang-select{ flex:none; }
+  .nav-extra .nav-cta{ flex:1; }
+  .nav-extra .nav-cta .btn{ width:100%; justify-content:center; min-height:48px; }
+}
+
+/* narrow phones: brand + theme + toggle only; everything else is in the panel */
+@media (max-width:430px){
+  .nav .wrap{ gap:8px; }
+  .brand .wm{ font-size:15px; }
+}
+
+/* ------------------------------------------------- 2. readable minimum type */
+/* The tracked micro-labels are a deliberate drafting motif, but 8-10px is
+   below what a phone can render legibly. Floor them at 11px on small screens
+   and leave the desktop typography untouched. */
+@media (max-width:1024px){
+  .band .band-tag, .bp .dim .v, .bp .rbox .t, .cov-label span, .cov-legend,
+  .cov-stage, .csub>div, .demo-chrome .live, .demo-draw .pcap, .demo-out .pcap,
+  .detail-grid .lbl, .dim .lab, .fact .k, .foot .col h6, .io-label, .maparrow,
+  .meter .unit, .mnode .ly, .mnode .seq, .mod .seq, .par, .pkg-foot .chip,
+  .prow .ps, .pstep .meta, .pstep .pnum, .recog .tag, .reqrow .rtag,
+  .step.review .badge, .tier .flag, footer.foot .base .k{
+    font-size:11px !important;
+  }
+  /* the drawing overlay tags sit in a fixed-size box — keep them small
+     enough not to escape it, but still above the legibility floor */
+  .recog .tag{ font-size:10px !important; }
+}
+
+/* ------------------------------------------------------ 3. tap targets */
+@media (max-width:880px){
+  .lang-select{ min-height:42px; padding:8px 9px; font-size:12px; }
+  .theme-toggle{ width:42px; height:42px; }
+  .faq summary{ padding:16px 18px; }
+  .nav-links a{ min-height:44px; display:flex; align-items:center; }
+}
+
+/* form controls need a 16px font or iOS Safari zooms the page on focus */
+@media (max-width:880px){
+  .field input, .field select, .field textarea,
+  input[type="text"], input[type="email"], select, textarea{
+    font-size:16px; min-height:46px;
+  }
+  textarea{ min-height:110px; }
+  .btn.submit{ min-height:50px; }
+}
+
+/* ------------------------------------------------- 4. layout breathing room */
+@media (max-width:600px){
+  .wrap{ padding:0 20px; }
+  .section{ padding:52px 0; }
+  .night .wrap{ padding:56px 20px; }
+  .finalcta{ padding:32px 22px; }
+  .panel, .dp{ padding:22px; }
+  .tier{ padding:22px; }
+  .hero{ padding:44px 0 22px; }
+}
+@media (max-width:420px){
+  .wrap{ padding:0 16px; }
+  .finalcta{ padding:26px 18px; }
+  /* stacked hero buttons read better than two cramped half-width ones */
+  .hero-cta{ flex-direction:column; align-items:stretch; }
+  .hero-cta .btn{ justify-content:center; }
+}
+
+/* tablets: the 3-up grids get tight before the 820px breakpoint bites */
+@media (min-width:821px) and (max-width:1000px){
+  .mods, .price-grid{ gap:13px; }
+  .ind-grid, .sec-grid{ gap:12px; }
+}
+
+/* long unbroken strings (emails, refs) must never force a scrollbar */
+.route a, .ref, .boq-row .code, .demo-chrome .file{ overflow-wrap:anywhere; }
