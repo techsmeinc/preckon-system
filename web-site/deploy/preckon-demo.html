@@ -184,8 +184,14 @@
   [dir="rtl"] .eyebrow::before{margin-left:0;}
 
   /* honeypot — off-screen rather than display:none, which some bots skip */
-  .hp{position:absolute!important; left:-9999px!important; top:auto!important;
-      width:1px!important; height:1px!important; overflow:hidden!important;}
+  /* Honeypot. Uses the clip() visually-hidden pattern rather than
+     left:-9999px — in an RTL document a negative offset extends the
+     scrollable area instead of hiding, producing a huge horizontal
+     scrollbar on /ar/demo. Bots still see and fill the field. */
+  .hp{position:absolute!important; width:1px!important; height:1px!important;
+      padding:0!important; margin:-1px!important; overflow:hidden!important;
+      clip:rect(0 0 0 0)!important; clip-path:inset(50%)!important;
+      white-space:nowrap!important; border:0!important;}
   .formerr{display:none; margin:14px 0 0; padding:12px 14px; border-radius:10px;
     background:#FEF2F2; border:1px solid #FECACA; color:#B91C1C; font-size:13.5px;}
   [data-theme="dark"] .formerr{background:rgba(185,28,28,.12); border-color:#7F1D1D; color:#FCA5A5;}
