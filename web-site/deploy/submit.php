@@ -15,6 +15,8 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception as MailException;
 
+mb_internal_encoding('UTF-8');   // so mb_substr never splits a UTF-8 sequence
+
 header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
 header('Cache-Control: no-store');
@@ -161,15 +163,22 @@ function mailer(array $config): PHPMailer
     $s = $config['smtp'];
     if (!empty($s['enabled']) && $s['password'] !== 'CHANGE-ME') {
         $m->isSMTP();
-        $m->Host       = $s['host'];
-        $m->Port       = (int)$s['port'];
-        $m->SMTPAuth   = true;
-        $m->Username   = $s['username'];
-        $m->Password   = $s['password'];
-        $m->Timeout    = (int)$s['timeout'];
-        $m->SMTPSecure = $s['secure'] === 'ssl'
-            ? PHPMailer::ENCRYPTION_SMTPS
-            : PHPMailer::ENCRYPTION_STARTTLS;
+        $m->Host     = $s['host'];
+        $m->Port     = (int)$s['port'];
+        $m->Username = $s['username'];
+        $m->Password = $s['password'];
+        $m->SMTPAuth = ($s['username'] ?? '') !== '';
+        $m->Timeout  = (int)$s['timeout'];
+
+        $secure = strtolower((string)($s['secure'] ?? 'tls'));
+        if ($secure === 'ssl') {
+            $m->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        } elseif ($secure === 'none' || $secure === '') {
+            $m->SMTPSecure  = '';
+            $m->SMTPAutoTLS = false;     // plain relay (local testing / internal MTA)
+        } else {
+            $m->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        }
     } else {
         $m->isMail();   // fall back to PHP mail()
     }
@@ -239,7 +248,9 @@ if ($ok && !empty($config['autoreply'])) {
                 . '<p>جهّز مجموعة مخططات واحدة من مشروع حقيقي — سنُمرّرها عبر السلسلة كاملة مباشرة في المكالمة.</p>'
                 . '<p style="color:#64748B;font-size:13px">رقم المرجع: ' . $esc($ref) . '</p>'
                 . '<p style="color:#64748B;font-size:13px">فريق Preckon · sales@preckon.com</p></div>';
-            $a->AltBody = "مرحبًا $name،\n\nشكرًا لطلبك عرضًا توضيحيًا لـPreckon. سنتواصل معك خلال يوم عمل واحد.\n\nرقم المرجع: $ref\n\nفريق Preckon";
+            // Braces are required: PHP allows bytes 0x80-0xFF in identifiers, so
+            // "$name،" would parse the Arabic comma as part of the variable name.
+            $a->AltBody = "مرحبًا {$name}،\n\nشكرًا لطلبك عرضًا توضيحيًا لـPreckon. سنتواصل معك خلال يوم عمل واحد.\n\nرقم المرجع: {$ref}\n\nفريق Preckon";
         } else {
             $a->Subject = 'We received your demo request — Preckon';
             $a->Body = '<div style="max-width:560px;font:15px/1.7 system-ui;color:#334155">'

@@ -188,6 +188,15 @@
 :root{ --font-mono:'IBM Plex Sans Arabic','JetBrains Mono',ui-monospace,monospace; }
 /* ...but genuine code chips stay monospaced. */
 .c1,.code,.mono,.rid,.sc,.seq,.dn,.nm,.mod-name,.mod .name,.pk,.mut,.file,.cov-label,.fn,.ava{ font-family:'JetBrains Mono',ui-monospace,monospace; }
+
+  /* honeypot — off-screen rather than display:none, which some bots skip */
+  .hp{position:absolute!important; left:-9999px!important; top:auto!important;
+      width:1px!important; height:1px!important; overflow:hidden!important;}
+  .formerr{display:none; margin:14px 0 0; padding:12px 14px; border-radius:10px;
+    background:#FEF2F2; border:1px solid #FECACA; color:#B91C1C; font-size:13.5px;}
+  [data-theme="dark"] .formerr{background:rgba(185,28,28,.12); border-color:#7F1D1D; color:#FCA5A5;}
+  .formerr.on{display:block;}
+  .btn.submit[disabled]{opacity:.6; cursor:progress;}
 </style>
 <style>
 /* ============================================================
@@ -297,7 +306,7 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
 <div class="formbody" id="formbody">
 <h2 class="fhead">اطلب عرضك التوضيحي</h2>
 <p class="fsub">أخبرنا قليلًا عن فريقك وسنتواصل معك خلال يوم عمل واحد.</p>
-<form id="demoform" novalidate="">
+<form id="demoform" novalidate=""><div class="hp" aria-hidden="true"><label>Website<input type="text" name="website" id="website" tabindex="-1" autocomplete="off"></label></div><input type="hidden" name="ts" id="ts" value="">
 <div class="frow">
 <div class="field"><label for="name">الاسم الكامل <span class="req">*</span></label><input autocomplete="name" id="name" name="name" placeholder="أحمد المنصوري" type="text"/><div class="msg">يرجى إدخال اسمك.</div></div>
 <div class="field"><label for="company">الشركة <span class="req">*</span></label><input autocomplete="organization" id="company" name="company" placeholder="شركة الذروة للمقاولات" type="text"/><div class="msg">يرجى إدخال اسم شركتك.</div></div>
@@ -327,6 +336,7 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
 </div>
 <div class="field full"><label for="notes">هل هناك شيء محدد تود رؤيته؟</label><textarea id="notes" name="notes" placeholder="مثال: مشروع كثيف الخرسانة، طريقة القياس لدينا، أسئلة عن التكامل…"></textarea></div>
 <p class="consent">بإرسالك النموذج، توافق على التواصل معك بخصوص Preckon. ولا نشارك بياناتك. اطّلع على <a href="#">إشعار الخصوصية</a>.</p>
+<div class="formerr" id="formerr" role="alert"></div>
 <button class="btn btn-primary submit" type="submit">اطلب عرضك التوضيحي
             <svg fill="none" height="16" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="16"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
 </button>
@@ -396,13 +406,20 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
     document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
   }
 
-  // form validation + success state (front-end only — wire to your CRM/backend)
+// ---- demo form: validate, then POST to submit.php ----
   const form = document.getElementById('demoform');
   const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  function setErr(id, on){ document.getElementById(id).closest('.field').classList.toggle('err', on); }
+  const errBox = document.getElementById('formerr');
+  const tsField = document.getElementById('ts');
+  if(tsField) tsField.value = String(Date.now());
 
-  form.addEventListener('submit', function(e){
+  function setErr(id, on){ document.getElementById(id).closest('.field').classList.toggle('err', on); }
+  function showError(msg){ errBox.textContent = msg; errBox.classList.add('on'); }
+
+  form.addEventListener('submit', async function(e){
     e.preventDefault();
+    errBox.classList.remove('on');
+
     const name = document.getElementById('name'), company = document.getElementById('company'), email = document.getElementById('email');
     let ok = true;
     const nOk = name.value.trim().length > 1; setErr('name', !nOk); ok = ok && nOk;
@@ -410,15 +427,45 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
     const eOk = emailRe.test(email.value.trim()); setErr('email', !eOk); ok = ok && eOk;
     if(!ok){ const first = form.querySelector('.field.err input'); if(first) first.focus(); return; }
 
-    // success
-    const ref = 'PRECKON-DEMO-' + Math.random().toString(36).slice(2,7).toUpperCase();
-    document.getElementById('refline').textContent = 'مرجع · ' + ref;
-    document.getElementById('formbody').classList.add('hide');
-    const s = document.getElementById('success'); s.classList.add('on');
-    document.getElementById('form').scrollIntoView({behavior:'smooth', block:'center'});
+    const btn = form.querySelector('.submit');
+    const restore = btn.innerHTML;
+    btn.disabled = true; btn.textContent = 'جارٍ الإرسال…';
+
+    try{
+      const res = await fetch('/submit.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.value.trim(),
+          company: company.value.trim(),
+          email: email.value.trim(),
+          role: (document.getElementById('role')||{}).value || '',
+          bids: (document.getElementById('bids')||{}).value || '',
+          notes: (document.getElementById('notes')||{}).value || '',
+          website: (document.getElementById('website')||{}).value || '',
+          ts: Number(tsField && tsField.value) || 0,
+          locale: 'ar'
+        })
+      });
+      const data = await res.json().catch(()=>({ ok:false }));
+
+      if(!res.ok || !data.ok){
+        btn.disabled = false; btn.innerHTML = restore;
+        showError(data.error || 'حدث خطأ ما. يرجى مراسلتنا على sales@preckon.com وسنتابع طلبك.');
+        if(Array.isArray(data.fields)) data.fields.forEach(f=>{ try{ setErr(f, true); }catch(_){} });
+        return;
+      }
+
+      document.getElementById('refline').textContent = 'مرجع · ' + data.ref;
+      document.getElementById('formbody').classList.add('hide');
+      document.getElementById('success').classList.add('on');
+      document.getElementById('form').scrollIntoView({behavior:'smooth', block:'center'});
+    }catch(err){
+      btn.disabled = false; btn.innerHTML = restore;
+      showError('حدث خطأ ما. يرجى مراسلتنا على sales@preckon.com وسنتابع طلبك.');
+    }
   });
 
-  // clear error as the user types
   ['name','company','email'].forEach(id=>{
     document.getElementById(id).addEventListener('input', ()=> setErr(id, false));
   });

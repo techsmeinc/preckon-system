@@ -159,32 +159,118 @@ re-check the upload first.
 
 ---
 
+---
+
+## The demo form — REQUIRED SETUP
+
+The form on `/demo` and `/ar/demo` posts to `submit.php`, which emails the request
+to sales, sends the visitor a confirmation in their language, and appends every
+submission to a CSV backup.
+
+**It will not send mail until you do these two things:**
+
+### 1. Create the sending mailbox
+
+IONOS → **Email** → create `no-reply@preckon.com` and set a password.
+
+It must be a real mailbox on a domain you control. The notification is sent *from*
+this address with the visitor's address in `Reply-To` — so hitting Reply in your
+inbox still replies to them. Sending directly "from" the visitor's address would
+fail SPF/DMARC and land in spam.
+
+While you are there, create `sales@`, `support@` and `hello@preckon.com` — all three
+are linked across the site.
+
+### 2. Fill in `config.php`
+
+```php
+'to'       => 'sales@preckon.com',      // where demo requests land
+'from'     => 'no-reply@preckon.com',   // the mailbox you just made
+'smtp' => [
+    'enabled'  => true,
+    'host'     => 'smtp.ionos.com',
+    'port'     => 587,
+    'secure'   => 'tls',
+    'username' => 'no-reply@preckon.com',
+    'password' => '...',                // <-- the mailbox password
+],
+```
+
+Confirm the SMTP host against IONOS → Email → your mailbox → settings; IONOS
+occasionally uses a different host per region.
+
+Setting `'enabled' => false` falls back to PHP `mail()`. The form still works, but
+deliverability is meaningfully worse — unauthenticated mail from shared hosting is
+frequently spam-filtered. Use SMTP.
+
+### What it does
+
+| | |
+|---|---|
+| **Notification** | To `sales@`, subject `Demo request — Company (Name)`, with `Reply-To` set to the visitor |
+| **Auto-reply** | Confirmation to the visitor, in English or Arabic per the form they used |
+| **CSV backup** | Every submission appended to `_data/leads.csv` — written *before* mail is attempted, so a lead survives an SMTP outage |
+| **Reference** | Each submission gets `PRECKON-DEMO-XXXXX`, shown on screen and in both emails |
+
+### Spam handling
+
+No captcha. Three layers instead: an off-screen honeypot field, a time trap
+(submissions completed in under 3 seconds are bots), and per-IP rate limiting
+(5/hour, configurable). Bots get a fake success response so they do not retry with
+a different payload shape.
+
+Server-side validation is independent of the JavaScript — the endpoint cannot be
+bypassed by posting directly, and CR/LF is rejected in any field that reaches a
+mail header.
+
+### If mail fails
+
+The visitor sees an error telling them to email `sales@preckon.com` directly, and
+the endpoint returns HTTP 500. **The lead is still in `_data/leads.csv`.** Check
+that file if you suspect anything went missing; the CSV is the source of truth.
+
+`_data/` and `_lib/` are blocked from web access by `.htaccess`, and `config.php`
+is denied too — so even if PHP were disabled, the SMTP password would not be served
+as plain text.
+
+### Requirements
+
+PHP 5.5+ (any IONOS package qualifies). No Composer, no database, no third-party
+service. PHPMailer is vendored in `_lib/PHPMailer/`.
+
+### Testing after upload
+
+Submit the form yourself from `https://www.preckon.com/demo`. You should get the
+success panel with a reference, a notification at `sales@`, and a confirmation at
+whatever address you entered. Then repeat on `/ar/demo` and confirm the reply
+arrives in Arabic. If the success panel does not appear, open the browser console —
+the response body carries the reason.
+
+---
+
 ## Known gaps — these ship as-is unless you address them
 
-1. **The demo form does not send anything.** `/demo` validates input and shows a
-   success message, then discards it. Every lead from launch onward is lost until a
-   submit handler is wired to a real endpoint (Formspree, HubSpot, or a mail script).
-   This is the highest-priority item.
+1. **Privacy policy link is `#`** on the demo form, next to fields collecting name,
+   company and email. The form now stores and transmits that data, so this matters
+   more than it did. A real privacy page is needed for EU/UK visitors.
 2. **Security claims are unverified.** `/security` states AES-256, TLS 1.2+, RLS and
    SSO/RBAC as fact. Confirm each matches what Preckon actually implements before
    this page is public — the source README flagged the same thing. SOC 2 is correctly
    marked in progress.
-3. **Privacy policy link is `#`** on the demo form, next to a field collecting name,
-   company and email. That's a compliance gap for EU/UK visitors, and the site is
-   translated into five languages.
-4. **Mailboxes must exist**: `sales@`, `support@`, `hello@preckon.com` are linked
-   sitewide. Set them up in IONOS → Email.
-5. **Pricing tiers carry no figures** — intentional, per the source README.
-6. **Fonts load from Google Fonts and Fontshare via `@import`.** Third-party requests
-   on every page view; self-host them for speed and for EU privacy comfort.
-7. **Arabic is a full translation** (see the `/ar/` section above) but has not been
+3. **Mailboxes must exist**: `no-reply@` (required by the form), plus `sales@`,
+   `support@` and `hello@preckon.com`, which are linked sitewide.
+4. **Arabic enquiries need an Arabic responder.** The form tags each submission with
+   its locale, and the CSV has a `locale` column — but routing Arabic leads to
+   someone who can reply in Arabic is a process decision, not a code one.
+5. **Arabic is a full translation** (see the `/ar/` section above) but has not been
    reviewed by a native construction professional. FR/DE/ES were removed from the
    switcher — they were nav labels with no content behind them.
+6. **Pricing tiers carry no figures** — intentional, per the source README.
+7. **Fonts load from Google Fonts and Fontshare via `@import`.** Third-party requests
+   on every page view; self-host them for speed and for EU privacy comfort.
 8. **No analytics or cookie consent** is installed.
-9. **The demo form is English-only in what it sends.** The Arabic form validates and
-   labels in Arabic, but since nothing is submitted anywhere yet (see item 1), there
-   is no locale routing to configure. Worth handling when the form is wired up, so
-   Arabic enquiries reach someone who can answer in Arabic.
+9. **Back up `_data/leads.csv`.** It is the only copy of a lead if mail ever fails,
+   and it is not covered by any IONOS backup you have configured.
 
 ## Updating the site later
 

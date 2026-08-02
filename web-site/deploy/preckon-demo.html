@@ -182,6 +182,15 @@
   [data-theme="dark"] .theme-toggle .ic-moon{display:none;}
   [data-theme="dark"] .theme-toggle .ic-sun{display:block;}
   [dir="rtl"] .eyebrow::before{margin-left:0;}
+
+  /* honeypot — off-screen rather than display:none, which some bots skip */
+  .hp{position:absolute!important; left:-9999px!important; top:auto!important;
+      width:1px!important; height:1px!important; overflow:hidden!important;}
+  .formerr{display:none; margin:14px 0 0; padding:12px 14px; border-radius:10px;
+    background:#FEF2F2; border:1px solid #FECACA; color:#B91C1C; font-size:13.5px;}
+  [data-theme="dark"] .formerr{background:rgba(185,28,28,.12); border-color:#7F1D1D; color:#FCA5A5;}
+  .formerr.on{display:block;}
+  .btn.submit[disabled]{opacity:.6; cursor:progress;}
 </style>
 <script>
   if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){ document.documentElement.classList.add('has-anim'); }
@@ -229,7 +238,7 @@
 <div class="formbody" id="formbody">
 <h2 class="fhead">Request your demo</h2>
 <p class="fsub">Tell us a little about your team and we'll be in touch within one business day.</p>
-<form id="demoform" novalidate="">
+<form id="demoform" novalidate=""><div class="hp" aria-hidden="true"><label>Website<input type="text" name="website" id="website" tabindex="-1" autocomplete="off"></label></div><input type="hidden" name="ts" id="ts" value="">
 <div class="frow">
 <div class="field"><label for="name">Full name <span class="req">*</span></label><input autocomplete="name" id="name" name="name" placeholder="Jordan Mensah" type="text"/><div class="msg">Please enter your name.</div></div>
 <div class="field"><label for="company">Company <span class="req">*</span></label><input autocomplete="organization" id="company" name="company" placeholder="Apex Constructors" type="text"/><div class="msg">Please enter your company.</div></div>
@@ -259,6 +268,7 @@
 </div>
 <div class="field full"><label for="notes">Anything specific you want to see?</label><textarea id="notes" name="notes" placeholder="e.g. concrete-heavy project, our method of measurement, integration questions…"></textarea></div>
 <p class="consent">By submitting, you agree to be contacted about Preckon. We don't share your details. See our <a href="#">privacy notice</a>.</p>
+<div class="formerr" id="formerr" role="alert"></div>
 <button class="btn btn-primary submit" type="submit">Request your demo
             <svg fill="none" height="16" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="16"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
 </button>
@@ -328,13 +338,20 @@
     document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
   }
 
-  // form validation + success state (front-end only — wire to your CRM/backend)
+// ---- demo form: validate, then POST to submit.php ----
   const form = document.getElementById('demoform');
   const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  function setErr(id, on){ document.getElementById(id).closest('.field').classList.toggle('err', on); }
+  const errBox = document.getElementById('formerr');
+  const tsField = document.getElementById('ts');
+  if(tsField) tsField.value = String(Date.now());
 
-  form.addEventListener('submit', function(e){
+  function setErr(id, on){ document.getElementById(id).closest('.field').classList.toggle('err', on); }
+  function showError(msg){ errBox.textContent = msg; errBox.classList.add('on'); }
+
+  form.addEventListener('submit', async function(e){
     e.preventDefault();
+    errBox.classList.remove('on');
+
     const name = document.getElementById('name'), company = document.getElementById('company'), email = document.getElementById('email');
     let ok = true;
     const nOk = name.value.trim().length > 1; setErr('name', !nOk); ok = ok && nOk;
@@ -342,15 +359,45 @@
     const eOk = emailRe.test(email.value.trim()); setErr('email', !eOk); ok = ok && eOk;
     if(!ok){ const first = form.querySelector('.field.err input'); if(first) first.focus(); return; }
 
-    // success
-    const ref = 'PRECKON-DEMO-' + Math.random().toString(36).slice(2,7).toUpperCase();
-    document.getElementById('refline').textContent = 'REF · ' + ref;
-    document.getElementById('formbody').classList.add('hide');
-    const s = document.getElementById('success'); s.classList.add('on');
-    document.getElementById('form').scrollIntoView({behavior:'smooth', block:'center'});
+    const btn = form.querySelector('.submit');
+    const restore = btn.innerHTML;
+    btn.disabled = true; btn.textContent = 'Sending…';
+
+    try{
+      const res = await fetch('/submit.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.value.trim(),
+          company: company.value.trim(),
+          email: email.value.trim(),
+          role: (document.getElementById('role')||{}).value || '',
+          bids: (document.getElementById('bids')||{}).value || '',
+          notes: (document.getElementById('notes')||{}).value || '',
+          website: (document.getElementById('website')||{}).value || '',
+          ts: Number(tsField && tsField.value) || 0,
+          locale: 'en'
+        })
+      });
+      const data = await res.json().catch(()=>({ ok:false }));
+
+      if(!res.ok || !data.ok){
+        btn.disabled = false; btn.innerHTML = restore;
+        showError(data.error || 'Something went wrong. Please email sales@preckon.com and we will pick it up.');
+        if(Array.isArray(data.fields)) data.fields.forEach(f=>{ try{ setErr(f, true); }catch(_){} });
+        return;
+      }
+
+      document.getElementById('refline').textContent = 'REF · ' + data.ref;
+      document.getElementById('formbody').classList.add('hide');
+      document.getElementById('success').classList.add('on');
+      document.getElementById('form').scrollIntoView({behavior:'smooth', block:'center'});
+    }catch(err){
+      btn.disabled = false; btn.innerHTML = restore;
+      showError('Something went wrong. Please email sales@preckon.com and we will pick it up.');
+    }
   });
 
-  // clear error as the user types
   ['name','company','email'].forEach(id=>{
     document.getElementById(id).addEventListener('input', ()=> setErr(id, false));
   });

@@ -105,3 +105,27 @@ AddDefaultCharset UTF-8
 <FilesMatch "^\.">
   Require all denied
 </FilesMatch>
+
+# ---------- Protect the form back end ----------
+# config.php holds the SMTP password. PHP source is executed rather than
+# served, so it is not exposed in normal operation -- but if PHP is ever
+# disabled or misconfigured, the file would be served as plain text.
+# This makes that failure mode safe.
+<FilesMatch "^config\.php$">
+  Require all denied
+</FilesMatch>
+
+# The vendored PHPMailer library and the lead store are never fetched
+# directly by a browser.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^_lib/  - [F,L]
+  RewriteRule ^_data/ - [F,L]
+</IfModule>
+
+# The form endpoint must not be cached.
+<IfModule mod_headers.c>
+  <FilesMatch "^submit\.php$">
+    Header set Cache-Control "no-store, no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>
