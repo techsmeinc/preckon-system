@@ -4,9 +4,9 @@
  *
  * Tries each configured transport in order and stops at the first success:
  *
- *   1. Brevo HTTP API   — outbound HTTPS on 443. Preferred on shared hosting,
- *                         where outbound SMTP ports are often blocked.
- *   2. SMTP             — via PHPMailer.
+ *   1. SMTP             — IONOS (or any authenticated relay), via PHPMailer.
+ *   2. Brevo HTTP API   — optional backup. Outbound HTTPS on 443, so it still
+ *                         works if the host filters outbound SMTP ports.
  *   3. PHP mail()       — last resort; poor deliverability.
  *
  * deliver() returns ['ok' => bool, 'transport' => string, 'errors' => string[]]
@@ -172,16 +172,16 @@ function deliver(array $config, array $msg): array
 {
     $errors = [];
 
-    if (brevo_ready($config)) {
-        [$ok, $err] = send_brevo($config, $msg);
-        if ($ok) { return ['ok' => true, 'transport' => 'brevo', 'errors' => []]; }
+    if (smtp_ready($config)) {
+        [$ok, $err] = send_phpmailer($config, $msg, true);
+        if ($ok) { return ['ok' => true, 'transport' => 'smtp', 'errors' => []]; }
         $errors[] = $err;
         @error_log('[preckon-demo] ' . $err);
     }
 
-    if (smtp_ready($config)) {
-        [$ok, $err] = send_phpmailer($config, $msg, true);
-        if ($ok) { return ['ok' => true, 'transport' => 'smtp', 'errors' => $errors]; }
+    if (brevo_ready($config)) {
+        [$ok, $err] = send_brevo($config, $msg);
+        if ($ok) { return ['ok' => true, 'transport' => 'brevo', 'errors' => $errors]; }
         $errors[] = $err;
         @error_log('[preckon-demo] ' . $err);
     }
@@ -194,7 +194,7 @@ function deliver(array $config, array $msg): array
     }
 
     if (!$errors) {
-        $errors[] = 'no transport configured — set a Brevo API key in config.php';
+        $errors[] = 'no transport configured — set the SMTP password in config.php';
     }
     return ['ok' => false, 'transport' => 'none', 'errors' => $errors];
 }

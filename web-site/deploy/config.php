@@ -17,60 +17,50 @@ return [
     'bcc'         => [],                    // optional extra recipients
 
     // ---------------------------------------------------------------
-    // The address notifications are SENT FROM.
-    //
-    // This must be a sender Brevo has verified (see setup below). The
-    // visitor's address goes in Reply-To, so replying from your inbox
-    // still reaches them — sending "as" the visitor would fail DMARC.
+    // The address notifications are SENT FROM. Must match the SMTP
+    // mailbox below. The visitor'"'"'s address goes in Reply-To, so replying
+    // from your inbox still reaches them — sending "as" the visitor
+    // would fail SPF/DMARC and land in spam.
     // ---------------------------------------------------------------
     'from'        => 'no-reply@preckon.com',
     'from_name'   => 'Preckon Website',
 
     // ===============================================================
-    // TRANSPORT 1 — BREVO (recommended)
+    // TRANSPORT 1 — IONOS SMTP   <<< THE ONE YOU NEED TO FILL IN
     //
-    // Uses Brevo's HTTP API over port 443. Shared hosting frequently
-    // blocks outbound SMTP ports, which silently breaks mail; HTTPS is
-    // never blocked, so this is the reliable option here.
+    // Uses the no-reply@preckon.com mailbox you created in
+    // IONOS -> Email. Authenticated sending from your own domain, so
+    // SPF passes and mail lands in inboxes.
     //
-    // SETUP
-    //   1. brevo.com -> sign up (free tier: 300 emails/day)
-    //   2. Senders, Domains & Dedicated IPs -> Domains -> add preckon.com
-    //      and add the DNS records it gives you in IONOS (Domains & SSL
-    //      -> preckon.com -> DNS). Authenticating the domain is what puts
-    //      mail in inboxes instead of spam.
-    //   3. Senders -> add no-reply@preckon.com and verify it
-    //   4. SMTP & API -> API Keys -> Generate a new API key
-    //   5. Paste it below. It starts with "xkeysib-".
+    //   username = the FULL email address, not just "no-reply"
+    //   password = the mailbox password you set when creating it
+    //
+    // If port 587 is blocked, try port 465 with secure => 'ssl'.
     // ===============================================================
-    'brevo' => [
+    'smtp' => [
         'enabled'  => true,
-        'api_key'  => 'xkeysib-YOUR-API-KEY-HERE',
-        'api_base' => 'https://api.brevo.com/v3',
+        'host'     => 'smtp.ionos.com',
+        'port'     => 587,
+        'secure'   => 'tls',                    // 'tls' for 587, 'ssl' for 465
+        'username' => 'no-reply@preckon.com',
+        'password' => 'CHANGE-ME',              // <-- the mailbox password
         'timeout'  => 20,
     ],
 
     // ===============================================================
-    // TRANSPORT 2 — SMTP (fallback, tried only if Brevo fails)
+    // TRANSPORT 2 — BREVO (optional backup, off by default)
     //
-    // Either Brevo's relay:
-    //     host = smtp-relay.brevo.com   port = 587   secure = 'tls'
-    //     username = your Brevo SMTP login
-    //     password = your Brevo SMTP key (not your account password)
+    // Only worth enabling if IONOS SMTP turns out to be blocked or
+    // unreliable. Uses an HTTPS API on port 443 rather than an SMTP
+    // port, so it works where SMTP is filtered.
     //
-    // Or IONOS's own:
-    //     host = smtp.ionos.com   port = 587   secure = 'tls'
-    //     username/password = a real mailbox on your domain
-    //
-    // Leave the password as CHANGE-ME to skip this transport entirely.
+    //   brevo.com -> Senders & Domains -> verify preckon.com
+    //             -> SMTP & API -> API Keys -> generate ("xkeysib-...")
     // ===============================================================
-    'smtp' => [
-        'enabled'  => true,
-        'host'     => 'smtp-relay.brevo.com',
-        'port'     => 587,
-        'secure'   => 'tls',              // 'tls' for 587, 'ssl' for 465
-        'username' => '',
-        'password' => 'CHANGE-ME',
+    'brevo' => [
+        'enabled'  => false,
+        'api_key'  => 'xkeysib-YOUR-API-KEY-HERE',
+        'api_base' => 'https://api.brevo.com/v3',
         'timeout'  => 20,
     ],
 

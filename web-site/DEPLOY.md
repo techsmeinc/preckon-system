@@ -167,45 +167,51 @@ The form on `/demo` and `/ar/demo` posts to `submit.php`, which emails the reque
 to sales, sends the visitor a confirmation in their language, and appends every
 submission to a CSV backup.
 
-Mail goes out through **Brevo's HTTP API** by default. That is deliberate: shared
-hosting commonly blocks outbound SMTP ports (25/465/587) to external hosts, which
-makes SMTP fail silently. The Brevo API is ordinary HTTPS on 443, which is never
-blocked.
+Mail goes out through **IONOS SMTP**, authenticated as the `no-reply@preckon.com`
+mailbox. `submit.php` tries transports in order and stops at the first success:
 
-`submit.php` tries transports in order and stops at the first success:
-
-1. **Brevo API** — recommended
-2. **SMTP** — Brevo's relay or IONOS's, if you prefer
+1. **IONOS SMTP** — the configured default
+2. **Brevo HTTP API** — optional backup, off by default. Worth enabling only if
+   IONOS SMTP turns out to be blocked, since it runs over HTTPS on 443 rather than
+   an SMTP port.
 3. **PHP `mail()`** — last resort, poor deliverability
+
+The DNS side is already correct: `preckon.com` has MX at IONOS, an SPF record
+(`v=spf1 include:_spf-us.ionos.com ~all`) authorising IONOS to send, and a DMARC
+record. Nothing to change there.
 
 **It will not send mail until you do this:**
 
-### 1. Set up Brevo
-
-1. Sign up at [brevo.com](https://www.brevo.com) — the free tier allows 300 emails/day.
-2. **Senders, Domains & Dedicated IPs → Domains** → add `preckon.com` and create the
-   DNS records it gives you in IONOS (**Domains & SSL → preckon.com → DNS**).
-   Authenticating the domain is what puts mail in inboxes instead of spam — do not
-   skip it.
-3. **Senders** → add `no-reply@preckon.com` and verify it.
-4. **SMTP & API → API Keys** → generate a key. It starts with `xkeysib-`.
-
-### 2. Fill in `config.php`
+### 1. Put the mailbox password in `config.php`
 
 ```php
 'to'    => 'sales@preckon.com',      // where demo requests land
-'from'  => 'no-reply@preckon.com',   // must be a verified Brevo sender
-'brevo' => [
-    'enabled' => true,
-    'api_key' => 'xkeysib-...',      // <-- paste the key here
+'from'  => 'no-reply@preckon.com',   // must match the SMTP mailbox
+'smtp' => [
+    'enabled'  => true,
+    'host'     => 'smtp.ionos.com',
+    'port'     => 587,
+    'secure'   => 'tls',
+    'username' => 'no-reply@preckon.com',   // the FULL address, not "no-reply"
+    'password' => '...',                    // <-- the mailbox password
 ],
 ```
 
-### 3. Create the mailboxes
+If port 587 is refused, switch to `'port' => 465` with `'secure' => 'ssl'`.
 
-IONOS → **Email**: `sales@`, `support@` and `hello@preckon.com` are all linked across
-the site and need to exist. `no-reply@` does not need a real mailbox if Brevo is
-sending — but creating it stops bounces going nowhere.
+### 2. Make `sales@preckon.com` reachable
+
+The form delivers to `sales@preckon.com`, and `support@` and `hello@preckon.com` are
+linked across the site. They must all exist.
+
+**Email forwards are the cheaper option** — IONOS → Email → Email forward → create
+`sales@`, `support@` and `hello@preckon.com` pointing at an inbox you already read.
+Forwards are unlimited on your plan and do not consume a Mail Basic licence, and the
+public addresses on the site still work for anyone emailing you directly.
+
+Alternatively point the form straight at an existing mailbox by setting
+`'to' => 'admin@techsme.com'`, but then the `sales@preckon.com` link on the site
+still bounces.
 
 ### Checking it works — without submitting the form
 
@@ -309,8 +315,8 @@ the response body carries the reason.
    SSO/RBAC as fact. Confirm each matches what Preckon actually implements before
    this page is public — the source README flagged the same thing. SOC 2 is correctly
    marked in progress.
-3. **Mailboxes must exist**: `no-reply@` (required by the form), plus `sales@`,
-   `support@` and `hello@preckon.com`, which are linked sitewide.
+3. **`sales@`, `support@` and `hello@preckon.com` must exist** (forwards are fine).
+   `no-reply@preckon.com` already does and is what the form authenticates as.
 4. **Arabic enquiries need an Arabic responder.** The form tags each submission with
    its locale, and the CSV has a `locale` column — but routing Arabic leads to
    someone who can reply in Arabic is a process decision, not a code one.

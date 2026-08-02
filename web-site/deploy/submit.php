@@ -227,7 +227,9 @@ $sent = deliver($config, [
 ]);
 
 // ---- 2. confirmation to the visitor, in their language -------------------
-if ($sent['ok'] && !empty($config['autoreply'])) {
+// Attempted independently of the notification: if the notification bounced for a
+// recipient-specific reason, the visitor should still get their thank-you.
+if (!empty($config['autoreply'])) {
     if ($locale === 'ar') {
         // Braces are required: PHP allows bytes 0x80-0xFF in identifiers, so
         // "$name،" would parse the Arabic comma as part of the variable name.
