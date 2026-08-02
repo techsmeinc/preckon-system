@@ -95,6 +95,12 @@
   footer .k b{color:var(--ink);}
 
   @media (prefers-reduced-motion: reduce){ *{transition:none!important; animation:none!important;} }
+
+/* Arabic-first mono stack: JetBrains Mono has no Arabic, and its very wide
+   space glyph was being used between Arabic words, tearing them apart. */
+:root{ --font-mono:'IBM Plex Sans Arabic','JetBrains Mono',ui-monospace,monospace; }
+/* ...but genuine code chips stay monospaced. */
+.c1,.code,.mono,.rid,.sc,.seq,.dn,.nm,.mod-name,.mod .name,.pk,.mut,.file,.cov-label,.fn,.ava{ font-family:'JetBrains Mono',ui-monospace,monospace; }
 </style>
 <style>
 /* ============================================================

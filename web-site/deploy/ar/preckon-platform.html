@@ -6,9 +6,9 @@
 <title>المنصة — Preckon</title>
 <meta content="منصة واحدة، سبع طبقات من الذكاء. شاهد كيف يربط Preckon ذكاء المناقصات والمخططات والمواصفات والكميات والتكاليف والمشتريات — بتنسيق من Construction Copilot." name="description"/>
 <meta content="#0B1B2B" name="theme-color"/>
-<link rel="alternate" hreflang="en" href="https://www.preckon.com/platform"/>
-<link rel="alternate" hreflang="ar" href="https://www.preckon.com/ar/platform"/>
-<link rel="alternate" hreflang="x-default" href="https://www.preckon.com/platform"/>
+<link href="https://www.preckon.com/platform" hreflang="en" rel="alternate"/>
+<link href="https://www.preckon.com/ar/platform" hreflang="ar" rel="alternate"/>
+<link href="https://www.preckon.com/platform" hreflang="x-default" rel="alternate"/>
 <link href="https://www.preckon.com/ar/platform" rel="canonical"/>
 <meta content="website" property="og:type"/>
 <meta content="Preckon" property="og:site_name"/>
@@ -231,6 +231,12 @@
   [data-theme="dark"] .theme-toggle .ic-moon{display:none;}
   [data-theme="dark"] .theme-toggle .ic-sun{display:block;}
   [dir="rtl"] .eyebrow::before{margin-left:0;}
+
+/* Arabic-first mono stack: JetBrains Mono has no Arabic, and its very wide
+   space glyph was being used between Arabic words, tearing them apart. */
+:root{ --font-mono:'IBM Plex Sans Arabic','JetBrains Mono',ui-monospace,monospace; }
+/* ...but genuine code chips stay monospaced. */
+.c1,.code,.mono,.rid,.sc,.seq,.dn,.nm,.mod-name,.mod .name,.pk,.mut,.file,.cov-label,.fn,.ava{ font-family:'JetBrains Mono',ui-monospace,monospace; }
 </style>
 <style>
 /* ============================================================
@@ -325,11 +331,11 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
 <h1>منصة واحدة، <span class="hl">سبع طبقات</span> من الذكاء.</h1>
 <p class="sub">ليس Preckon نموذجًا واحدًا مركّبًا على عارض مستندات. إنه سلسلة من طبقات ذكاء متخصصة — كل منها تقرأ نوعًا من المستندات وتسلّم مخرجًا منظّمًا للطبقة التالية — قائمة على أساس مشترك وبتنسيق من Construction Copilot.</p>
 <div class="flowline">
-<span class="chip">المستندات</span><span class="arr">→</span>
-<span class="chip">المتطلبات</span><span class="arr">→</span>
-<span class="chip">العناصر</span><span class="arr">→</span>
-<span class="chip">جدول الكميات</span><span class="arr">→</span>
-<span class="chip">التقدير</span><span class="arr">→</span>
+<span class="chip">المستندات</span><span class="arr">←</span>
+<span class="chip">المتطلبات</span><span class="arr">←</span>
+<span class="chip">العناصر</span><span class="arr">←</span>
+<span class="chip">جدول الكميات</span><span class="arr">←</span>
+<span class="chip">التقدير</span><span class="arr">←</span>
 <span class="chip">المشتريات</span>
 </div>
 </div>
@@ -398,7 +404,7 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
 <div class="detail-head">
 <span class="dn" id="d-name">TenderLogix</span>
 <span class="dl" id="d-layer">ذكاء المناقصات</span>
-<span class="dseq" id="d-seq">الطبقة 01 / 06</span>
+<span class="dseq" id="d-seq">الطبقة ⁦01 / 06⁩</span>
 </div>
 <div class="detail-grid">
 <div class="cell"><div class="lbl">يقرأ</div><div class="io" id="d-in"></div></div>

@@ -6,9 +6,9 @@
 <title>عن Preckon</title>
 <meta content="يُعيد Preckon بناء مقدّمة قطاع الإنشاء — ليجعل ما قبل الإنشاء سريعًا ويمكن الدفاع عنه ومتاحًا لكل من يُسعّر العمل. من تطوير TechSME Inc. في ميسيسوجا، أونتاريو." name="description"/>
 <meta content="#0B1B2B" name="theme-color"/>
-<link rel="alternate" hreflang="en" href="https://www.preckon.com/about"/>
-<link rel="alternate" hreflang="ar" href="https://www.preckon.com/ar/about"/>
-<link rel="alternate" hreflang="x-default" href="https://www.preckon.com/about"/>
+<link href="https://www.preckon.com/about" hreflang="en" rel="alternate"/>
+<link href="https://www.preckon.com/ar/about" hreflang="ar" rel="alternate"/>
+<link href="https://www.preckon.com/about" hreflang="x-default" rel="alternate"/>
 <link href="https://www.preckon.com/ar/about" rel="canonical"/>
 <meta content="website" property="og:type"/>
 <meta content="Preckon" property="og:site_name"/>
@@ -205,6 +205,12 @@
   [data-theme="dark"] .theme-toggle .ic-moon{display:none;}
   [data-theme="dark"] .theme-toggle .ic-sun{display:block;}
   [dir="rtl"] .eyebrow::before{margin-left:0;}
+
+/* Arabic-first mono stack: JetBrains Mono has no Arabic, and its very wide
+   space glyph was being used between Arabic words, tearing them apart. */
+:root{ --font-mono:'IBM Plex Sans Arabic','JetBrains Mono',ui-monospace,monospace; }
+/* ...but genuine code chips stay monospaced. */
+.c1,.code,.mono,.rid,.sc,.seq,.dn,.nm,.mod-name,.mod .name,.pk,.mut,.file,.cov-label,.fn,.ava{ font-family:'JetBrains Mono',ui-monospace,monospace; }
 </style>
 <style>
 /* ============================================================

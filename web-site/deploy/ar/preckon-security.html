@@ -6,9 +6,9 @@
 <title>الأمان والثقة — Preckon</title>
 <meta content="كيف يحمي Preckon وثائق المناقصات والتصاميم الحساسة: عزل العملاء والتشفير والاستقلال عن المزوّدين وعمود تدقيق غير قابل للتعديل ومراجعة بشرية وموقف امتثال صادق." name="description"/>
 <meta content="#0B1B2B" name="theme-color"/>
-<link rel="alternate" hreflang="en" href="https://www.preckon.com/security"/>
-<link rel="alternate" hreflang="ar" href="https://www.preckon.com/ar/security"/>
-<link rel="alternate" hreflang="x-default" href="https://www.preckon.com/security"/>
+<link href="https://www.preckon.com/security" hreflang="en" rel="alternate"/>
+<link href="https://www.preckon.com/ar/security" hreflang="ar" rel="alternate"/>
+<link href="https://www.preckon.com/security" hreflang="x-default" rel="alternate"/>
 <link href="https://www.preckon.com/ar/security" rel="canonical"/>
 <meta content="website" property="og:type"/>
 <meta content="Preckon" property="og:site_name"/>
@@ -198,6 +198,12 @@
   [data-theme="dark"] .theme-toggle .ic-moon{display:none;}
   [data-theme="dark"] .theme-toggle .ic-sun{display:block;}
   [dir="rtl"] .eyebrow::before{margin-left:0;}
+
+/* Arabic-first mono stack: JetBrains Mono has no Arabic, and its very wide
+   space glyph was being used between Arabic words, tearing them apart. */
+:root{ --font-mono:'IBM Plex Sans Arabic','JetBrains Mono',ui-monospace,monospace; }
+/* ...but genuine code chips stay monospaced. */
+.c1,.code,.mono,.rid,.sc,.seq,.dn,.nm,.mod-name,.mod .name,.pk,.mut,.file,.cov-label,.fn,.ava{ font-family:'JetBrains Mono',ui-monospace,monospace; }
 </style>
 <style>
 /* ============================================================

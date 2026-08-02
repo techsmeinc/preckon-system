@@ -6,9 +6,9 @@
 <title>احجز عرضًا توضيحيًا — Preckon</title>
 <meta content="أحضر مجموعة مخططات واحدة وشاهدها تصبح جدول كميات مُسعّرًا وقابلًا للتتبع — مباشرة. احجز عرضًا توضيحيًا لـPreckon، أو تواصل مع المبيعات والدعم وبرنامج شركاء التصميم." name="description"/>
 <meta content="#0B1B2B" name="theme-color"/>
-<link rel="alternate" hreflang="en" href="https://www.preckon.com/demo"/>
-<link rel="alternate" hreflang="ar" href="https://www.preckon.com/ar/demo"/>
-<link rel="alternate" hreflang="x-default" href="https://www.preckon.com/demo"/>
+<link href="https://www.preckon.com/demo" hreflang="en" rel="alternate"/>
+<link href="https://www.preckon.com/ar/demo" hreflang="ar" rel="alternate"/>
+<link href="https://www.preckon.com/demo" hreflang="x-default" rel="alternate"/>
 <link href="https://www.preckon.com/ar/demo" rel="canonical"/>
 <meta content="website" property="og:type"/>
 <meta content="Preckon" property="og:site_name"/>
@@ -182,6 +182,12 @@
   [data-theme="dark"] .theme-toggle .ic-moon{display:none;}
   [data-theme="dark"] .theme-toggle .ic-sun{display:block;}
   [dir="rtl"] .eyebrow::before{margin-left:0;}
+
+/* Arabic-first mono stack: JetBrains Mono has no Arabic, and its very wide
+   space glyph was being used between Arabic words, tearing them apart. */
+:root{ --font-mono:'IBM Plex Sans Arabic','JetBrains Mono',ui-monospace,monospace; }
+/* ...but genuine code chips stay monospaced. */
+.c1,.code,.mono,.rid,.sc,.seq,.dn,.nm,.mod-name,.mod .name,.pk,.mut,.file,.cov-label,.fn,.ava{ font-family:'JetBrains Mono',ui-monospace,monospace; }
 </style>
 <style>
 /* ============================================================
@@ -312,8 +318,8 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
 <div class="field"><label for="bids">عدد العطاءات شهريًا</label>
 <select id="bids" name="bids">
 <option value="">اختر…</option>
-<option>1–5</option>
-<option>6–20</option>
+<option>⁦1–5⁩</option>
+<option>⁦6–20⁩</option>
 <option>20+</option>
 <option>غير محدد بعد</option>
 </select>

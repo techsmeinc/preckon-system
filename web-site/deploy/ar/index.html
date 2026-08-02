@@ -6,9 +6,9 @@
 <title>Preckon — من المخططات إلى تقدير تكاليف يمكن الدفاع عنه</title>
 <meta content="يحوّل Preckon المناقصات والمخططات والمواصفات إلى جدول كميات مُسعّر وقابل للتتبع — ما قبل الإنشاء بالذكاء الاصطناعي، بمراجعة فريقك." name="description"/>
 <meta content="#0B1B2B" name="theme-color"/>
-<link rel="alternate" hreflang="en" href="https://www.preckon.com/"/>
-<link rel="alternate" hreflang="ar" href="https://www.preckon.com/ar/"/>
-<link rel="alternate" hreflang="x-default" href="https://www.preckon.com/"/>
+<link href="https://www.preckon.com/" hreflang="en" rel="alternate"/>
+<link href="https://www.preckon.com/ar/" hreflang="ar" rel="alternate"/>
+<link href="https://www.preckon.com/" hreflang="x-default" rel="alternate"/>
 <link href="https://www.preckon.com/ar/" rel="canonical"/>
 <meta content="website" property="og:type"/>
 <meta content="Preckon" property="og:site_name"/>
@@ -380,6 +380,12 @@
   [data-theme="dark"] .theme-toggle .ic-moon{display:none;}
   [data-theme="dark"] .theme-toggle .ic-sun{display:block;}
   [dir="rtl"] .eyebrow::before{margin-left:0;}
+
+/* Arabic-first mono stack: JetBrains Mono has no Arabic, and its very wide
+   space glyph was being used between Arabic words, tearing them apart. */
+:root{ --font-mono:'IBM Plex Sans Arabic','JetBrains Mono',ui-monospace,monospace; }
+/* ...but genuine code chips stay monospaced. */
+.c1,.code,.mono,.rid,.sc,.seq,.dn,.nm,.mod-name,.mod .name,.pk,.mut,.file,.cov-label,.fn,.ava{ font-family:'JetBrains Mono',ui-monospace,monospace; }
 </style>
 <style>
 /* ============================================================
@@ -529,7 +535,7 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
 <div class="wrap">
 <div class="stats-band reveal">
 <div class="sb"><div class="v">6<span class="u">  ساعات</span></div><div class="k">من وثائق المناقصة إلى جدول كميات مُسعّر</div></div>
-<div class="sb"><div class="v">2–6<span class="u">  أسابيع</span></div><div class="k">الدورة اليدوية التي نستبدلها</div></div>
+<div class="sb"><div class="v">⁦2–6⁩<span class="u">  أسابيع</span></div><div class="k">الدورة اليدوية التي نستبدلها</div></div>
 <div class="sb"><div class="v">1,240<span class="u">  بند</span></div><div class="k">بنود في تمريرة واحدة</div></div>
 <div class="sb"><div class="v">100<span class="u"> %</span></div><div class="k">من الكميات قابلة للتتبع إلى مصدرها</div></div>
 </div>
@@ -545,7 +551,7 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
 </div>
 <div class="shift reveal">
 <div class="panel old">
-<div class="ptag">اليوم · 2–6 أسابيع لكل عطاء</div>
+<div class="ptag">اليوم · ⁦2–6⁩ أسابيع لكل عطاء</div>
 <ul class="steplist">
 <li><span class="n">01</span> طباعة المخططات وتأشيرها وقياسها يدويًا</li>
 <li><span class="n">02</span> إعادة بناء جدول الكميات في جداول البيانات في كل مرة</li>
@@ -557,10 +563,10 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
 <div class="panel new">
 <div class="ptag">مع Preckon · ساعات</div>
 <div class="chain">
-<span class="node">المستندات</span><span class="arr">→</span>
-<span class="node">الذكاء الاصطناعي</span><span class="arr">→</span>
-<span class="node">جدول الكميات</span><span class="arr">→</span>
-<span class="node">التقدير</span><span class="arr">→</span>
+<span class="node">المستندات</span><span class="arr">←</span>
+<span class="node">الذكاء الاصطناعي</span><span class="arr">←</span>
+<span class="node">جدول الكميات</span><span class="arr">←</span>
+<span class="node">التقدير</span><span class="arr">←</span>
 <span class="node">المشتريات</span>
 </div>
 <p style="margin:16px 0 0; font-size:14px; color:var(--slate-600);">سلسلة واحدة متصلة من المناقصة الخام إلى حزمة المشتريات — مقيسة ومُسعّرة وقابلة للمراجعة في كل خطوة. لا شيء يُعتمد تلقائيًا؛ يبقى القرار بيد مُقدِّري التكاليف لديك.</p>
@@ -578,27 +584,27 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
 <p class="lede">كل وحدة هي طبقة ذكاء. معًا تحمل المشروع من أول وثيقة مناقصة إلى حزمة مشتريات جاهزة للإصدار — بتنسيق من Construction Copilot.</p>
 </div>
 <div class="mods reveal">
-<div class="mod"><span class="edge"></span><div class="seq">01 / 06</div>
+<div class="mod"><span class="edge"></span><div class="seq">⁦01 / 06⁩</div>
 <div class="iic"><svg fill="none" height="20" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="20"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><path d="M14 3v6h6M8 13h8M8 17h5"></path></svg></div>
 <div class="name">TenderLogix</div><div class="layer">ذكاء المناقصات</div>
 <p class="desc">يقرأ وثائق المناقصات ونطاق العمل والعقود. يستخلص المتطلبات ويُنظّم المشروع.</p></div>
-<div class="mod"><span class="edge"></span><div class="seq">02 / 06</div>
+<div class="mod"><span class="edge"></span><div class="seq">⁦02 / 06⁩</div>
 <div class="iic"><svg fill="none" height="20" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="20"><path d="M3 3h18v18H3z"></path><path d="M3 9h18M9 3v18M14 14l3 3"></path></svg></div>
 <div class="name">DrawLogix</div><div class="layer">ذكاء المخططات</div>
 <p class="desc">يفسّر المخططات بصيغتي PDF وCAD، ويتعرّف على العناصر الإنشائية ويقيسها.</p></div>
-<div class="mod"><span class="edge"></span><div class="seq">03 / 06</div>
+<div class="mod"><span class="edge"></span><div class="seq">⁦03 / 06⁩</div>
 <div class="iic"><svg fill="none" height="20" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="20"><path d="M4 4h16v16H4z"></path><path d="M8 9h8M8 13h8M8 17h5"></path></svg></div>
 <div class="name">DocLogix</div><div class="layer">ذكاء المواصفات</div>
 <p class="desc">يحلّل المواصفات ويربط كل بند فني بالعناصر والبنود التي يحكمها.</p></div>
-<div class="mod"><span class="edge"></span><div class="seq">04 / 06</div>
+<div class="mod"><span class="edge"></span><div class="seq">⁦04 / 06⁩</div>
 <div class="iic"><svg fill="none" height="20" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="20"><path d="M4 3h16v18H4z"></path><path d="M8 7h8M8 11h8M8 15h4"></path><circle cx="16" cy="16" r="2"></circle></svg></div>
 <div class="name">QuantLogix</div><div class="layer">ذكاء الكميات</div>
 <p class="desc">يُنشئ جدول الكميات وحصر الكميات من المخططات والمواصفات — مقيسًا ومنظّمًا.</p></div>
-<div class="mod"><span class="edge"></span><div class="seq">05 / 06</div>
+<div class="mod"><span class="edge"></span><div class="seq">⁦05 / 06⁩</div>
 <div class="iic"><svg fill="none" height="20" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="20"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div>
 <div class="name">CostLogix</div><div class="layer">ذكاء التكاليف</div>
 <p class="desc">يحوّل الكميات إلى تقدير مُسعّر يمكن الدفاع عنه بأسعار إفرادية يمكنك تتبعها وتعديلها.</p></div>
-<div class="mod"><span class="edge"></span><div class="seq">06 / 06</div>
+<div class="mod"><span class="edge"></span><div class="seq">⁦06 / 06⁩</div>
 <div class="iic"><svg fill="none" height="20" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="20"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><path d="M3 6h18M16 10a4 4 0 0 1-8 0"></path></svg></div>
 <div class="name">ProcureLogix</div><div class="layer">ذكاء المشتريات</div>
 <p class="desc">يُنتج حزم المشتريات وطلبات عروض الأسعار مباشرة من التقدير المُسعّر.</p></div>
@@ -665,7 +671,7 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
 <div class="reveal center" style="max-width:760px;">
 <span class="kicker">لماذا Preckon</span>
 <h2 class="h2">مبني قبل الجميع في سلسلة العمل.</h2>
-<div class="wedge">مستند <b>→</b> جدول الكميات <b>→</b> تقدير <b>→</b> مشتريات، من البداية إلى النهاية — في نظام واحد.</div>
+<div class="wedge">مستند <b>←</b> جدول الكميات <b>←</b> تقدير <b>←</b> مشتريات، من البداية إلى النهاية — في نظام واحد.</div>
 </div>
 <div class="cmp reveal">
 <div class="crow chead">

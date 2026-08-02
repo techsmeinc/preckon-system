@@ -25,16 +25,61 @@ routes. `preckon-home.html` was dropped — the `.htaccess` 301s it to `/`.
 
 ## Routes
 
-| URL | Serves |
-|---|---|
-| `/` | `index.html` |
-| `/platform` | `preckon-platform.html` |
-| `/modules` | `preckon-modules.html` |
-| `/why` | `preckon-why.html` |
-| `/security` | `preckon-security.html` |
-| `/pricing` | `preckon-pricing.html` |
-| `/about` | `preckon-about.html` |
-| `/demo` | `preckon-demo.html` |
+| English | العربية | Serves |
+|---|---|---|
+| `/` | `/ar/` | `index.html` |
+| `/platform` | `/ar/platform` | `preckon-platform.html` |
+| `/modules` | `/ar/modules` | `preckon-modules.html` |
+| `/why` | `/ar/why` | `preckon-why.html` |
+| `/security` | `/ar/security` | `preckon-security.html` |
+| `/pricing` | `/ar/pricing` | `preckon-pricing.html` |
+| `/about` | `/ar/about` | `preckon-about.html` |
+| `/demo` | `/ar/demo` | `preckon-demo.html` |
+
+---
+
+## The Arabic site (`/ar/`)
+
+A full translation, not a language toggle — every page has a real Arabic URL that
+Google can index separately, paired to its English twin via `hreflang`.
+
+**Terminology** is Gulf construction usage: مناقصة (tender), جدول الكميات (BOQ),
+مسّاح كميات (quantity surveyor), حصر الكميات (takeoff), الأسعار الإفرادية (rates).
+Numerals are Western (`1,240`, `C30/37`) per Gulf technical-document convention.
+
+**Kept in Latin**, deliberately: `Preckon`, the six `*Logix` module names,
+`Construction Copilot`, drawing/spec codes (`CONC.GR-30`, `REQ-014`, `C30/37`),
+email addresses, and `TechSME Inc.`
+
+**RTL handling.** `dir="rtl"` plus a stylesheet that mirrors every
+left/right-anchored element (module edge bars, tier flags, panel borders,
+the flow-pulse animation direction). Three things that specifically bite Arabic
+sites are handled:
+
+- **Letter-spacing is forced to `normal`.** The design tracks its mono labels
+  widely; on Arabic that severs the cursive glyph joins and renders words as
+  disconnected letters.
+- **Numeric ranges are bidi-isolated.** `2–6` in an RTL paragraph otherwise
+  renders as `6–2`, because the bidi algorithm resolves the dash between two
+  numbers as right-to-left. Same for `01 / 06`.
+- **The mono stack is Arabic-first.** JetBrains Mono has no Arabic glyphs, and
+  its very wide space was being used between Arabic words. Genuine code chips
+  get JetBrains Mono restored by class.
+
+**Typography** is IBM Plex Sans Arabic (Google Fonts), with line-height raised
+from 1.5 to 1.75 for body and 1.35 for headings — Arabic needs more leading.
+
+**The language switcher** is now EN · العربية and navigates to the counterpart
+page, replacing the old five-language dictionary that only translated nav labels.
+FR/DE/ES were removed: they had no content behind them.
+
+`ar/.htaccess` contains only `ErrorDocument 404 /ar/404.html` so Arabic visitors
+get the Arabic not-found page. It deliberately holds no rewrite directives, so
+the root `.htaccess` rules keep governing `/ar/*` URLs.
+
+> **Before the Arabic site goes in front of buyers:** have a native Arabic-speaking
+> QS or estimator read it. The translation is careful and terminology-checked, but
+> construction vocabulary carries regional weight that only a practitioner catches.
 
 ---
 
@@ -98,6 +143,12 @@ curl -sI https://www.preckon.com/       | head -3   # -> 200
 curl -sI https://www.preckon.com/platform | head -3 # -> 200
 curl -sI https://www.preckon.com/preckon-platform.html | head -3  # -> 301 /platform
 curl -sI https://www.preckon.com/nope   | head -3   # -> 404
+
+# Arabic
+curl -sI https://www.preckon.com/ar/          | head -3   # -> 200
+curl -sI https://www.preckon.com/ar/pricing   | head -3   # -> 200
+curl -sI https://www.preckon.com/ar/index.html | head -3  # -> 301 /ar/
+curl -s  https://www.preckon.com/ar/ | grep -o '<title>[^<]*</title>'   # Arabic title
 ```
 
 Then in a browser: theme toggle, mobile width, and the nav on every page.
@@ -126,9 +177,14 @@ re-check the upload first.
 5. **Pricing tiers carry no figures** — intentional, per the source README.
 6. **Fonts load from Google Fonts and Fontshare via `@import`.** Third-party requests
    on every page view; self-host them for speed and for EU privacy comfort.
-7. **Translations are nav-chrome only.** The language switcher changes five nav labels;
-   all body copy stays English. Don't promote the non-English versions.
+7. **Arabic is a full translation** (see the `/ar/` section above) but has not been
+   reviewed by a native construction professional. FR/DE/ES were removed from the
+   switcher — they were nav labels with no content behind them.
 8. **No analytics or cookie consent** is installed.
+9. **The demo form is English-only in what it sends.** The Arabic form validates and
+   labels in Arabic, but since nothing is submitted anywhere yet (see item 1), there
+   is no locale routing to configure. Worth handling when the form is wired up, so
+   Arabic enquiries reach someone who can answer in Arabic.
 
 ## Updating the site later
 

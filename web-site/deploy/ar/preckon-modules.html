@@ -6,9 +6,9 @@
 <title>الوحدات — Preckon</title>
 <meta content="وحدات Logix الست — ذكاء المناقصات والمخططات والمواصفات والكميات والتكاليف والمشتريات — التي تحمل المشروع من المستندات الخام إلى حزمة مشتريات." name="description"/>
 <meta content="#0B1B2B" name="theme-color"/>
-<link rel="alternate" hreflang="en" href="https://www.preckon.com/modules"/>
-<link rel="alternate" hreflang="ar" href="https://www.preckon.com/ar/modules"/>
-<link rel="alternate" hreflang="x-default" href="https://www.preckon.com/modules"/>
+<link href="https://www.preckon.com/modules" hreflang="en" rel="alternate"/>
+<link href="https://www.preckon.com/ar/modules" hreflang="ar" rel="alternate"/>
+<link href="https://www.preckon.com/modules" hreflang="x-default" rel="alternate"/>
 <link href="https://www.preckon.com/ar/modules" rel="canonical"/>
 <meta content="website" property="og:type"/>
 <meta content="Preckon" property="og:site_name"/>
@@ -240,6 +240,12 @@
   [data-theme="dark"] .theme-toggle .ic-moon{display:none;}
   [data-theme="dark"] .theme-toggle .ic-sun{display:block;}
   [dir="rtl"] .eyebrow::before{margin-left:0;}
+
+/* Arabic-first mono stack: JetBrains Mono has no Arabic, and its very wide
+   space glyph was being used between Arabic words, tearing them apart. */
+:root{ --font-mono:'IBM Plex Sans Arabic','JetBrains Mono',ui-monospace,monospace; }
+/* ...but genuine code chips stay monospaced. */
+.c1,.code,.mono,.rid,.sc,.seq,.dn,.nm,.mod-name,.mod .name,.pk,.mut,.file,.cov-label,.fn,.ava{ font-family:'JetBrains Mono',ui-monospace,monospace; }
 </style>
 <style>
 /* ============================================================
@@ -352,7 +358,7 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
 <section class="mod" id="tender">
 <div class="mod-inner reveal">
 <div class="mod-copy">
-<div class="mod-eyebrow"><span class="iic"><svg fill="none" height="17" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="17"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><path d="M14 3v6h6M8 13h8M8 17h5"></path></svg></span> الوحدة 01 / 06 · ذكاء المناقصات</div>
+<div class="mod-eyebrow"><span class="iic"><svg fill="none" height="17" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="17"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><path d="M14 3v6h6M8 13h8M8 17h5"></path></svg></span> الوحدة ⁦01 / 06⁩ · ذكاء المناقصات</div>
 <h2 class="mod-name">TenderLogix</h2>
 <p class="mod-promise">حوّل وثائق المناقصة إلى موجز منظّم.</p>
 <p class="mod-desc">يقرأ TenderLogix المناقصة كاملة — سجل المخططات والعقد ونطاق العمل وتعليمات مقدّمي العطاءات — ويستخرج ما يحكم العمل فعليًا. لا يبقى شيء مهم مدفونًا في الصفحة 240.</p>
@@ -361,13 +367,13 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
 <li><span class="c">✓</span> يُبرز البنود الإلزامية والمستندات المطلوبة والمواعيد النهائية</li>
 <li><span class="c">✓</span> يُنظّم المشروع لتحصل كل طبقة لاحقة على السياق</li>
 </ul>
-<div class="io-chips"><span class="chip">وثائق المناقصة (PDF)</span><span class="arr">→</span><span class="chip out">سجل المتطلبات</span></div>
+<div class="io-chips"><span class="chip">وثائق المناقصة (PDF)</span><span class="arr">←</span><span class="chip out">سجل المتطلبات</span></div>
 </div>
 <div class="mod-visual">
 <div class="mock">
 <div class="mock-bar"><span>requirement-register</span><span class="live">● مستخرَج</span></div>
 <div class="mk-body">
-<div class="reqrow"><span class="rid">REQ-014</span><span class="rtxt">خرسانة بدرجة C30/37 لجميع الأساسات</span><span class="rtag man">إلزامي</span></div>
+<div class="reqrow"><span class="rid">REQ-014</span><span class="rtxt">خرسانة بدرجة C⁦30/37⁩ لجميع الأساسات</span><span class="rtag man">إلزامي</span></div>
 <div class="reqrow"><span class="rid">REQ-018</span><span class="rtxt">عزل مائي وفق BS 8102، النوع A</span><span class="rtag std">معياري</span></div>
 <div class="reqrow"><span class="rid">REQ-021</span><span class="rtxt">أعمال الخوازيق — مطلوب بيان طريقة تنفيذ</span><span class="rtag sub">مستند مطلوب</span></div>
 <div class="reqrow"><span class="rid">REQ-027</span><span class="rtxt">تسليم العطاء بحلول 14:00، 28 فبراير</span><span class="rtag dead">موعد نهائي</span></div>
@@ -380,7 +386,7 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
 <section class="mod rev" id="draw">
 <div class="mod-inner reveal">
 <div class="mod-copy">
-<div class="mod-eyebrow"><span class="iic"><svg fill="none" height="17" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="17"><path d="M3 3h18v18H3z"></path><path d="M3 9h18M9 3v18M14 14l3 3"></path></svg></span> الوحدة 02 / 06 · ذكاء المخططات</div>
+<div class="mod-eyebrow"><span class="iic"><svg fill="none" height="17" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="17"><path d="M3 3h18v18H3z"></path><path d="M3 9h18M9 3v18M14 14l3 3"></path></svg></span> الوحدة ⁦02 / 06⁩ · ذكاء المخططات</div>
 <h2 class="mod-name">DrawLogix</h2>
 <p class="mod-promise">اقرأ المخططات كما يقرؤها مُقدِّر التكاليف — كل لوحة، في كل مرة.</p>
 <p class="mod-desc">يفسّر DrawLogix المخططات المعمارية والإنشائية بصيغة PDF أو CAD، ويتعرّف على العناصر الإنشائية ويقيس أبعادها. جدران وأعمدة وبلاطات وفتحات — مُحدَّدة ومُقاسة وجاهزة للحصر.</p>
@@ -389,7 +395,7 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
 <li><span class="c">✓</span> يقيس الأشكال والأبعاد تلقائيًا</li>
 <li><span class="c">✓</span> يربط كل قياس باللوحة التي جاء منها</li>
 </ul>
-<div class="io-chips"><span class="chip">مخططات (PDF · CAD)</span><span class="arr">→</span><span class="chip out">عناصر مُتعرَّف عليها</span></div>
+<div class="io-chips"><span class="chip">مخططات (PDF · CAD)</span><span class="arr">←</span><span class="chip out">عناصر مُتعرَّف عليها</span></div>
 </div>
 <div class="mod-visual">
 <div class="mock">
@@ -413,7 +419,7 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
 <section class="mod" id="doc">
 <div class="mod-inner reveal">
 <div class="mod-copy">
-<div class="mod-eyebrow"><span class="iic"><svg fill="none" height="17" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="17"><path d="M4 4h16v16H4z"></path><path d="M8 9h8M8 13h8M8 17h5"></path></svg></span> الوحدة 03 / 06 · ذكاء المواصفات</div>
+<div class="mod-eyebrow"><span class="iic"><svg fill="none" height="17" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="17"><path d="M4 4h16v16H4z"></path><path d="M8 9h8M8 13h8M8 17h5"></path></svg></span> الوحدة ⁦03 / 06⁩ · ذكاء المواصفات</div>
 <h2 class="mod-name">DocLogix</h2>
 <p class="mod-promise">اربط كل كمية بالبند الفني الذي يحكمها.</p>
 <p class="mod-desc">المواصفات هي التي تحدد ماهية البند فعليًا — الدرجة والتشطيب والمعيار. يحلّل DocLogix المواصفات ويربط كل بند فني بالعناصر والبنود التي ينطبق عليها، فلا يُسعَّر شيء بصورة عامة.</p>
@@ -422,13 +428,13 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
 <li><span class="c">✓</span> يربط البنود الفنية بالعناصر وبنود جدول الكميات</li>
 <li><span class="c">✓</span> يُبقي الخصائص — الدرجة والتشطيب والمعيار — مرتبطة بالكميات</li>
 </ul>
-<div class="io-chips"><span class="chip">المواصفات</span><span class="arr">→</span><span class="chip out">خصائص مطابَقة بالمواصفات</span></div>
+<div class="io-chips"><span class="chip">المواصفات</span><span class="arr">←</span><span class="chip out">خصائص مطابَقة بالمواصفات</span></div>
 </div>
 <div class="mod-visual">
 <div class="mock">
 <div class="mock-bar"><span>spec-match</span><span class="live">● مرتبط</span></div>
 <div class="mk-body">
-<div class="specclause"><span class="sc">SPEC 03 30 00 · 3.2.1</span><small>خرسانة مصبوبة بالموقع — درجة C30/37، غطاء 40 مم</small></div>
+<div class="specclause"><span class="sc">SPEC 03 30 00 · 3.2.1</span><small>خرسانة مصبوبة بالموقع — درجة C⁦30/37⁩، غطاء 40 مم</small></div>
 <div class="maparrow">▼ ينطبق على</div>
 <div class="mapitems"><span>CONC.GR-30</span><span>FRM.WALL</span><span>RFT.B500</span></div>
 </div>
@@ -440,7 +446,7 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
 <section class="mod rev" id="quant">
 <div class="mod-inner reveal">
 <div class="mod-copy">
-<div class="mod-eyebrow"><span class="iic"><svg fill="none" height="17" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="17"><path d="M4 3h16v18H4z"></path><path d="M8 7h8M8 11h8M8 15h4"></path><circle cx="16" cy="16" r="2"></circle></svg></span> الوحدة 04 / 06 · ذكاء الكميات</div>
+<div class="mod-eyebrow"><span class="iic"><svg fill="none" height="17" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="17"><path d="M4 3h16v18H4z"></path><path d="M8 7h8M8 11h8M8 15h4"></path><circle cx="16" cy="16" r="2"></circle></svg></span> الوحدة ⁦04 / 06⁩ · ذكاء الكميات</div>
 <h2 class="mod-name">QuantLogix</h2>
 <p class="mod-promise">جدول كميات منظّم، يُنشَأ — لا يُعاد بناؤه يدويًا.</p>
 <p class="mod-desc">يحوّل QuantLogix العناصر المقيسة والمواصفات المطابَقة إلى جدول كميات وحصر منظّمين. بنود وكميات ووحدات — مُجمّعة وفق طريقة القياس المعتمدة لديك، وجاهزة للتسعير.</p>
@@ -449,7 +455,7 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
 <li><span class="c">✓</span> يتبع طريقة القياس المعيارية لديك</li>
 <li><span class="c">✓</span> كل كمية قابلة للتتبع إلى عنصرها المصدر</li>
 </ul>
-<div class="io-chips"><span class="chip">عناصر + مواصفات</span><span class="arr">→</span><span class="chip out">جدول كميات منظّم</span></div>
+<div class="io-chips"><span class="chip">عناصر + مواصفات</span><span class="arr">←</span><span class="chip out">جدول كميات منظّم</span></div>
 </div>
 <div class="mod-visual">
 <div class="mock">
@@ -468,7 +474,7 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
 <section class="mod" id="cost">
 <div class="mod-inner reveal">
 <div class="mod-copy">
-<div class="mod-eyebrow"><span class="iic"><svg fill="none" height="17" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="17"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></span> الوحدة 05 / 06 · ذكاء التكاليف</div>
+<div class="mod-eyebrow"><span class="iic"><svg fill="none" height="17" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="17"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></span> الوحدة ⁦05 / 06⁩ · ذكاء التكاليف</div>
 <h2 class="mod-name">CostLogix</h2>
 <p class="mod-promise">تقدير مُسعّر يمكن الدفاع عنه وتتبعه وتعديله.</p>
 <p class="mod-desc">يطبّق CostLogix الأسعار الإفرادية على كل بند ويبني التقدير. أسعار يمكنك رؤيتها ومعرفة مصدرها وتجاوزها — مع تحديث الإجمالي مباشرة وإمكانية تتبع كل رقم عبر جدول الكميات وصولًا إلى المخطط.</p>
@@ -477,7 +483,7 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
 <li><span class="c">✓</span> يبني تقديرًا مُسعّرًا بإجماليات مباشرة</li>
 <li><span class="c">✓</span> قابل للتتبع من الإجمالي ← البند ← العنصر ← المخطط</li>
 </ul>
-<div class="io-chips"><span class="chip">جدول كميات منظّم</span><span class="arr">→</span><span class="chip out">تقدير مُسعّر</span></div>
+<div class="io-chips"><span class="chip">جدول كميات منظّم</span><span class="arr">←</span><span class="chip out">تقدير مُسعّر</span></div>
 </div>
 <div class="mod-visual">
 <div class="mock">
@@ -496,7 +502,7 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
 <section class="mod rev" id="procure">
 <div class="mod-inner reveal">
 <div class="mod-copy">
-<div class="mod-eyebrow"><span class="iic"><svg fill="none" height="17" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="17"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><path d="M3 6h18M16 10a4 4 0 0 1-8 0"></path></svg></span> الوحدة 06 / 06 · ذكاء المشتريات</div>
+<div class="mod-eyebrow"><span class="iic"><svg fill="none" height="17" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="17"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><path d="M3 6h18M16 10a4 4 0 0 1-8 0"></path></svg></span> الوحدة ⁦06 / 06⁩ · ذكاء المشتريات</div>
 <h2 class="mod-name">ProcureLogix</h2>
 <p class="mod-promise">من التقدير إلى الشراء، مُحزَّمة وجاهزة للإرسال.</p>
 <p class="mod-desc">يجمّع ProcureLogix التقدير في حزم مشتريات ويُنشئ طلبات عروض الأسعار لطرح كل نطاق في السوق — الجسر بين تقدير مُسعّر وشراء العمل فعليًا.</p>
@@ -505,7 +511,7 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
 <li><span class="c">✓</span> يُنشئ طلبات عروض الأسعار من التقدير المُسعّر</li>
 <li><span class="c">✓</span> يسلّم حزمة نظيفة لفرق المشتريات</li>
 </ul>
-<div class="io-chips"><span class="chip">تقدير مُسعّر</span><span class="arr">→</span><span class="chip out">حزم مشتريات · طلبات عروض أسعار</span></div>
+<div class="io-chips"><span class="chip">تقدير مُسعّر</span><span class="arr">←</span><span class="chip out">حزم مشتريات · طلبات عروض أسعار</span></div>
 </div>
 <div class="mod-visual">
 <div class="mock">
@@ -533,7 +539,7 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
 <div class="bubble q">لماذا كمية الخرسانة 84.6 م3؟</div>
 <div class="bubble a">
 <b>Construction Copilot</b>
-          إنها من الجدار الخرساني المسلح في الدور الأرضي على اللوحة <span class="mono">A-201</span> — <span class="mono">6,400 × 3,000 × 0.30 م</span> عبر 4 أجزاء، وفق المواصفات <span class="mono">03 30 00 · 3.2.1</span>.
+          إنها من الجدار الخرساني المسلح في الدور الأرضي على اللوحة <span class="mono">A-201</span> — <span class="mono">⁦6,400 × 3,000 × 0.30⁩ م</span> عبر 4 أجزاء، وفق المواصفات <span class="mono">03 30 00 · 3.2.1</span>.
           <span class="trace">◂ تتبّع إلى المخطط</span>
 </div>
 </div>

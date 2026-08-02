@@ -6,9 +6,9 @@
 <title>لماذا Preckon — مبني قبل الجميع في سلسلة العمل</title>
 <meta content="مستند ← جدول كميات ← تقدير ← مشتريات، من البداية إلى النهاية، قبل المخططات الخام. شاهد أين تتوقف أدوات الحصر وCostX ومنصات إدارة المشاريع — وأين يمتد Preckon عبر السلسلة كاملة." name="description"/>
 <meta content="#0B1B2B" name="theme-color"/>
-<link rel="alternate" hreflang="en" href="https://www.preckon.com/why"/>
-<link rel="alternate" hreflang="ar" href="https://www.preckon.com/ar/why"/>
-<link rel="alternate" hreflang="x-default" href="https://www.preckon.com/why"/>
+<link href="https://www.preckon.com/why" hreflang="en" rel="alternate"/>
+<link href="https://www.preckon.com/ar/why" hreflang="ar" rel="alternate"/>
+<link href="https://www.preckon.com/why" hreflang="x-default" rel="alternate"/>
 <link href="https://www.preckon.com/ar/why" rel="canonical"/>
 <meta content="website" property="og:type"/>
 <meta content="Preckon" property="og:site_name"/>
@@ -214,6 +214,12 @@
   [data-theme="dark"] .theme-toggle .ic-moon{display:none;}
   [data-theme="dark"] .theme-toggle .ic-sun{display:block;}
   [dir="rtl"] .eyebrow::before{margin-left:0;}
+
+/* Arabic-first mono stack: JetBrains Mono has no Arabic, and its very wide
+   space glyph was being used between Arabic words, tearing them apart. */
+:root{ --font-mono:'IBM Plex Sans Arabic','JetBrains Mono',ui-monospace,monospace; }
+/* ...but genuine code chips stay monospaced. */
+.c1,.code,.mono,.rid,.sc,.seq,.dn,.nm,.mod-name,.mod .name,.pk,.mut,.file,.cov-label,.fn,.ava{ font-family:'JetBrains Mono',ui-monospace,monospace; }
 </style>
 <style>
 /* ============================================================
@@ -306,7 +312,7 @@ h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !imp
 <div class="wrap">
 <span class="eyebrow">لماذا Preckon</span>
 <h1>مبني <span class="hl">قبل الجميع</span> في سلسلة العمل.</h1>
-<p class="wedge">مستند <b>→</b> جدول الكميات <b>→</b> تقدير <b>→</b> مشتريات — من البداية إلى النهاية، في نظام واحد.</p>
+<p class="wedge">مستند <b>←</b> جدول الكميات <b>←</b> تقدير <b>←</b> مشتريات — من البداية إلى النهاية، في نظام واحد.</p>
 <p class="sub">أدوات الحصر تقيس. وأدوات التقدير تُسعّر يدويًا. ومنصات المشاريع تدير ما هو موجود أصلًا. أما Preckon فيدير السلسلة كاملة انطلاقًا من المستندات الخام — الجزء الذي يتركه الجميع لك.</p>
 </div>
 </header>
