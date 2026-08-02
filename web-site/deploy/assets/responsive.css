@@ -60,8 +60,11 @@
     border-top:1px solid var(--hairline);
   }
   .nav-extra .lang-select{ flex:none; }
-  .nav-extra .nav-cta{ flex:1; }
-  .nav-extra .nav-cta .btn{ width:100%; justify-content:center; min-height:48px; }
+  /* .nav-cta on the homepage, a bare .btn on every other page */
+  .nav-extra .nav-cta, .nav-extra > .btn{ flex:1; }
+  .nav-extra .nav-cta .btn, .nav-extra > .btn{
+    width:100%; justify-content:center; min-height:48px;
+  }
 }
 
 /* narrow phones: brand + theme + toggle only; everything else is in the panel */

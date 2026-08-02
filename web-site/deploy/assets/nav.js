@@ -12,8 +12,16 @@
   if (!nav || !links || !wrap) return;
 
   var tools = nav.querySelector('.nav-tools');
-  var cta = nav.querySelector('.nav-cta');
   var lang = nav.querySelector('.lang-select');
+
+  // The homepage wraps its CTA in .nav-cta; the other pages put a bare .btn
+  // straight into .wrap. Handle both so every page behaves the same.
+  var cta = nav.querySelector('.nav-cta');
+  if (!cta) {
+    cta = Array.prototype.filter.call(wrap.children, function (c) {
+      return c.classList && c.classList.contains('btn');
+    })[0] || null;
+  }
   var rtl = document.documentElement.getAttribute('dir') === 'rtl';
 
   // where relocated controls live inside the panel

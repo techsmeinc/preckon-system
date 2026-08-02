@@ -167,41 +167,62 @@ The form on `/demo` and `/ar/demo` posts to `submit.php`, which emails the reque
 to sales, sends the visitor a confirmation in their language, and appends every
 submission to a CSV backup.
 
-**It will not send mail until you do these two things:**
+Mail goes out through **Brevo's HTTP API** by default. That is deliberate: shared
+hosting commonly blocks outbound SMTP ports (25/465/587) to external hosts, which
+makes SMTP fail silently. The Brevo API is ordinary HTTPS on 443, which is never
+blocked.
 
-### 1. Create the sending mailbox
+`submit.php` tries transports in order and stops at the first success:
 
-IONOS → **Email** → create `no-reply@preckon.com` and set a password.
+1. **Brevo API** — recommended
+2. **SMTP** — Brevo's relay or IONOS's, if you prefer
+3. **PHP `mail()`** — last resort, poor deliverability
 
-It must be a real mailbox on a domain you control. The notification is sent *from*
-this address with the visitor's address in `Reply-To` — so hitting Reply in your
-inbox still replies to them. Sending directly "from" the visitor's address would
-fail SPF/DMARC and land in spam.
+**It will not send mail until you do this:**
 
-While you are there, create `sales@`, `support@` and `hello@preckon.com` — all three
-are linked across the site.
+### 1. Set up Brevo
+
+1. Sign up at [brevo.com](https://www.brevo.com) — the free tier allows 300 emails/day.
+2. **Senders, Domains & Dedicated IPs → Domains** → add `preckon.com` and create the
+   DNS records it gives you in IONOS (**Domains & SSL → preckon.com → DNS**).
+   Authenticating the domain is what puts mail in inboxes instead of spam — do not
+   skip it.
+3. **Senders** → add `no-reply@preckon.com` and verify it.
+4. **SMTP & API → API Keys** → generate a key. It starts with `xkeysib-`.
 
 ### 2. Fill in `config.php`
 
 ```php
-'to'       => 'sales@preckon.com',      // where demo requests land
-'from'     => 'no-reply@preckon.com',   // the mailbox you just made
-'smtp' => [
-    'enabled'  => true,
-    'host'     => 'smtp.ionos.com',
-    'port'     => 587,
-    'secure'   => 'tls',
-    'username' => 'no-reply@preckon.com',
-    'password' => '...',                // <-- the mailbox password
+'to'    => 'sales@preckon.com',      // where demo requests land
+'from'  => 'no-reply@preckon.com',   // must be a verified Brevo sender
+'brevo' => [
+    'enabled' => true,
+    'api_key' => 'xkeysib-...',      // <-- paste the key here
 ],
 ```
 
-Confirm the SMTP host against IONOS → Email → your mailbox → settings; IONOS
-occasionally uses a different host per region.
+### 3. Create the mailboxes
 
-Setting `'enabled' => false` falls back to PHP `mail()`. The form still works, but
-deliverability is meaningfully worse — unauthenticated mail from shared hosting is
-frequently spam-filtered. Use SMTP.
+IONOS → **Email**: `sales@`, `support@` and `hello@preckon.com` are all linked across
+the site and need to exist. `no-reply@` does not need a real mailbox if Brevo is
+sending — but creating it stops bounces going nowhere.
+
+### Checking it works — without submitting the form
+
+Set a long random string as `selftest_token` in `config.php`, then visit:
+
+```
+https://www.preckon.com/submit.php?selftest=YOUR-TOKEN
+```
+
+It reports what is configured, sends one test email to your `to` address, and shows
+the exact transport error if it fails — e.g. `brevo: HTTP 401 Key not found`. Far
+faster than guessing from a silent form.
+
+**Clear the token once you are live.** With no token set, the endpoint 404s.
+
+If you would rather debug through the form itself, set `'debug' => true` and the
+JSON error response carries the transport error. Turn it off afterwards.
 
 ### What it does
 
@@ -235,8 +256,39 @@ as plain text.
 
 ### Requirements
 
-PHP 5.5+ (any IONOS package qualifies). No Composer, no database, no third-party
-service. PHPMailer is vendored in `_lib/PHPMailer/`.
+PHP 5.5+ (any IONOS package qualifies), with either cURL or `allow_url_fopen` for
+the Brevo transport — the self-test reports which are available. No Composer, no
+database. PHPMailer is vendored in `_lib/PHPMailer/` for the SMTP fallback.
+
+---
+
+## Responsive behaviour
+
+`assets/responsive.css` and `assets/nav.js` are linked from all 18 pages and cover
+phones, tablets and laptops. Audited at 320 / 360 / 390 / 430 / 600 / 768 / 820 /
+1024 / 1280 / 1440 px in both languages: no horizontal overflow anywhere.
+
+**Mobile navigation.** The base design set `.nav-links { display:none }` below 880px
+with no replacement — so on every phone and on iPad portrait there was *no way to
+reach Platform, Modules, Why us, Security or Pricing* except through the footer.
+There is now a toggle button that drives the existing `.nav-links` list as a
+drop-down panel. No duplicated markup, so pages stay in sync automatically.
+
+Because a 320px bar cannot hold brand + language + theme + CTA + toggle, `nav.js`
+relocates the language select into the panel below 880px, and the CTA below 430px,
+moving them back on resize. It handles both nav markup patterns — the homepage wraps
+its CTA in `.nav-cta`, the other 16 pages use a bare `.btn`.
+
+Panel closes on link click, outside click, Escape, and on resize past 880px.
+Desktop rendering is byte-for-byte unchanged.
+
+**Type.** Micro-labels in the drafting motif ran as small as 8px. They are floored at
+11px up to 1024px wide. Desktop typography is left exactly as designed — worth
+revisiting separately, since 8px is below accessibility guidance at any width.
+
+**Tap targets.** Language select and theme toggle were 30px and 34px; both are 42px
+below 880px, and nav links are 44px. Form controls are 46px with 16px text — under
+16px, iOS Safari zooms the page on focus, which is a common mobile-form annoyance.
 
 ### Testing after upload
 
