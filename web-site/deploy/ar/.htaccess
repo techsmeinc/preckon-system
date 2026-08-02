@@ -1,0 +1,4 @@
+# Arabic section — serve the Arabic not-found page.
+# Deliberately contains no mod_rewrite directives so the root
+# .htaccess rewrite rules continue to govern /ar/* URLs.
+ErrorDocument 404 /ar/404.html

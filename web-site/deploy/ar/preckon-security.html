@@ -1,27 +1,27 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html dir="rtl" lang="ar">
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Security &amp; Trust — Preckon</title>
-<meta content="How Preckon protects sensitive tender and design documents: tenant isolation, encryption, provider independence, an immutable audit spine, human review, and an honest compliance posture." name="description"/>
+<title>الأمان والثقة — Preckon</title>
+<meta content="كيف يحمي Preckon وثائق المناقصات والتصاميم الحساسة: عزل العملاء والتشفير والاستقلال عن المزوّدين وعمود تدقيق غير قابل للتعديل ومراجعة بشرية وموقف امتثال صادق." name="description"/>
 <meta content="#0B1B2B" name="theme-color"/>
 <link rel="alternate" hreflang="en" href="https://www.preckon.com/security"/>
 <link rel="alternate" hreflang="ar" href="https://www.preckon.com/ar/security"/>
 <link rel="alternate" hreflang="x-default" href="https://www.preckon.com/security"/>
-<link href="https://www.preckon.com/security" rel="canonical"/>
+<link href="https://www.preckon.com/ar/security" rel="canonical"/>
 <meta content="website" property="og:type"/>
 <meta content="Preckon" property="og:site_name"/>
-<meta content="en_US" property="og:locale"/>
-<meta content="https://www.preckon.com/security" property="og:url"/>
-<meta content="Security &amp; Trust — Preckon" property="og:title"/>
-<meta content="How Preckon protects sensitive tender and design documents: tenant isolation, encryption, provider independence, an immutable audit spine, human review, and an honest compliance posture." property="og:description"/>
+<meta content="ar_SA" property="og:locale"/>
+<meta content="https://www.preckon.com/ar/security" property="og:url"/>
+<meta content="الأمان والثقة — Preckon" property="og:title"/>
+<meta content="كيف يحمي Preckon وثائق المناقصات والتصاميم الحساسة: عزل العملاء والتشفير والاستقلال عن المزوّدين وعمود تدقيق غير قابل للتعديل ومراجعة بشرية وموقف امتثال صادق." property="og:description"/>
 <meta content="https://www.preckon.com/og-image.png" property="og:image"/>
 <meta content="1200" property="og:image:width"/>
 <meta content="630" property="og:image:height"/>
 <meta content="summary_large_image" name="twitter:card"/>
-<meta content="Security &amp; Trust — Preckon" name="twitter:title"/>
-<meta content="How Preckon protects sensitive tender and design documents: tenant isolation, encryption, provider independence, an immutable audit spine, human review, and an honest compliance posture." name="twitter:description"/>
+<meta content="الأمان والثقة — Preckon" name="twitter:title"/>
+<meta content="كيف يحمي Preckon وثائق المناقصات والتصاميم الحساسة: عزل العملاء والتشفير والاستقلال عن المزوّدين وعمود تدقيق غير قابل للتعديل ومراجعة بشرية وموقف امتثال صادق." name="twitter:description"/>
 <meta content="https://www.preckon.com/og-image.png" name="twitter:image"/>
 <link href="/favicon.svg" rel="icon" type="image/svg+xml"/>
 <link href="/apple-touch-icon.png" rel="apple-touch-icon"/>
@@ -199,41 +199,103 @@
   [data-theme="dark"] .theme-toggle .ic-sun{display:block;}
   [dir="rtl"] .eyebrow::before{margin-left:0;}
 </style>
+<style>
+/* ============================================================
+   AR — RTL layout + Arabic typography overrides for DS-01
+   Loaded only on the Arabic pages. The Latin design is untouched.
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap');
+
+:root{
+  /* Latin-first stacks keep codes (CONC.GR-30, C30/37) in JetBrains Mono
+     while Arabic glyphs fall through to the Arabic face automatically. */
+  --font-display:'IBM Plex Sans Arabic','General Sans','Inter',system-ui,sans-serif;
+  --font-body:'IBM Plex Sans Arabic','Inter',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono','IBM Plex Sans Arabic',ui-monospace,monospace;
+}
+
+/* Arabic script is cursive — letter-spacing severs the glyph joins.
+   This must win everywhere, including the tracked mono labels. */
+*,*::before,*::after{ letter-spacing:normal !important; }
+
+/* Arabic needs more leading than Latin at the same size. */
+body{ line-height:1.75; }
+h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !important; }
+.hero h1{ font-size:clamp(30px,4.6vw,48px); }
+.hero h1 .hl{ white-space:normal; }
+
+/* ---------- mirrored: left/right-anchored decoration ---------- */
+.mod .edge{ left:auto; right:0; }
+.step.review .badge{ right:auto; left:14px; }
+.tier .flag{ left:auto; right:28px; }
+.recog .tag{ left:auto; right:6px; }
+.demo-draw .pcap{ left:auto; right:16px; }
+.demo-chrome .live{ margin-left:0; margin-right:auto; }
+.demo-draw{ border-right:0; border-left:1px solid var(--hairline); }
+.stats-band .sb{ border-right:0; border-left:1px solid var(--hairline); }
+.stats-band .sb:last-child{ border-left:0; }
+.stats-band .sb:first-child{ border-left:1px solid var(--hairline); }
+
+/* the flow pulse must travel right-to-left */
+@keyframes flow{
+  0%{ opacity:0; transform:translate(130%,-50%); }
+  40%{ opacity:1; }
+  100%{ opacity:0; transform:translate(-40%,-50%); }
+}
+.btn-ghost:hover svg{ transform:translateX(-3px); }
+
+/* the measured-line motif reads the same mirrored, but the eyebrow rule
+   sits at the start of the inline-flex row, which dir already flips. */
+.eyebrow::before{ margin-left:0; margin-right:0; }
+
+/* ---------- responsive breakpoints re-applied for RTL ---------- */
+@media(max-width:820px){
+  .stats-band .sb:nth-child(2){ border-left:0; }
+  .stats-band .sb:nth-child(1),.stats-band .sb:nth-child(2){ border-bottom:1px solid var(--hairline); }
+}
+@media(max-width:460px){
+  .stats-band .sb{ border-left:0; border-bottom:1px solid var(--hairline); }
+  .stats-band .sb:last-child{ border-bottom:0; }
+}
+
+/* Latin runs (product names, codes, emails) inside Arabic sentences */
+.wm,.brand .wm{ direction:ltr; unicode-bidi:isolate; }
+</style>
 <script>
   if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){ document.documentElement.classList.add('has-anim'); }
 </script>
 <!-- NAV -->
 <nav class="nav">
 <div class="wrap">
-<a class="brand" href="/">
+<a class="brand" href="/ar/">
 <svg aria-hidden="true" class="mark" fill="none" height="29" viewbox="0 0 48 56" width="25"><path d="M16 50V8h14a13 13 0 0 1 0 26H16" stroke="var(--ink)" stroke-linecap="round" stroke-linejoin="round" stroke-width="7"></path><circle cx="25" cy="21" fill="var(--teal)" r="3.6"></circle></svg>
 <span class="wm">Preck<span class="o">o</span>n</span>
 </a>
 <div class="nav-links">
-<a data-i18n="nav.platform" href="/platform">Platform</a>
-<a data-i18n="nav.modules" href="/modules">Modules</a>
-<a data-i18n="nav.why" href="/why">Why us</a>
-<a class="active" data-i18n="nav.security" href="/security">Security</a>
-<a data-i18n="nav.pricing" href="/pricing">Pricing</a>
+<a data-i18n="nav.platform" href="/ar/platform">المنصة</a>
+<a data-i18n="nav.modules" href="/ar/modules">الوحدات</a>
+<a data-i18n="nav.why" href="/ar/why">لماذا نحن</a>
+<a class="active" data-i18n="nav.security" href="/ar/security">الأمان</a>
+<a data-i18n="nav.pricing" href="/ar/pricing">الأسعار</a>
 </div>
 <div class="nav-tools">
-<select aria-label="Language" class="lang-select" onchange="location.href=this.value"><option selected="" value="/security">EN</option><option value="/ar/security">العربية</option></select>
-<button aria-label="Toggle theme" class="theme-toggle" onclick="PK.toggleTheme()" type="button"><svg class="ic-moon" fill="none" height="17" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24" width="17"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg><svg class="ic-sun" fill="none" height="17" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24" width="17"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19"></path></svg></button>
+<select aria-label="اللغة" class="lang-select" onchange="location.href=this.value"><option value="/security">EN</option><option selected="" value="/ar/security">العربية</option></select>
+<button aria-label="تبديل المظهر" class="theme-toggle" onclick="PK.toggleTheme()" type="button"><svg class="ic-moon" fill="none" height="17" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24" width="17"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg><svg class="ic-sun" fill="none" height="17" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24" width="17"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19"></path></svg></button>
 </div>
-<a class="btn btn-primary" data-i18n="cta.demo" href="/demo">Book a demo</a>
+<a class="btn btn-primary" data-i18n="cta.demo" href="/ar/demo">احجز عرضًا توضيحيًا</a>
 </div>
 </nav>
 <!-- HERO -->
 <header class="hero">
 <div class="wrap">
-<span class="eyebrow">Security &amp; trust</span>
-<h1>Your tender documents never leave your control.</h1>
-<p class="sub">Preckon ingests some of the most sensitive documents a contractor holds — live bids, contracts, full design sets. Security isn't a page of fine print here; it's built into how every document is handled, from upload to audit.</p>
+<span class="eyebrow">الأمان والثقة</span>
+<h1>وثائق مناقصاتك لا تغادر سيطرتك أبدًا.</h1>
+<p class="sub">يستقبل Preckon بعضًا من أكثر المستندات حساسية لدى المقاول — عطاءات جارية وعقود ومجموعات تصميم كاملة. والأمان هنا ليس صفحة شروط مطبوعة بخط صغير؛ بل مدمج في طريقة التعامل مع كل مستند، من الرفع حتى التدقيق.</p>
 <div class="trust-chips">
-<span class="tc"><svg fill="none" height="13" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="13"><rect height="11" rx="2" width="16" x="4" y="10"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg> Encrypted in transit &amp; at rest</span>
-<span class="tc"><svg fill="none" height="13" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="13"><rect height="8" rx="1" width="8" x="3" y="3"></rect><rect height="8" rx="1" width="8" x="13" y="13"></rect></svg> Isolated per tenant</span>
-<span class="tc"><svg fill="none" height="13" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="13"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"></path></svg> Not used to train shared models</span>
-<span class="tc"><svg fill="none" height="13" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="13"><path d="M12 8v4l3 2"></path><circle cx="12" cy="12" r="9"></circle></svg> SOC 2 in progress</span>
+<span class="tc"><svg fill="none" height="13" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="13"><rect height="11" rx="2" width="16" x="4" y="10"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg> مشفّر أثناء النقل وفي حالة السكون</span>
+<span class="tc"><svg fill="none" height="13" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="13"><rect height="8" rx="1" width="8" x="3" y="3"></rect><rect height="8" rx="1" width="8" x="13" y="13"></rect></svg> معزول لكل عميل</span>
+<span class="tc"><svg fill="none" height="13" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="13"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"></path></svg> لا تُستخدم لتدريب نماذج مشتركة</span>
+<span class="tc"><svg fill="none" height="13" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="13"><path d="M12 8v4l3 2"></path><circle cx="12" cy="12" r="9"></circle></svg> SOC 2 قيد الإنجاز</span>
 </div>
 </div>
 </header>
@@ -241,45 +303,45 @@
 <section class="section" style="padding-top:34px;">
 <div class="wrap">
 <div class="reveal">
-<span class="kicker">The trust path</span>
-<h2 class="h2">What protects a document at every step.</h2>
-<p class="lede">Follow a drawing set from the moment it's uploaded. Each stage adds a control — encryption, isolation, independence, review, audit — before anything moves on.</p>
+<span class="kicker">مسار الثقة</span>
+<h2 class="h2">ما يحمي المستند في كل خطوة.</h2>
+<p class="lede">تابع مجموعة مخططات من لحظة رفعها. كل مرحلة تضيف ضابطًا — تشفير وعزل واستقلال ومراجعة وتدقيق — قبل أن ينتقل أي شيء.</p>
 </div>
 <div class="path reveal">
 <div class="pstep">
-<div class="pnum">STEP 01</div>
+<div class="pnum">الخطوة 01</div>
 <div class="iic"><svg fill="none" height="20" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="20"><path d="M12 15V3m0 0L8 7m4-4l4 4"></path><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"></path></svg></div>
 <div class="meta">TLS 1.2+</div>
-<h4>Upload</h4>
-<p>Documents are encrypted in transit the moment they leave your machine.</p>
+<h4>الرفع</h4>
+<p>تُشفَّر المستندات أثناء النقل لحظة مغادرتها جهازك.</p>
 </div>
 <div class="pstep">
-<div class="pnum">STEP 02</div>
+<div class="pnum">الخطوة 02</div>
 <div class="iic"><svg fill="none" height="20" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="20"><rect height="11" rx="2" width="16" x="4" y="10"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg></div>
-<div class="meta">RLS · ENCRYPTED AT REST</div>
-<h4>Tenant vault</h4>
-<p>Stored in your isolated tenant, separated at the database layer by row-level security.</p>
+<div class="meta">أمان على مستوى الصف · مشفّر في حالة السكون</div>
+<h4>خزانة العميل</h4>
+<p>تُخزَّن في نطاقك المعزول، مفصولة على طبقة قاعدة البيانات بالأمان على مستوى الصف.</p>
 </div>
 <div class="pstep">
-<div class="pnum">STEP 03</div>
+<div class="pnum">الخطوة 03</div>
 <div class="iic"><svg fill="none" height="20" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="20"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3"></path></svg></div>
-<div class="meta">PROVIDER-INDEPENDENT</div>
-<h4>Processing</h4>
-<p>The orchestrator routes tasks across providers, so no single vendor ever sees your whole project.</p>
+<div class="meta">مستقل عن المزوّدين</div>
+<h4>المعالجة</h4>
+<p>يوزّع المنسّق المهام عبر المزوّدين، فلا يرى مزوّد واحد مشروعك كاملًا أبدًا.</p>
 </div>
 <div class="pstep">
-<div class="pnum">STEP 04</div>
+<div class="pnum">الخطوة 04</div>
 <div class="iic"><svg fill="none" height="20" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="20"><circle cx="12" cy="8" r="4"></circle><path d="M4 21v-1a6 6 0 0 1 12 0v1"></path></svg></div>
-<div class="meta">HUMAN-IN-THE-LOOP</div>
-<h4>Review</h4>
-<p>Your team confirms or corrects every output. Nothing is costed or issued automatically.</p>
+<div class="meta">مراجعة بشرية</div>
+<h4>المراجعة</h4>
+<p>يؤكد فريقك أو يصحّح كل مخرج. ولا يُسعَّر شيء أو يُصدَر تلقائيًا.</p>
 </div>
 <div class="pstep">
-<div class="pnum">STEP 05</div>
+<div class="pnum">الخطوة 05</div>
 <div class="iic"><svg fill="none" height="20" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="20"><path d="M12 8v4l3 2"></path><circle cx="12" cy="12" r="9"></circle></svg></div>
-<div class="meta">IMMUTABLE</div>
-<h4>Audit</h4>
-<p>Every action is logged — who, what, when — so any number can be proven end to end.</p>
+<div class="meta">غير قابل للتعديل</div>
+<h4>التدقيق</h4>
+<p>كل إجراء يُسجَّل — من وماذا ومتى — ليتسنى إثبات أي رقم من البداية إلى النهاية.</p>
 </div>
 </div>
 </div>
@@ -288,16 +350,16 @@
 <section class="section" style="padding-top:10px;">
 <div class="wrap">
 <div class="reveal center" style="max-width:660px;">
-<span class="kicker">The pillars</span>
-<h2 class="h2">Six commitments behind that path.</h2>
+<span class="kicker">الركائز</span>
+<h2 class="h2">ستة التزامات وراء ذلك المسار.</h2>
 </div>
 <div class="pillars reveal">
-<div class="pcard"><span class="iic"><svg fill="none" height="20" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="20"><rect height="11" rx="2" width="16" x="4" y="10"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg></span><h4>Encrypted end to end</h4><p>TLS in transit and AES-256 at rest. Your documents are protected the moment they're uploaded and everywhere they sit.</p></div>
-<div class="pcard"><span class="iic"><svg fill="none" height="20" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="20"><rect height="8" rx="1" width="8" x="3" y="3"></rect><rect height="8" rx="1" width="8" x="13" y="13"></rect><path d="M11 7h6a2 2 0 0 1 2 2v4"></path></svg></span><h4>Isolated per tenant</h4><p>Row-level security separates every client at the database layer. One tenant's data is never visible to another.</p></div>
-<div class="pcard"><span class="iic"><svg fill="none" height="20" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="20"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"></path><path d="M9 12l2 2 4-4"></path></svg></span><h4>Never used to train shared models</h4><p>Your tenders and drawings are yours. Preckon does not use your documents to train models shared with anyone else.</p></div>
-<div class="pcard"><span class="iic"><svg fill="none" height="20" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="20"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3"></path></svg></span><h4>Provider-independent by design</h4><p>Work is routed across multiple AI providers, so no single vendor sees your whole project. Independence is a security posture, not just flexibility.</p></div>
-<div class="pcard"><span class="iic"><svg fill="none" height="20" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="20"><path d="M12 8v4l3 2"></path><circle cx="12" cy="12" r="9"></circle></svg></span><h4>Immutable audit spine</h4><p>Every action and change is recorded — who, what, when — so you can prove exactly how any number was produced.</p></div>
-<div class="pcard"><span class="iic"><svg fill="none" height="20" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="20"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg></span><h4>Human in the loop</h4><p>Nothing is costed or issued without a person confirming it. AI proposes; your team decides.</p></div>
+<div class="pcard"><span class="iic"><svg fill="none" height="20" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="20"><rect height="11" rx="2" width="16" x="4" y="10"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg></span><h4>مشفّر من البداية إلى النهاية</h4><p>TLS أثناء النقل وAES-256 في حالة السكون. مستنداتك محمية لحظة رفعها وفي كل مكان تستقر فيه.</p></div>
+<div class="pcard"><span class="iic"><svg fill="none" height="20" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="20"><rect height="8" rx="1" width="8" x="3" y="3"></rect><rect height="8" rx="1" width="8" x="13" y="13"></rect><path d="M11 7h6a2 2 0 0 1 2 2v4"></path></svg></span><h4>معزول لكل عميل</h4><p>الأمان على مستوى الصف يفصل كل عميل على طبقة قاعدة البيانات. بيانات عميل لا تكون مرئية لآخر أبدًا.</p></div>
+<div class="pcard"><span class="iic"><svg fill="none" height="20" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="20"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"></path><path d="M9 12l2 2 4-4"></path></svg></span><h4>لا تُستخدم أبدًا لتدريب نماذج مشتركة</h4><p>مناقصاتك ومخططاتك ملكك. ولا يستخدم Preckon مستنداتك لتدريب نماذج مشتركة مع أي جهة أخرى.</p></div>
+<div class="pcard"><span class="iic"><svg fill="none" height="20" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="20"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3"></path></svg></span><h4>مستقل عن المزوّدين بالتصميم</h4><p>يُوزَّع العمل عبر مزوّدي ذكاء اصطناعي متعددين، فلا يرى مزوّد واحد مشروعك كاملًا. والاستقلال موقف أمني، لا مجرد مرونة.</p></div>
+<div class="pcard"><span class="iic"><svg fill="none" height="20" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="20"><path d="M12 8v4l3 2"></path><circle cx="12" cy="12" r="9"></circle></svg></span><h4>عمود تدقيق غير قابل للتعديل</h4><p>كل إجراء وتغيير يُسجَّل — من وماذا ومتى — لتتمكن من إثبات كيفية إنتاج أي رقم بدقة.</p></div>
+<div class="pcard"><span class="iic"><svg fill="none" height="20" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="20"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg></span><h4>الإنسان في حلقة القرار</h4><p>لا يُسعَّر شيء أو يُصدَر دون تأكيد شخص. الذكاء الاصطناعي يقترح؛ وفريقك يقرر.</p></div>
 </div>
 </div>
 </section>
@@ -305,9 +367,9 @@
 <section class="section" style="padding-top:10px;">
 <div class="wrap">
 <div class="own reveal">
-<div class="k">Data ownership</div>
-<h3>Your data is yours. Full stop.</h3>
-<p>You own every document you upload and every output Preckon produces. Export it whenever you want, and have it deleted on request. We don't sell it, we don't share it, and we don't train shared models on it.</p>
+<div class="k">ملكية البيانات</div>
+<h3>بياناتك ملكك. نقطة.</h3>
+<p>أنت تملك كل مستند ترفعه وكل مخرج يُنتجه Preckon. صدّره متى شئت، واطلب حذفه متى شئت. لا نبيعه ولا نشاركه ولا ندرّب عليه نماذج مشتركة.</p>
 </div>
 </div>
 </section>
@@ -315,18 +377,18 @@
 <section class="section" style="padding-top:10px;">
 <div class="wrap">
 <div class="reveal center" style="max-width:660px;">
-<span class="kicker">Compliance &amp; posture</span>
-<h2 class="h2">Where we are, stated plainly.</h2>
-<p class="lede">We'd rather tell you exactly where things stand than imply a certificate we don't hold yet.</p>
+<span class="kicker">الامتثال والموقف</span>
+<h2 class="h2">أين نقف، بوضوح.</h2>
+<p class="lede">نفضّل أن نخبرك بالوضع تمامًا على أن نوحي بشهادة لا نملكها بعد.</p>
 </div>
 <div class="posture reveal">
-<div class="prow"><div class="pk">SOC 2</div><div class="pv">Type II underway; controls implemented, audit in progress. Report available under NDA when complete.</div><div class="ps prog">IN PROGRESS</div></div>
-<div class="prow"><div class="pk">Encryption</div><div class="pv">TLS 1.2+ in transit, AES-256 at rest.</div><div class="ps live">LIVE</div></div>
-<div class="prow"><div class="pk">Access control</div><div class="pv">SSO and role-based access control (RBAC); least-privilege by default.</div><div class="ps live">LIVE</div></div>
-<div class="prow"><div class="pk">Tenant isolation</div><div class="pv">Row-level security enforced at the database layer.</div><div class="ps live">LIVE</div></div>
-<div class="prow"><div class="pk">Audit logging</div><div class="pv">Immutable, per-tenant record of every action and change.</div><div class="ps live">LIVE</div></div>
-<div class="prow"><div class="pk">Data residency</div><div class="pv">Regional hosting options for enterprise agreements.</div><div class="ps prog">ENTERPRISE</div></div>
-<div class="prow"><div class="pk">Sub-processors</div><div class="pv">Provider-independent AI; documented sub-processor list available on request.</div><div class="ps live">LIVE</div></div>
+<div class="prow"><div class="pk">SOC 2</div><div class="pv">النوع الثاني جارٍ؛ الضوابط مُطبَّقة والتدقيق قيد التنفيذ. التقرير متاح باتفاقية عدم إفشاء عند اكتماله.</div><div class="ps prog">قيد الإنجاز</div></div>
+<div class="prow"><div class="pk">التشفير</div><div class="pv">TLS 1.2+ أثناء النقل، وAES-256 في حالة السكون.</div><div class="ps live">مباشر</div></div>
+<div class="prow"><div class="pk">التحكم في الوصول</div><div class="pv">الدخول الموحّد والتحكم في الوصول القائم على الأدوار (RBAC)؛ وأقل صلاحية افتراضيًا.</div><div class="ps live">مباشر</div></div>
+<div class="prow"><div class="pk">عزل العملاء</div><div class="pv">أمان على مستوى الصف مُطبَّق على طبقة قاعدة البيانات.</div><div class="ps live">مباشر</div></div>
+<div class="prow"><div class="pk">تسجيل التدقيق</div><div class="pv">سجل غير قابل للتعديل لكل عميل يوثّق كل إجراء وتغيير.</div><div class="ps live">مباشر</div></div>
+<div class="prow"><div class="pk">موقع تخزين البيانات</div><div class="pv">خيارات استضافة إقليمية لاتفاقيات المؤسسات.</div><div class="ps prog">مؤسسي</div></div>
+<div class="prow"><div class="pk">المعالجون الفرعيون</div><div class="pv">ذكاء اصطناعي مستقل عن المزوّدين؛ وقائمة موثّقة بالمعالجين الفرعيين متاحة عند الطلب.</div><div class="ps live">مباشر</div></div>
 </div>
 </div>
 </section>
@@ -334,25 +396,25 @@
 <section class="section" style="padding-top:10px;">
 <div class="wrap">
 <div class="reveal center" style="max-width:660px;">
-<span class="kicker">Security questions</span>
-<h2 class="h2">The ones your IT team will ask.</h2>
+<span class="kicker">أسئلة الأمان</span>
+<h2 class="h2">التي سيطرحها فريق تقنية المعلومات لديك.</h2>
 </div>
 <div class="faq reveal">
 <details open="">
-<summary>Do you train AI models on our data?<span aria-hidden="true" class="ic"><svg fill="none" height="18" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="18"><path d="M12 5v14M5 12h14"></path></svg></span></summary>
-<div class="a">No. Your documents are not used to train models shared with other customers. Any learning from your corrections stays within your own tenant and improves results on your projects only.</div>
+<summary>هل تدرّبون نماذج ذكاء اصطناعي على بياناتنا؟<span aria-hidden="true" class="ic"><svg fill="none" height="18" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="18"><path d="M12 5v14M5 12h14"></path></svg></span></summary>
+<div class="a">لا. لا تُستخدم مستنداتكم لتدريب نماذج مشتركة مع عملاء آخرين. وأي تعلّم من تصحيحاتكم يبقى داخل نطاقكم الخاص ويحسّن النتائج على مشاريعكم وحدها.</div>
 </details>
 <details>
-<summary>Where is our data stored, and who can access it?<span aria-hidden="true" class="ic"><svg fill="none" height="18" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="18"><path d="M12 5v14M5 12h14"></path></svg></span></summary>
-<div class="a">In your isolated tenant, encrypted at rest and separated by row-level security. Access is governed by SSO and role-based controls on a least-privilege basis, and every access is audit-logged. Regional residency options are available for enterprise agreements.</div>
+<summary>أين تُخزَّن بياناتنا، ومن يمكنه الوصول إليها؟<span aria-hidden="true" class="ic"><svg fill="none" height="18" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="18"><path d="M12 5v14M5 12h14"></path></svg></span></summary>
+<div class="a">في نطاقكم المعزول، مشفّرة في حالة السكون ومفصولة بالأمان على مستوى الصف. ويُحكَم الوصول بالدخول الموحّد وضوابط قائمة على الأدوار وفق مبدأ أقل صلاحية، ويُسجَّل كل وصول للتدقيق. وتتوفر خيارات تخزين إقليمية لاتفاقيات المؤسسات.</div>
 </details>
 <details>
-<summary>Which AI providers do you use?<span aria-hidden="true" class="ic"><svg fill="none" height="18" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="18"><path d="M12 5v14M5 12h14"></path></svg></span></summary>
-<div class="a">Preckon is provider-independent. The orchestrator routes each task to the appropriate model, so no single vendor sees your whole project. A documented sub-processor list is available on request.</div>
+<summary>ما مزوّدو الذكاء الاصطناعي الذين تستخدمونهم؟<span aria-hidden="true" class="ic"><svg fill="none" height="18" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="18"><path d="M12 5v14M5 12h14"></path></svg></span></summary>
+<div class="a">Preckon مستقل عن المزوّدين. يوجّه المنسّق كل مهمة إلى النموذج المناسب، فلا يرى مزوّد واحد مشروعكم كاملًا. وتتوفر قائمة موثّقة بالمعالجين الفرعيين عند الطلب.</div>
 </details>
 <details>
-<summary>What happens to our data if we leave?<span aria-hidden="true" class="ic"><svg fill="none" height="18" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="18"><path d="M12 5v14M5 12h14"></path></svg></span></summary>
-<div class="a">You can export your documents and outputs at any time, and request full deletion of your data. It's yours to take with you.</div>
+<summary>ماذا يحدث لبياناتنا إذا غادرنا؟<span aria-hidden="true" class="ic"><svg fill="none" height="18" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="18"><path d="M12 5v14M5 12h14"></path></svg></span></summary>
+<div class="a">يمكنكم تصدير مستنداتكم ومخرجاتكم في أي وقت، وطلب حذف بياناتكم بالكامل. فهي ملككم تأخذونها معكم.</div>
 </details>
 </div>
 </div>
@@ -361,11 +423,11 @@
 <section style="padding:20px 0 64px;">
 <div class="wrap">
 <div class="finalcta reveal">
-<h3>Bring your security team to the first call.</h3>
-<p>We'll walk your IT and procurement people through the controls, the sub-processor list, and the SOC 2 timeline.</p>
+<h3>أحضر فريق الأمان لديك إلى المكالمة الأولى.</h3>
+<p>سنشرح لفريقي تقنية المعلومات والمشتريات لديك الضوابط وقائمة المعالجين الفرعيين والجدول الزمني لشهادة SOC 2.</p>
 <div class="btns">
-<a class="btn btn-primary" href="/demo">Book a demo</a>
-<a class="btn btn-secondary" href="/demo">Request the security overview</a>
+<a class="btn btn-primary" href="/ar/demo">احجز عرضًا توضيحيًا</a>
+<a class="btn btn-secondary" href="/ar/demo">اطلب نظرة عامة عن الأمان</a>
 </div>
 </div>
 </div>
@@ -375,16 +437,16 @@
 <div class="wrap">
 <div class="top">
 <div>
-<a class="brand" href="/"><svg aria-hidden="true" class="mark" fill="none" height="29" viewbox="0 0 48 56" width="25"><path d="M16 50V8h14a13 13 0 0 1 0 26H16" stroke="var(--ink)" stroke-linecap="round" stroke-linejoin="round" stroke-width="7"></path><circle cx="25" cy="21" fill="var(--teal)" r="3.6"></circle></svg><span class="wm">Preck<span class="o">o</span>n</span></a>
-<p class="blurb">From drawings to a defensible estimate. AI-native preconstruction, reviewed by your team.</p>
+<a class="brand" href="/ar/"><svg aria-hidden="true" class="mark" fill="none" height="29" viewbox="0 0 48 56" width="25"><path d="M16 50V8h14a13 13 0 0 1 0 26H16" stroke="var(--ink)" stroke-linecap="round" stroke-linejoin="round" stroke-width="7"></path><circle cx="25" cy="21" fill="var(--teal)" r="3.6"></circle></svg><span class="wm">Preck<span class="o">o</span>n</span></a>
+<p class="blurb">من المخططات إلى تقدير يمكن الدفاع عنه. ما قبل الإنشاء بالذكاء الاصطناعي، بمراجعة فريقك.</p>
 </div>
-<div class="col"><h6>Platform</h6><a href="/platform">Architecture</a><a href="/modules">Modules</a><a href="/platform#foundation">Foundation</a><a href="#">Security</a></div>
-<div class="col"><h6>Company</h6><a href="/pricing">Pricing</a><a href="/#partners">Design partners</a><a href="/why">Why us</a><a href="/demo">Contact</a></div>
-<div class="col"><h6>Get started</h6><a href="/demo">Book a demo</a><a href="/#partners">Design Partner Program</a><a href="/#how">Watch overview</a></div>
+<div class="col"><h6>المنصة</h6><a href="/ar/platform">البنية</a><a href="/ar/modules">الوحدات</a><a href="/ar/platform#foundation">الأساس</a><a href="#">الأمان</a></div>
+<div class="col"><h6>الشركة</h6><a href="/ar/pricing">الأسعار</a><a href="/ar/#partners">شركاء التصميم</a><a href="/ar/why">لماذا نحن</a><a href="/ar/demo">تواصل معنا</a></div>
+<div class="col"><h6>ابدأ الآن</h6><a href="/ar/demo">احجز عرضًا توضيحيًا</a><a href="/ar/#partners">برنامج شركاء التصميم</a><a href="/ar/#how">شاهد النظرة العامة</a></div>
 </div>
 <div class="base">
-<span class="k">© 2026 TechSME Inc. · Mississauga, ON</span>
-<span class="k">SHEET <b>SECURITY</b> · BUILT ON <b>DS-01</b></span>
+<span class="k">© 2026 TechSME Inc. · ميسيسوجا، أونتاريو</span>
+<span class="k">لوحة <b>الأمان</b> · مبني على <b>DS-01</b></span>
 </div>
 </div>
 </footer>

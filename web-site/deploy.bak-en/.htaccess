@@ -39,19 +39,6 @@ AddDefaultCharset UTF-8
 
   # ---------- 4. Clean URLs -> actual files (internal) ----------
   RewriteRule ^(platform|modules|why|security|pricing|about|demo)/?$ preckon-$1.html [L]
-
-  # ---------- 5. Arabic section (/ar) ----------
-  # Same three legacy-URL redirects, then the internal rewrite.
-  RewriteCond %{THE_REQUEST} \s/+ar/+index\.html[\s?] [NC]
-  RewriteRule ^ /ar/ [R=301,L]
-
-  RewriteCond %{THE_REQUEST} \s/+ar/+preckon-(platform|modules|why|security|pricing|about|demo)\.html[\s?] [NC]
-  RewriteRule ^ /ar/%1 [R=301,L]
-
-  RewriteCond %{THE_REQUEST} \s/+ar/+(platform|modules|why|security|pricing|about|demo)/[\s?] [NC]
-  RewriteRule ^ /ar/%1 [R=301,L]
-
-  RewriteRule ^ar/(platform|modules|why|security|pricing|about|demo)/?$ ar/preckon-$1.html [L]
 </IfModule>
 
 # ---------- Compression ----------

@@ -1,27 +1,27 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html dir="rtl" lang="ar">
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Book a demo — Preckon</title>
-<meta content="Bring one drawing set and watch it become a costed, traceable BOQ — live. Book a Preckon demo, or reach sales, support and the Design Partner Program." name="description"/>
+<title>احجز عرضًا توضيحيًا — Preckon</title>
+<meta content="أحضر مجموعة مخططات واحدة وشاهدها تصبح جدول كميات مُسعّرًا وقابلًا للتتبع — مباشرة. احجز عرضًا توضيحيًا لـPreckon، أو تواصل مع المبيعات والدعم وبرنامج شركاء التصميم." name="description"/>
 <meta content="#0B1B2B" name="theme-color"/>
 <link rel="alternate" hreflang="en" href="https://www.preckon.com/demo"/>
 <link rel="alternate" hreflang="ar" href="https://www.preckon.com/ar/demo"/>
 <link rel="alternate" hreflang="x-default" href="https://www.preckon.com/demo"/>
-<link href="https://www.preckon.com/demo" rel="canonical"/>
+<link href="https://www.preckon.com/ar/demo" rel="canonical"/>
 <meta content="website" property="og:type"/>
 <meta content="Preckon" property="og:site_name"/>
-<meta content="en_US" property="og:locale"/>
-<meta content="https://www.preckon.com/demo" property="og:url"/>
-<meta content="Book a demo — Preckon" property="og:title"/>
-<meta content="Bring one drawing set and watch it become a costed, traceable BOQ — live. Book a Preckon demo, or reach sales, support and the Design Partner Program." property="og:description"/>
+<meta content="ar_SA" property="og:locale"/>
+<meta content="https://www.preckon.com/ar/demo" property="og:url"/>
+<meta content="احجز عرضًا توضيحيًا — Preckon" property="og:title"/>
+<meta content="أحضر مجموعة مخططات واحدة وشاهدها تصبح جدول كميات مُسعّرًا وقابلًا للتتبع — مباشرة. احجز عرضًا توضيحيًا لـPreckon، أو تواصل مع المبيعات والدعم وبرنامج شركاء التصميم." property="og:description"/>
 <meta content="https://www.preckon.com/og-image.png" property="og:image"/>
 <meta content="1200" property="og:image:width"/>
 <meta content="630" property="og:image:height"/>
 <meta content="summary_large_image" name="twitter:card"/>
-<meta content="Book a demo — Preckon" name="twitter:title"/>
-<meta content="Bring one drawing set and watch it become a costed, traceable BOQ — live. Book a Preckon demo, or reach sales, support and the Design Partner Program." name="twitter:description"/>
+<meta content="احجز عرضًا توضيحيًا — Preckon" name="twitter:title"/>
+<meta content="أحضر مجموعة مخططات واحدة وشاهدها تصبح جدول كميات مُسعّرًا وقابلًا للتتبع — مباشرة. احجز عرضًا توضيحيًا لـPreckon، أو تواصل مع المبيعات والدعم وبرنامج شركاء التصميم." name="twitter:description"/>
 <meta content="https://www.preckon.com/og-image.png" name="twitter:image"/>
 <link href="/favicon.svg" rel="icon" type="image/svg+xml"/>
 <link href="/apple-touch-icon.png" rel="apple-touch-icon"/>
@@ -183,92 +183,154 @@
   [data-theme="dark"] .theme-toggle .ic-sun{display:block;}
   [dir="rtl"] .eyebrow::before{margin-left:0;}
 </style>
+<style>
+/* ============================================================
+   AR — RTL layout + Arabic typography overrides for DS-01
+   Loaded only on the Arabic pages. The Latin design is untouched.
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap');
+
+:root{
+  /* Latin-first stacks keep codes (CONC.GR-30, C30/37) in JetBrains Mono
+     while Arabic glyphs fall through to the Arabic face automatically. */
+  --font-display:'IBM Plex Sans Arabic','General Sans','Inter',system-ui,sans-serif;
+  --font-body:'IBM Plex Sans Arabic','Inter',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono','IBM Plex Sans Arabic',ui-monospace,monospace;
+}
+
+/* Arabic script is cursive — letter-spacing severs the glyph joins.
+   This must win everywhere, including the tracked mono labels. */
+*,*::before,*::after{ letter-spacing:normal !important; }
+
+/* Arabic needs more leading than Latin at the same size. */
+body{ line-height:1.75; }
+h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !important; }
+.hero h1{ font-size:clamp(30px,4.6vw,48px); }
+.hero h1 .hl{ white-space:normal; }
+
+/* ---------- mirrored: left/right-anchored decoration ---------- */
+.mod .edge{ left:auto; right:0; }
+.step.review .badge{ right:auto; left:14px; }
+.tier .flag{ left:auto; right:28px; }
+.recog .tag{ left:auto; right:6px; }
+.demo-draw .pcap{ left:auto; right:16px; }
+.demo-chrome .live{ margin-left:0; margin-right:auto; }
+.demo-draw{ border-right:0; border-left:1px solid var(--hairline); }
+.stats-band .sb{ border-right:0; border-left:1px solid var(--hairline); }
+.stats-band .sb:last-child{ border-left:0; }
+.stats-band .sb:first-child{ border-left:1px solid var(--hairline); }
+
+/* the flow pulse must travel right-to-left */
+@keyframes flow{
+  0%{ opacity:0; transform:translate(130%,-50%); }
+  40%{ opacity:1; }
+  100%{ opacity:0; transform:translate(-40%,-50%); }
+}
+.btn-ghost:hover svg{ transform:translateX(-3px); }
+
+/* the measured-line motif reads the same mirrored, but the eyebrow rule
+   sits at the start of the inline-flex row, which dir already flips. */
+.eyebrow::before{ margin-left:0; margin-right:0; }
+
+/* ---------- responsive breakpoints re-applied for RTL ---------- */
+@media(max-width:820px){
+  .stats-band .sb:nth-child(2){ border-left:0; }
+  .stats-band .sb:nth-child(1),.stats-band .sb:nth-child(2){ border-bottom:1px solid var(--hairline); }
+}
+@media(max-width:460px){
+  .stats-band .sb{ border-left:0; border-bottom:1px solid var(--hairline); }
+  .stats-band .sb:last-child{ border-bottom:0; }
+}
+
+/* Latin runs (product names, codes, emails) inside Arabic sentences */
+.wm,.brand .wm{ direction:ltr; unicode-bidi:isolate; }
+</style>
 <script>
   if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){ document.documentElement.classList.add('has-anim'); }
 </script>
 <!-- NAV -->
 <nav class="nav">
 <div class="wrap">
-<a class="brand" href="/">
+<a class="brand" href="/ar/">
 <svg aria-hidden="true" class="mark" fill="none" height="29" viewbox="0 0 48 56" width="25"><path d="M16 50V8h14a13 13 0 0 1 0 26H16" stroke="var(--ink)" stroke-linecap="round" stroke-linejoin="round" stroke-width="7"></path><circle cx="25" cy="21" fill="var(--teal)" r="3.6"></circle></svg>
 <span class="wm">Preck<span class="o">o</span>n</span>
 </a>
 <div class="nav-links">
-<a data-i18n="nav.platform" href="/platform">Platform</a>
-<a data-i18n="nav.modules" href="/modules">Modules</a>
-<a data-i18n="nav.why" href="/why">Why us</a>
-<a data-i18n="nav.security" href="/security">Security</a>
-<a data-i18n="nav.pricing" href="/pricing">Pricing</a>
+<a data-i18n="nav.platform" href="/ar/platform">المنصة</a>
+<a data-i18n="nav.modules" href="/ar/modules">الوحدات</a>
+<a data-i18n="nav.why" href="/ar/why">لماذا نحن</a>
+<a data-i18n="nav.security" href="/ar/security">الأمان</a>
+<a data-i18n="nav.pricing" href="/ar/pricing">الأسعار</a>
 </div>
 <div class="nav-tools">
-<select aria-label="Language" class="lang-select" onchange="location.href=this.value"><option selected="" value="/demo">EN</option><option value="/ar/demo">العربية</option></select>
-<button aria-label="Toggle theme" class="theme-toggle" onclick="PK.toggleTheme()" type="button"><svg class="ic-moon" fill="none" height="17" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24" width="17"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg><svg class="ic-sun" fill="none" height="17" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24" width="17"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19"></path></svg></button>
+<select aria-label="اللغة" class="lang-select" onchange="location.href=this.value"><option value="/demo">EN</option><option selected="" value="/ar/demo">العربية</option></select>
+<button aria-label="تبديل المظهر" class="theme-toggle" onclick="PK.toggleTheme()" type="button"><svg class="ic-moon" fill="none" height="17" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24" width="17"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg><svg class="ic-sun" fill="none" height="17" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24" width="17"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19"></path></svg></button>
 </div>
-<a class="btn btn-primary" href="#form">Book a demo</a>
+<a class="btn btn-primary" href="#form">احجز عرضًا توضيحيًا</a>
 </div>
 </nav>
 <!-- SPLIT -->
 <header class="wrap">
 <div class="split">
 <div class="reveal">
-<span class="eyebrow">Book a demo</span>
-<h1>See a real tender become a <span class="hl">BOQ.</span></h1>
-<p class="sub">Bring one drawing set. We'll run it through the whole chain — documents to a costed, traceable bill of quantities — live on the call. No slides.</p>
+<span class="eyebrow">احجز عرضًا توضيحيًا</span>
+<h1>شاهد مناقصة حقيقية تتحول إلى <span class="hl">جدول كميات.</span></h1>
+<p class="sub">أحضر مجموعة مخططات واحدة. وسنُمرّرها عبر السلسلة كاملة — من المستندات إلى جدول كميات مُسعّر وقابل للتتبع — مباشرة في المكالمة. بلا شرائح عرض.</p>
 <ul class="expect">
-<li><span class="ei"><svg fill="none" height="16" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="16"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4l3 2"></path></svg></span><div><b>About 30 minutes</b><span>Enough to see the full chain run end to end.</span></div></li>
-<li><span class="ei"><svg fill="none" height="16" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="16"><path d="M3 3h18v18H3z"></path><path d="M3 9h18M9 3v18"></path></svg></span><div><b>Bring your own drawing set</b><span>We work on a real project of yours, not a canned demo.</span></div></li>
-<li><span class="ei"><svg fill="none" height="16" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="16"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"></path></svg></span><div><b>Security team welcome</b><span>We'll answer IT and procurement questions on the spot.</span></div></li>
+<li><span class="ei"><svg fill="none" height="16" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="16"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4l3 2"></path></svg></span><div><b>نحو 30 دقيقة</b><span>تكفي لرؤية السلسلة كاملة تعمل من البداية إلى النهاية.</span></div></li>
+<li><span class="ei"><svg fill="none" height="16" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="16"><path d="M3 3h18v18H3z"></path><path d="M3 9h18M9 3v18"></path></svg></span><div><b>أحضر مجموعة مخططاتك</b><span>نعمل على مشروع حقيقي لك، لا على عرض جاهز.</span></div></li>
+<li><span class="ei"><svg fill="none" height="16" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="16"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"></path></svg></span><div><b>فريق الأمان مرحّب به</b><span>سنجيب عن أسئلة تقنية المعلومات والمشتريات على الفور.</span></div></li>
 </ul>
 <div class="assure">
 <svg fill="none" height="15" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="15"><rect height="11" rx="2" width="16" x="4" y="10"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
-        Your documents stay yours — isolated, encrypted, never used to train shared models.
+        مستنداتك تبقى ملكك — معزولة ومشفّرة ولا تُستخدم أبدًا لتدريب نماذج مشتركة.
       </div>
 </div>
 <!-- FORM -->
 <div class="formcard reveal" id="form">
 <div class="formbody" id="formbody">
-<h2 class="fhead">Request your demo</h2>
-<p class="fsub">Tell us a little about your team and we'll be in touch within one business day.</p>
+<h2 class="fhead">اطلب عرضك التوضيحي</h2>
+<p class="fsub">أخبرنا قليلًا عن فريقك وسنتواصل معك خلال يوم عمل واحد.</p>
 <form id="demoform" novalidate="">
 <div class="frow">
-<div class="field"><label for="name">Full name <span class="req">*</span></label><input autocomplete="name" id="name" name="name" placeholder="Jordan Mensah" type="text"/><div class="msg">Please enter your name.</div></div>
-<div class="field"><label for="company">Company <span class="req">*</span></label><input autocomplete="organization" id="company" name="company" placeholder="Apex Constructors" type="text"/><div class="msg">Please enter your company.</div></div>
+<div class="field"><label for="name">الاسم الكامل <span class="req">*</span></label><input autocomplete="name" id="name" name="name" placeholder="أحمد المنصوري" type="text"/><div class="msg">يرجى إدخال اسمك.</div></div>
+<div class="field"><label for="company">الشركة <span class="req">*</span></label><input autocomplete="organization" id="company" name="company" placeholder="شركة الذروة للمقاولات" type="text"/><div class="msg">يرجى إدخال اسم شركتك.</div></div>
 </div>
-<div class="field full"><label for="email">Work email <span class="req">*</span></label><input autocomplete="email" id="email" name="email" placeholder="jordan@apex.build" type="email"/><div class="msg">Please enter a valid work email.</div></div>
+<div class="field full"><label for="email">بريد العمل الإلكتروني <span class="req">*</span></label><input autocomplete="email" id="email" name="email" placeholder="ahmed@apex.build" type="email"/><div class="msg">يرجى إدخال بريد عمل إلكتروني صالح.</div></div>
 <div class="frow">
-<div class="field"><label for="role">Your role</label>
+<div class="field"><label for="role">دورك الوظيفي</label>
 <select id="role" name="role">
-<option value="">Select…</option>
-<option>Estimator</option>
-<option>Preconstruction lead</option>
-<option>Quantity surveyor</option>
-<option>Owner / Director</option>
-<option>Procurement</option>
-<option>Other</option>
+<option value="">اختر…</option>
+<option>مُقدِّر تكاليف</option>
+<option>مسؤول ما قبل الإنشاء</option>
+<option>مسّاح كميات</option>
+<option>مالك / مدير</option>
+<option>المشتريات</option>
+<option>أخرى</option>
 </select>
 </div>
-<div class="field"><label for="bids">Bids per month</label>
+<div class="field"><label for="bids">عدد العطاءات شهريًا</label>
 <select id="bids" name="bids">
-<option value="">Select…</option>
+<option value="">اختر…</option>
 <option>1–5</option>
 <option>6–20</option>
 <option>20+</option>
-<option>Not sure yet</option>
+<option>غير محدد بعد</option>
 </select>
 </div>
 </div>
-<div class="field full"><label for="notes">Anything specific you want to see?</label><textarea id="notes" name="notes" placeholder="e.g. concrete-heavy project, our method of measurement, integration questions…"></textarea></div>
-<p class="consent">By submitting, you agree to be contacted about Preckon. We don't share your details. See our <a href="#">privacy notice</a>.</p>
-<button class="btn btn-primary submit" type="submit">Request your demo
+<div class="field full"><label for="notes">هل هناك شيء محدد تود رؤيته؟</label><textarea id="notes" name="notes" placeholder="مثال: مشروع كثيف الخرسانة، طريقة القياس لدينا، أسئلة عن التكامل…"></textarea></div>
+<p class="consent">بإرسالك النموذج، توافق على التواصل معك بخصوص Preckon. ولا نشارك بياناتك. اطّلع على <a href="#">إشعار الخصوصية</a>.</p>
+<button class="btn btn-primary submit" type="submit">اطلب عرضك التوضيحي
             <svg fill="none" height="16" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="16"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
 </button>
 </form>
 </div>
 <div aria-live="polite" class="success" id="success" role="status">
 <div class="tick"><svg fill="none" height="28" stroke="currentColor" stroke-width="2.4" viewbox="0 0 24 24" width="28"><path d="M5 12l4 4 10-10"></path></svg></div>
-<h3>Demo requested</h3>
-<p>Thanks — we'll reach out within one business day to find a time. Have a drawing set ready and we'll run it live.</p>
-<div class="ref" id="refline">REF · PRECKON-DEMO</div>
+<h3>تم طلب العرض التوضيحي</h3>
+<p>شكرًا لك — سنتواصل معك خلال يوم عمل واحد لتحديد موعد. جهّز مجموعة مخططات وسنشغّلها مباشرة.</p>
+<div class="ref" id="refline">مرجع · PRECKON-DEMO</div>
 </div>
 </div>
 </div>
@@ -277,27 +339,27 @@
 <section class="routes-sec">
 <div class="wrap">
 <div class="reveal">
-<span class="kicker">Other ways to reach us</span>
+<span class="kicker">طرق أخرى للتواصل معنا</span>
 </div>
 <div class="routes reveal">
 <div class="route">
 <span class="iic"><svg fill="none" height="18" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="18"><path d="M4 4h16v16H4z"></path><path d="m4 6 8 6 8-6"></path></svg></span>
-<h4>Sales &amp; demos</h4><p>Pricing, procurement, and enterprise questions.</p>
+<h4>المبيعات والعروض التوضيحية</h4><p>أسئلة الأسعار والمشتريات والمؤسسات.</p>
 <a href="mailto:sales@preckon.com">sales@preckon.com</a>
 </div>
 <div class="route">
 <span class="iic"><svg fill="none" height="18" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="18"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg></span>
-<h4>Support</h4><p>Already using Preckon and need a hand.</p>
+<h4>الدعم</h4><p>تستخدم Preckon بالفعل وتحتاج مساعدة.</p>
 <a href="mailto:support@preckon.com">support@preckon.com</a>
 </div>
 <div class="route">
 <span class="iic"><svg fill="none" height="18" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="18"><circle cx="9" cy="8" r="3"></circle><path d="M3 20v-1a5 5 0 0 1 10 0v1"></path><path d="M16 3.1a3 3 0 0 1 0 5.8M21 20v-1a5 5 0 0 0-3.5-4.8"></path></svg></span>
-<h4>Design partners</h4><p>Run real bids and shape the roadmap.</p>
-<a href="/#partners">Apply to the program →</a>
+<h4>شركاء التصميم</h4><p>شغّل عطاءات حقيقية وشكّل خارطة الطريق.</p>
+<a href="/ar/#partners">قدّم للبرنامج ←</a>
 </div>
 <div class="route">
 <span class="iic"><svg fill="none" height="18" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="18"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"></path></svg></span>
-<h4>Everything else</h4><p>General enquiries and partnerships.</p>
+<h4>كل ما عدا ذلك</h4><p>الاستفسارات العامة والشراكات.</p>
 <a href="mailto:hello@preckon.com">hello@preckon.com</a>
 </div>
 </div>
@@ -308,16 +370,16 @@
 <div class="wrap">
 <div class="top">
 <div>
-<a class="brand" href="/"><svg aria-hidden="true" class="mark" fill="none" height="29" viewbox="0 0 48 56" width="25"><path d="M16 50V8h14a13 13 0 0 1 0 26H16" stroke="var(--ink)" stroke-linecap="round" stroke-linejoin="round" stroke-width="7"></path><circle cx="25" cy="21" fill="var(--teal)" r="3.6"></circle></svg><span class="wm">Preck<span class="o">o</span>n</span></a>
-<p class="blurb">From drawings to a defensible estimate. AI-native preconstruction, reviewed by your team.</p>
+<a class="brand" href="/ar/"><svg aria-hidden="true" class="mark" fill="none" height="29" viewbox="0 0 48 56" width="25"><path d="M16 50V8h14a13 13 0 0 1 0 26H16" stroke="var(--ink)" stroke-linecap="round" stroke-linejoin="round" stroke-width="7"></path><circle cx="25" cy="21" fill="var(--teal)" r="3.6"></circle></svg><span class="wm">Preck<span class="o">o</span>n</span></a>
+<p class="blurb">من المخططات إلى تقدير يمكن الدفاع عنه. ما قبل الإنشاء بالذكاء الاصطناعي، بمراجعة فريقك.</p>
 </div>
-<div class="col"><h6>Platform</h6><a href="/platform">Architecture</a><a href="/modules">Modules</a><a href="/platform#foundation">Foundation</a><a href="/security">Security</a></div>
-<div class="col"><h6>Company</h6><a href="/about">About</a><a href="/pricing">Pricing</a><a href="/why">Why us</a><a href="/#partners">Design partners</a></div>
-<div class="col"><h6>Get started</h6><a href="#form">Book a demo</a><a href="/#partners">Design Partner Program</a><a href="/#how">Watch overview</a></div>
+<div class="col"><h6>المنصة</h6><a href="/ar/platform">البنية</a><a href="/ar/modules">الوحدات</a><a href="/ar/platform#foundation">الأساس</a><a href="/ar/security">الأمان</a></div>
+<div class="col"><h6>الشركة</h6><a href="/ar/about">عن Preckon</a><a href="/ar/pricing">الأسعار</a><a href="/ar/why">لماذا نحن</a><a href="/ar/#partners">شركاء التصميم</a></div>
+<div class="col"><h6>ابدأ الآن</h6><a href="#form">احجز عرضًا توضيحيًا</a><a href="/ar/#partners">برنامج شركاء التصميم</a><a href="/ar/#how">شاهد النظرة العامة</a></div>
 </div>
 <div class="base">
-<span class="k">© 2026 TechSME Inc. · Mississauga, ON</span>
-<span class="k">SHEET <b>DEMO</b> · BUILT ON <b>DS-01</b></span>
+<span class="k">© 2026 TechSME Inc. · ميسيسوجا، أونتاريو</span>
+<span class="k">لوحة <b>عرض توضيحي</b> · مبني على <b>DS-01</b></span>
 </div>
 </div>
 </footer>
@@ -344,7 +406,7 @@
 
     // success
     const ref = 'PRECKON-DEMO-' + Math.random().toString(36).slice(2,7).toUpperCase();
-    document.getElementById('refline').textContent = 'REF · ' + ref;
+    document.getElementById('refline').textContent = 'مرجع · ' + ref;
     document.getElementById('formbody').classList.add('hide');
     const s = document.getElementById('success'); s.classList.add('on');
     document.getElementById('form').scrollIntoView({behavior:'smooth', block:'center'});

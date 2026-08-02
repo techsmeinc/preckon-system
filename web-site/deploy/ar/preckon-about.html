@@ -1,27 +1,27 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html dir="rtl" lang="ar">
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>About — Preckon</title>
-<meta content="Preckon is rebuilding the front of construction — making preconstruction fast, defensible and open to everyone who prices the work. Built by TechSME Inc. in Mississauga, Ontario." name="description"/>
+<title>عن Preckon</title>
+<meta content="يُعيد Preckon بناء مقدّمة قطاع الإنشاء — ليجعل ما قبل الإنشاء سريعًا ويمكن الدفاع عنه ومتاحًا لكل من يُسعّر العمل. من تطوير TechSME Inc. في ميسيسوجا، أونتاريو." name="description"/>
 <meta content="#0B1B2B" name="theme-color"/>
 <link rel="alternate" hreflang="en" href="https://www.preckon.com/about"/>
 <link rel="alternate" hreflang="ar" href="https://www.preckon.com/ar/about"/>
 <link rel="alternate" hreflang="x-default" href="https://www.preckon.com/about"/>
-<link href="https://www.preckon.com/about" rel="canonical"/>
+<link href="https://www.preckon.com/ar/about" rel="canonical"/>
 <meta content="website" property="og:type"/>
 <meta content="Preckon" property="og:site_name"/>
-<meta content="en_US" property="og:locale"/>
-<meta content="https://www.preckon.com/about" property="og:url"/>
-<meta content="About — Preckon" property="og:title"/>
-<meta content="Preckon is rebuilding the front of construction — making preconstruction fast, defensible and open to everyone who prices the work. Built by TechSME Inc. in Mississauga, Ontario." property="og:description"/>
+<meta content="ar_SA" property="og:locale"/>
+<meta content="https://www.preckon.com/ar/about" property="og:url"/>
+<meta content="عن Preckon" property="og:title"/>
+<meta content="يُعيد Preckon بناء مقدّمة قطاع الإنشاء — ليجعل ما قبل الإنشاء سريعًا ويمكن الدفاع عنه ومتاحًا لكل من يُسعّر العمل. من تطوير TechSME Inc. في ميسيسوجا، أونتاريو." property="og:description"/>
 <meta content="https://www.preckon.com/og-image.png" property="og:image"/>
 <meta content="1200" property="og:image:width"/>
 <meta content="630" property="og:image:height"/>
 <meta content="summary_large_image" name="twitter:card"/>
-<meta content="About — Preckon" name="twitter:title"/>
-<meta content="Preckon is rebuilding the front of construction — making preconstruction fast, defensible and open to everyone who prices the work. Built by TechSME Inc. in Mississauga, Ontario." name="twitter:description"/>
+<meta content="عن Preckon" name="twitter:title"/>
+<meta content="يُعيد Preckon بناء مقدّمة قطاع الإنشاء — ليجعل ما قبل الإنشاء سريعًا ويمكن الدفاع عنه ومتاحًا لكل من يُسعّر العمل. من تطوير TechSME Inc. في ميسيسوجا، أونتاريو." name="twitter:description"/>
 <meta content="https://www.preckon.com/og-image.png" name="twitter:image"/>
 <link href="/favicon.svg" rel="icon" type="image/svg+xml"/>
 <link href="/apple-touch-icon.png" rel="apple-touch-icon"/>
@@ -206,36 +206,98 @@
   [data-theme="dark"] .theme-toggle .ic-sun{display:block;}
   [dir="rtl"] .eyebrow::before{margin-left:0;}
 </style>
+<style>
+/* ============================================================
+   AR — RTL layout + Arabic typography overrides for DS-01
+   Loaded only on the Arabic pages. The Latin design is untouched.
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap');
+
+:root{
+  /* Latin-first stacks keep codes (CONC.GR-30, C30/37) in JetBrains Mono
+     while Arabic glyphs fall through to the Arabic face automatically. */
+  --font-display:'IBM Plex Sans Arabic','General Sans','Inter',system-ui,sans-serif;
+  --font-body:'IBM Plex Sans Arabic','Inter',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono','IBM Plex Sans Arabic',ui-monospace,monospace;
+}
+
+/* Arabic script is cursive — letter-spacing severs the glyph joins.
+   This must win everywhere, including the tracked mono labels. */
+*,*::before,*::after{ letter-spacing:normal !important; }
+
+/* Arabic needs more leading than Latin at the same size. */
+body{ line-height:1.75; }
+h1,h2,h3,h4,h5,h6,.h2,.hero h1,.wedge,.finalcta h3,.dp h3{ line-height:1.35 !important; }
+.hero h1{ font-size:clamp(30px,4.6vw,48px); }
+.hero h1 .hl{ white-space:normal; }
+
+/* ---------- mirrored: left/right-anchored decoration ---------- */
+.mod .edge{ left:auto; right:0; }
+.step.review .badge{ right:auto; left:14px; }
+.tier .flag{ left:auto; right:28px; }
+.recog .tag{ left:auto; right:6px; }
+.demo-draw .pcap{ left:auto; right:16px; }
+.demo-chrome .live{ margin-left:0; margin-right:auto; }
+.demo-draw{ border-right:0; border-left:1px solid var(--hairline); }
+.stats-band .sb{ border-right:0; border-left:1px solid var(--hairline); }
+.stats-band .sb:last-child{ border-left:0; }
+.stats-band .sb:first-child{ border-left:1px solid var(--hairline); }
+
+/* the flow pulse must travel right-to-left */
+@keyframes flow{
+  0%{ opacity:0; transform:translate(130%,-50%); }
+  40%{ opacity:1; }
+  100%{ opacity:0; transform:translate(-40%,-50%); }
+}
+.btn-ghost:hover svg{ transform:translateX(-3px); }
+
+/* the measured-line motif reads the same mirrored, but the eyebrow rule
+   sits at the start of the inline-flex row, which dir already flips. */
+.eyebrow::before{ margin-left:0; margin-right:0; }
+
+/* ---------- responsive breakpoints re-applied for RTL ---------- */
+@media(max-width:820px){
+  .stats-band .sb:nth-child(2){ border-left:0; }
+  .stats-band .sb:nth-child(1),.stats-band .sb:nth-child(2){ border-bottom:1px solid var(--hairline); }
+}
+@media(max-width:460px){
+  .stats-band .sb{ border-left:0; border-bottom:1px solid var(--hairline); }
+  .stats-band .sb:last-child{ border-bottom:0; }
+}
+
+/* Latin runs (product names, codes, emails) inside Arabic sentences */
+.wm,.brand .wm{ direction:ltr; unicode-bidi:isolate; }
+</style>
 <script>
   if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){ document.documentElement.classList.add('has-anim'); }
 </script>
 <!-- NAV -->
 <nav class="nav">
 <div class="wrap">
-<a class="brand" href="/">
+<a class="brand" href="/ar/">
 <svg aria-hidden="true" class="mark" fill="none" height="29" viewbox="0 0 48 56" width="25"><path d="M16 50V8h14a13 13 0 0 1 0 26H16" stroke="var(--ink)" stroke-linecap="round" stroke-linejoin="round" stroke-width="7"></path><circle cx="25" cy="21" fill="var(--teal)" r="3.6"></circle></svg>
 <span class="wm">Preck<span class="o">o</span>n</span>
 </a>
 <div class="nav-links">
-<a data-i18n="nav.platform" href="/platform">Platform</a>
-<a data-i18n="nav.modules" href="/modules">Modules</a>
-<a data-i18n="nav.why" href="/why">Why us</a>
-<a data-i18n="nav.security" href="/security">Security</a>
-<a data-i18n="nav.pricing" href="/pricing">Pricing</a>
+<a data-i18n="nav.platform" href="/ar/platform">المنصة</a>
+<a data-i18n="nav.modules" href="/ar/modules">الوحدات</a>
+<a data-i18n="nav.why" href="/ar/why">لماذا نحن</a>
+<a data-i18n="nav.security" href="/ar/security">الأمان</a>
+<a data-i18n="nav.pricing" href="/ar/pricing">الأسعار</a>
 </div>
 <div class="nav-tools">
-<select aria-label="Language" class="lang-select" onchange="location.href=this.value"><option selected="" value="/about">EN</option><option value="/ar/about">العربية</option></select>
-<button aria-label="Toggle theme" class="theme-toggle" onclick="PK.toggleTheme()" type="button"><svg class="ic-moon" fill="none" height="17" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24" width="17"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg><svg class="ic-sun" fill="none" height="17" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24" width="17"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19"></path></svg></button>
+<select aria-label="اللغة" class="lang-select" onchange="location.href=this.value"><option value="/about">EN</option><option selected="" value="/ar/about">العربية</option></select>
+<button aria-label="تبديل المظهر" class="theme-toggle" onclick="PK.toggleTheme()" type="button"><svg class="ic-moon" fill="none" height="17" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24" width="17"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg><svg class="ic-sun" fill="none" height="17" stroke="currentColor" stroke-width="1.8" viewbox="0 0 24 24" width="17"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19"></path></svg></button>
 </div>
-<a class="btn btn-primary" data-i18n="cta.demo" href="/demo">Book a demo</a>
+<a class="btn btn-primary" data-i18n="cta.demo" href="/ar/demo">احجز عرضًا توضيحيًا</a>
 </div>
 </nav>
 <!-- HERO -->
 <header class="hero">
 <div class="wrap">
-<span class="eyebrow">About Preckon</span>
-<h1>Rebuilding the <span class="hl">front</span> of construction.</h1>
-<p class="sub">The numbers a project is won or lost on are still produced by hand, slowly, and locked in a few people's heads. We're changing that — making preconstruction fast, defensible, and open to everyone who prices the work.</p>
+<span class="eyebrow">عن Preckon</span>
+<h1>نُعيد بناء <span class="hl">مقدّمة</span> قطاع الإنشاء.</h1>
+<p class="sub">الأرقام التي يُربح بها المشروع أو يُخسر لا تزال تُنتج يدويًا وببطء، وتبقى حبيسة أذهان قلّة من الناس. نحن نغيّر ذلك — لنجعل ما قبل الإنشاء سريعًا ويمكن الدفاع عنه ومتاحًا لكل من يُسعّر العمل.</p>
 </div>
 </header>
 <!-- MISSION / VISION -->
@@ -243,14 +305,14 @@
 <div class="wrap">
 <div class="mv reveal">
 <div class="mvcard">
-<div class="t">Mission</div>
-<h3>Turn documents into decisions.</h3>
-<p>Give every contractor and quantity surveyor a way to go from a raw tender package to a costed, defensible estimate in hours — with the reasoning shown and a person in control at every step.</p>
+<div class="t">الرسالة</div>
+<h3>حوّل المستندات إلى قرارات.</h3>
+<p>أن نمنح كل مقاول ومسّاح كميات طريقة للانتقال من وثائق مناقصة خام إلى تقدير مُسعّر يمكن الدفاع عنه خلال ساعات — مع إظهار الاستدلال وبقاء الإنسان مسيطرًا في كل خطوة.</p>
 </div>
 <div class="mvcard">
-<div class="t">Vision</div>
-<h3>Preconstruction, no longer the bottleneck.</h3>
-<p>A world where bid throughput isn't limited by how many senior estimators you can hire, where no number is a black box, and where the knowledge to price a project isn't trapped in one person's spreadsheets.</p>
+<div class="t">الرؤية</div>
+<h3>ما قبل الإنشاء، لم يعد عنق الزجاجة.</h3>
+<p>عالم لا تُقيَّد فيه إنتاجية العطاءات بعدد مُقدِّري التكاليف الأوائل الذين يمكنك توظيفهم، ولا يكون فيه أي رقم صندوقًا أسود، ولا تبقى فيه معرفة تسعير المشروع محبوسة في جداول بيانات شخص واحد.</p>
 </div>
 </div>
 </div>
@@ -259,13 +321,13 @@
 <section class="section" style="padding-top:10px;">
 <div class="wrap">
 <div class="reveal center" style="max-width:680px; margin-bottom:34px;">
-<span class="kicker">Why we built it</span>
-<h2 class="h2">Estimating is the hardest, slowest, least-shared part of the job.</h2>
+<span class="kicker">لماذا بنيناه</span>
+<h2 class="h2">التقدير هو أصعب أجزاء العمل وأبطؤها وأقلها مشاركة.</h2>
 </div>
 <div class="story reveal">
-<p>Before a shovel touches the ground, someone has to read the drawings, measure everything, decide what it's made of, price it, and package it for buyout. It's the work that decides whether a bid wins and whether a project makes money — and it's still done largely by hand, in spreadsheets, under a clock.</p>
-<p class="pull">The most consequential numbers in construction are produced the slowest, by the fewest people, with the least ability to audit them.</p>
-<p>Takeoff tools measure. Estimating tools price, manually. Project platforms manage what already exists. Nobody carried the whole thing — from raw documents to a procurement package — in one place, with the reasoning attached. So we built Preckon to do exactly that: read the documents, generate the chain, and keep the estimator's judgment at the center of it.</p>
+<p>قبل أن تلمس المجرفة الأرض، على أحدهم أن يقرأ المخططات، ويقيس كل شيء، ويحدد مما تتكون، ويُسعّرها، ويحزّمها للشراء. إنه العمل الذي يقرر هل يفوز العطاء وهل يربح المشروع — ولا يزال يُنجَز يدويًا إلى حد بعيد، في جداول بيانات، وتحت ضغط الوقت.</p>
+<p class="pull">أكثر الأرقام أثرًا في قطاع الإنشاء تُنتَج بأبطأ وتيرة، وبأقل عدد من الأشخاص، وبأدنى قدرة على تدقيقها.</p>
+<p>أدوات الحصر تقيس. وأدوات التقدير تُسعّر يدويًا. ومنصات المشاريع تدير ما هو موجود أصلًا. لم يحمل أحد العملية كاملة — من المستندات الخام إلى حزمة مشتريات — في مكان واحد، مع إرفاق الاستدلال. لذا بنينا Preckon ليفعل ذلك تمامًا: يقرأ المستندات، ويُنشئ السلسلة، ويُبقي حكم مُقدِّر التكاليف في قلبها.</p>
 </div>
 </div>
 </section>
@@ -273,32 +335,32 @@
 <section class="section" style="padding-top:10px;">
 <div class="wrap">
 <div class="reveal center" style="max-width:640px; margin-bottom:28px;">
-<span class="kicker">Who's building it</span>
-<h2 class="h2">Built by people close to the work.</h2>
+<span class="kicker">من يبنيه</span>
+<h2 class="h2">مبني على يد أشخاص قريبين من العمل.</h2>
 </div>
 <div class="founder reveal">
 <div aria-hidden="true" class="ava">MM</div>
 <div>
-<p class="fq">"Preconstruction shouldn't take longer than the bid window, and no number should be a mystery. We're building the platform I wish estimating teams already had — fast, traceable, and still under human control."</p>
+<p class="fq">«لا ينبغي أن يستغرق ما قبل الإنشاء وقتًا أطول من مهلة العطاء، ولا ينبغي أن يكون أي رقم لغزًا. نحن نبني المنصة التي كنت أتمنى أن تكون بين يدي فرق التقدير — سريعة وقابلة للتتبع ولا تزال تحت سيطرة الإنسان.»</p>
 <div class="fn">Mahesh Mukkara</div>
-<div class="fr">Founder &amp; President · TechSME Inc. · Mississauga, ON</div>
+<div class="fr">المؤسس والرئيس · TechSME Inc. · ميسيسوجا، أونتاريو</div>
 </div>
 </div>
-<p class="reveal center" style="max-width:640px; margin-top:18px; font-size:13.5px; color:var(--slate-500);">Preckon is developed with practicing estimators and quantity surveyors — the people who feel the takeoff-and-estimate crunch every bid — so it fits how the work is really done.</p>
+<p class="reveal center" style="max-width:640px; margin-top:18px; font-size:13.5px; color:var(--slate-500);">يُطوَّر Preckon بالتعاون مع مُقدِّري تكاليف ومسّاحي كميات ممارسين — من يشعرون بضغط الحصر والتقدير في كل عطاء — ليناسب طريقة إنجاز العمل فعليًا.</p>
 </div>
 </section>
 <!-- TECH PHILOSOPHY -->
 <section class="section" style="padding-top:10px;">
 <div class="wrap">
 <div class="reveal center" style="max-width:660px;">
-<span class="kicker">How we build</span>
-<h2 class="h2">Four principles under the hood.</h2>
+<span class="kicker">كيف نبني</span>
+<h2 class="h2">أربعة مبادئ تحت الغطاء.</h2>
 </div>
 <div class="tgrid reveal">
-<div class="tcard"><span class="iic"><svg fill="none" height="19" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="19"><path d="M12 2a4 4 0 0 1 4 4v1a4 4 0 0 1 0 8 4 4 0 0 1-8 0 4 4 0 0 1 0-8V6a4 4 0 0 1 4-4z"></path></svg></span><h4>AI-native</h4><p>Built around AI from the first line — not a chatbot bolted onto a document viewer.</p></div>
-<div class="tcard"><span class="iic"><svg fill="none" height="19" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="19"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3"></path></svg></span><h4>Provider-independent</h4><p>No single AI vendor to lock us — or your data — in. We route to the right model for each task.</p></div>
-<div class="tcard"><span class="iic"><svg fill="none" height="19" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="19"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg></span><h4>Explainable &amp; reviewed</h4><p>Every output traces to its source and passes through a human. Nothing auto-commits.</p></div>
-<div class="tcard"><span class="iic"><svg fill="none" height="19" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="19"><circle cx="5" cy="6" r="2"></circle><circle cx="19" cy="6" r="2"></circle><circle cx="12" cy="18" r="2"></circle><path d="M5 8v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M12 13v3"></path></svg></span><h4>Grounded in construction</h4><p>A real construction knowledge graph, so the platform reasons about buildings — not generic text.</p></div>
+<div class="tcard"><span class="iic"><svg fill="none" height="19" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="19"><path d="M12 2a4 4 0 0 1 4 4v1a4 4 0 0 1 0 8 4 4 0 0 1-8 0 4 4 0 0 1 0-8V6a4 4 0 0 1 4-4z"></path></svg></span><h4>مبني على الذكاء الاصطناعي</h4><p>مبني حول الذكاء الاصطناعي من السطر الأول — لا روبوت محادثة مركّب على عارض مستندات.</p></div>
+<div class="tcard"><span class="iic"><svg fill="none" height="19" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="19"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3"></path></svg></span><h4>مستقل عن المزوّدين</h4><p>لا مزوّد ذكاء اصطناعي واحد يقيّدنا أو يقيّد بياناتك. نحن نوجّه إلى النموذج المناسب لكل مهمة.</p></div>
+<div class="tcard"><span class="iic"><svg fill="none" height="19" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="19"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg></span><h4>قابل للتفسير ومُراجَع</h4><p>كل مخرج يعود إلى مصدره ويمر عبر إنسان. ولا شيء يُعتمد تلقائيًا.</p></div>
+<div class="tcard"><span class="iic"><svg fill="none" height="19" stroke="currentColor" stroke-width="1.7" viewbox="0 0 24 24" width="19"><circle cx="5" cy="6" r="2"></circle><circle cx="19" cy="6" r="2"></circle><circle cx="12" cy="18" r="2"></circle><path d="M5 8v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M12 13v3"></path></svg></span><h4>مبني على الإنشاءات</h4><p>مخطط معرفي إنشائي حقيقي، لتستنتج المنصة عن المباني — لا عن نص عام.</p></div>
 </div>
 </div>
 </section>
@@ -306,33 +368,33 @@
 <section class="section" style="padding-top:10px;">
 <div class="wrap">
 <div class="reveal center" style="max-width:640px;">
-<span class="kicker">Roadmap</span>
-<h2 class="h2">Where we are, and where we're headed.</h2>
-<p class="lede">Directional, not a promise of dates — but this is the shape of it.</p>
+<span class="kicker">خارطة الطريق</span>
+<h2 class="h2">أين نحن، وإلى أين نتجه.</h2>
+<p class="lede">توجّه عام لا وعد بتواريخ — لكن هذا هو شكل المسار.</p>
 </div>
 <div class="roadmap reveal">
 <div class="rcol now">
-<span class="rtag">● Now</span>
+<span class="rtag">● الآن</span>
 <ul>
-<li><span class="d"></span> Core document-to-estimate chain live</li>
-<li><span class="d"></span> Design Partner Program open</li>
-<li><span class="d"></span> Running real bids with first partners</li>
+<li><span class="d"></span> سلسلة المستند إلى التقدير الأساسية تعمل</li>
+<li><span class="d"></span> برنامج شركاء التصميم مفتوح</li>
+<li><span class="d"></span> تشغيل عطاءات حقيقية مع الشركاء الأوائل</li>
 </ul>
 </div>
 <div class="rcol next">
-<span class="rtag">→ Next</span>
+<span class="rtag">← التالي</span>
 <ul>
-<li><span class="d"></span> All six modules + Copilot to general availability</li>
-<li><span class="d"></span> Expanded methods of measurement</li>
-<li><span class="d"></span> Deeper integrations &amp; exports</li>
+<li><span class="d"></span> الوحدات الست جميعها + Copilot إلى الإتاحة العامة</li>
+<li><span class="d"></span> توسيع طرق القياس</li>
+<li><span class="d"></span> تكاملات وتصديرات أعمق</li>
 </ul>
 </div>
 <div class="rcol later">
-<span class="rtag">◇ On the horizon</span>
+<span class="rtag">◇ في الأفق</span>
 <ul>
-<li><span class="d"></span> Broader public availability</li>
-<li><span class="d"></span> Enterprise deployment options</li>
-<li><span class="d"></span> SOC 2 completion</li>
+<li><span class="d"></span> إتاحة عامة أوسع</li>
+<li><span class="d"></span> خيارات نشر مؤسسية</li>
+<li><span class="d"></span> إتمام شهادة SOC 2</li>
 </ul>
 </div>
 </div>
@@ -342,10 +404,10 @@
 <section class="section" style="padding-top:0;">
 <div class="wrap">
 <div class="facts reveal">
-<div class="fact"><div class="k">Company</div><div class="v">TechSME Inc.</div></div>
-<div class="fact"><div class="k">Headquarters</div><div class="v">Mississauga, ON</div></div>
-<div class="fact"><div class="k">Focus</div><div class="v">AI-native preconstruction</div></div>
-<div class="fact"><div class="k">Stage</div><div class="v">Design partners open</div></div>
+<div class="fact"><div class="k">الشركة</div><div class="v">TechSME Inc.</div></div>
+<div class="fact"><div class="k">المقر الرئيسي</div><div class="v">ميسيسوجا، أونتاريو</div></div>
+<div class="fact"><div class="k">التركيز</div><div class="v">ما قبل الإنشاء بالذكاء الاصطناعي</div></div>
+<div class="fact"><div class="k">المرحلة</div><div class="v">شركاء التصميم مفتوح</div></div>
 </div>
 </div>
 </section>
@@ -354,15 +416,15 @@
 <div class="wrap">
 <div class="dp reveal">
 <div>
-<span class="tag">Design Partner Program · now open</span>
-<h3>Build it with us.</h3>
-<p>We're onboarding a small group of contractors and QS consultancies to run real projects through Preckon — with direct access to the team and terms that reflect building it together.</p>
+<span class="tag">برنامج شركاء التصميم · مفتوح الآن</span>
+<h3>ابنِه معنا.</h3>
+<p>نستقبل مجموعة صغيرة من المقاولين وبيوت خبرة مساحة الكميات لتشغيل مشاريع حقيقية عبر Preckon — مع وصول مباشر إلى الفريق وشروط تعكس بناءه معًا.</p>
 </div>
 <ul class="perks">
-<li><span class="c">✓</span> Run live bids through the full chain</li>
-<li><span class="c">✓</span> Shape the roadmap and priorities</li>
-<li><span class="c">✓</span> Founder-level support and onboarding</li>
-<li><span class="c">✓</span> Preferred early terms, locked in</li>
+<li><span class="c">✓</span> شغّل عطاءات حقيقية عبر السلسلة الكاملة</li>
+<li><span class="c">✓</span> شكّل خارطة الطريق والأولويات</li>
+<li><span class="c">✓</span> دعم وتهيئة على مستوى المؤسِّس</li>
+<li><span class="c">✓</span> شروط مبكرة تفضيلية، مثبّتة</li>
 </ul>
 </div>
 </div>
@@ -371,9 +433,9 @@
 <section style="padding:20px 0 64px;">
 <div class="wrap">
 <div class="finalcta reveal">
-<h3>Come build the front of construction with us.</h3>
-<p>Whether you want a demo or a design-partner conversation, we'd like to talk.</p>
-<a class="btn btn-primary" href="/demo">Get in touch
+<h3>تعال وابنِ مقدّمة قطاع الإنشاء معنا.</h3>
+<p>سواء أردت عرضًا توضيحيًا أو حديثًا عن شراكة التصميم، يسعدنا التواصل.</p>
+<a class="btn btn-primary" href="/ar/demo">تواصل معنا
         <svg fill="none" height="16" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24" width="16"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
 </div>
 </div>
@@ -383,16 +445,16 @@
 <div class="wrap">
 <div class="top">
 <div>
-<a class="brand" href="/"><svg aria-hidden="true" class="mark" fill="none" height="29" viewbox="0 0 48 56" width="25"><path d="M16 50V8h14a13 13 0 0 1 0 26H16" stroke="var(--ink)" stroke-linecap="round" stroke-linejoin="round" stroke-width="7"></path><circle cx="25" cy="21" fill="var(--teal)" r="3.6"></circle></svg><span class="wm">Preck<span class="o">o</span>n</span></a>
-<p class="blurb">From drawings to a defensible estimate. AI-native preconstruction, reviewed by your team.</p>
+<a class="brand" href="/ar/"><svg aria-hidden="true" class="mark" fill="none" height="29" viewbox="0 0 48 56" width="25"><path d="M16 50V8h14a13 13 0 0 1 0 26H16" stroke="var(--ink)" stroke-linecap="round" stroke-linejoin="round" stroke-width="7"></path><circle cx="25" cy="21" fill="var(--teal)" r="3.6"></circle></svg><span class="wm">Preck<span class="o">o</span>n</span></a>
+<p class="blurb">من المخططات إلى تقدير يمكن الدفاع عنه. ما قبل الإنشاء بالذكاء الاصطناعي، بمراجعة فريقك.</p>
 </div>
-<div class="col"><h6>Platform</h6><a href="/platform">Architecture</a><a href="/modules">Modules</a><a href="/platform#foundation">Foundation</a><a href="/security">Security</a></div>
-<div class="col"><h6>Company</h6><a href="#">About</a><a href="/pricing">Pricing</a><a href="/why">Why us</a><a href="/#partners">Design partners</a></div>
-<div class="col"><h6>Get started</h6><a href="/demo">Book a demo</a><a href="/#partners">Design Partner Program</a><a href="/#how">Watch overview</a></div>
+<div class="col"><h6>المنصة</h6><a href="/ar/platform">البنية</a><a href="/ar/modules">الوحدات</a><a href="/ar/platform#foundation">الأساس</a><a href="/ar/security">الأمان</a></div>
+<div class="col"><h6>الشركة</h6><a href="#">عن Preckon</a><a href="/ar/pricing">الأسعار</a><a href="/ar/why">لماذا نحن</a><a href="/ar/#partners">شركاء التصميم</a></div>
+<div class="col"><h6>ابدأ الآن</h6><a href="/ar/demo">احجز عرضًا توضيحيًا</a><a href="/ar/#partners">برنامج شركاء التصميم</a><a href="/ar/#how">شاهد النظرة العامة</a></div>
 </div>
 <div class="base">
-<span class="k">© 2026 TechSME Inc. · Mississauga, ON</span>
-<span class="k">SHEET <b>ABOUT</b> · BUILT ON <b>DS-01</b></span>
+<span class="k">© 2026 TechSME Inc. · ميسيسوجا، أونتاريو</span>
+<span class="k">لوحة <b>عن Preckon</b> · مبني على <b>DS-01</b></span>
 </div>
 </div>
 </footer>
