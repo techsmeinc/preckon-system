@@ -3,8 +3,8 @@
  * Preckon demo-form configuration.
  *
  * EDIT THE VALUES BELOW, then upload alongside submit.php.
- * Nothing here is served to visitors — .htaccess blocks direct access to
- * .php config files, and PHP source is executed, never displayed.
+ * .htaccess denies web access to this file, and PHP source is executed
+ * rather than served — so the API key is not exposed.
  */
 
 return [
@@ -14,41 +14,70 @@ return [
     // ---------------------------------------------------------------
     'to'          => 'sales@preckon.com',
     'to_name'     => 'Preckon Sales',
-
-    // Optional extra recipients (BCC). Leave empty to skip.
-    'bcc'         => [],
+    'bcc'         => [],                    // optional extra recipients
 
     // ---------------------------------------------------------------
-    // The address the notification is SENT FROM.
+    // The address notifications are SENT FROM.
     //
-    // IMPORTANT: this must be a real mailbox on a domain you control
-    // (create it in IONOS -> Email). Using the visitor's address here
-    // would fail SPF/DMARC and land in spam — the visitor's address goes
-    // in Reply-To instead, so hitting Reply in your inbox works.
+    // This must be a sender Brevo has verified (see setup below). The
+    // visitor's address goes in Reply-To, so replying from your inbox
+    // still reaches them — sending "as" the visitor would fail DMARC.
     // ---------------------------------------------------------------
     'from'        => 'no-reply@preckon.com',
     'from_name'   => 'Preckon Website',
 
-    // ---------------------------------------------------------------
-    // SMTP. Strongly recommended over PHP mail() — authenticated sending
-    // through your own mailbox passes SPF and lands in inboxes.
+    // ===============================================================
+    // TRANSPORT 1 — BREVO (recommended)
     //
-    // IONOS values (confirm in IONOS -> Email -> your mailbox -> settings):
-    //   host = smtp.ionos.com   port = 587   secure = 'tls'
-    //   (or port 465 with secure = 'ssl')
+    // Uses Brevo's HTTP API over port 443. Shared hosting frequently
+    // blocks outbound SMTP ports, which silently breaks mail; HTTPS is
+    // never blocked, so this is the reliable option here.
     //
-    // Set 'enabled' => false to fall back to PHP mail(). The form still
-    // works either way; deliverability is just worse without SMTP.
-    // ---------------------------------------------------------------
-    'smtp' => [
+    // SETUP
+    //   1. brevo.com -> sign up (free tier: 300 emails/day)
+    //   2. Senders, Domains & Dedicated IPs -> Domains -> add preckon.com
+    //      and add the DNS records it gives you in IONOS (Domains & SSL
+    //      -> preckon.com -> DNS). Authenticating the domain is what puts
+    //      mail in inboxes instead of spam.
+    //   3. Senders -> add no-reply@preckon.com and verify it
+    //   4. SMTP & API -> API Keys -> Generate a new API key
+    //   5. Paste it below. It starts with "xkeysib-".
+    // ===============================================================
+    'brevo' => [
         'enabled'  => true,
-        'host'     => 'smtp.ionos.com',
-        'port'     => 587,
-        'secure'   => 'tls',              // 'tls' for 587, 'ssl' for 465
-        'username' => 'no-reply@preckon.com',
-        'password' => 'CHANGE-ME',        // <-- the mailbox password
+        'api_key'  => 'xkeysib-YOUR-API-KEY-HERE',
+        'api_base' => 'https://api.brevo.com/v3',
         'timeout'  => 20,
     ],
+
+    // ===============================================================
+    // TRANSPORT 2 — SMTP (fallback, tried only if Brevo fails)
+    //
+    // Either Brevo's relay:
+    //     host = smtp-relay.brevo.com   port = 587   secure = 'tls'
+    //     username = your Brevo SMTP login
+    //     password = your Brevo SMTP key (not your account password)
+    //
+    // Or IONOS's own:
+    //     host = smtp.ionos.com   port = 587   secure = 'tls'
+    //     username/password = a real mailbox on your domain
+    //
+    // Leave the password as CHANGE-ME to skip this transport entirely.
+    // ===============================================================
+    'smtp' => [
+        'enabled'  => true,
+        'host'     => 'smtp-relay.brevo.com',
+        'port'     => 587,
+        'secure'   => 'tls',              // 'tls' for 587, 'ssl' for 465
+        'username' => '',
+        'password' => 'CHANGE-ME',
+        'timeout'  => 20,
+    ],
+
+    // ---------------------------------------------------------------
+    // TRANSPORT 3 — PHP mail(). Last resort, poor deliverability.
+    // ---------------------------------------------------------------
+    'allow_php_mail' => true,
 
     // ---------------------------------------------------------------
     // Send the person who filled the form a confirmation email.
@@ -56,12 +85,25 @@ return [
     'autoreply'   => true,
 
     // ---------------------------------------------------------------
+    // Diagnostics
+    //
+    // Set a long random string to enable GET /submit.php?selftest=<token>,
+    // which reports what is configured and sends one test email to 'to'.
+    // Leave empty (or clear it once you are live) to disable the endpoint.
+    // ---------------------------------------------------------------
+    'selftest_token' => '',
+
+    // Include transport error detail in the form's JSON error response.
+    // Useful while setting up; turn off afterwards.
+    'debug'       => false,
+
+    // ---------------------------------------------------------------
     // Abuse controls
     // ---------------------------------------------------------------
     'max_per_ip_per_hour' => 5,
     'min_fill_seconds'    => 3,   // submissions faster than this are bots
 
-    // Where the CSV backup of every lead is written. Kept even when mail
-    // fails, so a submission is never silently lost.
+    // CSV backup of every lead, written before mail is attempted so a
+    // submission is never lost to a delivery failure.
     'data_dir'    => __DIR__ . '/_data',
 ];

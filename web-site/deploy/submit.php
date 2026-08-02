@@ -11,10 +11,6 @@
 
 declare(strict_types=1);
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception as MailException;
-
 mb_internal_encoding('UTF-8');   // so mb_substr never splits a UTF-8 sequence
 
 header('Content-Type: application/json; charset=utf-8');
@@ -44,6 +40,46 @@ $L = [
     ],
 ];
 
+$config = require __DIR__ . '/config.php';
+
+// ------------------------------------------------------------ self-test
+// GET /submit.php?selftest=<token>  — reports which transports are configured
+// and sends one real test message to the 'to' address. Disabled unless
+// selftest_token is set in config.php. Delete the token once you are live.
+if (isset($_GET['selftest'])) {
+    $token = (string)($config['selftest_token'] ?? '');
+    if ($token === '' || !hash_equals($token, (string)$_GET['selftest'])) {
+        respond(404, ['ok' => false, 'error' => 'Not found.']);
+    }
+    require_once __DIR__ . '/_lib/mail.php';
+
+    $report = [
+        'php'            => PHP_VERSION,
+        'curl'           => function_exists('curl_init'),
+        'openssl'        => extension_loaded('openssl'),
+        'allow_url_fopen'=> (bool)ini_get('allow_url_fopen'),
+        'brevo_ready'    => brevo_ready($config),
+        'smtp_ready'     => smtp_ready($config),
+        'php_mail'       => (bool)($config['allow_php_mail'] ?? false),
+        'from'           => $config['from'],
+        'to'             => $config['to'],
+        'data_dir_writable' => is_dir((string)$config['data_dir'])
+            ? is_writable((string)$config['data_dir'])
+            : is_writable(dirname((string)$config['data_dir'])),
+    ];
+    $res = deliver($config, [
+        'from_email' => $config['from'],
+        'from_name'  => $config['from_name'],
+        'to_email'   => $config['to'],
+        'to_name'    => $config['to_name'],
+        'subject'    => 'Preckon form self-test',
+        'html'       => '<p>Self-test from submit.php. If you are reading this, the demo form can send mail.</p>',
+        'text'       => 'Self-test from submit.php. If you are reading this, the demo form can send mail.',
+    ]);
+    respond($res['ok'] ? 200 : 500, ['ok' => $res['ok'], 'transport' => $res['transport'],
+        'errors' => $res['errors'], 'env' => $report]);
+}
+
 // --------------------------------------------------------------- input
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     respond(405, ['ok' => false, 'error' => $L['en']['bad_method']]);
@@ -59,8 +95,6 @@ if (str_contains($_SERVER['CONTENT_TYPE'] ?? '', 'application/json')) {
 
 $locale = (($in['locale'] ?? 'en') === 'ar') ? 'ar' : 'en';
 $t      = $L[$locale];
-
-$config = require __DIR__ . '/config.php';
 
 $field = static fn(string $k, int $max = 2000): string
     => trim(mb_substr((string)($in[$k] ?? ''), 0, $max));
@@ -149,41 +183,7 @@ if ($fh = @fopen($csv, 'a')) {
 }
 
 // ---------------------------------------------------------------- mail
-require_once __DIR__ . '/_lib/PHPMailer/Exception.php';
-require_once __DIR__ . '/_lib/PHPMailer/PHPMailer.php';
-require_once __DIR__ . '/_lib/PHPMailer/SMTP.php';
-
-/** Configure a PHPMailer instance from config. */
-function mailer(array $config): PHPMailer
-{
-    $m = new PHPMailer(true);
-    $m->CharSet  = 'UTF-8';
-    $m->Encoding = 'base64';
-
-    $s = $config['smtp'];
-    if (!empty($s['enabled']) && $s['password'] !== 'CHANGE-ME') {
-        $m->isSMTP();
-        $m->Host     = $s['host'];
-        $m->Port     = (int)$s['port'];
-        $m->Username = $s['username'];
-        $m->Password = $s['password'];
-        $m->SMTPAuth = ($s['username'] ?? '') !== '';
-        $m->Timeout  = (int)$s['timeout'];
-
-        $secure = strtolower((string)($s['secure'] ?? 'tls'));
-        if ($secure === 'ssl') {
-            $m->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-        } elseif ($secure === 'none' || $secure === '') {
-            $m->SMTPSecure  = '';
-            $m->SMTPAutoTLS = false;     // plain relay (local testing / internal MTA)
-        } else {
-            $m->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        }
-    } else {
-        $m->isMail();   // fall back to PHP mail()
-    }
-    return $m;
-}
+require_once __DIR__ . '/_lib/mail.php';
 
 $esc  = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
 $rows = [
@@ -209,70 +209,70 @@ $notesHtml = $notes !== '' ? '<p style="margin:18px 0 0;color:#334155;font:14px/
     . $esc($notes) . '</p>' : '';
 $notesText = $notes !== '' ? "\nNotes:\n$notes\n" : '';
 
-$ok = false;
-$sendError = '';
-try {
-    $m = mailer($config);
-    $m->setFrom($config['from'], $config['from_name']);
-    $m->addAddress($config['to'], $config['to_name']);
-    foreach ((array)($config['bcc'] ?? []) as $b) { $m->addBCC($b); }
-    $m->addReplyTo($email, $name);          // Reply in your inbox goes to them
-    $m->Subject = "Demo request — $company ($name)";
-    $m->isHTML(true);
-    $m->Body = '<div style="max-width:560px"><h2 style="font:600 18px system-ui;color:#0B1B2B;margin:0 0 4px">'
+// ---- 1. notification to sales -------------------------------------------
+$sent = deliver($config, [
+    'from_email'  => $config['from'],
+    'from_name'   => $config['from_name'],
+    'to_email'    => $config['to'],
+    'to_name'     => $config['to_name'],
+    'reply_email' => $email,          // Reply in your inbox goes to them
+    'reply_name'  => $name,
+    'bcc'         => (array)($config['bcc'] ?? []),
+    'subject'     => "Demo request — $company ($name)",
+    'html'        => '<div style="max-width:560px"><h2 style="font:600 18px system-ui;color:#0B1B2B;margin:0 0 4px">'
         . 'New demo request</h2><p style="font:13px system-ui;color:#64748B;margin:0 0 16px">'
         . 'Submitted via preckon.com</p><table cellpadding="0" cellspacing="0">'
-        . $htmlRows . '</table>' . $notesHtml . '</div>';
-    $m->AltBody = "New demo request — preckon.com\n\n$textRows$notesText";
-    $m->send();
-    $ok = true;
-} catch (MailException|Throwable $e) {
-    $sendError = $e->getMessage();
-    @error_log('[preckon-demo] notification failed: ' . $sendError);
-}
+        . $htmlRows . '</table>' . $notesHtml . '</div>',
+    'text'        => "New demo request — preckon.com\n\n$textRows$notesText",
+]);
 
-// ------------------------------------------------------------ autoreply
-if ($ok && !empty($config['autoreply'])) {
-    try {
-        $a = mailer($config);
-        $a->setFrom($config['from'], 'Preckon');
-        $a->addAddress($email, $name);
-        $a->addReplyTo($config['to'], $config['to_name']);
-        $a->isHTML(true);
-
-        if ($locale === 'ar') {
-            $a->Subject = 'استلمنا طلب العرض التوضيحي — Preckon';
-            $a->Body = '<div dir="rtl" style="max-width:560px;font:15px/1.9 system-ui;color:#334155">'
+// ---- 2. confirmation to the visitor, in their language -------------------
+if ($sent['ok'] && !empty($config['autoreply'])) {
+    if ($locale === 'ar') {
+        // Braces are required: PHP allows bytes 0x80-0xFF in identifiers, so
+        // "$name،" would parse the Arabic comma as part of the variable name.
+        $reply = [
+            'subject' => 'استلمنا طلب العرض التوضيحي — Preckon',
+            'html'    => '<div dir="rtl" style="max-width:560px;font:15px/1.9 system-ui;color:#334155">'
                 . '<p>مرحبًا ' . $esc($name) . '،</p>'
                 . '<p>شكرًا لطلبك عرضًا توضيحيًا لـPreckon. وصلنا طلبك وسنتواصل معك خلال يوم عمل واحد لتحديد موعد.</p>'
                 . '<p>جهّز مجموعة مخططات واحدة من مشروع حقيقي — سنُمرّرها عبر السلسلة كاملة مباشرة في المكالمة.</p>'
                 . '<p style="color:#64748B;font-size:13px">رقم المرجع: ' . $esc($ref) . '</p>'
-                . '<p style="color:#64748B;font-size:13px">فريق Preckon · sales@preckon.com</p></div>';
-            // Braces are required: PHP allows bytes 0x80-0xFF in identifiers, so
-            // "$name،" would parse the Arabic comma as part of the variable name.
-            $a->AltBody = "مرحبًا {$name}،\n\nشكرًا لطلبك عرضًا توضيحيًا لـPreckon. سنتواصل معك خلال يوم عمل واحد.\n\nرقم المرجع: {$ref}\n\nفريق Preckon";
-        } else {
-            $a->Subject = 'We received your demo request — Preckon';
-            $a->Body = '<div style="max-width:560px;font:15px/1.7 system-ui;color:#334155">'
+                . '<p style="color:#64748B;font-size:13px">فريق Preckon · sales@preckon.com</p></div>',
+            'text'    => "مرحبًا {$name}،\n\nشكرًا لطلبك عرضًا توضيحيًا لـPreckon. سنتواصل معك خلال يوم عمل واحد.\n\nرقم المرجع: {$ref}\n\nفريق Preckon",
+        ];
+    } else {
+        $reply = [
+            'subject' => 'We received your demo request — Preckon',
+            'html'    => '<div style="max-width:560px;font:15px/1.7 system-ui;color:#334155">'
                 . '<p>Hi ' . $esc($name) . ',</p>'
                 . '<p>Thanks for requesting a Preckon demo. We have your request and will be in touch '
                 . 'within one business day to find a time.</p>'
                 . '<p>Have one drawing set from a real project ready — we will run it through the whole '
                 . 'chain live on the call.</p>'
                 . '<p style="color:#64748B;font-size:13px">Reference: ' . $esc($ref) . '</p>'
-                . '<p style="color:#64748B;font-size:13px">The Preckon team · sales@preckon.com</p></div>';
-            $a->AltBody = "Hi $name,\n\nThanks for requesting a Preckon demo. We'll be in touch within one business day.\n\nReference: $ref\n\nThe Preckon team";
-        }
-        $a->send();
-    } catch (MailException|Throwable $e) {
-        @error_log('[preckon-demo] autoreply failed: ' . $e->getMessage());
+                . '<p style="color:#64748B;font-size:13px">The Preckon team · sales@preckon.com</p></div>',
+            'text'    => "Hi {$name},\n\nThanks for requesting a Preckon demo. We'll be in touch within one business day.\n\nReference: {$ref}\n\nThe Preckon team",
+        ];
     }
+    deliver($config, $reply + [
+        'from_email'  => $config['from'],
+        'from_name'   => 'Preckon',
+        'to_email'    => $email,
+        'to_name'     => $name,
+        'reply_email' => $config['to'],
+        'reply_name'  => $config['to_name'],
+    ]);
 }
 
 // The lead is already in the CSV, so a mail failure is recoverable — but the
 // visitor must not be told "thanks" if nothing reached anyone.
-if (!$ok) {
-    respond(500, ['ok' => false, 'error' => $t['server'], 'ref' => $ref]);
+if (!$sent['ok']) {
+    $payload = ['ok' => false, 'error' => $t['server'], 'ref' => $ref];
+    if (!empty($config['debug'])) {
+        $payload['debug'] = $sent['errors'];   // only when explicitly enabled
+    }
+    respond(500, $payload);
 }
 
 respond(200, ['ok' => true, 'ref' => $ref]);
