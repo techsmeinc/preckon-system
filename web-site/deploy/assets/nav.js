@@ -43,25 +43,17 @@
   wrap.appendChild(btn);
 
   var mqPanel = window.matchMedia('(max-width:880px)');
-  // Once the controls are grouped the CTA fits comfortably down to ~375px,
-  // so it only relocates on genuinely small phones (320/360).
-  var mqNarrow = window.matchMedia('(max-width:374px)');
 
   function place() {
-    // language select: in the panel on mobile/tablet, in the bar otherwise
+    // Language select moves into the panel on mobile/tablet to free bar space.
+    // The CTA deliberately never moves — it stays in the bar at every width so
+    // it looks and behaves identically on every device. Below 340px the brand
+    // wordmark collapses to the mark instead, which frees the room it needs.
     if (lang) {
       var target = mqPanel.matches ? extra : tools;
       if (lang.parentNode !== target) {
         if (target === tools) target.insertBefore(lang, target.firstChild);
         else target.appendChild(lang);
-      }
-    }
-    // CTA: only relocates on very narrow phones, where the bar runs out of room
-    if (cta) {
-      var ctaTarget = mqNarrow.matches ? extra : wrap;
-      if (cta.parentNode !== ctaTarget) {
-        if (ctaTarget === wrap) wrap.insertBefore(cta, btn);
-        else extra.insertBefore(cta, extra.firstChild);
       }
     }
   }
@@ -90,10 +82,8 @@
     place();
     if (!mqPanel.matches) setOpen(false);   // don't leave it stuck open on desktop
   }
-  [mqPanel, mqNarrow].forEach(function (mq) {
-    if (mq.addEventListener) mq.addEventListener('change', onChange);
-    else if (mq.addListener) mq.addListener(onChange);
-  });
+  if (mqPanel.addEventListener) mqPanel.addEventListener('change', onChange);
+  else if (mqPanel.addListener) mqPanel.addListener(onChange);
 
   place();
 })();

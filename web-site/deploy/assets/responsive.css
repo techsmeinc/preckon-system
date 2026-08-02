@@ -34,7 +34,13 @@
   .nav .wrap{ justify-content:flex-start; gap:9px; }
   .brand{ margin-inline-end:auto; }
   .nav-tools{ gap:6px; }
-  .nav-cta .btn, .nav .wrap > .btn{ padding:11px 15px; font-size:13.5px; }
+
+  /* One CTA size for every phone and tablet, matched to the 42px height of the
+     theme toggle and menu button so the cluster reads as a single row. */
+  .nav-cta .btn, .nav .wrap > .btn{
+    padding:0 15px; font-size:13.5px; height:42px; min-height:42px;
+    white-space:nowrap; justify-content:center;
+  }
 
   /* The panel IS the existing .nav-links list — no duplicated markup,
      so every page stays in sync automatically. */
@@ -58,6 +64,17 @@
     border-bottom:1px solid var(--hairline);
   }
   .nav-links a:last-child{ border-bottom:0; }
+}
+
+/* Ultra-narrow: collapse the wordmark to the mark so the CTA can stay in the
+   bar. Losing "Preckon" in text costs less than losing the primary action. */
+@media (max-width:340px){
+  .brand .wm{
+    position:absolute; width:1px; height:1px; overflow:hidden;
+    clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap;
+  }
+  .nav .wrap{ gap:7px; }
+  .nav-cta .btn, .nav .wrap > .btn{ padding:0 12px; font-size:13px; }
 }
 
 /* controls relocated into the panel by nav.js */
@@ -170,6 +187,32 @@
   .brand .mark{ width:21px; height:24px; }
   .hero h1{ font-size:26px; }
   .h2{ font-size:22px; }
+}
+
+/* ------------------------------------- 7. hero transformation panel */
+/* Side by side, each half is ~178px on a phone. Every BOQ cell then wraps
+   onto 2-3 lines and the rows render 92px tall, reading as collapsed,
+   overlapping text. Stack the two panels so each gets the full width. */
+@media (max-width:600px){
+  .demo-body{ grid-template-columns:1fr; min-height:0; }
+  .demo-draw{
+    border-right:0 !important; border-left:0 !important;
+    border-bottom:1px solid var(--hairline);
+    min-height:190px;
+  }
+  .demo-out{ padding:16px 18px 20px; }
+  .demo-out .pcap{ white-space:nowrap; }
+  /* the pulse travels horizontally between the two halves — meaningless once
+     they are stacked */
+  .flowdot{ display:none; }
+
+  .boq-row{ gap:12px; align-items:baseline; }
+  .boq-row .code, .boq-row .qty{ white-space:nowrap; }
+  .boq-total .v{ font-size:19px; }
+}
+@media (max-width:360px){
+  .boq-row{ font-size:11px; gap:9px; }
+  .boq-row .desc{ font-size:11.5px; }
 }
 
 /* ------------------------------------------------------- 6. RTL buttons */
