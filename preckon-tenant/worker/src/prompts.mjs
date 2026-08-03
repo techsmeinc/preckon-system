@@ -12,6 +12,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { DESCRIPTION_GUIDE, DECOMPOSITION_GUIDE, DISCIPLINE_UNITS, STANDARD_UNITS , programmeSignals, boqDigest } from "./knowledge.mjs";
+import { buildFewShotBlock } from "./exemplars.mjs";
 
 const HOUSE_RULES = `GROUND EVERY OUTPUT IN THE EVIDENCE PROVIDED.
 - Use only what the DOCUMENTS and INPUT RECORDS actually say. Never invent a figure, a party, a date or a standard.
@@ -433,6 +434,8 @@ ${DESCRIPTION_GUIDE}
 ${DECOMPOSITION_GUIDE}
 
 ${DISCIPLINE_UNITS}
+
+${buildFewShotBlock(`${roster?.projectType ?? ""} ${roster?.projectDescription ?? ""} ${section.title} ${section.trade ?? ""}`)}
 
 STAY INSIDE YOUR DIVISION. Emit only lines belonging to "${section.title}" — another specialist is pricing the rest, and a line in two divisions is a line paid for twice. Number codes ${section.code}.1, ${section.code}.2, … in build order.
 MEASURE, DON'T GUESS: take each quantity from a measurement record, a schedule, or an explicit dimension, and name that source in "notes". Where you must assume a rate of provision or a spacing, state the assumption in "notes" so the reviewer can correct it. 4-20 lines — real priceable work, not padding.`,

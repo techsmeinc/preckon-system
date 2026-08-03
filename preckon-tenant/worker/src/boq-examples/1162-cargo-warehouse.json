@@ -1,0 +1,4071 @@
+{
+  "slug": "1162-cargo-warehouse",
+  "source": {
+    "sowDocx": "Attachment 9.2 SOW 22-1023 Comm Cargo Warehouse_25 Feb 25.docx",
+    "boq": "1162-Construction of Communication Cargo warehouse-Ramana Reddy-Final one - Copy.xlsx"
+  },
+  "meta": {
+    "projectNumber": "22-1023",
+    "projectName": "Construction of communication cargo Warehouse",
+    "projectLocation": "Ali Al salem airbase",
+    "submissionDate": "20th September 2025",
+    "submittedTo": "AQ Global For General Trading & Contracting Co.W.L.L."
+  },
+  "units": {
+    "LS": 32,
+    "LM": 23,
+    "m3": 30,
+    "m2": 5,
+    "No.s": 6,
+    "Nos": 4,
+    "Sq,mtrs": 1,
+    "Tons": 1,
+    "Lm": 3,
+    "No": 22,
+    "tons": 1,
+    "sq.m": 15,
+    "Nos.": 38,
+    "Set": 1,
+    "no.": 25,
+    "nos.": 30,
+    "mtrs.": 17,
+    "meters": 17,
+    "set": 5,
+    "no": 1,
+    "nos": 26,
+    "pts.": 3,
+    "LS.": 3,
+    "Pts.": 2
+  },
+  "sowOutline": [],
+  "sections": [
+    {
+      "sowRef": "Project Number",
+      "ourRef": null,
+      "subRef": null,
+      "srNo": null,
+      "title": "22-1023",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": "Project Name",
+      "ourRef": null,
+      "subRef": null,
+      "srNo": null,
+      "title": "Construction of communication cargo Warehouse",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": "Project Location",
+      "ourRef": null,
+      "subRef": null,
+      "srNo": null,
+      "title": "Ali Al salem airbase",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": "Submission Date",
+      "ourRef": null,
+      "subRef": null,
+      "srNo": null,
+      "title": "20th September 2025",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": "Submitted to",
+      "ourRef": null,
+      "subRef": null,
+      "srNo": null,
+      "title": "AQ Global For General Trading & Contracting Co.W.L.L.",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": "1",
+      "subRef": null,
+      "srNo": null,
+      "title": "Mobilization and De-mobilization",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": "1.1",
+          "srNo": null,
+          "description": "Mobilization & De-mobilization",
+          "unit": "LS",
+          "quantity": 1
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "1.1.1",
+      "title": "To set up staging area",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "1.1.2",
+      "title": "To set up Storage area for material , Equipment and debris",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "1.1.3",
+      "title": "Supply and Installation of Temporary Utility Work, Facilities etc As required",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "1.1.4",
+      "title": "Temporary Fence & Signages",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "1.1.5",
+      "title": "Delivery of Item to site and from Site to Store",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "1.1.6",
+      "title": "Removal of Debris from work site to approve dumping yard",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "1.1.7",
+      "title": "Safety",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": "2",
+      "subRef": null,
+      "srNo": null,
+      "title": "Design , Engineering & Supervision",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "2.1",
+          "description": "Preparation of 65%,95% & 100% Design and Calculations",
+          "unit": "LS",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "2.2",
+          "description": "Design,Technical & Materials Submittals",
+          "unit": "LS",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "2.3",
+          "description": "As built drawings",
+          "unit": "LS",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "2.4",
+          "description": "Subbmission of warranties, Guarantees, O&M, Operational Training & Close out Documents",
+          "unit": "LS",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "2.5",
+          "description": "Poject Supervision Engineering",
+          "unit": "LS",
+          "quantity": 1
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": "3",
+      "subRef": null,
+      "srNo": null,
+      "title": "Site Survey & Investigation",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "3.1",
+          "description": "Site Investigation / Site Survey (included Geo technical survey)",
+          "unit": "LS",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "3.2",
+          "description": "Supply and Installation of 1.5mtr Height with all accessories with single pedestrian Gate and Vehicular Gate.",
+          "unit": "LM",
+          "quantity": 180
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": "4",
+      "subRef": null,
+      "srNo": null,
+      "title": "Infrastructure Work",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "4.1",
+      "srNo": null,
+      "title": "Asphalt works",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.1.1",
+          "description": "Site Grading and levelling",
+          "unit": "LS",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.1.2",
+          "description": "Cut the existing soil & fill sub-base course 300 mm depth with compaction",
+          "unit": "m3",
+          "quantity": 582
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.1.3",
+          "description": "Supply and installation of base course crushed aggregate of 150mm with compaction",
+          "unit": "m3",
+          "quantity": 291
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.1.4",
+          "description": "Supply and installation of prime coat",
+          "unit": "m2",
+          "quantity": 1940
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.1.5",
+          "description": "Supply and laying of hot mix asphlat pavement including 300mm crushed aggregate base course, prime coat and 75mm HMA wearing course including parking area. (Type-II -40mm & Type-III-35mm)",
+          "unit": "m2",
+          "quantity": 1550
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.1.6",
+          "description": "Supply and installation of parking concrete wheel stops",
+          "unit": "No.s",
+          "quantity": 8
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.1.7",
+          "description": "supply & Apply of parking markings",
+          "unit": "LS",
+          "quantity": 1
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "4.2",
+      "srNo": null,
+      "title": "Aggregate surface yard",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.2.1",
+          "description": "Cut the existing soil & fill 150mm Sub base course with compaction",
+          "unit": "m3",
+          "quantity": 238
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.2.2",
+          "description": "Supply and Laying 75 mm  Crushed aggregate base course with compaction",
+          "unit": "m3",
+          "quantity": 120
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "4.3",
+      "srNo": null,
+      "title": "Chainlink fence",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.3.1",
+          "description": "Excavation/Augering for fence post,corner post -1mtr deep 300mm dia",
+          "unit": "Nos",
+          "quantity": 18
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.3.2",
+          "description": "Supply and casting of K400 grade concrete for fence footers",
+          "unit": "m3",
+          "quantity": 2.25
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.3.3",
+          "description": "Supply and installation of  chain link fabric fence 9gauge up to 2.5 mtrs high above Ground with GI coated mesh steel, Galvanized Zinc coated posts including supports,other required accessoriers etc.,as per approved specification & Design",
+          "unit": "LM",
+          "quantity": 72
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.3.4",
+          "description": "Supply & Installation of 3 layer Galvanized Zinc Coated Barbed wire  Including Barbarms & other related accessories.",
+          "unit": "LM",
+          "quantity": 216
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.3.5",
+          "description": "Supply & installation of chainlink Manual swing gate of size - 0.91mtr (w) x 2.13 mtr (H) at new concrete walkway.",
+          "unit": "No.s",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.3.6",
+          "description": "Supply & installation of chainlink sliding gate of size - 4.88 mtrs (W) x 2.13 mtrs (H) at cenetered on the new asphalt drive that servers the adjacent building.",
+          "unit": "No.s",
+          "quantity": 1
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "4.4",
+      "srNo": null,
+      "title": "Water supply",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.4.1",
+          "description": "Excavtion for water supply line from warehouse to nearest existing water supply.",
+          "unit": "m3",
+          "quantity": 62.4
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.4.2",
+          "description": "Supply and installation of tracer wire",
+          "unit": "LM",
+          "quantity": 130
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.4.3",
+          "description": "Supply & installation of warning tape",
+          "unit": "LM",
+          "quantity": 130
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.4.4",
+          "description": "Backfilling with  Satisfactory fill Materials",
+          "unit": "m3",
+          "quantity": 60
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "4.5",
+      "srNo": null,
+      "title": "Sewer line",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.5.1",
+          "description": "Excavation for Sewer line from warehouse toilet to nearst existing manhole.",
+          "unit": "m3",
+          "quantity": 100
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.5.2",
+          "description": "Supply & installation of warning tape",
+          "unit": "LM",
+          "quantity": 125
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.5.3",
+          "description": "Backfilling with  Satisfactory fill Materials",
+          "unit": "m3",
+          "quantity": 96
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "4.6",
+      "srNo": null,
+      "title": "Power supply",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.6.1",
+          "description": "Excavation for electrical main cable from warehouse toilet to Bravo substation (aprox. 300 LM)",
+          "unit": "m3",
+          "quantity": 300
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.6.2",
+          "description": "Saw cutting of existing asphalt pavers at two location for elecrical cable installation (1.1 x 0.15x 9mtrs)x2",
+          "unit": "LS",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.6.3",
+          "description": "Supply & instalaltion of 100mm HMA with 300mm sub course ( gatch filling) including prime coat.",
+          "unit": "LS",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.6.4",
+          "description": "Supply & installation of precasted ductbanks (0.6x0.6x9 mtrs) x2",
+          "unit": "LS",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.6.5",
+          "description": "Supply & installation of warning tape",
+          "unit": "LM",
+          "quantity": 350
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.6.6",
+          "description": "Backfilling with  Satisfactory fill Materials",
+          "unit": "m3",
+          "quantity": 277
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "4.7",
+      "srNo": null,
+      "title": "Telecom utility",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.7.1",
+          "description": "Excavation for warehouse communication room to nearest handhole",
+          "unit": "m3",
+          "quantity": 138
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.7.2",
+          "description": "Supply & installation of warning tape",
+          "unit": "LM",
+          "quantity": 115
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.7.3",
+          "description": "Backfilling with  Satisfactory fill Materials",
+          "unit": "m3",
+          "quantity": 65
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": "5",
+      "subRef": null,
+      "srNo": null,
+      "title": "Construction of Cargo Warehouse",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "5.1",
+      "srNo": null,
+      "title": "Civil Works",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.1.1",
+          "description": "Excavation for Concrete foundations with compaction",
+          "unit": "m3",
+          "quantity": 170
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.1.2",
+          "description": "Blinding concrete for footings K150 grade",
+          "unit": "m3",
+          "quantity": 11.76
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.1.3",
+          "description": "Supply & Casting of  Reinforced Concrete footings Including Rebars, formwork & Ready mix concrete of grade K400 SRC",
+          "unit": "m3",
+          "quantity": 28.8
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.1.4",
+          "description": "Supply & Casting of  Reinforced Concrete Column Neck Including Rebars & Ready mix concrete of grade K400 SRC",
+          "unit": "m3",
+          "quantity": 6.69
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.1.5",
+          "description": "Backfilling at foundation and column neck using Satisfactory fill Material",
+          "unit": "m3",
+          "quantity": 122.75
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.1.6",
+          "description": "Blinding concrete for grade beam K150 grade",
+          "unit": "m3",
+          "quantity": 6.48
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.1.7",
+          "description": "Supply & Casting of  Reinforced Concrete Grade Beam Including Rebars & Ready mix concrete of grade K400 (0.25X0.500 mtr)",
+          "unit": "m3",
+          "quantity": 18
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.1.8",
+          "description": "Supply and Installation of Vapor barrier Polythylene Sheet below slab",
+          "unit": "m2",
+          "quantity": 1224
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.1.9",
+          "description": "Supply & Casting of  200mm thick Reinforced Concrete slab on grade Including Rebars, consturction Joint with sealant  & Ready mix concrete of grade K400 SRC",
+          "unit": "m3",
+          "quantity": 244.85
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.1.10",
+          "description": "Supply & installation of 150mm subbase course (gatch) with compaction for concrete walkway",
+          "unit": "m3",
+          "quantity": 16.5
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.1.11",
+          "description": "supply & installation of k400 SRC concrete for walkway perimeters of warehouse as per approved drawings with 150mm base course (Ramp infront of rollup shutter)",
+          "unit": "m3",
+          "quantity": 12.5
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.1.12",
+          "description": "Supply & installation of 150mm subbase course (gatch) with compaction for concrete Ramp",
+          "unit": "m3",
+          "quantity": 14.85
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.1.13",
+          "description": "Supply & installation of K400 SRC concrete walkway from warehouse to asphalt pavement with 150mm base course (2 mtr x 20 mtr x 0.15 mtr)",
+          "unit": "m3",
+          "quantity": 19.8
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.1.14",
+          "description": "Supply & installation of bollards at roll up shutters ends",
+          "unit": "No.s",
+          "quantity": 2
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "5.2",
+      "srNo": null,
+      "title": "Chainlink fence inside warehouse upto eave height",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.2.1",
+          "description": "Excavation/Augering for fence post,corner post -1mtr deep 300mm dia",
+          "unit": "Nos",
+          "quantity": 12
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.2.2",
+          "description": "Supply and casting of K400 grade concrete for fence pole foundations",
+          "unit": "m3",
+          "quantity": 2.5
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.2.3",
+          "description": "Supply and installation of  chain link fabric fence 9gauge up to 7.44 mtrs(eave height) high above Ground with GI coated mesh steel, Galvanized Zinc coated posts including supports,other required accessoriers etc.,as per approved specification & Design",
+          "unit": "Sq,mtrs",
+          "quantity": 198.45
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.2.4",
+          "description": "Supply & installation of elecrical sliding chainlink gate of size 4mtrs(W) X 3.66 mtrs (H)",
+          "unit": "No.s",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.2.5",
+          "description": "Supply & installation of Manual swing gate of size - 1mtr (w) X 2.13 mtr (H)",
+          "unit": "No.s",
+          "quantity": 1
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "5.4",
+      "srNo": null,
+      "title": "Pre Engineered Building (Structural)",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": "5.4.1",
+          "srNo": null,
+          "description": "Supply, Fabrication and Erection of  30*42m Steel Structure with Epoxy Paint finish for",
+          "unit": "Tons",
+          "quantity": 75
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "5.4.1.1",
+      "title": "Base Plate and Anchor Bolts",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "5.4.1.2",
+      "title": "Tapered Column",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "5.4.1.3",
+      "title": "Rafters",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "5.4.1.4",
+      "title": "Purlins",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "5.4.1.5",
+      "title": "Horizontal Girts",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "5.4.1.6",
+      "title": "Bracings- Roof and Walls",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "5.4.1.7",
+      "title": "Sandwich panel steel run",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "5.4.2",
+      "srNo": null,
+      "title": "Exterior walls",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.4.2.1",
+          "description": "Supply & Installation of 100mm thick thermal insulation of  ( un-faced fiber glass insulation) metal sandwich panel  with R-19 Value sealed with Intumescent spray foam & 24 gauge Steel ribbed Skin pressed both sides  and 1hr Fire Rated",
+          "unit": "m2",
+          "quantity": 860
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "5.4.3",
+      "srNo": null,
+      "title": "Roof",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.4.3.1",
+          "description": "Supply & Installation of 150mm thick Metal Sandwich panel with mineral wool insulation  with R-30 Value sealed with Intumescent spray foam & 26 gauge Steel ribbed Skin pressed both sides ( Exterior color- desert beige) and 1hr Fire Rated",
+          "unit": "m2",
+          "quantity": 1280
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.4.3.2",
+          "description": "Roofing Accessories",
+          "unit": "Lm",
+          "quantity": 42
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.4.3.3",
+          "description": "4\"X5\", 22Gauage metal steel gutter",
+          "unit": "Lm",
+          "quantity": 84
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.4.3.4",
+          "description": "4\"X4\", 22 Gauage metal steel Downspout.",
+          "unit": "Lm",
+          "quantity": 46.5
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.4.3.5",
+          "description": "Splash block",
+          "unit": "No",
+          "quantity": 8
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "5.4.4",
+      "srNo": null,
+      "title": "External Doors",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.4.4.1",
+          "description": "Supply and Installation of Single leaf steel hallow metal Door 45min Fire Rated 914 mm (W)x 2134 mm (H) with 50 mm thickness including min 3 heavy duty hinges,aluminim threshhold, cipher lock, Panic Hardware from inside,door sweep and weather stripping and gasket etc",
+          "unit": "No",
+          "quantity": 6
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.4.4.2",
+          "description": "Supply & installation of overhead rolling (coiling) door with hood & operated cover, 20 gauge slats, insulated doors,sensing edge, power coated surfaces,  heavy duty springs, chain diverter, vibration isolators and entrapment protection device of size - 4114mm (H) * 3657mm(W)",
+          "unit": "No",
+          "quantity": 1
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "5.4.5",
+      "srNo": null,
+      "title": "Steel structure for HVAC units- 4 no.s",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.4.5.1",
+          "description": "Excavation for steel structure footing",
+          "unit": "m3",
+          "quantity": 4
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.4.5.2",
+          "description": "Supply & installation of k150  blinding concrete",
+          "unit": "m3",
+          "quantity": 1.12
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.4.5.3",
+          "description": "Supply & install k400 concrete for footings & column neck",
+          "unit": "m3",
+          "quantity": 4.32
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.4.5.4",
+          "description": "Bacfilling",
+          "unit": "m3",
+          "quantity": 2.88
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.4.5.5",
+          "description": "Supply ,fabrication & installation of steel structure (incl. columns ,beams,checker plate roof , railing and staircase ladder)",
+          "unit": "tons",
+          "quantity": 3.2
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": "6",
+      "subRef": null,
+      "srNo": null,
+      "title": "Architectural Works",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "Openings",
+          "unit": null,
+          "quantity": null
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "Doors and hardwares",
+          "unit": null,
+          "quantity": null
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "6.1",
+      "srNo": null,
+      "title": "Interior Doors",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.1.1",
+          "description": "Interior door in Utility room: Supply and Installation of Single leaf  hollow metal filled Interior Door 20min Fire Rated with metal louver door size 914 mm (W)x 2134 mm (H) with 50 mm thickness including with weather gasket, Min 3-hinges, threshold, door silencer, mortise lockset,kick plate and cylinder door closer, door stop.Complete with all accessories (Door No:102,103)",
+          "unit": "No",
+          "quantity": 2
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.1.2",
+          "description": "Janitor room:Supply and Installation of Single leaf  hollow metal filled Interior Door 20min Fire Rated  door size 914 mm (W)x 2134 mm (H) with 50 mm thickness including with weather gasket, Min 3-hinges, threshold, door silencer, mortise lockset,kick plate and cylinder door closer, door stop.Complete with all accessories (Door No:105)",
+          "unit": "No",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.1.3",
+          "description": "Supply and Installation of Single leaf  hollow metal filled Interior Door 90min Fire Rated 914 mm (W)x 2134 mm (H) with 50 mm thickness including with weather gasket, Min 3-hinges, threshold, door silencer, mortise ciper lock with key ,kick plate,latch set and cylinder door closer, door stop (Door No:108)",
+          "unit": "No",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.1.4",
+          "description": "Supply and Installation of Single leaf hollow metal frame wood door 20min Fire Rated honey stain finish on light oak species wood  Interior Door 914 mm (W)x 2134 mm (H) with 50 mm thickness including with weather gasket, Min 3-hinges, threshold, door silencer, mortise lockset (privacy lock thumb turn) ,kick plate and cylinder door closer, door stop. Including with all accessories (Door No:104-Toilet door)",
+          "unit": "No",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.1.5",
+          "description": "Supply and Installation of Single leaf  hollow metal frame wood Door 20min Fire Rated (honey stain finish on light oak species wood) 914 mm (W)x 2134 mm (H) with 50 mm thickness including with weather gasket, Min 3-hinges, threshold, door silencer, mortise ciper lock with key ,kick plate,latch set and cylinder door closer, door stop Complete with all accessories (Door No:106,107)",
+          "unit": "No",
+          "quantity": 2
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "6.2",
+      "srNo": null,
+      "title": "Finishes",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "Floors",
+          "unit": null,
+          "quantity": null
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.2.1",
+          "description": "Supply and Installation of Concrete floor Sealer two Coat. Complete with all accessories.",
+          "unit": "sq.m",
+          "quantity": 1155
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.2.2",
+          "description": "Supply and installation of Static Dissipative floor tile. Color (Marble Beige) size                 300 mm x 300 mm with grout fill in Comm.rooms.",
+          "unit": "sq.m",
+          "quantity": 8
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.2.3",
+          "description": "Supply and installation of 600mm x 600mm Ceramic floor tile.                                                     Color (IPO6 Natural Beige) with grout fill in Restroom.",
+          "unit": "sq.m",
+          "quantity": 9
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.2.4",
+          "description": "Supply and installation of 300mm x 600mm Bio-Based floor tile.                                               Color (T3614 Bisque) with grout fill in Office area.",
+          "unit": "sq.m",
+          "quantity": 55
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.2.5",
+          "description": "Supply and installation of Rubber skirting except for restrooms & janitor room.(150mm high)",
+          "unit": "LM",
+          "quantity": 205
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.2.6",
+          "description": "Supply and Installation of Marble threshold for floor change of seven rooms.",
+          "unit": "Nos",
+          "quantity": 7
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "6.3",
+      "srNo": null,
+      "title": "Walls",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "Interior wall",
+          "unit": null,
+          "quantity": null
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.3.1",
+          "description": "Supply and installation of 92mm thk metal steel studs with 16mm thk high Impact Resistant Gypsum board  and 1 hour fire rated assembly for interior perimeter wall and tool room.",
+          "unit": "sq.m",
+          "quantity": 885
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.3.2",
+          "description": "Supply and installation of 92mm thk metal steel studs with unfaced sound attenuation Blanket  and 16mm thk Gypsum board for interior partition wall",
+          "unit": "sq.m",
+          "quantity": 232
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.3.3",
+          "description": "Supply and installation of 92mm thk metal steel studs with unfaced sound attenuation Blanket and 16mm thk Moisture Resistant Gypsum board for interior partition wall (Toilet & Janitor room)",
+          "unit": "sq.m",
+          "quantity": 34
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.3.4",
+          "description": "Supply and installation of 92mm thk metal steel studs16mm thk cement board at Toilet & Janitor room",
+          "unit": "sq.m",
+          "quantity": 46
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.3.5",
+          "description": "Supply and installation of ceramic wall tile size 300mm x 300 mm with grout fill, water resistance of  in Toilet & Janitor room with all necessary accessories.",
+          "unit": "sq.m",
+          "quantity": 46
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "6.4",
+      "srNo": null,
+      "title": "Ceiling",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.4.1",
+          "description": "Supply and installation of suspended acoustical ceiling tile (ACT) of size 600x600mm including main runner,with T grid system and 12 gauge galvanized wire spaced at 4' and other necessary accessories. Except storage warehouse \"A&B\" and Tool Room",
+          "unit": "sq.m",
+          "quantity": 111
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.4.2",
+          "description": "Supply and installation of 16mm thk. Gypsum board ceiling with 88mm unfaced sound attenuation Blanket",
+          "unit": "sq.m",
+          "quantity": 125
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.4.3",
+          "description": "Supply and installation of 16mm thk. moisture resistant Gypsum board with 88mm unfaced sound attenuation Blanket at Toilet & Janitor room",
+          "unit": "sq.m",
+          "quantity": 15
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.4.4",
+          "description": "Supply and installlation of 19mm thk OSD plywood with 25.4mm gypsum board liner, connected to the gypsum board ceiling with 254x50mm metal joists. Complete with all accessories.",
+          "unit": "sq.m",
+          "quantity": 125
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "6.5",
+      "srNo": null,
+      "title": "Paint Finish",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.5.1",
+          "description": "Supply and apply of paint finish on gypsum board wall partition.",
+          "unit": "sq.m",
+          "quantity": 1200
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.5.2",
+          "description": "Supply and apply of paint finish on gypsum board ceiling.",
+          "unit": "sq.m",
+          "quantity": 15
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "6.6",
+      "srNo": null,
+      "title": "Furnishing",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.6.1",
+          "description": "Industrial Metal Shelving:Supply and installation Pallet Racks of 3-tier, steel, heavy duty shelving units of size 48\"Dx120\"W x144\" with all necessary accessories as per specifications.",
+          "unit": "No",
+          "quantity": 104
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.6.2",
+          "description": "Supply and installation of steel Flammable Safety cabinets of size 43\"Wx18\"Dx44\"H, yellow powder coated,self-closing double door, keyed lock, recessed pull handles, 4 shelves complete with all necessary accessories.",
+          "unit": "No",
+          "quantity": 5
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.6.3",
+          "description": "Supply and installation of Metal Modular Cabinets of size 36\"Wx36\"Dx60\"H, heavy-duty drawers with full-height sidewall, unit color-dark blue.Complete with all necessary accessories.",
+          "unit": "No",
+          "quantity": 6
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.6.4",
+          "description": "Supply and installation of Workbenches of size 72\"Wx30\"Dx33.5\"H , 12 gauge steel top,13 gauge steel frame,square edges,1 cabinet, 7 drawers, powder coated grey, including all fasteners. Complete with all necessary accessories.",
+          "unit": "No",
+          "quantity": 3
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "6.7",
+      "srNo": null,
+      "title": "Landscape",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.7.1",
+          "description": "Supply and installation of tree.",
+          "unit": "No",
+          "quantity": 2
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.7.2",
+          "description": "Supply and installation of bushes(Agave Desmentiana)",
+          "unit": "No",
+          "quantity": 6
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": "7",
+      "subRef": null,
+      "srNo": null,
+      "title": "Plumbing works.",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "7.1",
+      "srNo": null,
+      "title": "Water & Sewage lines",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.1.1",
+          "description": "Supply,Installation and Connection of 2\" Cold water line from Main line to restroom and janitor room uPVC pressure pipes.(Consider outside).",
+          "unit": "LM",
+          "quantity": 130
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.1.2",
+          "description": "Supply and installation of 1\" Cold Water Pipe line, uPVC pressure pipes with Shutoff Valves for  restrooms and janitor room.(Consider inside).",
+          "unit": "LM",
+          "quantity": 20
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.1.3",
+          "description": "Supply and installation of 1\" Hot Pipe line, PEX with Shutoff Valves for  restrooms and janitor room.(Consider inside).",
+          "unit": "LM",
+          "quantity": 15
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.1.4",
+          "description": "Supply,Installation & Connection of 3\" uPVC Pipes, restroom and janitor room to existing sanitary sewage storage tank including with fitting,joints bends and accessories.(Consider outside).",
+          "unit": "LM",
+          "quantity": 125
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.1.5",
+          "description": "Supply,Installation & Connection of 3\" uPVC Pipes inside the restrooms and janitor room to sewer main line including with fitting,joints bends and accessories.(Consider inside)",
+          "unit": "LM",
+          "quantity": 15
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.1.6",
+          "description": "Supply and installaton of Vent pipe System uPVC.",
+          "unit": "LM",
+          "quantity": 10
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "7.2",
+      "srNo": null,
+      "title": "Supply and Installation of Electric Water Heater",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.2.1",
+          "description": "22 Ltr (6 Gallon)",
+          "unit": "Nos.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.2.2",
+          "description": "Drain Pan",
+          "unit": "Nos.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.2.3",
+          "description": "Supply and installation of insulation for hot water pipe Line",
+          "unit": "LM",
+          "quantity": 15
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.2.4",
+          "description": "Supply and Installation of Duplex Pump (Booster Pump).Duplex pump will be Included with shutoff Valve, Capacity:1 HP.",
+          "unit": "Set",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.2.5",
+          "description": "Supply and installation of Recirculations Pump",
+          "unit": "Nos.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.2.6",
+          "description": "Supply and installaton of water hammer or air chambers.",
+          "unit": "Nos.",
+          "quantity": 2
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.2.7",
+          "description": "Supply and installation of Heavy duty floor drains for storage warehouse and loading and unloading bay.",
+          "unit": "Nos.",
+          "quantity": 9
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.2.8",
+          "description": "Supply and installation of Grease Interceptors for storage warehouse and loading and unloading bay.",
+          "unit": "Nos.",
+          "quantity": 8
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "7.3",
+      "srNo": null,
+      "title": "Supply and installation of Plumbing Fixtures",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.3.1",
+          "description": "Floor Drain with P trap",
+          "unit": "Nos.",
+          "quantity": 2
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.3.2",
+          "description": "Floor Clean Out with P Trap",
+          "unit": "Nos.",
+          "quantity": 2
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.3.3",
+          "description": "Ball Valve",
+          "unit": "Nos.",
+          "quantity": 10
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.3.4",
+          "description": "Angle Valve",
+          "unit": "Nos.",
+          "quantity": 6
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.3.5",
+          "description": "1\" Gate Valve with Enclouser",
+          "unit": "Nos.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.3.6",
+          "description": "Pressure reducing valve",
+          "unit": "Nos.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.3.7",
+          "description": "Pressure gauge",
+          "unit": "Nos.",
+          "quantity": 2
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.3.8",
+          "description": "Strainer",
+          "unit": "Nos.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.3.9",
+          "description": "Western Water Closet",
+          "unit": "Nos.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.3.10",
+          "description": "Water Closet Outlets",
+          "unit": "Nos.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.3.11",
+          "description": "Hand Shower Hose",
+          "unit": "Nos.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.3.12",
+          "description": "Pedestal wash basins",
+          "unit": "Nos.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.3.13",
+          "description": "Wash basin faucet and tap",
+          "unit": "Nos.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.3.14",
+          "description": "Floor mounted mop sink",
+          "unit": "Nos.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.3.15",
+          "description": "Mop sink faucet and tap",
+          "unit": "Nos.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.3.16",
+          "description": "Drain pipe with P trap for wash basins",
+          "unit": "Nos.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.3.17",
+          "description": "Check Valve",
+          "unit": "Nos.",
+          "quantity": 4
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "7.4",
+      "srNo": null,
+      "title": "Greywater Irrigation System",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.4.1",
+          "description": "Supply and installation of uPVC pipes  including with fitting, joints, bend,strainer and other accessories for greywater irrigation system",
+          "unit": null,
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.4.2",
+          "description": "Supply and installation of irrigation pumps including with fitting,valves and other accessories. Capacity:",
+          "unit": null,
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.4.3",
+          "description": "Supply and installation of soleniod valve including with accessories and concrete pit with access door.",
+          "unit": null,
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.4.4",
+          "description": "Supply and installation hose bibbs",
+          "unit": null,
+          "quantity": 3
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.4.5",
+          "description": "Supply and installation of greywater tank including with cover and other required accessories Size:1.5m(L) x 1.5m(W) x1.3m(D).",
+          "unit": null,
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.4.6",
+          "description": "Supply and installation of gate valves",
+          "unit": null,
+          "quantity": 2
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": "7.5",
+          "srNo": null,
+          "description": "Execute and conduct pipe water pressure test.",
+          "unit": null,
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": "7.6",
+          "srNo": null,
+          "description": "Execute and conduct on hot and cold water supply line sterilization of liquid chlorine (chlorination).",
+          "unit": null,
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": "7.7",
+          "srNo": null,
+          "description": "Supply and installation of Hanging rods,Pipe clams,Framing Channel including Nuts & Bolts",
+          "unit": null,
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": "7.8",
+          "srNo": null,
+          "description": "Testing and commissioning.",
+          "unit": null,
+          "quantity": 1
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "7.9",
+      "srNo": null,
+      "title": "Toilet Accessories",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.9.1",
+          "description": "Supply and installation of wall mounted mirror of nom. Size 450mm (w) x 610mm (h) inclduing stainless steel frame",
+          "unit": "No",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.9.2",
+          "description": "Supply and installation of wall mounted 230mm dia paper towel dispenser (PVC)",
+          "unit": "No",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.9.3",
+          "description": "Supply and installation of wall mounted liquid soap dispenser (Manual push)",
+          "unit": "No",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.9.4",
+          "description": "Supply and installation of Toilet tissue paper holder Double roll (stainless steel roll Type)",
+          "unit": "No",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.9.5",
+          "description": "Supply of Waste receptacles, stainless steel with top (13 gallon).",
+          "unit": "No",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.9.6",
+          "description": "Supply and installation of stainless steel shelf with hemmed edges below the mirror",
+          "unit": "No",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.9.7",
+          "description": "Mop sink faucet and tap in Janitor room.",
+          "unit": "No",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "7.9.8",
+          "description": "Supply and installation of stainless steel coat hook, complete with all necessary accessories and fixing",
+          "unit": "No",
+          "quantity": 1
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": "8",
+      "subRef": null,
+      "srNo": null,
+      "title": "HVAC works.",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "8.1",
+      "srNo": null,
+      "title": "HVAC Units",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.1.1",
+          "description": "Supply and installation of  Package Units with integrated heating system Capacity:120000Btu/hr. (10tons)                                                                                                  (Note: Capacity of Package units may increase based on actual calculations.)",
+          "unit": "Nos.",
+          "quantity": 4
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.1.2",
+          "description": "Supply and installation of HVAC package unit protective cover cladding",
+          "unit": "Nos.",
+          "quantity": 4
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.1.3",
+          "description": "Supply and Installation of 100 mm x 100mm anti-vibration mounted Pads for HVAC Units",
+          "unit": "Nos.",
+          "quantity": 16
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.1.4",
+          "description": "Supply and installation of drain line included with p-trap, fittings and other required accessories for package unit.",
+          "unit": "LM",
+          "quantity": 20
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "8.1.5",
+      "title": "Supply and installation of Mini Split Air conditioning Cool & Heat (Heat Pump) including with refrigerant pipes, fittings and other accessories",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.1.6",
+          "description": "Capacity:18000Btu/hr. (1.5tons) for Electrical Room & Communication Room.",
+          "unit": "Nos.",
+          "quantity": 2
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.1.7",
+          "description": "Capacity:24000Btu/hr. (2tons) for tool room, Office-01 & Office-02",
+          "unit": "Nos.",
+          "quantity": 3
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.1.8",
+          "description": "Supply and installation of New Concrete Footing,Foundation or Slab and Reinforcing Steel for Mini Split Unit",
+          "unit": "Nos.",
+          "quantity": 5
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.1.9",
+          "description": "Supply and installation of drain line included with p-trap, fittings and other required accessories for mini split unit",
+          "unit": "LM",
+          "quantity": 35
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "8.2",
+      "srNo": null,
+      "title": "Duct System",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.2.1",
+          "description": "Supply and installation of Galvanized Sheet Metal Duct Work ( Supply Air Duct, Return Air Duct and Fresh Air Duct)",
+          "unit": "LM",
+          "quantity": 180
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "Supply and Installation of Volume control Dampers(VCD)",
+          "unit": null,
+          "quantity": null
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "14 inch diameter",
+          "unit": "Nos.",
+          "quantity": 20
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "16 x 12 inch",
+          "unit": "Nos.",
+          "quantity": 4
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.2.2",
+          "description": "30 x 20 inch",
+          "unit": "Nos.",
+          "quantity": 4
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.2.3",
+          "description": "Supply and Installation of flexible duct",
+          "unit": "LM",
+          "quantity": 30
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "8.3",
+      "srNo": null,
+      "title": "Supply and Installation of Insulation",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.3.1",
+          "description": "Inside Ducts, density 24 kg/m3 and 25mm Thk.",
+          "unit": "LM",
+          "quantity": 150
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.3.2",
+          "description": "Outside Ducts, density 48 kg/m3 and 50mm Thk.",
+          "unit": "LM",
+          "quantity": 50
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.3.3",
+          "description": "Supply and Installation of Flexible Duct Connector to Connect  Units to Supply & Return Ducts",
+          "unit": "LM",
+          "quantity": 75
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "8.4",
+      "srNo": null,
+      "title": "Supply and Installation of Air Terminals",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.4.1",
+          "description": "Supply Air Diffuser Circular ceiling diffuser",
+          "unit": "Nos.",
+          "quantity": 20
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.4.2",
+          "description": "Return Air Grille",
+          "unit": "Nos.",
+          "quantity": 4
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "8.5",
+      "srNo": null,
+      "title": "Air Intakes",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.5.1",
+          "description": "Supply and Installation of Sand Trap Louvers with 50 mmThk. Washable Air filter, Damper and Bird Screen (Size: inch)",
+          "unit": "Nos.",
+          "quantity": 4
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.5.2",
+          "description": "Supply and installation of  Wall Mounted exhasut fans with self closing louver for Communication room, electrical room, janitor room and toilet Capacity(200CFM)",
+          "unit": "Nos.",
+          "quantity": 5
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.5.3",
+          "description": "Supply and installation of Motorized Smoke dampers including actuator and other required accessories for supply and return air ducts. Size( 30x20inch)",
+          "unit": "Nos.",
+          "quantity": 8
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.5.4",
+          "description": "Supply and installation of Programmable thermostats",
+          "unit": "Nos.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.5.5",
+          "description": "Supply and installation of L-angles, and including accessories",
+          "unit": "LS",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.5.6",
+          "description": "Supply and installation of Adhesive, Sealant, Coating and Canvas",
+          "unit": "LS",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.5.7",
+          "description": "Execution of repair works on walls for through wall duct penetration and proper sealing",
+          "unit": "LS",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.5.8",
+          "description": "Sleeve with PVC for Main Ducts and Branch Ducts",
+          "unit": "LS",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "8.5.9",
+          "description": "Testing, adjusting, commissioning and balancing",
+          "unit": "LS",
+          "quantity": 1
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": "9",
+      "subRef": null,
+      "srNo": null,
+      "title": "ELECTRICAL",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "9.1",
+      "srNo": null,
+      "title": "ELECTRICAL SUBSTATION WORKS",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.1.1",
+          "description": "Modification works on existing LT panel in Bravo substation by the additional installation of extension busbars and 630at, 3p, 36kA, adjustable MCCB",
+          "unit": "LS",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.1.2",
+          "description": "Core cutting and conduit stub-up installation works for all sets of outgoing cables of new 630at MCCB",
+          "unit": "LS",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "EQUIPMENT",
+          "unit": null,
+          "quantity": null
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "SWITCHBOARD",
+          "unit": null,
+          "quantity": null
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "9.2",
+      "srNo": null,
+      "title": "MSB-1",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.2.1",
+          "description": "Supply and installation of 10-way, single busbar, 415v, 50hz, IP41, free stand, MSB assembly including conduit stub-ups, grounding, cable dressing and manhole and trench set, termination of all incoming and outgoing cables necessary to function the equipment properly and complete.",
+          "unit": "no.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "10-way, single busbar, 415v, 50hz, free stand, MSB\nincoming:\n1 no. - 630at, 3p, 36ka, adj. mccb\noutgoing: \n2 nos. - 20at, 3p, 36ka, adj. mccb\n1 no. - 40at, 3p, 36ka, adj. mccb\n1 no. - 63at, 3p, 36ka, adj. mccb\n5 no. - 80at, 3p, 36ka, adj. mccb w/ 300ma, ELR\n1 no. - 200at, 3p, 36ka, adj. mccb w/ 300ma ELR\nincluding necessary surge protective device, controls, analog voltmeters, ammeters and selector switches, compartment for termination of 6 sets of 4c-300 sq.mm cu/xlpe/swa/pvc multicore cables to complete the assembly",
+          "unit": null,
+          "quantity": null
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "300 sq.mm crimp lugs",
+          "unit": "nos.",
+          "quantity": 30
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "35 sq.mm crimp lugs",
+          "unit": "nos.",
+          "quantity": 6
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "300 sq.mm banjo rings",
+          "unit": "nos.",
+          "quantity": 6
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "160mmØ, 5mm thick, upvc conduit sleeve",
+          "unit": "mtrs.",
+          "quantity": 6
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "160mmØ bell mouth",
+          "unit": "mtrs.",
+          "quantity": 6
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "800x500x50mm concrete trench cover",
+          "unit": "nos.",
+          "quantity": 4
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "2x1.4x1 meter (internal dimension) electrical manhole inside electrical room",
+          "unit": "no.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "110mmØ upvc conduit",
+          "unit": "meters",
+          "quantity": 3.4
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "steel base frame support for free standing MSB",
+          "unit": "set",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "1000x150x150mm, HDG, wire gutter",
+          "unit": "no.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "execution of panel termination of wires and cables",
+          "unit": "LS",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "T1+T2, 50ka, SPD",
+          "unit": "no",
+          "quantity": 1
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "9.3",
+      "srNo": null,
+      "title": "DISTRIBUTION BOARD",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "9.3.1",
+      "title": "DP-415V LP",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "Supply and installation of 12-ways(4/6), double busbar, 415/240v, 50hz, IP41, indoor type, surface mount, DB-415V LP assembly including main feeder cable, conduits, grounding, cable dressing and termination of all incoming and outgoing cables/wires necessary to function the equipment properly and complete.",
+          "unit": "set",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "12-way(4/6), double busbar, 415/240v, 50hz, wall mount IP41, DB-415V LP\nincoming:\n1 no. - 63at, 3p, 10ka, MCB\noutgoing:\n36 nos. - 20at, 1p, 10ka, mcb\nincluding separate photocell box, relays, contactors, grounding and neutral busbars to complete the assembly",
+          "unit": "no.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "4-16 sq.mm cu/pvc",
+          "unit": "meters",
+          "quantity": 32
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "1-6 sq.mm cu/pvc (g)",
+          "unit": "meters",
+          "quantity": 8
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "1c-50 sq.mm cu/pvc (green) as GEC",
+          "unit": "meters",
+          "quantity": 4
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "25mmØ gs conduit",
+          "unit": "meters",
+          "quantity": 12
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "gs conduit fittings for installation",
+          "unit": "LS",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "execution of panel termination of wires and cables",
+          "unit": "LS",
+          "quantity": 1
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "9.4",
+      "srNo": null,
+      "title": "DP-415V COMM",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.4.1",
+          "description": "Supply and installation of 6-ways, single busbar, 415/240v, 50hz, IP41, indoor type, surface mount, DB-415V COMM assembly including main feeder cable, conduits, grounding, cable dressing and termination of all incoming and outgoing cables/wires necessary to function the equipment properly and complete.",
+          "unit": "set",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "6-way, single busbar, 415/240v, 50hz, wall mount IP41, DB-415V COMM\nincoming:\n1 no. - 63at, 3p, 10ka, MCB\n1 no. - 63a, 30ma, 3p+n, RCCB\noutgoing:\n18 nos. - 20at, 1p, 10ka, mcb",
+          "unit": "no.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "4-16 sq.mm cu/pvc",
+          "unit": "meters",
+          "quantity": 32
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "1-6 sq.mm cu/pvc (g)",
+          "unit": "meters",
+          "quantity": 8
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "1c-50 sq.mm cu/pvc (green) as GEC",
+          "unit": "meters",
+          "quantity": 4
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "25mmØ gs conduit",
+          "unit": "meters",
+          "quantity": 12
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "gs conduit fittings for installation",
+          "unit": "LS",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "execution of panel termination of wires and cables",
+          "unit": "LS",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "T1+T2, 50ka, SPD",
+          "unit": "no.",
+          "quantity": 1
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "9.5",
+      "srNo": null,
+      "title": "DP-208V P",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.5.1",
+          "description": "Supply and installation of 4-way, 3Ø, 208/120v, 60hz, indoor type, surface mount, DB-208V P including incoming main feeder cable and associated raceway, termination of wires and cables, cable dressing and grounding to complete the assembly",
+          "unit": "set",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "4-way, single busbar, 208/120v, 50hz, wall mount IP41, DB-208V P\nincoming:\n1 no. - 32at, 3p, 10ka, MCB\n1 no. - 32a, 30ma, 3p+n, RCCB\noutgoing:\n12 nos. - 20at, 1p, 10ka, mcb",
+          "unit": "no.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "4-6 sq.mm cu/pvc",
+          "unit": "meters",
+          "quantity": 32
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "1-6 sq.mm cu/pvc (g)",
+          "unit": "meters",
+          "quantity": 8
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "1c-50 sq.mm cu/pvc (green) as GEC",
+          "unit": "meters",
+          "quantity": 4
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "25mmØ gs conduit",
+          "unit": "meters",
+          "quantity": 12
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "gs conduit fittings for installation",
+          "unit": "LS",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "execution of panel termination of wires and cables",
+          "unit": "LS",
+          "quantity": 1
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "9.6",
+      "srNo": null,
+      "title": "DISCONNECT SWITCH",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.6.1",
+          "description": "Supply and installation of 20a, 2p, ip65, polycarbonate, rotary type, disconnect switch including termination and dressing of incoming and outgoing wires for ac outdoor units, sliding gate, roll up doors, and pumps.",
+          "unit": "nos.",
+          "quantity": 8
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.6.2",
+          "description": "Supply and installation of 80a, 3p+n, metal enclosed, ip54, rotary type disconnect switch including termination and dressing of incoming and outgoing wires for HVAC units",
+          "unit": "nos.",
+          "quantity": 4
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.6.3",
+          "description": "Supply and installation of 20a, 3p+n, metal enclosed, ip41, rotary type disconnect switch including termination and dressing of incoming and outgoing wires for frequency voltage converter",
+          "unit": "no.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.6.4",
+          "description": "Supply and installation of 32a, 3p+n, metal enclosed, ip41, rotary type disconnect switch including termination and dressing of incoming and outgoing wires for frequency voltage converter",
+          "unit": "no.",
+          "quantity": 1
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "9.7",
+      "srNo": null,
+      "title": "FREQUENCY/VOLTAGE CONVERTER",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.7.1",
+          "description": "Supply and installation of 10kVA, pri:415v,50hz - sec:208/120v, 60hz, frequency voltage converter to include outgoing and incoming cables along with flexible metal conduit from/to disconnect switches",
+          "unit": "set",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "10kVA, pri:415v,50hz - sec:208/120v, 60hz, frequency voltage converter",
+          "unit": "nos",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "4-4 sq.mm cu/pvc + 1-4 sq.mm cu/pvc (g)",
+          "unit": "mtrs.",
+          "quantity": 20
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "4-6 sq.mm cu/pvc + 1-6 sq.mm cu/pvc (g)",
+          "unit": "mtrs.",
+          "quantity": 20
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "25mmØ liquid tight flexible metal conduit",
+          "unit": "mtrs.",
+          "quantity": 4
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "25mmØ adapators for LFMC",
+          "unit": "nos.",
+          "quantity": 4
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "9.8",
+      "srNo": null,
+      "title": "CONDUIT SYSTEM",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "9.8.1",
+      "title": "Supply and installation of concrete encased 160mmØ upvc conduit for cables crossing roads",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.8.1.1",
+          "description": "160mmØ upvc conduit",
+          "unit": "nos.",
+          "quantity": 108
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.8.1.2",
+          "description": "duct spacers",
+          "unit": "mtrs.",
+          "quantity": 108
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.8.1.3",
+          "description": "9 meter length concrete encasing of 4 sets of conduits",
+          "unit": "mtrs.",
+          "quantity": 3
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "9.9",
+      "srNo": null,
+      "title": "WIRES AND CABLES",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "9.9.1",
+      "title": "Supply and installation of 4 sets of 4c-300 sq.mm cu/xlpe/swa/pvc +\n1c-50 sq.mm cu/pvc (g) between MSB-1 and substation",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "reference only for pricing. Qty for total set",
+          "unit": null,
+          "quantity": null
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "4c-300 sq.mm cu/xlpe/swa/pvc",
+          "unit": "mtrs.",
+          "quantity": 1400
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "1c-35 sq.mm cu/pvc (green)",
+          "unit": "mtrs.",
+          "quantity": 1400
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "300 sq.mm crimp lugs in bravo Sub Station",
+          "unit": "nos.",
+          "quantity": 16
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "50 sq.mm crimp lugs required in bravo substation",
+          "unit": null,
+          "quantity": 4
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "brass cable gland w/ banjo ring for 4c-300 sq.mm armored multicore cable required in bravo substation",
+          "unit": "nos.",
+          "quantity": 4
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "9.9.2",
+      "title": "Supply and installation of the 1 set of 4c-25 sq.mm cu/xlpe/swa/pvc + 1c-16 sq.mm cu/pvc (g) between MSB and HVAC units",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "reference only for pricing. Qty for all sets",
+          "unit": null,
+          "quantity": null
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "4c-25 sq.mm cu/xlpe/swa/pvc",
+          "unit": "mtrs.",
+          "quantity": 180.2
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "1c-16 sq.mm cu/pvc (green)",
+          "unit": "mtrs.",
+          "quantity": 85.732
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "brass cable gland",
+          "unit": "nos",
+          "quantity": 8
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "50mmØ gs conduit",
+          "unit": "meters",
+          "quantity": 12
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "50mmØ coupling",
+          "unit": "nos",
+          "quantity": 20
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "50mmØ brass male bush",
+          "unit": "nos",
+          "quantity": 8
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.9.3",
+          "description": "Supply and installation of electrical warning tapes",
+          "unit": "nos.",
+          "quantity": 28
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "9.1",
+      "srNo": null,
+      "title": "LIGHTINGS",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.10.1",
+          "description": "Supply and installation of light and switch points that include materials such as gs conduit, boxes, fittings, wires and connectors to complete provision for power supply for wiring devices",
+          "unit": "pts.",
+          "quantity": 92
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "9.10.2",
+      "title": "Supply and installation of all installed lights as per approved submittals and drawings",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.10.3",
+          "description": "40w, 4200lm, 4000k, ip44, 60x60, led panel light",
+          "unit": "nos.",
+          "quantity": 19
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.10.4",
+          "description": "40w, 4200lm, 4000k, ip44, 60x60, led panel light w/ 90 min. emgcy battery back-up",
+          "unit": "nos.",
+          "quantity": 5
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.10.5",
+          "description": "40w, 4200lm, 4000k, ip44, 60x60, led panel light",
+          "unit": "nos.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.10.6",
+          "description": "40w, 4200lm, 4000k, ip44, 60x60, led panel light\nw/ 90 min. emgcy battery back-up",
+          "unit": "nos.",
+          "quantity": 2
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.10.7",
+          "description": "200w, 27000lm, 4000k, ip65, led high bay light",
+          "unit": "nos.",
+          "quantity": 10
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.10.8",
+          "description": "200w, 27000lm, 4000k, ip65, led high bay light \nw/ 90 min. emgcy battery back-up",
+          "unit": "nos.",
+          "quantity": 10
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.10.9",
+          "description": "14w, 1540lm, 4000k, ip44, led vanity light",
+          "unit": "no.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.10.10",
+          "description": "100w, 11165lm, 4000k, ip65, led flood light",
+          "unit": "no.",
+          "quantity": 14
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.10.11",
+          "description": "16w, 2300lm, 4000k, ip65, led bulkhead light",
+          "unit": "no.",
+          "quantity": 6
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.10.12",
+          "description": "5w, maintained type, single sided, combination led exit and twin spot light",
+          "unit": "no.",
+          "quantity": 6
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.10.13",
+          "description": "5w, maintained type, double sided, two directional, led exit light",
+          "unit": "no.",
+          "quantity": 3
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "9.10.3",
+      "title": "Supply and installation of all installed switches as per approved submittals and drawings",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.10.3.1",
+          "description": "10a, one gang one way, metal clad, light switch",
+          "unit": "nos.",
+          "quantity": 9
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.10.3.2",
+          "description": "10a, one gang two way, metal clad, light switch",
+          "unit": "nos.",
+          "quantity": 2
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.10.3.3",
+          "description": "10a, one gang intermediate, metal clad, light switch",
+          "unit": "nos.",
+          "quantity": 4
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "9.11",
+      "srNo": null,
+      "title": "WIRING DEVICES",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.11.1",
+          "description": "Supply and installation of power points that include materials such as gs conduit, boxes, fittings, wires and connectors to complete provision for power supply for wiring devices",
+          "unit": "pts.",
+          "quantity": 66
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "9.11.2",
+      "title": "Supply and installation of all installed wiring devices as per approved submittals and drawings",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.11.3",
+          "description": "13a, 250v, metal clad type, single unswitched socket outlet",
+          "unit": "nos.",
+          "quantity": 2
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.11.4",
+          "description": "13a, 30mA, 250v, metal clad type, twin switched RCD socket outlet",
+          "unit": "nos.",
+          "quantity": 23
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.11.5",
+          "description": "13a, 250v, metal clad type, twin unswitched socket outlet",
+          "unit": "nos.",
+          "quantity": 4
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.11.6",
+          "description": "15a, 30mA, 125v, metal clad type, unswitched duplex receptacle outlet",
+          "unit": "nos.",
+          "quantity": 23
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.11.7",
+          "description": "20a, 250v, double pole switch with jb for exhaust fan, ac indoor unit & water heater",
+          "unit": "nos.",
+          "quantity": 8
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.11.8",
+          "description": "junction box for fire alarm control panel",
+          "unit": "no.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.11.9",
+          "description": "junction box for roll-up door",
+          "unit": "no.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.11.10",
+          "description": "power point provision for electric sliding chain link gate",
+          "unit": "no.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.11.11",
+          "description": "power point provision for pumps",
+          "unit": "no.",
+          "quantity": 2
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "9.12",
+      "srNo": null,
+      "title": "GROUNDING SYSTEM",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "Supply and installation of the earthing ring around the building which comprises of the conductor/copper tapes, clips, rods and inspection pits to complete the system",
+          "unit": null,
+          "quantity": null
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.12.1",
+          "description": "20mmØ, 3 meters, copper clad steel earth rod",
+          "unit": "nos",
+          "quantity": 10
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.12.2",
+          "description": "rod to cable clips",
+          "unit": "nos",
+          "quantity": 10
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.12.3",
+          "description": "concrete inspection earth pit",
+          "unit": "nos",
+          "quantity": 10
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.12.4",
+          "description": "25kg bentonite soil",
+          "unit": "nos",
+          "quantity": 3
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.12.5",
+          "description": "8-way grounding busbar",
+          "unit": "nos",
+          "quantity": 2
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.12.6",
+          "description": "Telecommunication main grounding busbar",
+          "unit": "no.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.12.7",
+          "description": "bonding clamps",
+          "unit": "nos",
+          "quantity": 8
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "u-bolt clamp for rebar",
+          "unit": "nos.",
+          "quantity": 4
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "b-bond clamp for structure",
+          "unit": "nos.",
+          "quantity": 4
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.12.8",
+          "description": "16 sq.mm bare copper conductor",
+          "unit": "mtrs.",
+          "quantity": 50
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.12.9",
+          "description": "50 sq.mm bare copper conductor",
+          "unit": "mtrs.",
+          "quantity": 79
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.12.10",
+          "description": "70 sq.mm bare copper conductor",
+          "unit": "mtrs.",
+          "quantity": 205
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.12.11",
+          "description": "exothermic welding works",
+          "unit": "LS",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.12.12",
+          "description": "upvc conduit sleeves",
+          "unit": "mtrs.",
+          "quantity": 50
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "9.13",
+      "srNo": null,
+      "title": "LIGHTNING PROTECTION SYSTEM",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "Supply and installation of the lightning protection at building roof which comprises of the conductor/copper tapes, clips, rods and downconductors to complete the system",
+          "unit": null,
+          "quantity": null
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.13.1",
+          "description": "15mmØ, 0.5 meters, solid copper air terminal rod with spike",
+          "unit": "nos",
+          "quantity": 21
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.13.2",
+          "description": "air terminal base for round conductor",
+          "unit": "nos",
+          "quantity": 21
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.13.3",
+          "description": "conductor clips",
+          "unit": "nos",
+          "quantity": 260
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.13.4",
+          "description": "test clamp",
+          "unit": "nos",
+          "quantity": 4
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.13.5",
+          "description": "25x3mm bare copper tape",
+          "unit": "mtrs.",
+          "quantity": 242
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.13.6",
+          "description": "25mmØ, gs conduit",
+          "unit": "meters",
+          "quantity": 7.920000000000001
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.13.7",
+          "description": "miscellaneous gs conduit fittings for wall fixing",
+          "unit": "LS",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "9.13.8",
+          "description": "Execution of testing and commissioning of electrical system",
+          "unit": "LS.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "price the testing and commissioning of the electrical system through the following test to conduct. This for information only.",
+          "unit": null,
+          "quantity": null
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "continuity testing of all lighting and power system. DMM is available",
+          "unit": null,
+          "quantity": null
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "voltage test of all lights, power, and panels. DMM is available",
+          "unit": null,
+          "quantity": null
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "grounding testing. Device is available from us",
+          "unit": null,
+          "quantity": null
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "illumination level in each room. Instrument is available from us",
+          "unit": null,
+          "quantity": null
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "insulation resistance test. Device is available from us",
+          "unit": null,
+          "quantity": null
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": "10",
+      "subRef": null,
+      "srNo": null,
+      "title": "TELECOMMUNICATION SYSTEM",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "CIVIL WORKS",
+          "unit": null,
+          "quantity": null
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "10.1",
+      "srNo": null,
+      "title": "SITE",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "10.1.1",
+          "description": "Supply and installation of 2 runs 110mmØ, Sch 80, UPVC conduit including accessories for incoming cables from outside new manhole to inside comm room",
+          "unit": "mtrs.",
+          "quantity": 230
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "10.1.2",
+          "description": "Supply and installation of telecommunication warning tape for underground duct bank.",
+          "unit": "LS",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "10.1.3",
+          "description": "Supply & installation of 3-cell fabric mesh type innerduct(Maxcell).",
+          "unit": "Nos",
+          "quantity": 2
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "10.2",
+      "srNo": null,
+      "title": "RACEWAY SYSTEM",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "10.2.1",
+      "title": "Supply and installation of telco style cable tray inside communication room including all other necessary fittings for fixing, support and attachment to racks to complete the raceway",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "below are the contents the lump sum",
+          "unit": null,
+          "quantity": null
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "610mm wide telco style tray",
+          "unit": "meters",
+          "quantity": 20
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "all necessary fittings to consider inside the communication room that has a dimension of 5x2 meters. Cable tray to surround the comm rooms in all sides. Two drops to come: first one between the surrounding ladder tray down to the server rack and second one from incoming cable entry up to the surrounding ladder tray",
+          "unit": "LS",
+          "quantity": 1
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "10.2.2",
+      "title": "Supply and installation of 300x100mm basket cable tray including all other ncessary fittings for a suspended ceiling type installation such as threaded rods, L-bar supports, bolts, nuts and pipe connectors to complete the assembly",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "below are the contents the lump sum",
+          "unit": null,
+          "quantity": null
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "300x100mm, HDG, basket cable tray",
+          "unit": "meters",
+          "quantity": 40
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "conduit clamp support for basket cable tray",
+          "unit": "nos.",
+          "quantity": 25
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "all necessary fittings for suspended ceiling type installation",
+          "unit": "LS",
+          "quantity": 1
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "10.3",
+      "srNo": null,
+      "title": "DATA PORTS",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "10.3.1",
+          "description": "Supply and installation of data points that include materials such as conduit, boxes and fittings to complete the raceway routing connection to the basket tray",
+          "unit": "pts.",
+          "quantity": 18
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "10.3.2",
+      "title": "Supply and installation of all data ports as per approved submittals and drawings",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "10.3.3",
+          "description": "Twin port data faceplate, including 2 nos of rj45 jacks(green colour)",
+          "unit": "nos.",
+          "quantity": 14
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "10.3.4",
+          "description": "Twin port data faceplate W/P(outdoor type)including 2 nos of rj45 jacks(green colour),",
+          "unit": "nos.",
+          "quantity": 4
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "10.3.5",
+          "description": "Testing and commissioning of telecommunication system",
+          "unit": "LS.",
+          "quantity": 1
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "10.3.6",
+      "title": "PLYWOOD BACKBOARD",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "10.3.6.1",
+      "title": "Supply and installation of  plywood board fire retardant 19mm Thick  backboard for fixing the protector terminal inside main communication room",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "below are the contents the lump sum",
+          "unit": null,
+          "quantity": null
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "all necessary fittings to consider inside the communication room that has a dimension of 5x2 meters. Plywood backboard should be paint with white color fire retandant paint. Minimum 2 walls of the room should be install with the backboard.",
+          "unit": "LS",
+          "quantity": 1
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": "11",
+      "subRef": null,
+      "srNo": null,
+      "title": "FIRE DETECTION AND ALARM SYSTEM",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "11.1",
+      "srNo": null,
+      "title": "EQUIPMENT",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "11.1.1",
+      "title": "Supply and installation of all panels necessary to provide the building with a functional mass notification fire alarm system.",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "11.1.2",
+          "description": "Addressable Fire alarm control & mass notification system panel (primary & secondary)batteries for 48 hrs & 15min Backup",
+          "unit": "no.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "11.1.3",
+          "description": "Monaco fire Alarm transceiver Panel with Omni Directional Antenna (primary & secondary)batteries for 60min Backup",
+          "unit": "no.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "11.1.4",
+          "description": "Audio Signal Amplifier panel",
+          "unit": "no.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "11.1.5",
+          "description": "Power supply unit(Notification Devices)",
+          "unit": "no.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "11.1.6",
+          "description": "Battery Box",
+          "unit": "no.",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "11.1.7",
+          "description": "Document Box",
+          "unit": "no.",
+          "quantity": 1
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "11.2",
+      "srNo": null,
+      "title": "INITIATING DEVICES",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "11.2.1",
+          "description": "Supply and installation of fire alarm points that include materials such as conduit, boxes, fittings, wires and connectors to complete provision of connection of initiating devices in the system",
+          "unit": "Pts.",
+          "quantity": 75
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "11.2.2",
+      "title": "Supply, install, connect, fix, test and commission of all installed light fixtures as per approved submittals and drawings",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "11.2.3",
+          "description": "addressable smoke detectors",
+          "unit": "nos",
+          "quantity": 36
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "11.2.4",
+          "description": "addressable heat detectors",
+          "unit": "nos",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "11.2.5",
+          "description": "addressable duct detectors",
+          "unit": "nos",
+          "quantity": 4
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "11.2.6",
+          "description": "remote test switch with key",
+          "unit": "nos",
+          "quantity": 4
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "11.2.7",
+          "description": "manual pull station",
+          "unit": "nos",
+          "quantity": 6
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "11.2.8",
+          "description": "relay input module",
+          "unit": "nos",
+          "quantity": 20
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "11.2.9",
+          "description": "control module",
+          "unit": "nos",
+          "quantity": 3
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "11.2.10",
+          "description": "synch module",
+          "unit": "nos",
+          "quantity": 1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "11.2.11",
+          "description": "Portable Fire Extinguisher",
+          "unit": "nos",
+          "quantity": 9
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "11.3",
+      "srNo": null,
+      "title": "NOTIFICATION DEVICES",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "11.3.1",
+          "description": "Supply and installation of fire alarm points that include materials such as conduit, boxes, fittings, wires and connectors to complete provision of connection of initiating devices in the system",
+          "unit": "Pts.",
+          "quantity": 16
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "11.3.2",
+      "title": "Supply, install, connect, fix, test and commission of all installed light fixtures as per approved submittals and drawings",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "11.3.3",
+          "description": "indoor strobe alarm",
+          "unit": "nos",
+          "quantity": 4
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "11.3.4",
+          "description": "Indoor Speaker Strobe alarm",
+          "unit": "nos",
+          "quantity": 6
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "11.3.5",
+          "description": "Outdoor Speaker Strobe alarm with backbox",
+          "unit": "nos",
+          "quantity": 6
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "11.3.6",
+          "description": "Testing and commissioning of fire alarm system",
+          "unit": "LS.",
+          "quantity": 1
+        }
+      ],
+      "subtotalLabel": "Total Amount in K.D"
+    }
+  ],
+  "totals": {
+    "flatItemCount": 344
+  }
+}

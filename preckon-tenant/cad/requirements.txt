@@ -6,3 +6,9 @@ Pillow>=10,<13
 fastapi==0.115.0
 uvicorn[standard]==0.30.6
 pydantic==2.9.2
+# PyMuPDF: rasterises PDF drawing sheets for the vision pass. Needed because the
+# DXF toolbox is blind to PDFs — a tender pack that arrives as PDF drawings has
+# no layers, no blocks and no geometry to query, so looking at the sheet is the
+# only measurement path available. AGPL-licensed; fine server-side. Swap to
+# pdfplumber + pypdf if this ever ships as a distributed closed product.
+PyMuPDF>=1.27.0,<1.28

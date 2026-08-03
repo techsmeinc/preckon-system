@@ -1,0 +1,621 @@
+{
+  "slug": "1158-camp-moreell-lift-station",
+  "source": {
+    "sowPdf": "25.7.3 SOW Camp Moreell Lift Station Repair.pdf",
+    "boq": "1158-Priced BOQ-Camp Morell Lift station repair-BOQ...xlsb"
+  },
+  "meta": {
+    "projectNumber": "25-1004",
+    "projectName": "Camp Moreell-Repair of Lift Station.",
+    "projectLocation": "Ali Al Salem Air base,Kuwait.",
+    "submissionDate": "23rd August 2025",
+    "submittedTo": "AQ Global Gen.Trad. & Cont. Co.W.L.L."
+  },
+  "units": {
+    "LS": 15,
+    "m3": 11,
+    "LM": 5,
+    "Nos": 6,
+    "No.s": 1
+  },
+  "sowOutline": [
+    {
+      "ref": "1.0",
+      "title": "INTRODUCTION"
+    },
+    {
+      "ref": "2.0",
+      "title": "CONTRACTOR DESIGN AND CONSTRUCTION TASKS"
+    },
+    {
+      "ref": "3.0",
+      "title": "TECHNICAL REQUIREMENTS"
+    },
+    {
+      "ref": "4.0",
+      "title": "CONTRACT DESIGN DRAWINGS (Submittals Required)"
+    },
+    {
+      "ref": "5.0",
+      "title": "BUILDING DESIGN DISCIPLINE REQUIREMENTS"
+    },
+    {
+      "ref": "6.0",
+      "title": "CONTRACTING AND GENERAL REQUIREMENTS"
+    },
+    {
+      "ref": "7.0",
+      "title": "SECURITY"
+    },
+    {
+      "ref": "7.1",
+      "title": "Force Protection Condition (FPCON)"
+    },
+    {
+      "ref": "7.2",
+      "title": "Personnel List"
+    },
+    {
+      "ref": "7.3",
+      "title": "Procedures To Obtain Badging"
+    },
+    {
+      "ref": "7.4",
+      "title": "Access Delays"
+    },
+    {
+      "ref": "7.5",
+      "title": "Escorts"
+    },
+    {
+      "ref": "7.6",
+      "title": "Material Deliveries"
+    },
+    {
+      "ref": "8.0",
+      "title": "REFERENCES"
+    },
+    {
+      "ref": "9.0",
+      "title": "APPENDICES"
+    }
+  ],
+  "sections": [
+    {
+      "sowRef": "2",
+      "ourRef": null,
+      "subRef": null,
+      "srNo": null,
+      "title": "Contractor Design & Construction Tasks",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": "2.1",
+      "ourRef": "1",
+      "subRef": null,
+      "srNo": null,
+      "title": "Performing a comprehensive Site Survey",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": "1.1",
+          "srNo": null,
+          "description": "Site Supervision and engineering",
+          "unit": "LS",
+          "quantity": 1.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": "1.2",
+          "srNo": null,
+          "description": "Site Investigation / Site Survey",
+          "unit": "LS",
+          "quantity": 1.0
+        }
+      ],
+      "subtotalLabel": "Total Amount in K.D For 2.1"
+    },
+    {
+      "sowRef": "2.2",
+      "ourRef": "2",
+      "subRef": null,
+      "srNo": null,
+      "title": "Development of 100% Design Contact Drawings",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": "2.1",
+          "srNo": null,
+          "description": "Design, calculations,Schedule, Docuements and submittals",
+          "unit": "LS",
+          "quantity": 1.0
+        }
+      ],
+      "subtotalLabel": "Total Amount in K.D For 2.2"
+    },
+    {
+      "sowRef": "2.3",
+      "ourRef": "3",
+      "subRef": null,
+      "srNo": null,
+      "title": "Perform Mobilization and Demobilization",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "3.1",
+      "srNo": null,
+      "title": "Mobilization & De-mobilization",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "3.1.1",
+          "description": "To set up staging area",
+          "unit": "LS",
+          "quantity": 1.0
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "3.1.2",
+      "title": "To set up Storage area for material , Equipment and debris",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "3.1.3",
+      "title": "Supply and Installation of Temporary Utility Work, Facilities etc As required",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "3.1.4",
+      "title": "Temporary Signages",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "3.1.5",
+      "title": "Delivery of Item to site and from Site to Store",
+      "items": [],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": null,
+      "srNo": "3.1.6",
+      "title": "Removal of Debris from work site to approve dumping yard",
+      "items": [],
+      "subtotalLabel": "Total Amount in K.D For 2.3"
+    },
+    {
+      "sowRef": "2.4",
+      "ourRef": "4",
+      "subRef": null,
+      "srNo": null,
+      "title": "Upgrade the Existing System components",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "Civil works",
+          "unit": null,
+          "quantity": null
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "4.1",
+      "srNo": null,
+      "title": "Demolition works",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.1.1",
+          "description": "Demolition of Existing Lift station #2(Manhole), Pump including with electrical connections, remove the debris to approved municipality yard.",
+          "unit": "LS",
+          "quantity": 1.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.1.2",
+          "description": "Removal of Lift station #2 pipes including valves and fittings,  remove the debris to approved municipality yard.",
+          "unit": "LS",
+          "quantity": 1.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.1.3",
+          "description": "Demolition of Existing Lift station #3(Pump House) including with pumps,gate valves,pipe fittings, remove the debris to approved municipality yard.",
+          "unit": "LS",
+          "quantity": 1.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.1.4",
+          "description": "Demolition of existing two submersible pumps in Lift station #1 including pipes, gate valves, fittings and electrical connections",
+          "unit": "LS",
+          "quantity": 1.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.1.5",
+          "description": "Potential cut of 4\" pipe from Lift station #1",
+          "unit": "LS",
+          "quantity": 1.0
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "4.2",
+      "srNo": null,
+      "title": "New Manhole construction (2.2x2.2x2.4) mtr",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.2.1",
+          "description": "Excavation for manholes(3x3x2.8) - 1no.s",
+          "unit": "m3",
+          "quantity": 26.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.2.2",
+          "description": "Blinding concrete for Manhole (2.4x2.4x.1))-1no's",
+          "unit": "m3",
+          "quantity": 0.6
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.2.3",
+          "description": "Supply & Casting of K400 SRC concrete for manhole Base ,walls & Roof slab with rebars (2.2x2.2x2.4)",
+          "unit": "m3",
+          "quantity": 5.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.2.4",
+          "description": "Supply and installation of manhole cover(600 mm Diameter)",
+          "unit": "LM",
+          "quantity": 1.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.2.5",
+          "description": "Backfilling works",
+          "unit": "m3",
+          "quantity": 14.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": null,
+          "description": "New sewerpipe line installation",
+          "unit": null,
+          "quantity": null
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "4.3",
+      "srNo": null,
+      "title": "Lift Station #2.",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.3.1",
+          "description": "Excavation for 8\" from Lift station #2 to Lift station #1",
+          "unit": "m3",
+          "quantity": 45.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.3.2",
+          "description": "Supply and installation of 8\" dia HDPE pipe (Gravity pipe) from Lift station #2 to Lift station#1, including all necessary fittings & valves.",
+          "unit": "LM",
+          "quantity": 40.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.3.3",
+          "description": "Supply and installation of Tracer wire and warning tape",
+          "unit": "LM",
+          "quantity": 40.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.3.4",
+          "description": "Backfilling works",
+          "unit": "m3",
+          "quantity": 40.0
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "4.4",
+      "srNo": null,
+      "title": "Lift Station #1.",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.4.1",
+          "description": "Excavation for sewerpipe line from Lift station #1 to sewer Lagoon",
+          "unit": "m3",
+          "quantity": 600.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.4.2",
+          "description": "Supply, installation and connection of 6\" dia HDPE pipe (pressure pipe ) including all necessary fittings & valves.",
+          "unit": "LM",
+          "quantity": 425.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.4.3",
+          "description": "Supply & installation of Tracer wire and warning tape",
+          "unit": "LM",
+          "quantity": 425.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.4.4",
+          "description": "Backfilling works",
+          "unit": "m3",
+          "quantity": 580.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.4.5",
+          "description": "Supply and installation of 7.5 HP capacity submersible pumps (Grinder type), pipes, fittings valves,float switch, control panel and electrical connection as required.",
+          "unit": "Nos",
+          "quantity": 2.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.4.6",
+          "description": "Supply and installation of electric hoist system, including with hoist structure & support for lift station #01",
+          "unit": "LS",
+          "quantity": 1.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.4.7",
+          "description": "Supply and installation of Gate valves (size : 6\" diameter)",
+          "unit": "Nos",
+          "quantity": 2.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.4.8",
+          "description": "Supply and installation of check valves (size : 6\" diameter)",
+          "unit": "Nos",
+          "quantity": 2.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.4.9",
+          "description": "Supply and Installation of Flow switches.",
+          "unit": "Nos",
+          "quantity": 3.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.4.10",
+          "description": "Supply and installation of trust blocks where installed bends, tee and other fittings",
+          "unit": "LS",
+          "quantity": 1.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.4.11",
+          "description": "Supply and installation of backflow preventer valve or gravity shutter",
+          "unit": "Nos",
+          "quantity": 1.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.4.12",
+          "description": "Water pressure Test",
+          "unit": "LS",
+          "quantity": 1.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.4.13",
+          "description": "Testing and commissioning",
+          "unit": "LS",
+          "quantity": 1.0
+        }
+      ],
+      "subtotalLabel": null
+    },
+    {
+      "sowRef": null,
+      "ourRef": null,
+      "subRef": "4.5",
+      "srNo": null,
+      "title": "Hand Holes",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.5.1",
+          "description": "Excavation for Hanholes",
+          "unit": "m3",
+          "quantity": 1.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.5.2",
+          "description": "Supply and installation of blinding concrete 1mtr x 1mtr x 0.1",
+          "unit": "m3",
+          "quantity": 0.1
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.5.3",
+          "description": "Supply and installation of  K400 SRC concrete with rebars ( 0.8 x 0.8 x 1) mtrs",
+          "unit": "m3",
+          "quantity": 1.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.5.4",
+          "description": "Supply and installation of hanholes with isolation valves, box outs and sleeves( Inner size : 600 x 600 mm)",
+          "unit": "Nos",
+          "quantity": 4.0
+        },
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "4.5.5",
+          "description": "Supply and installation of Handhole covers",
+          "unit": "No.s",
+          "quantity": 4.0
+        }
+      ],
+      "subtotalLabel": "Total Amount in K.D For 2.4"
+    },
+    {
+      "sowRef": "2.5",
+      "ourRef": "5",
+      "subRef": null,
+      "srNo": null,
+      "title": "As Built Drawings",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "5.1",
+          "description": "Prepare & Submission of As Built drawings in Autocad & PDF",
+          "unit": "LS",
+          "quantity": 1.0
+        }
+      ],
+      "subtotalLabel": "Total Amount in K.D For 2.5"
+    },
+    {
+      "sowRef": "2.6",
+      "ourRef": "6",
+      "subRef": null,
+      "srNo": null,
+      "title": "DD Form 1354",
+      "items": [
+        {
+          "sowRef": null,
+          "ourRef": null,
+          "subRef": null,
+          "srNo": "6.1",
+          "description": "Prepare & Submission of DD From 1354 as per the draft provided by Governemnet",
+          "unit": "LS",
+          "quantity": 1.0
+        }
+      ],
+      "subtotalLabel": "Total Amount in K.D For 2.6"
+    }
+  ],
+  "totals": {
+    "flatItemCount": 40
+  }
+}

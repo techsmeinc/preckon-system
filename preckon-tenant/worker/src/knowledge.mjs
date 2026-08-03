@@ -9,6 +9,8 @@
 // touching the agent plumbing.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { formatDisciplineUnitsForPrompt } from "./disciplines.mjs";
+
 /* ── Units ──────────────────────────────────────────────────────────────────
    Every quantity is normalised onto this canonical set so the BOQ, the priced
    estimate and any export stay internally consistent, regardless of how the
@@ -82,20 +84,15 @@ A plumbing scope is not one "Complete plumbing - LS"; it is:
 Emit a dedicated TESTING & COMMISSIONING line for every MEP system (plumbing, HVAC, electrical, fire, low-voltage). Reserve LS for genuine lump deliverables only — mobilisation, design, submittals, testing, making good, stated allowances.`;
 
 /** Unit expectations per trade — steers the model away from "EA" for everything. */
-export const DISCIPLINE_UNITS = `EXPECTED UNITS BY TRADE (use these unless the documents clearly say otherwise):
-  Earthworks — excavation, backfill, filling, hardcore: m³ · site clearance/stripping: m²
-  Concrete — in-situ concrete: m³ · formwork: m² · reinforcement: ton · blinding: m²
-  Masonry — blockwork/brickwork walls: m² · lintels/copings: m
-  Structural steel — beams/columns/frames: ton · light steelwork/handrails: m or kg
-  Roofing & waterproofing — sheeting, membranes, insulation, screeds: m²
-  Finishes — plaster, painting, tiling, ceilings, cladding, flooring: m² · skirting/beading: m
-  Doors & windows — leaves, frames, ironmongery sets: EA
-  Plumbing — pipework: m · fixtures, valves, heaters, drains: EA · testing: LS
-  HVAC — ducting: m² or kg · pipework: m · AHUs/FCUs/chillers/diffusers: EA · T&C: LS
-  Electrical — cabling, conduit, trunking, trays: m · DBs, panels, fittings, sockets: EA · T&C: LS
-  Fire — sprinkler/detection pipework & cabling: m · heads, detectors, panels: EA · T&C: LS
-  External works — paving, landscaping: m² · kerbs, fencing, drainage runs: m
-  Preliminaries — mobilisation, site setup, design, submittals, as-builts: LS · supervision/plant by time: PM`;
+// Built from the per-discipline table rather than written out flat. The flat
+// version conflated two things the trades keep apart: metal roof sheeting is
+// bought by the ton and the membrane over it by the m²; GI ductwork is priced
+// by weight, not by the run. It also had no "Set", so plant supplied as one
+// assembly — a genset, a pump set, a packaged AC unit — had nowhere sensible to
+// go and came back as EA of its component parts.
+export const DISCIPLINE_UNITS = `EXPECTED UNITS BY TRADE (use these unless the documents clearly say otherwise).
+Each discipline carries its OWN set — do not borrow another trade's unit because it looks close:
+${formatDisciplineUnitsForPrompt()}`;
 
 /* ── Quantity sanity ────────────────────────────────────────────────────── */
 
