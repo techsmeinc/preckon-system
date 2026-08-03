@@ -48,6 +48,42 @@ interface CadView {
 
 const isDrawing = (name: string) => /\.(dxf|dwg)$/i.test(name ?? "");
 
+type Schedule = CadView["schedules"][number];
+
+/** Order-preserving de-duplication — a repeated note is noise, not emphasis. */
+const dedupe = (xs: string[]) => [...new Set(xs.map((x) => x.trim()).filter(Boolean))];
+
+/**
+ * Is this a real schedule, or room tags the parser mistook for one?
+ *
+ * The extractor detects a "table" from text that lines up in a grid. On a floor
+ * plan the room labels do exactly that, so a plan comes back carrying a
+ * "schedule" that is four hundred repetitions of BED ROOM / TOILET / SHOWER
+ * TRAY. Two signals separate them: a real schedule has several DISTINCT column
+ * headings, and its cells are mostly distinct values (a door schedule lists
+ * different doors). A tag cloud has neither.
+ */
+function classifySchedule(s: Schedule): "table" | "tags" {
+  const cells = s.rows.flat().map((c) => String(c ?? "").trim()).filter(Boolean);
+  if (!cells.length) return "table";
+  const distinctHeaders = new Set(s.header.map((h) => String(h ?? "").trim().toLowerCase()).filter(Boolean));
+  const distinctCells = new Set(cells.map((c) => c.toLowerCase()));
+  const repetition = distinctCells.size / cells.length;
+  // Fewer than two real headings, and the same handful of values over and over.
+  return distinctHeaders.size < 2 && repetition < 0.35 ? "tags" : "table";
+}
+
+/** The distinct labels in a tag cloud with how many times each appears. */
+function tagCounts(s: Schedule): Array<[string, number]> {
+  const counts = new Map<string, number>();
+  for (const raw of [...s.header, ...s.rows.flat()]) {
+    const label = String(raw ?? "").trim();
+    if (!label) continue;
+    counts.set(label, (counts.get(label) ?? 0) + 1);
+  }
+  return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 40);
+}
+
 /** Sheet sets are numbered ("01-…", "02-…"); numeric-aware sort keeps 2 before
  *  10, which a plain string sort would not. */
 const bySheetName = (a: any, b: any) =>
@@ -168,23 +204,59 @@ function SheetDetail({ pid, fid }: { pid: string; fid: string }) {
         </aside>
       </div>
 
-      {data.schedules.map((s, i) => (
-        <div className="tw" key={i} style={{ marginTop: 12 }}>
-          <table className="tbl">
-            <thead><tr>{s.header.map((h, j) => <th key={j}>{h}</th>)}</tr></thead>
-            <tbody>
-              {s.rows.slice(0, 30).map((r, j) => (
-                <tr key={j}>{r.map((c, k) => <td key={k}>{c}</td>)}</tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ))}
+      {data.schedules.map((s, i) => {
+        const kind = classifySchedule(s);
+        // A door or finishes schedule is a table and reads as one. A cloud of
+        // room tags lifted off the plan is not: rendering it as a table gives
+        // you four hundred cells of the word "BED ROOM", which buries the real
+        // schedules underneath it and tells a reader nothing. Counted once each
+        // it becomes the thing an estimator actually wanted — 54 bedrooms is a
+        // door count, a light count and a floor area waiting to be used.
+        if (kind === "tags") {
+          return (
+            <div className="card" key={i} style={{ marginTop: 12, padding: "12px 16px" }}>
+              <div className="csub" style={{ marginBottom: 8 }}>
+                {t("cad.tagsOn", { layer: s.layer })}
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {tagCounts(s).map(([label, n]) => (
+                  <span className="srcchip" key={label}>
+                    {label} <b className="mono">×{n}</b>
+                  </span>
+                ))}
+              </div>
+            </div>
+          );
+        }
+        return (
+          <div className="tw" key={i} style={{ marginTop: 12, overflowX: "auto" }}>
+            <div className="csub" style={{ marginBottom: 6 }}>{s.layer}</div>
+            <table className="tbl">
+              <thead><tr>{s.header.map((h, j) => <th key={j}>{h}</th>)}</tr></thead>
+              <tbody>
+                {s.rows.slice(0, 30).map((r, j) => (
+                  <tr key={j}>{r.map((c, k) => <td key={k}>{c}</td>)}</tr>
+                ))}
+              </tbody>
+            </table>
+            {s.rows.length > 30 && (
+              <div className="csub" style={{ marginTop: 6 }}>
+                {t("cad.moreRows", { n: s.rows.length - 30 })}
+              </div>
+            )}
+          </div>
+        );
+      })}
 
       {data.notes.length > 0 && (
-        <p className="csub" style={{ marginTop: 12 }}>
-          <b>{t("cad.notes")}</b> {data.notes.slice(0, 20).join(" · ")}
-        </p>
+        <div className="card" style={{ marginTop: 12, padding: "12px 16px" }}>
+          <div className="csub" style={{ marginBottom: 8 }}>{t("cad.notes")}</div>
+          <ul style={{ margin: 0, paddingInlineStart: 18, lineHeight: 1.7 }}>
+            {dedupe(data.notes).slice(0, 20).map((n, i) => (
+              <li key={i} className="csub">{n}</li>
+            ))}
+          </ul>
+        </div>
       )}
     </>
   );
