@@ -324,7 +324,13 @@ function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadVi
         >
           <div
             className="cad-sheet"
-            style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${z})` }}
+            style={{
+              transform: `translate(${pan.x}px, ${pan.y}px) scale(${z})`,
+              // Read back by the stroke-width rule: a CSS transform scales the
+              // linework with everything else, so the stroke is divided out to
+              // stay one hairline wide at every zoom.
+              ["--cad-z" as any]: z,
+            }}
             // The renderer emits a standalone, self-contained SVG — no scripts,
             // no external refs — so it is safe to inline and needed to make it
             // scale to the panel.

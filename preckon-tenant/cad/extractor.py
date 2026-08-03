@@ -19,11 +19,13 @@ verbatim and so chunks can be embedded for RAG.
 
 from __future__ import annotations
 
+import hashlib
 import math
 import os
 import shutil
 import subprocess
 import tempfile
+import threading
 from collections import defaultdict
 from dataclasses import asdict, dataclass, field
 from typing import Any, Iterable
@@ -544,29 +546,72 @@ def _libredwg_convert(path: str, out_path: str) -> bool:
     return os.path.exists(out_path) and os.path.getsize(out_path) > 1024
 
 
+def _dwg_cache_path(path: str) -> str:
+    """Where the DXF rendition of this DWG lives.
+
+    Keyed on identity + size + mtime, so a re-uploaded or edited drawing gets a
+    fresh conversion while the same bytes are converted once. Uploads are mounted
+    read-only, so the cache goes to the container's tmpdir and dies with it.
+
+    This matters more than a cache usually does: converting a large DWG takes
+    tens of seconds, and the same file is converted for extraction, again for the
+    render, and again for every DXF download. Without this each of those pays the
+    full cost and leaks its own temp directory.
+    """
+    try:
+        st = os.stat(path)
+        key = f"{os.path.realpath(path)}|{st.st_size}|{int(st.st_mtime)}"
+    except OSError:
+        key = os.path.realpath(path)
+    digest = hashlib.sha1(key.encode("utf-8", "replace")).hexdigest()[:20]
+    cache_dir = os.path.join(tempfile.gettempdir(), "preckon-dwg-cache")
+    os.makedirs(cache_dir, exist_ok=True)
+    return os.path.join(cache_dir, f"{digest}.dxf")
+
+
 def _convert_dwg_to_dxf(path: str) -> str:
     """If the file is .dwg, convert it to DXF. Tries the ODA File Converter when
     one is configured (best fidelity), then falls back to LibreDWG, which ships
-    in this image. Returns a path to a temporary .dxf."""
+    in this image. Returns a path to a cached .dxf."""
     if not path.lower().endswith(".dwg"):
         return path
 
-    out_dir = tempfile.mkdtemp(prefix="dwg2dxf_")
-    out_path = os.path.join(out_dir, os.path.splitext(os.path.basename(path))[0] + ".dxf")
+    out_path = _dwg_cache_path(path)
+    try:
+        if os.path.exists(out_path) and os.path.getsize(out_path) > 1024:
+            return out_path
+    except OSError:
+        pass
+
+    # Convert to a private path and rename into place. Two requests can want the
+    # same drawing at once (the viewer renders while a download converts), and
+    # two converters writing the same file would cache a half-written DXF that
+    # every later read then trusts. os.replace is atomic.
+    staging = f"{out_path}.{os.getpid()}.{threading.get_ident()}.part"
+
+    def _publish() -> str:
+        os.replace(staging, out_path)
+        return out_path
 
     resolved = _resolve_odafc_path()
     try:
         from ezdxf.addons import odafc  # type: ignore
         if odafc.is_installed():
-            odafc.convert(path, out_path, version="R2018", replace=True)  # type: ignore[attr-defined]
-            return out_path
+            odafc.convert(path, staging, version="R2018", replace=True)  # type: ignore[attr-defined]
+            if os.path.exists(staging) and os.path.getsize(staging) > 1024:
+                return _publish()
     except Exception:
         # An ODA that is present but fails on this file is not the end of the
         # road — LibreDWG may still read it.
         pass
 
-    if _libredwg_convert(path, out_path):
-        return out_path
+    if _libredwg_convert(path, staging):
+        return _publish()
+
+    try:
+        os.remove(staging)
+    except OSError:
+        pass
 
     raise RuntimeError(
         "This DWG could not be converted. LibreDWG could not read it, and no ODA "

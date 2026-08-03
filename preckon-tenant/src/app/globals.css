@@ -686,11 +686,13 @@ input[type=color]{width:46px; height:34px; border:1px solid var(--hairline); bor
   cursor:grab; touch-action:none; display:grid; place-items:center;}
 .cad-view:active{cursor:grabbing;}
 [dir="rtl"] .cad-view{direction:ltr;}  /* a plan is a plan: never mirrored */
-/* An issued sheet renders as a standalone SVG at its own drawing size; clamp it
-   to the panel so a 40 m plan doesn't blow the layout out horizontally. */
-.cad-sheet{background:#fff; border-radius:8px; padding:8px; width:100%; max-height:100%;
+/* An issued sheet renders as a standalone SVG at its own drawing size — a 40 m
+   plan is 40000mm wide. Give it the whole viewport box and let its own viewBox
+   letterbox inside it, so a wide floor plan and a tall section both arrive
+   fitted rather than one of them overflowing. */
+.cad-sheet{background:#fff; border-radius:8px; padding:8px; width:100%; height:100%;
   transform-origin:center center; will-change:transform;}
-.cad-sheet svg{width:100%; height:auto; max-width:100%; display:block;}
+.cad-sheet svg{width:100%; height:100%; max-width:100%; max-height:100%; display:block;}
 
 /* Nothing to draw. Says WHY and offers the two ways out — draw it again, or
    take the DXF away and open it in a CAD application. */
@@ -701,8 +703,12 @@ input[type=color]{width:46px; height:34px; border:1px solid var(--hairline); bor
 /* ezdxf writes stroke widths in DRAWING units against a viewBox a million units
    across. Scaled into a panel that is ~0.014px per line, so the sheet renders
    blank even though every entity is present. Pin the stroke to screen units.
-   The [class] selector outweighs the generated .C1/.C2 rules that set it. */
-.cad-sheet svg [class]{vector-effect:non-scaling-stroke; stroke-width:1.1px;}
+   The [class] selector outweighs the generated .C1/.C2 rules that set it.
+   Divided by the zoom because non-scaling-stroke is blind to a CSS transform on
+   an ancestor: without this, zooming to 8x to read a dimension string draws it
+   with 9px linework and the detail you zoomed in for disappears under its own
+   strokes. */
+.cad-sheet svg [class]{vector-effect:non-scaling-stroke; stroke-width:calc(1.1px / var(--cad-z, 1));}
 /* Phase band: groups the Gantt by the project's own structure. */
 .gphase{display:flex; align-items:center; padding:9px 0 5px; margin-top:6px;
   border-top:1px solid var(--hairline);}
