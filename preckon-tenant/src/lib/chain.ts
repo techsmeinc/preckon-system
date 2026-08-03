@@ -39,6 +39,7 @@ export const STAGE_LABEL: Record<string, string> = {
   quantlogix: "BOQ",
   costlogix: "Estimate",
   schedulelogix: "Schedule",
+  narrativelogix: "Technical Narrative",
   procurelogix: "Procurement",
   underwriting: "Underwriting",
 };
@@ -51,6 +52,7 @@ export const STAGE_ICON: Record<string, string> = {
   quantlogix: "boq",
   costlogix: "estimate",
   schedulelogix: "schedule",
+  narrativelogix: "specs",
   procurelogix: "procurement",
 };
 
@@ -66,7 +68,7 @@ export function moduleForType(type: string): string | null {
 /** The order the chain actually runs in, regardless of catalog ordering. */
 const CHAIN_ORDER: Record<string, number> = {
   tenderlogix: 1, drawlogix: 2, doclogix: 3, quantlogix: 4,
-  costlogix: 5, schedulelogix: 6, procurelogix: 7,
+  costlogix: 5, schedulelogix: 6, narrativelogix: 7, procurelogix: 8,
 };
 
 const short = (t: string) => t.split(".").pop() ?? t;
