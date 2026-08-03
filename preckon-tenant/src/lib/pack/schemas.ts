@@ -95,6 +95,14 @@ export const SCHEMAS: Record<string, any> = {
       // it. Worth showing: a line nobody asked for, added because a check said
       // it should exist, deserves a closer read than one the scope named.
       verified_by: { type: "string" },
+      // The CAD elements this quantity was actually measured from, confirmed to
+      // exist in the parsed drawings — not merely claimed by the agent.
+      measured_from: { type: "string" },
+      // Set when the citation audit could not match any cited layer or block to
+      // a parsed drawing. A field rather than a note so the BOQ screen can
+      // filter on it: a warning buried in prose is a warning nobody acts on.
+      review_required: { type: "boolean" },
+      review_reason: { type: "string" },
     },
   },
   cost_line: {

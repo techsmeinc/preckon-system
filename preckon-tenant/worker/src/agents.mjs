@@ -5,7 +5,7 @@
 // the trust boundary (worker has no store access) is unchanged.
 
 import { PROMPTS, hasPrompt, supervisorPrompt, outlinePrompt, sectionPrompt, designerPrompt, verifierPrompt } from "./prompts.mjs";
-import { createCadToolbox, buildExtractionDigest } from "./cad-tools.mjs";
+import { createCadToolbox, buildExtractionDigest, knownNames } from "./cad-tools.mjs";
 import { runAgenticLoop } from "./agentic-loop.mjs";
 import {
   normalizeUnit, normalizeMeasurementUnit, quantityConfidence, validateQuantity, sequence,
@@ -76,7 +76,7 @@ async function withClaude(env, base, template) {
   // The bill is built by a roster, not a single call.
   if (env.job_type === "boq.derive_lines") {
     const { lines, roster } = await runBoqRoster(env, model);
-    const outputs = postProcess(env, lines);
+    const outputs = auditCitations(postProcess(env, lines), env.inputs?.params?.cad_extractions ?? []);
     for (const o of outputs) {
       if (!o.provenance || !o.provenance.length) o.provenance = ids(env);
       if (o.confidence == null) o.confidence = CONF;
@@ -178,10 +178,48 @@ export async function runBoqRoster(env, model, call = callAnthropic) {
       : null;
 
   // 3. Section agents
+  //
+  // Where drawings were parsed, the specialist gets a toolbox rather than a
+  // paragraph. The difference is what it can do when the seeded digest doesn't
+  // answer its question: with a digest it must guess (and a guessed quantity is
+  // indistinguishable from a measured one once it's in the bill); with the
+  // toolbox it calls get_layer_geometry on the layer it actually cares about.
+  const toolbox = createCadToolbox(
+    env.inputs?.params?.cad_extractions ?? [],
+    env.inputs?.params?.documents ?? []
+  );
+  const grounded = toolbox.drawingCount > 0;
+  note(
+    "toolbox",
+    grounded
+      ? `${toolbox.drawingCount} parsed drawing(s) — specialists will measure with tools`
+      : "no parsed drawings — specialists price from documents only"
+  );
+
   const runSection = async (sec) => {
+    const req = sectionPrompt(env, sec, specialistFor(sec), roster);
     try {
-      const req = sectionPrompt(env, sec, specialistFor(sec), roster);
-      const text = await call(model, req.system, req.user, req.maxTokens);
+      let text;
+      if (grounded) {
+        const seeded =
+          `${req.user}\n\nDRAWINGS ALREADY PARSED (call the tools for anything this does not answer):\n` +
+          `${buildExtractionDigest(env.inputs?.params?.cad_extractions ?? [], 3000)}`;
+        const out = await runAgenticLoop({
+          model,
+          system: req.system,
+          user: seeded,
+          toolbox,
+          maxTokens: req.maxTokens,
+          iterCap: 6,
+        });
+        text = out.content;
+        note(
+          `section/${sec.code}`,
+          `${out.toolCallsMade} tool call(s) over ${out.iterations} turn(s)${out.hitCap ? " (hit tool cap)" : ""}`
+        );
+      } else {
+        text = await call(model, req.system, req.user, req.maxTokens);
+      }
       const parsed = extractJson(text);
       const rows = Array.isArray(parsed) ? parsed : parsed?.outputs;
       return Array.isArray(rows) ? rows : [];
@@ -272,6 +310,65 @@ async function mapLimit(items, limit, fn) {
  * reflects how the number was actually derived. Doing this here means every
  * provider and every retry lands on the same standard.
  */
+/**
+ * Audit each measured line's citation against the drawings that actually exist.
+ *
+ * QUANTITY_RULES require a line to say where its number came from — a layer, a
+ * block, a schedule row. Until now nothing checked whether the thing it named
+ * was real. A cited layer that does not exist is the pipeline's worst failure
+ * mode: it reads as diligence, survives review, and is wrong. Every line that
+ * claims a CAD source now either matches a parsed element or is flagged for a
+ * human, and the flag is a field rather than prose so the BOQ screen can filter
+ * on it.
+ *
+ * Deliberately conservative. It only judges lines whose method claims a CAD
+ * source; a quantity taken from a spec clause or a stated figure is left alone,
+ * because inventing a second reason to doubt a good line costs an estimator the
+ * same attention as a real one.
+ */
+function auditCitations(outputs, extractions) {
+  if (!extractions?.length) return outputs;
+  const { layers, blocks, schedules } = knownNames(extractions);
+  if (!layers.size && !blocks.size) return outputs;
+
+  // Identifier-shaped tokens: A-DOOR, DOOR_SINGLE_900, C-SLAB-01. Ordinary
+  // prose words are excluded by requiring a separator or an all-caps run.
+  const TOKEN = /\b[A-Z0-9]+(?:[-_][A-Z0-9]+)+\b|\b[A-Z]{3,}\b/g;
+  const CLAIMS_CAD = /\blayer\b|\bblock\b|\bcount of\b|\bhatch\b|\bpolyline\b/i;
+
+  for (const o of outputs) {
+    if (String(o?.type ?? "").split(".").pop() !== "boq_line") continue;
+    const p = o.payload;
+    if (!p || typeof p !== "object") continue;
+    const method = String(p.method ?? p.notes ?? "");
+    if (!CLAIMS_CAD.test(method)) continue;
+
+    const cited = [...new Set(method.match(TOKEN) ?? [])];
+    if (!cited.length) continue;
+    const known = (t) => {
+      const k = t.toLowerCase();
+      if (layers.has(k) || blocks.has(k) || schedules.has(k)) return true;
+      // Agents legitimately cite a layer group ("A-DOOR" for A-DOOR-FRAME).
+      for (const l of layers) if (l.includes(k) || k.includes(l)) return true;
+      for (const b of blocks) if (b.includes(k) || k.includes(b)) return true;
+      return false;
+    };
+
+    const unknown = cited.filter((t) => !known(t));
+    if (unknown.length === cited.length) {
+      p.review_required = true;
+      p.review_reason = `cites CAD element(s) not found in the parsed drawings: ${unknown.slice(0, 4).join(", ")}`;
+      p.notes = [p.notes, `QA: ${p.review_reason}`].filter(Boolean).join(" · ");
+      // Not zero — the line may still be real scope with a mis-typed reference,
+      // and deleting an estimator's line is a worse error than doubting it.
+      o.confidence = Math.min(Number(o.confidence ?? 0.6), 0.4);
+    } else {
+      p.measured_from = cited.filter(known).slice(0, 4).join(", ");
+    }
+  }
+  return outputs;
+}
+
 function postProcess(env, outputs) {
   const boqQty = new Map();
   for (const a of env.inputs?.artifacts ?? []) {

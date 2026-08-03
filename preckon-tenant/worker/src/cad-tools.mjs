@@ -387,6 +387,27 @@ export function createCadToolbox(extractions = [], documents = []) {
 }
 
 /**
+ * Every layer, block and schedule title that genuinely exists in the drawings.
+ *
+ * Used to audit citations. An agent that writes "count of DOOR_SINGLE_900 = 5
+ * (A-DOOR)" has produced a checkable claim, and a claim nobody checks is only a
+ * more convincing kind of guess — the failure this pipeline exists to prevent is
+ * a fabricated quantity an estimator cannot tell apart from a measured one.
+ */
+export function knownNames(extractions = []) {
+  const layers = new Set();
+  const blocks = new Set();
+  const schedules = new Set();
+  for (const d of extractions ?? []) {
+    if (!d) continue;
+    for (const l of d.layers ?? []) if (l?.layer) layers.add(lc(l.layer));
+    for (const b of Object.keys(d.blockInstanceCounts ?? {})) blocks.add(lc(b));
+    for (const s of d.schedules ?? []) if (s?.title) schedules.add(lc(s.title));
+  }
+  return { layers, blocks, schedules };
+}
+
+/**
  * A compact text summary, still used to seed the first turn so the agent starts
  * oriented rather than spending a tool call discovering the drawing exists.
  */
