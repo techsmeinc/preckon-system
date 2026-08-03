@@ -18,6 +18,11 @@ export default function BoqSurface({ pid, stage, artifacts, rows, workflows, run
   const [review, setReview] = useState<any | null>(null);
   const { confirmMany, busy } = useArtifactActions(pid, reload);
   const { pending, highConf } = pendingOf(rows);
+  // Lines whose stated CAD source could not be found in the parsed drawings.
+  // Surfaced as its own count because it is a different question from "has a
+  // human looked at this": a reviewed line with a fabricated citation is worse
+  // than an unreviewed one with a sound measurement.
+  const unverifiedCount = useMemo(() => rows.filter((r) => r.payload?.review_required).length, [rows]);
 
   // Rates live on cost_line, keyed by BOQ code — the estimate stage's output
   // read back here so a line shows its money without leaving the bill.
@@ -69,6 +74,7 @@ export default function BoqSurface({ pid, stage, artifacts, rows, workflows, run
         <div className="s"><div className="k">{t("boq.pricedValue")}</div><div className="v">{totals.minor ? money(totals.minor, totals.ccy) : "—"}</div></div>
         <div className="s"><div className="k">{t("boq.lines")}</div><div className="v">{rows.length}</div></div>
         <div className="s"><div className="k">{t("boq.needsReview")}</div><div className={"v" + (pending.length ? " warn" : "")}>{pending.length}</div></div>
+        <div className="s"><div className="k">{t("boq.unverified")}</div><div className={"v" + (unverifiedCount ? " warn" : "")}>{unverifiedCount}</div></div>
         <div className="s"><div className="k">{t("boq.reviewed")}</div><div className="v">{totals.pct}%</div></div>
       </div>
 
@@ -98,7 +104,12 @@ export default function BoqSurface({ pid, stage, artifacts, rows, workflows, run
                 <tr className="grp-row"><td colSpan={8}>{trade}</td></tr>
                 {list.map((l) => {
                   const c = costFor(l.payload?.code);
-                  const flagged = (l.status === "pending" || l.status === "stale") && (confPct(l.confidence) ?? 100) < 90;
+                  // A line whose citation could not be matched to any parsed
+                  // layer or block is flagged regardless of the model's own
+                  // confidence — the whole point of the audit is that a
+                  // confidently-stated measurement can still be unfounded.
+                  const unverified = !!l.payload?.review_required;
+                  const flagged = unverified || ((l.status === "pending" || l.status === "stale") && (confPct(l.confidence) ?? 100) < 90);
                   return (
                     <tr key={l.id} className={flagged ? "flagged" : ""}>
                       <td className="num" style={{ color: "var(--slate-500)" }}>{l.payload?.code ?? "—"}</td>
@@ -107,7 +118,19 @@ export default function BoqSurface({ pid, stage, artifacts, rows, workflows, run
                       <td className="num r">{qty(l.payload?.quantity)}</td>
                       <td className="num r">{c ? money(c.payload?.rate_minor, "") : "—"}</td>
                       <td className="num r">{c ? money(c.payload?.amount_minor, c.payload?.currency) : "—"}</td>
-                      <td><button className="srcchip" onClick={() => setReview(l)}>{t("boq.trace")}</button></td>
+                      <td style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                        {l.payload?.measured_from && (
+                          <span className="srcchip" title={t("boq.measuredFromTitle", { from: l.payload.measured_from })}>
+                            {l.payload.measured_from}
+                          </span>
+                        )}
+                        {unverified && (
+                          <span className="srcchip warn" title={l.payload?.review_reason ?? ""}>
+                            {t("boq.unverifiedCitation")}
+                          </span>
+                        )}
+                        <button className="srcchip" onClick={() => setReview(l)}>{t("boq.trace")}</button>
+                      </td>
                       <td className="r"><StatusCell a={l} onReview={setReview} /></td>
                     </tr>
                   );

@@ -119,7 +119,13 @@ const COLS: Record<string, Col[]> = {
   spec_clause: [{ key: "section" }, { key: "clause_ref", label: "ref" }, { key: "title" }],
   drawing_index: [{ key: "sheet_no", label: "sheet" }, { key: "title" }, { key: "discipline" }],
   drawing_measurement: [{ key: "sheet_no", label: "sheet" }, { key: "item" }, { key: "quantity", r: true }, { key: "unit" }],
-  boq_line: [{ key: "code" }, { key: "description" }, { key: "quantity", r: true }, { key: "unit" }],
+  // measured_from names the CAD layers/blocks a quantity was actually measured
+  // from, confirmed to exist; review_reason is populated only when the citation
+  // audit could not match what the line claimed. Showing the reason rather than
+  // the review_required boolean means the column is blank for sound lines and
+  // self-explanatory for the ones worth opening — a QS scanning the bill sees
+  // exactly the lines that need them and nothing else.
+  boq_line: [{ key: "code" }, { key: "description" }, { key: "quantity", r: true }, { key: "unit" }, { key: "measured_from", label: "measured from" }, { key: "review_reason", label: "review" }],
   cost_line: [{ key: "boq_code", label: "boq" }, { key: "rate_minor", label: "rate", r: true, money: true }, { key: "amount_minor", label: "amount", r: true, money: true }, { key: "currency", label: "ccy" }],
   schedule_activity: [{ key: "activity" }, { key: "duration_days", label: "days", r: true }, { key: "trade" }],
   procurement_package: [{ key: "package_name", label: "package" }, { key: "trade" }, { key: "estimated_value_minor", label: "value", r: true, money: true }],
