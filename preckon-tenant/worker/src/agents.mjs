@@ -587,6 +587,31 @@ function buildOutputs(env) {
       return [
         { type: "procurement_package", payload: { package_name: "Concrete supply & place", trade: "Concrete", boq_codes: ["C20", "R16"], estimated_value_minor: 2892000, currency: "CAD", lead_time_weeks: 4 }, provenance: ids(env), confidence: CONF },
       ];
+    // Shape template for the technical submission. The seven sections are fixed
+    // and ordered the way an evaluator reads them, so a partial run still
+    // produces a document with the right skeleton rather than an arbitrary
+    // subset in whatever order the model happened to emit.
+    case "narrative.compose":
+      return [
+        ["executive_summary", "Executive Summary"],
+        ["company_profile", "Company Profile"],
+        ["technical_approach", "Technical Approach & Methodology"],
+        ["programme", "Project Programme"],
+        ["quality", "Quality Assurance Plan"],
+        ["hse", "Health, Safety & Environment"],
+        ["risk_management", "Risk Management"],
+      ].map(([section, title]) => ({
+        type: "narrative_section",
+        payload: {
+          section,
+          title,
+          body_md: `## ${title}\n\n(not yet written — run NarrativeLogix with the bill and programme confirmed)`,
+          grounded_in: "",
+          word_count: 0,
+        },
+        provenance: ids(env),
+        confidence: CONF,
+      }));
     case "rfi.detect":
       return [
         { type: "rfi", payload: { subject: "Foundation bearing capacity", question: "Confirm allowable bearing pressure — geotech report not in tender pack.", severity: "high", references: [], raised_against: "S-201" }, provenance: ids(env), confidence: CONF },

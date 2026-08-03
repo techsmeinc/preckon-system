@@ -12,6 +12,7 @@ export const MODULE_META: Record<string, { icon: string; kind: string; desc: str
   quantlogix: { icon: "🧮", kind: "BOQ", desc: "Derive the bill of quantities from measurements and clauses." },
   costlogix: { icon: "💲", kind: "Estimate", desc: "Price each BOQ line against the rate books." },
   schedulelogix: { icon: "📅", kind: "Schedule", desc: "Sequence activities into a delivery programme." },
+  narrativelogix: { icon: "📝", kind: "Technical narrative", desc: "Write the technical submission from the priced scope and programme." },
   procurelogix: { icon: "🛒", kind: "Procurement", desc: "Group scope into RFQ packages by trade and lead-time." },
   // Underwriting pack (second vertical) — one module.
   underwriting: { icon: "🛡️", kind: "Underwriting", desc: "Triage, rate, price and quote a broker submission." },
@@ -26,6 +27,7 @@ export const MODULE_OUTPUTS: Record<string, string[]> = {
   quantlogix: ["boq_line"],
   costlogix: ["cost_line"],
   schedulelogix: ["schedule_activity"],
+  narrativelogix: ["narrative_section"],
   procurelogix: ["procurement_package"],
   underwriting: [
     "underwriting.submission_summary", "underwriting.exposure", "underwriting.loss_run",
@@ -37,7 +39,7 @@ export const MODULE_OUTPUTS: Record<string, string[]> = {
 export const TYPE_LABEL: Record<string, string> = {
   tender_summary: "Tender summary", bid_decision: "Bid decision", proposal_doc: "Proposal", bid_approval: "Bid approval",
   spec_clause: "Specification clauses", drawing_index: "Drawing index", drawing_measurement: "Measurements",
-  boq_line: "Bill of quantities", cost_line: "Cost lines", schedule_activity: "Programme", procurement_package: "Procurement packages",
+  boq_line: "Bill of quantities", cost_line: "Cost lines", schedule_activity: "Programme", procurement_package: "Procurement packages", narrative_section: "Technical narrative",
   risk: "Risk register", rfi: "RFIs", compliance_item: "Compliance", client_query: "Clarifications", document: "Documents",
   standard_violation: "Standard violations",
   // underwriting (short keys — looked up via typeLabel which strips the namespace)
@@ -128,6 +130,7 @@ const COLS: Record<string, Col[]> = {
   boq_line: [{ key: "code" }, { key: "description" }, { key: "quantity", r: true }, { key: "unit" }, { key: "measured_from", label: "measured from" }, { key: "review_reason", label: "review" }],
   cost_line: [{ key: "boq_code", label: "boq" }, { key: "rate_minor", label: "rate", r: true, money: true }, { key: "amount_minor", label: "amount", r: true, money: true }, { key: "currency", label: "ccy" }],
   schedule_activity: [{ key: "activity" }, { key: "duration_days", label: "days", r: true }, { key: "trade" }],
+  narrative_section: [{ key: "title" }, { key: "word_count", label: "words", r: true }, { key: "grounded_in", label: "grounded in" }],
   procurement_package: [{ key: "package_name", label: "package" }, { key: "trade" }, { key: "estimated_value_minor", label: "value", r: true, money: true }],
   bid_decision: [{ key: "decision" }, { key: "rationale" }],
   proposal_doc: [{ key: "title" }, { key: "total_amount_minor", label: "total", r: true, money: true }, { key: "currency", label: "ccy" }],

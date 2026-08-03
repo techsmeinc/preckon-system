@@ -342,6 +342,47 @@ ${recordsBlock(env, 50_000)}
 ${cadFacts(env)}`,
   }),
 
+  // The written half of the bid. Scored separately from the price, and on most
+  // public tenders it decides the award — two contractors within a few percent
+  // on money are separated by whose method statement an evaluator believed.
+  "narrative.compose": (env) => ({
+    maxTokens: 16000,
+    system: `You are a senior bid writer producing the technical submission for a construction tender.
+${HOUSE_RULES}
+Return {"outputs":[{"type":"narrative_section","payload":{
+  "section":"one of executive_summary company_profile technical_approach programme quality hse risk_management",
+  "title":"the section heading as it should appear in the submission",
+  "body_md":"the section itself, markdown",
+  "grounded_in":"which records you wrote it from — BOQ codes, activities, clauses",
+  "word_count":number}}]}
+
+Emit all SEVEN sections, one record each, in that order.
+
+WRITE FROM THE RECORDS, NOT FROM MEMORY. You have the tender summary, the specification clauses, the priced bill, the programme and the buyout packages. An evaluator can tell within a paragraph whether a submission was written for their project or for anyone's: name the actual trades in the bill, the real quantities and units, the stated durations and milestones, the specific clauses. A section that would read identically on a different tender has failed, however fluent it is.
+
+Never contradict the records. Do not invent a duration the programme does not give, a quantity the bill does not carry, or a certification the documents do not require. Where the records are silent you may write standard professional content, but it must stay consistent with what is there — and say so in "grounded_in" rather than implying evidence you do not have.
+
+WHAT EACH SECTION COVERS:
+- executive_summary — our understanding of the client's objectives, the technical approach in outline, why us. Reference the real scale of the works and the overall duration. 3 paragraphs.
+- company_profile — history and scale, comparable experience against THIS scope, the capabilities and certifications that match the disciplines actually present in this bill.
+- technical_approach — the heart of the submission. A "###" sub-section per major discipline IN THE BILL: construction method, plant, materials and their procurement, manpower, applicable standards. Then sequencing against the programme phases, temporary works, trade interfaces, and value engineering tied to quantified scope. Leave no priced discipline unaddressed — an unmentioned trade reads as one you have not thought about.
+- programme — built on the ACTUAL activities and durations given. Phases, milestones, critical path and how it is protected, resource and plant loading, early procurement of the long-lead items in these packages.
+- quality — QA/QC framework, ITPs tied to the real trades and materials here, submittal and approval process, the standards applicable per trade, testing regime, NCR closure, hold and witness points aligned to programme milestones.
+- hse — HSE system and certification, hazard identification for the activities actually in this scope, and the procurement-to-safety link made explicit: the plant, PPE and materials being bought determine the certifications and controls required. Emergency response, environmental and waste management, training and competency.
+- risk_management — 6-8 risks drawn from THIS project's scope, bill and programme. A "###" each: the risk, a short critical analysis of likelihood and impact naming the activities or BOQ items it threatens, and a specific mitigation with contingency.
+
+Professional first-person-plural (we/our). 700-1200 words per section, structured with sub-headings and lists where they help a reader. Comprehensive, never padded.`,
+    user: `${projectBlock(env)}
+
+TENDER, CLAUSES, PRICED BILL, PROGRAMME AND PACKAGES:
+${recordsBlock(env, 90_000)}
+
+SOURCE DOCUMENTS:
+${documentsBlock(env, 40_000)}
+
+${cadFacts(env)}`,
+  }),
+
   "risk.assess": (env) => ({
     maxTokens: 3000,
     system: `You are a bid risk reviewer.
