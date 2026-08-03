@@ -322,7 +322,16 @@ export const fr: Dict = {
   "cad.blocks": "Nombre de blocs",
   "cad.layers": "Calques",
   "cad.notes": "Notes",
-  "cad.noRender": "Ce plan a été mesuré correctement mais n’a pas pu être affiché.",
+  "cad.sheet": "Planche",
+  "cad.fit": "Ajuster",
+  "cad.zoomIn": "Zoom avant",
+  "cad.zoomOut": "Zoom arrière",
+  "cad.downloadDxf": "Télécharger le DXF",
+  "cad.rendering": "Tracé de la planche…",
+  "cad.retryRender": "Tracer à nouveau",
+  "cad.unreadable": "Ce plan n’a pas pu être lu",
+  "cad.noRender": "Ce plan a été mesuré correctement mais la planche n’a pas pu être tracée.",
+  "cad.noRenderWhy": "Aucune raison n’a été enregistrée. Réessayez, ou téléchargez le DXF et ouvrez-le dans votre application de CAO.",
 
   /* ── specs (DocLogix) ─────────────────────────────────────────────────── */
   "specs.emptyTitle": "CCTP pas encore analysé",
