@@ -16,6 +16,7 @@ import SpecsSurface from "@/lib/surfaces/specs";
 import BoqSurface from "@/lib/surfaces/boq";
 import EstimateSurface from "@/lib/surfaces/estimate";
 import ScheduleSurface from "@/lib/surfaces/schedule";
+import NarrativeSurface from "@/lib/surfaces/narrative";
 import ProcurementSurface from "@/lib/surfaces/procurement";
 import GenericSurface from "@/lib/surfaces/generic";
 
@@ -26,6 +27,7 @@ const SURFACES: Record<string, React.ComponentType<SurfaceProps>> = {
   quantlogix: BoqSurface,
   costlogix: EstimateSurface,
   schedulelogix: ScheduleSurface,
+  narrativelogix: NarrativeSurface,
   procurelogix: ProcurementSurface,
 };
 
