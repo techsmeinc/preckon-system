@@ -335,23 +335,67 @@ async function buildAgentParams(
     // trustworthy, so the agent never has to interpret raw drawing units.
     const measuresWork = ["drawing_measurement", "boq_line", "cost_line", "schedule_activity", "spec_clause"];
     if (agent.produces.some((p) => measuresWork.includes(shortType(p))) || readsDocuments) {
-      const drawings = await query<{ filename: string; summary: any }>(
-        `SELECT f.filename, c.summary
+      // Two queries, deliberately. Selecting c.summary alongside ORDER BY
+      // f.created_at makes MySQL sort rows that carry the whole extraction
+      // payload; on a real drawing set that exceeds sort_buffer_size and the
+      // statement dies with ER_OUT_OF_SORTMEMORY. The run then never advances
+      // past this point, so no job is ever enqueued and the BOQ silently stays
+      // empty. Ordering a blob-free projection first keeps the sort tiny.
+      const drawingFiles = await query<{ id: string; filename: string }>(
+        `SELECT f.id, f.filename
            FROM cad_extraction c JOIN file f ON f.id = c.file_id
           WHERE c.tenant_id = ? AND c.project_id = ?
           ORDER BY f.created_at ASC LIMIT 20`,
         [tenantId, projectId]
       );
-      if (drawings.length) {
-        params.cad = cadDigest(
-          drawings.map((d) => ({
+      let drawings: Array<{ filename: string; summary: any }> = [];
+      if (drawingFiles.length) {
+        const ph = drawingFiles.map(() => "?").join(",");
+        const rows = await query<{ file_id: string; summary: any }>(
+          `SELECT file_id, summary FROM cad_extraction
+            WHERE tenant_id = ? AND file_id IN (${ph})`,
+          [tenantId, ...drawingFiles.map((f) => f.id)]
+        );
+        const byFile = new Map(rows.map((r) => [r.file_id, r.summary]));
+        drawings = drawingFiles
+          .map((f) => ({ filename: f.filename, summary: byFile.get(f.id) }))
+          .filter((d) => d.summary != null)
+          .map((d) => ({
             filename: d.filename,
             // mysql2 gives JSON columns back parsed, but a driver/config change
             // that returns a string shouldn't silently blank the drawings.
             summary: typeof d.summary === "string" ? JSON.parse(d.summary) : d.summary,
-          })),
-          CAD_DIGEST_BUDGET
-        );
+          }));
+      }
+      if (drawings.length) {
+        params.cad = cadDigest(drawings, CAD_DIGEST_BUDGET);
+
+        // The bill is the one stage that interrogates the drawings rather than
+        // reading a summary of them: its specialists call list_layers /
+        // get_layer_geometry / count_blocks across turns. Those handlers run in
+        // the worker, which has no database by design (§5.1), so the parsed
+        // extractions travel in the envelope. Scoped to the BOQ agent on
+        // purpose — every other stage is well served by the digest, and
+        // inlining full extractions everywhere would bloat every envelope.
+        if (agent.produces.some((p) => shortType(p) === "boq_line")) {
+          const full = drawings.map((d) => ({ ...d.summary, file: d.summary?.file ?? d.filename }));
+          const bytes = JSON.stringify(full).length;
+          if (bytes <= CAD_EXTRACTION_BUDGET) {
+            params.cad_extractions = full;
+          } else {
+            // Rather than truncate mid-structure — which would hand the toolbox
+            // a layer list that looks complete and isn't — drop the heaviest
+            // per-entity arrays and keep the aggregates the take-off actually
+            // measures from.
+            params.cad_extractions = full.map((x) => ({
+              ...x,
+              textAnnotations: (x.textAnnotations ?? []).slice(0, 200),
+              blockInstances: [],
+              dimensions: (x.dimensions ?? []).slice(0, 200),
+            }));
+            params.cad_extractions_trimmed = true;
+          }
+        }
       }
     }
 
@@ -529,6 +573,10 @@ const DOC_TEXT_BUDGET = Number(process.env.AGENT_DOC_TEXT_BUDGET ?? 120_000);
 // The CAD digest is dense — every line is a number the agent may price from —
 // so it gets its own budget rather than competing with the specification text.
 const CAD_DIGEST_BUDGET = Number(process.env.AGENT_CAD_BUDGET ?? 20_000);
+// Ceiling on the parsed extractions inlined into a BOQ envelope. This is stored
+// in ai_job.envelope, so it is a row size as much as a prompt size; past this
+// the per-entity arrays are dropped and the aggregates kept.
+const CAD_EXTRACTION_BUDGET = Number(process.env.AGENT_CAD_EXTRACTION_BUDGET ?? 4_000_000);
 
 async function inlineDocumentText(
   tenantId: string,

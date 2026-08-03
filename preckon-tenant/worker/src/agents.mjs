@@ -5,6 +5,8 @@
 // the trust boundary (worker has no store access) is unchanged.
 
 import { PROMPTS, hasPrompt, supervisorPrompt, outlinePrompt, sectionPrompt, designerPrompt, verifierPrompt } from "./prompts.mjs";
+import { createCadToolbox, buildExtractionDigest } from "./cad-tools.mjs";
+import { runAgenticLoop } from "./agentic-loop.mjs";
 import {
   normalizeUnit, normalizeMeasurementUnit, quantityConfidence, validateQuantity, sequence,
 } from "./knowledge.mjs";
