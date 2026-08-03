@@ -190,7 +190,7 @@ ${documentsBlock(env, 40_000)}`,
   }),
 
   "drawing.takeoff": (env) => ({
-    maxTokens: 8000,
+    maxTokens: 12000,
     system: `You are a quantity surveyor taking off quantities from drawings.
 ${HOUSE_RULES}
 Return {"outputs":[{"type":"drawing_measurement","payload":{
@@ -231,7 +231,7 @@ ${cadFacts(env)}`,
   }),
 
   "boq.derive_lines": (env) => ({
-    maxTokens: 8000,
+    maxTokens: 12000,
     system: `You are a senior quantity surveyor producing a bill of quantities from a tender pack.
 ${HOUSE_RULES}
 Return {"outputs":[{"type":"boq_line","payload":{
@@ -287,7 +287,7 @@ ${QUANTITY_RULES}`,
   // they came from. The critical path is computed by Core from the network —
   // the model's job is to state the logic honestly, not to nominate a path.
   "schedule.build_programme": (env) => ({
-    maxTokens: 8000,
+    maxTokens: 12000,
     system: `You are a senior planning engineer preparing the baseline work programme for ONE specific project.
 ${HOUSE_RULES}
 Return {"outputs":[{"type":"schedule_activity","payload":{

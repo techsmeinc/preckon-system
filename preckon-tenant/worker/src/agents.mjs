@@ -477,11 +477,82 @@ async function callAnthropic(model, system, userText, maxTokens) {
   return (data.content ?? []).map((c) => c.text ?? "").join("");
 }
 
+/**
+ * Pull the first complete JSON value out of a model response.
+ *
+ * The old version sliced from the first bracket to the LAST bracket anywhere in
+ * the text. One sentence of commentary after the JSON — or a closing brace
+ * inside it — corrupted the slice, JSON.parse threw, and the caller discarded
+ * everything. That is how a 17,000-character programme became two hardcoded
+ * stub bars: the model did the work, the parser threw it away, and the fallback
+ * looked like a real answer.
+ *
+ * This walks the text tracking string state and escapes, so it stops at the
+ * point the value actually closes and ignores whatever follows.
+ */
 function extractJson(text) {
-  const s = text.indexOf("["), o = text.indexOf("{");
+  const src = String(text ?? "");
+  const s = src.indexOf("["), o = src.indexOf("{");
   const start = s === -1 ? o : o === -1 ? s : Math.min(s, o);
-  const end = Math.max(text.lastIndexOf("]"), text.lastIndexOf("}"));
-  try { return JSON.parse(text.slice(start, end + 1)); } catch { return null; }
+  if (start === -1) return null;
+
+  let depth = 0, inStr = false, esc = false;
+  for (let i = start; i < src.length; i++) {
+    const c = src[i];
+    if (esc) { esc = false; continue; }
+    if (c === "\\") { esc = true; continue; }
+    if (c === '"') { inStr = !inStr; continue; }
+    if (inStr) continue;
+    if (c === "{" || c === "[") depth++;
+    else if (c === "}" || c === "]") {
+      depth--;
+      if (depth === 0) {
+        try { return JSON.parse(src.slice(start, i + 1)); } catch { break; }
+      }
+    }
+  }
+
+  // Never closed — the response was cut off mid-structure. Rather than lose the
+  // whole run, salvage every element that DID complete. A programme missing its
+  // last three activities is a programme an estimator can finish; a stub that
+  // silently replaced it is not.
+  return salvageObjects(src, start);
+}
+
+/** Every complete top-level object inside a truncated array, as {outputs}. */
+function salvageObjects(src, start) {
+  const out = [];
+  // Scan from INSIDE the array. A truncated `{"outputs":[{…},{…},{"ty` never
+  // closes its wrapper, so a brace counter started at the wrapper stays above
+  // zero and no element is ever seen as complete. Stepping past the opening
+  // bracket puts each element at depth zero, where it can be recognised.
+  const arr = src.indexOf("[", start);
+  const from = arr === -1 ? start : arr + 1;
+  let depth = 0, inStr = false, esc = false, objStart = -1;
+  for (let i = from; i < src.length; i++) {
+    const c = src[i];
+    if (esc) { esc = false; continue; }
+    if (c === "\\") { esc = true; continue; }
+    if (c === '"') { inStr = !inStr; continue; }
+    if (inStr) continue;
+    if (c === "{") { if (depth === 0) objStart = i; depth++; }
+    else if (c === "}") {
+      depth--;
+      if (depth === 0 && objStart !== -1) {
+        try {
+          const v = JSON.parse(src.slice(objStart, i + 1));
+          if (v && typeof v === "object") out.push(v);
+        } catch { /* skip the fragment, keep the rest */ }
+        objStart = -1;
+      }
+    }
+  }
+  if (!out.length) return null;
+  // A salvaged run of {type, payload} records is an outputs array; a single
+  // salvaged wrapper object is already the shape the caller wants.
+  if (out.length === 1 && (out[0].outputs || out[0].sections || out[0].specialists)) return out[0];
+  const records = out.filter((v) => v.type && v.payload);
+  return records.length ? { outputs: records } : out[0];
 }
 
 /**
