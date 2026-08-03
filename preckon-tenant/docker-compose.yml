@@ -46,6 +46,12 @@ services:
     environment:
       PORT: "4000"
       CORE_URL: http://app:3000
+      # The vision pre-pass rasterises PDF drawing sheets through the sidecar.
+      # The worker fetches them itself so the images never enter the job
+      # envelope — that envelope is a database column, and a rendered sheet is
+      # hundreds of KB. Neither service holds a database handle or a credential,
+      # so this adds no reach.
+      CAD_URL: http://cad:7400
       INTERNAL_SERVICE_TOKEN: change-me-service-token
       # Set ANTHROPIC_API_KEY (e.g. in a .env next to this file) to use REAL Claude
       # agents; unset → deterministic stub agents. Model ids are env-overridable.

@@ -7,6 +7,7 @@ import { newId } from "./ids";
 import { enqueueJob, recordJobResult, type JobInputArtifact, type JobResult } from "./jobs";
 import type { Tier } from "./constants";
 import { cadDigest } from "./cad";
+import { join as pathJoin } from "node:path";
 
 // ── §4 The workflow runtime: Preckon Core's deterministic scheduler. No LLM.
 // It materializes a step per node, dispatches steps whose upstream completed,
@@ -377,6 +378,27 @@ async function buildAgentParams(
         // extractions travel in the envelope. Scoped to the BOQ agent on
         // purpose — every other stage is well served by the digest, and
         // inlining full extractions everywhere would bloat every envelope.
+        // PDF drawing sheets, for the vision pre-pass. Only the PATHS travel —
+        // rendered pages are hundreds of KB each and ai_job.envelope is a
+        // database column, so the worker fetches them from the cad sidecar
+        // itself. The sidecar has no database and no credentials either, so
+        // nothing about the trust boundary changes; the images simply never
+        // touch the row.
+        if (agent.produces.some((p) => shortType(p) === "boq_line")) {
+          const pdfs = await query<{ filename: string; storage_key: string }>(
+            `SELECT filename, storage_key FROM file
+              WHERE tenant_id = ? AND project_id = ? AND LOWER(filename) LIKE '%.pdf'
+              ORDER BY created_at ASC LIMIT 8`,
+            [tenantId, projectId]
+          );
+          if (pdfs.length) {
+            params.drawing_pdfs = pdfs.map((f) => ({
+              filename: f.filename,
+              path: pathJoin(process.env.FILE_STORAGE_DIR ?? "./.uploads", f.storage_key),
+            }));
+          }
+        }
+
         if (agent.produces.some((p) => shortType(p) === "boq_line")) {
           const full = drawings.map((d) => ({ ...d.summary, file: d.summary?.file ?? d.filename }));
           const bytes = JSON.stringify(full).length;

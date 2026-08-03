@@ -7,6 +7,7 @@
 import { PROMPTS, hasPrompt, supervisorPrompt, outlinePrompt, sectionPrompt, designerPrompt, verifierPrompt } from "./prompts.mjs";
 import { createCadToolbox, buildExtractionDigest, knownNames } from "./cad-tools.mjs";
 import { runAgenticLoop } from "./agentic-loop.mjs";
+import { runVisionPass, visionBlock } from "./vision.mjs";
 import {
   normalizeUnit, normalizeMeasurementUnit, quantityConfidence, validateQuantity, sequence,
 } from "./knowledge.mjs";
@@ -196,14 +197,27 @@ export async function runBoqRoster(env, model, call = callAnthropic) {
       : "no parsed drawings — specialists price from documents only"
   );
 
+  // Vision pre-pass. Runs once for the whole bill and its observations are
+  // shared into every division — a sheet is read at most once however many
+  // trades cite it. Skipped entirely when there are no PDFs.
+  const pdfs = env.inputs?.params?.drawing_pdfs ?? [];
+  let vision = "";
+  if (pdfs.length) {
+    const v = await runVisionPass({ model, pdfs, note });
+    vision = visionBlock(v.notes);
+    note("vision", v.sheets ? `read ${v.sheets} sheet(s)` : "no sheets could be read");
+  }
+
   const runSection = async (sec) => {
     const req = sectionPrompt(env, sec, specialistFor(sec), roster);
     try {
       let text;
-      if (grounded) {
+      if (grounded || vision) {
         const seeded =
-          `${req.user}\n\nDRAWINGS ALREADY PARSED (call the tools for anything this does not answer):\n` +
-          `${buildExtractionDigest(env.inputs?.params?.cad_extractions ?? [], 3000)}`;
+          `${req.user}\n\n${vision}\n\n` +
+          (grounded
+            ? `DRAWINGS ALREADY PARSED (call the tools for anything this does not answer):\n${buildExtractionDigest(env.inputs?.params?.cad_extractions ?? [], 3000)}`
+            : "");
         const out = await runAgenticLoop({
           model,
           system: req.system,
