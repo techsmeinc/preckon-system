@@ -229,13 +229,33 @@ function SheetDetail({ pid, fid }: { pid: string; fid: string }) {
           );
         }
         return (
-          <div className="tw" key={i} style={{ marginTop: 12, overflowX: "auto" }}>
+          <div className="tw" key={i} style={{ marginTop: 12, overflowX: "auto", maxWidth: "100%" }}>
             <div className="csub" style={{ marginBottom: 6 }}>{s.layer}</div>
-            <table className="tbl">
-              <thead><tr>{s.header.map((h, j) => <th key={j}>{h}</th>)}</tr></thead>
+            {/* A finishes schedule cell is a full specification sentence
+                ("NOMINAL 600MM X 600MM X 10MM THK GLAZED CERAMIC TILES"). Left
+                to size themselves those columns run to several thousand pixels
+                and the table stops being readable at any zoom. Cap the width,
+                wrap inside it, and top-align so short cells don't float in the
+                middle of a tall row. */}
+            <table className="tbl" style={{ tableLayout: "fixed", minWidth: 720 }}>
+              <thead>
+                <tr>
+                  {s.header.map((h, j) => (
+                    <th key={j} style={{ maxWidth: 200, whiteSpace: "normal", wordBreak: "break-word", verticalAlign: "bottom" }}>
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
               <tbody>
                 {s.rows.slice(0, 30).map((r, j) => (
-                  <tr key={j}>{r.map((c, k) => <td key={k}>{c}</td>)}</tr>
+                  <tr key={j}>
+                    {r.map((c, k) => (
+                      <td key={k} style={{ maxWidth: 200, whiteSpace: "normal", wordBreak: "break-word", verticalAlign: "top" }}>
+                        {c}
+                      </td>
+                    ))}
+                  </tr>
                 ))}
               </tbody>
             </table>

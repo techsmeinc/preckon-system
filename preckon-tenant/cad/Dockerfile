@@ -23,6 +23,18 @@ WORKDIR /app
 
 COPY --from=dwg /usr/local/bin/dwg2dxf /usr/local/bin/dwg2dxf
 
+# Fonts. python:3.12-slim ships with none at all, and ezdxf's SVG backend
+# refuses to draw a sheet that contains a single piece of text without one —
+# `FontNotFoundError('no fonts available, not even fallback fonts')`. Every
+# construction drawing is covered in text, so with no font installed EVERY
+# sheet fails to render while measuring perfectly: the quantities are right and
+# the estimator cannot see the drawing they came from. DejaVu is the metric
+# fallback ezdxf expects; fontconfig is what lets it be found.
+RUN apt-get update -qq \
+ && apt-get install -y --no-install-recommends fonts-dejavu-core fontconfig \
+ && fc-cache -f \
+ && rm -rf /var/lib/apt/lists/*
+
 # ezdxf builds cleanly on slim; no compiler needed for these pins.
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
