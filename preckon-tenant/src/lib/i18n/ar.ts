@@ -320,6 +320,8 @@ export const ar: Dict = {
   "cad.sheets": "اللوحات",
   "cad.blocks": "عدد الكتل",
   "cad.layers": "الطبقات",
+  "cad.tagsOn": "وسوم الغرف والعناصر على {layer}",
+  "cad.moreRows": "+{n} صفوف إضافية في الجدول المصدر",
   "cad.notes": "ملاحظات",
   "cad.sheet": "اللوحة",
   "cad.fit": "ملء الإطار",

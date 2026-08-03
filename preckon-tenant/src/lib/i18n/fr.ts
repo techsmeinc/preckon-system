@@ -321,6 +321,8 @@ export const fr: Dict = {
   "cad.sheets": "Planches",
   "cad.blocks": "Nombre de blocs",
   "cad.layers": "Calques",
+  "cad.tagsOn": "Étiquettes de pièces et d’éléments sur {layer}",
+  "cad.moreRows": "+{n} lignes supplémentaires dans le tableau source",
   "cad.notes": "Notes",
   "cad.sheet": "Planche",
   "cad.fit": "Ajuster",

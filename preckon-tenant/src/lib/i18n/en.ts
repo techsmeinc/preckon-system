@@ -319,6 +319,8 @@ export const en = {
   "cad.sheets": "Sheets",
   "cad.blocks": "Block counts",
   "cad.layers": "Layers",
+  "cad.tagsOn": "Room & element tags on {layer}",
+  "cad.moreRows": "+{n} more rows in the source schedule",
   "cad.notes": "Notes",
   "cad.sheet": "Sheet",
   "cad.fit": "Fit",
