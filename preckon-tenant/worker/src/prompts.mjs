@@ -356,7 +356,9 @@ Return {"outputs":[{"type":"narrative_section","payload":{
   "grounded_in":"which records you wrote it from — BOQ codes, activities, clauses",
   "word_count":number}}]}
 
-Emit all SEVEN sections, one record each, in that order.
+${env.inputs?.params?.section
+  ? `Write ONLY the "${env.inputs.params.section}" section — one record, nothing else. It is being regenerated on its own because a reviewer rejected it or the scope moved underneath it, so treat the records below as the current truth rather than matching whatever the previous draft said.`
+  : "Emit all SEVEN sections, one record each, in that order."}
 
 WRITE FROM THE RECORDS, NOT FROM MEMORY. You have the tender summary, the specification clauses, the priced bill, the programme and the buyout packages. An evaluator can tell within a paragraph whether a submission was written for their project or for anyone's: name the actual trades in the bill, the real quantities and units, the stated durations and milestones, the specific clauses. A section that would read identically on a different tender has failed, however fluent it is.
 
