@@ -38,6 +38,13 @@
   --slate-700:#C7D3E0; --slate-600:#A8B6C6; --slate-500:#8493A6; --slate-400:#6A7A8E; --slate-300:#3A4C60;
   --hairline:#1D3250; --teal-tint:rgba(21,194,168,.14);
   --amber-tint:rgba(245,165,36,.14); --blue-tint:rgba(59,130,246,.16); --red-tint:rgba(239,68,68,.15); --violet-tint:rgba(124,108,255,.16);
+  color-scheme:dark;
+  /* Dark mode is chosen, not flipped: the same hues re-stepped against this
+     surface. A tint that reads as a gentle wash on white becomes invisible on
+     #0F2033 at the same ratio, so the mixes are heavier here. */
+  --fill-brand:color-mix(in srgb,var(--brand) 40%,var(--surface));
+  --fill-warn:color-mix(in srgb,var(--amber) 40%,var(--surface));
+  --fill-neutral:color-mix(in srgb,var(--slate-400) 40%,var(--surface));
 }
 *{box-sizing:border-box;} html,body{margin:0; height:100%;}
 body{font-family:var(--font-body); color:var(--slate-700); background:var(--paper); -webkit-font-smoothing:antialiased; font-size:14px; line-height:1.45;}
@@ -535,13 +542,22 @@ tr.flagged td{background:var(--amber-tint);}
 .grow .glbl .sd{margin-inline-start:auto;}
 .grow .gtrack{flex:1; position:relative; min-height:38px;}
 .gwk-grid{position:absolute; top:0; bottom:0; border-inline-start:1px solid var(--hairline); opacity:.5;}
-.gbar{position:absolute; top:9px; height:20px; border-radius:5px; cursor:pointer; display:flex; align-items:center; padding:0 6px;
-  white-space:nowrap; box-shadow:0 1px 2px rgba(0,0,0,.08); border:0;}
-.gbar.crit{background:var(--brand); color:#06131d;}
-.gbar.norm{background:var(--slate-400); color:#fff;}
-.gbar.flag{background:var(--amber); color:#06131d;}
-.gbar .gd{font-family:var(--font-mono); font-size:9px; font-weight:600;}
-.gbar.sel{outline:2px solid var(--ink); outline-offset:1px;}
+/* The bar is a MEASURE (how long), not a status light. It gets a recessive
+   tint and states its condition with a 3px cap on the start edge — the end a
+   reader's eye lands on first — plus the CRITICAL/review chip already in the
+   row label. Status therefore never depends on colour alone, and a programme
+   where every activity is flagged no longer reads as a wall of alarm. */
+.gbar{position:absolute; top:10px; height:18px; border-radius:4px; cursor:pointer; display:flex; align-items:center;
+  padding:0 7px; white-space:nowrap; border:0; color:var(--ink);
+  border-inline-start:3px solid var(--slate-400); background:var(--fill-neutral);}
+.gbar.crit{background:var(--fill-brand); border-inline-start-color:var(--brand);}
+.gbar.norm{background:var(--fill-neutral); border-inline-start-color:var(--slate-400);}
+.gbar.flag{background:var(--fill-warn); border-inline-start-color:var(--amber);}
+/* Values wear text tokens, never the mark's colour — the cap beside them
+   carries the identity, so the number stays legible on any fill. */
+.gbar .gd{font-family:var(--font-mono); font-size:9.5px; font-weight:600; color:var(--slate-700);}
+.gbar:hover{filter:brightness(1.06);}
+.gbar.sel{outline:2px solid var(--brand); outline-offset:1px;}
 .leg{display:flex; gap:16px; margin-top:14px; font-size:11.5px; color:var(--slate-500); flex-wrap:wrap;}
 .leg span{display:inline-flex; align-items:center; gap:6px;}
 .leg i{width:12px; height:12px; border-radius:3px; display:inline-block;}
