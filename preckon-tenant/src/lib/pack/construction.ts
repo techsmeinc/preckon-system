@@ -226,6 +226,19 @@ export const WORKFLOWS: PackWorkflow[] = [
     ],
     [{ from: "draft", to: "gate" }]
   ),
+  // B.14 — Classify. agent.document is the first node of every workflow, so a
+  // document only acquires a type once some downstream workflow is run. That
+  // left the Documents tab showing "not classified yet" for a pack that had
+  // been fully ingested, with no way to act on it from that screen. This is
+  // that one step on its own — same agent, same audit trail, no gate, so the
+  // set can be typed before deciding which chain to run.
+  wf(
+    "workflow.classify",
+    "Classify documents",
+    "tenderlogix",
+    [{ id: "ingest", kind: "agent", agent_key: "agent.document" }],
+    []
+  ),
 ];
 
 // ── Personas (3) — §1.3 ──────────────────────────────────────────────────────

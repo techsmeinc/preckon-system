@@ -76,8 +76,10 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
   }
 
   // Rendered outside the transaction: it is slow, entirely optional, and a
-  // drawing that measures fine but won't render is still fully useful.
-  const svg = cad?.ok ? await renderCad(path.join(STORAGE_DIR, storageKey)) : null;
+  // drawing that measures fine but won't render is still fully useful. The
+  // failure reason is kept, not swallowed — see the /cad/render route for why
+  // that matters more than it looks.
+  const render = cad?.ok ? await renderCad(path.join(STORAGE_DIR, storageKey)) : null;
 
   await useCase(actorFromCtx(ctx), async (_conn, audit) => {
     // A drawing we couldn't parse is 'failed', not 'ingested'. The bytes are
@@ -99,14 +101,15 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
     if (cad?.ok && cad.summary) {
       const s = cad.summary;
       await query(
-        `INSERT INTO cad_extraction (file_id, tenant_id, project_id, units, layer_count, block_count, sheet_count, summary, warnings, svg)
-         VALUES (?,?,?,?,?,?,?,?,?,?)`,
+        `INSERT INTO cad_extraction (file_id, tenant_id, project_id, units, layer_count, block_count, sheet_count, summary, warnings, svg, render_error, rendered_at)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?, NOW(3))`,
         [
           id, ctx.tenantId, pid, s.units ?? null,
           (s.layers ?? []).length,
           Object.values(s.blockInstanceCounts ?? {}).reduce((t, b) => t + (b.total ?? 0), 0),
           (s.sheets ?? []).length,
-          JSON.stringify(s), JSON.stringify(s.warnings ?? []), svg,
+          JSON.stringify(s), JSON.stringify(s.warnings ?? []),
+          render?.svg ?? null, render?.error ?? null,
         ]
       );
     }

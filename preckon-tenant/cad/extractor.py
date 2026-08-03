@@ -685,15 +685,42 @@ _DEGRADE_TIERS: tuple[frozenset[str], ...] = (
 )
 
 
+def _drawable_layout(doc: Drawing):
+    """The layout worth rendering: modelspace when it holds the linework,
+    otherwise the fullest paperspace layout.
+
+    Plenty of issued sheets keep modelspace empty (or holding nothing but an
+    xref that was never uploaded with the drawing) and put the drawn sheet in a
+    named layout. Rendering modelspace regardless is how those come back as a
+    blank page, which reads to the estimator as "broken" rather than "look at
+    the layout tab".
+    """
+    msp = doc.modelspace()
+    if sum(1 for _ in msp) >= 5:
+        return msp
+    best, best_n = msp, sum(1 for _ in msp)
+    try:
+        for name in doc.layout_names():
+            if name.lower() == "model":
+                continue
+            lay = doc.layout(name)
+            n = sum(1 for _ in lay)
+            if n > best_n:
+                best, best_n = lay, n
+    except Exception:
+        pass
+    return best
+
+
 def _render_pass(doc: Drawing, skip: frozenset[str]) -> str:
-    """One full render of modelspace to an SVG string, skipping `skip` types."""
+    """One full render of the drawable layout to an SVG, skipping `skip` types."""
     from ezdxf import bbox
     from ezdxf.addons.drawing import Frontend, RenderContext, layout, svg
     from ezdxf.addons.drawing.config import (
         Configuration, BackgroundPolicy, ColorPolicy,
     )
 
-    msp = doc.modelspace()
+    msp = _drawable_layout(doc)
     context = RenderContext(doc)
     # Modelspace defaults to a BLACK background in CAD, so ACI colour 7 (the
     # default linework) resolves to WHITE and renders as an invisible/black box
@@ -718,6 +745,13 @@ def _render_pass(doc: Drawing, skip: frozenset[str]) -> str:
 
     dropped = _SKIP_TYPES | skip
     entities = [e for e in msp if e.dxftype() not in dropped]
+    if not entities:
+        raise RuntimeError(
+            "There is nothing to draw in this file — its modelspace and layouts are "
+            "empty. The linework is most likely in an external reference (xref) that "
+            "was not uploaded alongside the drawing. Bind the xrefs and re-issue, or "
+            "upload the referenced drawings too."
+        )
     drawn = entities
 
     # Robust crop: these drawings carry many entities scattered kilometres from
@@ -770,7 +804,11 @@ def _render_pass(doc: Drawing, skip: frozenset[str]) -> str:
         svg_string,
         count=1,
     )
-    return svg_string
+    # Drop the XML prolog. This markup is inlined into an HTML document, where
+    # the HTML parser turns `<?xml ... ?>` into a stray comment node — harmless,
+    # but it means the container's first child is not the <svg>, which the
+    # viewer needs a handle on to fit and zoom.
+    return _re.sub(r"^\s*<\?xml[^>]*\?>\s*", "", svg_string)
 
 
 def render_to_svg(path: str) -> dict[str, Any]:
@@ -792,7 +830,7 @@ def render_to_svg(path: str) -> dict[str, Any]:
     doc, _auditor = _load_drawing(path)
 
     last_size = 0
-    for tier, skip in enumerate(_DEGRADE_TIERS):
+    for skip in _DEGRADE_TIERS:
         svg_string = _render_pass(doc, skip)
         last_size = len(svg_string)
         if last_size <= _SVG_SIZE_LIMIT:

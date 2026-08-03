@@ -653,10 +653,51 @@ input[type=color]{width:46px; height:34px; border:1px solid var(--hairline); bor
   border:1.5px solid var(--hairline); border-radius:9px; background:var(--panel-2); color:var(--ink); outline:none;}
 .bim-ask input:focus{border-color:var(--brand);}
 .toast.bad{background:var(--danger, #b42318); color:#fff;}
+/* ---------- ISSUED SHEETS (DrawLogix) ---------- */
+/* Sheet picker. A drawing set is read one sheet at a time and the filenames are
+   long ("03-MDVQ-AB-03-FLOORING PLAN & FINISHING SCHEDULE.dwg"), so this is a
+   select, not a tab strip that would wrap into an unreadable block. */
+.cad-pick{display:flex; align-items:center; gap:8px; flex-wrap:wrap; min-width:0;}
+.cad-pick label{font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--slate-500);}
+.cad-pick select{font-family:var(--font-body); font-size:12.5px; font-weight:600; color:var(--ink);
+  padding:8px 30px 8px 11px; border:1px solid var(--hairline); border-radius:9px; background:var(--panel-2);
+  max-width:340px; cursor:pointer; outline:none; appearance:none;
+  background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 10px center;}
+[dir="rtl"] .cad-pick select{padding:8px 11px 8px 30px; background-position:left 10px center;}
+.cad-pick select:hover{border-color:var(--slate-400);}
+.cad-pick select:focus-visible{border-color:var(--brand);}
+.cad-count{font-size:11.5px; color:var(--slate-500);}
+
+/* Sheet toolbar. The filename truncates rather than wrapping so the controls
+   never move — you reach for zoom in the same place on every sheet. */
+.cad-bar{justify-content:space-between; gap:12px;}
+.cad-name{font-size:12.5px; font-weight:600; color:var(--ink); overflow:hidden;
+  text-overflow:ellipsis; white-space:nowrap; min-width:0;}
+.cad-tools{display:flex; align-items:center; gap:6px; flex:none;}
+.cad-tools .btn{font-size:12px; padding:5px 10px; border-radius:8px; line-height:1.4;}
+.cad-zoom{font-size:11.5px; color:var(--slate-500); min-width:44px; text-align:center;}
+
+/* The viewport: a fixed window the drawing is panned and zoomed INSIDE. Fitted
+   is the right first view — it answers "which sheet is this?" — but every
+   question after that needs to get closer, so overflow is clipped, not scrolled. */
+.cad-view{position:relative; height:560px; overflow:hidden; background:var(--panel-2);
+  cursor:grab; touch-action:none; display:grid; place-items:center;}
+.cad-view:active{cursor:grabbing;}
+[dir="rtl"] .cad-view{direction:ltr;}  /* a plan is a plan: never mirrored */
 /* An issued sheet renders as a standalone SVG at its own drawing size; clamp it
    to the panel so a 40 m plan doesn't blow the layout out horizontally. */
-.cad-sheet{background:#fff; border-radius:8px; padding:8px; overflow:auto; max-height:620px;}
+.cad-sheet{background:#fff; border-radius:8px; padding:8px; width:100%; max-height:100%;
+  transform-origin:center center; will-change:transform;}
 .cad-sheet svg{width:100%; height:auto; max-width:100%; display:block;}
+
+/* Nothing to draw. Says WHY and offers the two ways out — draw it again, or
+   take the DXF away and open it in a CAD application. */
+.cad-empty{height:560px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:6px; text-align:center; padding:24px; background:var(--panel-2);}
+.cad-empty h4{font-family:var(--font-display); font-weight:600; font-size:14px; color:var(--ink); margin:0;}
+.cad-empty p{max-width:520px; margin:0; line-height:1.55;}
 /* ezdxf writes stroke widths in DRAWING units against a viewBox a million units
    across. Scaled into a panel that is ~0.014px per line, so the sheet renders
    blank even though every entity is present. Pin the stroke to screen units.

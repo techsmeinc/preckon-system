@@ -16,11 +16,13 @@ export default function DocumentsPage({ params }: { params: Promise<{ pid: strin
   const toast = useToast();
   const { t } = useI18n();
   const canEdit = useCan("artifact.edit");
-  const { artifacts, reload } = useProject();
+  const canRun = useCan("workflow.run");
+  const { artifacts, runs, workflows, reload } = useProject();
   const files = useApi<any[]>(`/projects/${pid}/files`, [], { refreshMs: 4000 });
   const ref = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [drag, setDrag] = useState(false);
+  const [classifying, setClassifying] = useState(false);
 
   async function upload(list: FileList | null) {
     const chosen = Array.from(list ?? []);
@@ -45,6 +47,28 @@ export default function DocumentsPage({ params }: { params: Promise<{ pid: strin
   // What the Document agent made of each file — the classified view of the pack.
   const docs = ofType(artifacts, "document");
   const docFor = (fileId: string) => docs.find((d) => d.payload?.file_id === fileId);
+
+  // Classification is the first node of every workflow, so before any chain is
+  // run the whole pack reads "not classified yet". Offer that one step here.
+  const CLASSIFY_KEY = "workflow.classify";
+  const classifyAvailable = workflows.some((w) => w.key === CLASSIFY_KEY);
+  const classifyRunning = runs.some(
+    (r) => r.workflow_key === CLASSIFY_KEY && (r.status === "running" || r.status === "awaiting_review")
+  );
+  const unclassified = list.filter((f) => !docFor(f.id)).length;
+
+  async function classify() {
+    setClassifying(true);
+    try {
+      await api.post(`/projects/${pid}/runs`, { workflow_key: CLASSIFY_KEY });
+      toast(t("docs.classifyStarted"));
+      reload();
+    } catch (er: any) {
+      toast(er?.message ?? t("docs.classifyFail"));
+    } finally {
+      setClassifying(false);
+    }
+  }
 
   return (
     <>
@@ -80,7 +104,19 @@ export default function DocumentsPage({ params }: { params: Promise<{ pid: strin
         <div className="card" style={{ padding: "14px 18px" }}>
           <div className="chead">
             <div><h3>{t("docs.setTitle")}</h3><div className="csub">{t("docs.setSub", { files: list.length, docs: docs.length })}</div></div>
-            {canEdit && <button className="mini" disabled={busy} onClick={() => ref.current?.click()}>{t("docs.upload")}</button>}
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              {canRun && classifyAvailable && unclassified > 0 && (
+                <button
+                  className="mini"
+                  disabled={classifying || classifyRunning}
+                  onClick={classify}
+                  title={t("docs.classifyHint")}
+                >
+                  {classifyRunning ? t("docs.classifyRunning") : t("docs.classify", { n: unclassified })}
+                </button>
+              )}
+              {canEdit && <button className="mini" disabled={busy} onClick={() => ref.current?.click()}>{t("docs.upload")}</button>}
+            </div>
           </div>
           <table style={{ marginTop: 8 }}>
             <thead>

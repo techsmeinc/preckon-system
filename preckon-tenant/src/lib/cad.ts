@@ -279,20 +279,71 @@ export async function extractCad(storagePath: string, filename?: string): Promis
   }
 }
 
-/** Render a drawing to SVG for the Drawings stage. Best-effort by design —
- *  a drawing that measures fine but won't render is still fully useful. */
-export async function renderCad(storagePath: string): Promise<string | null> {
+export interface CadRenderOutcome {
+  svg: string | null;
+  /** Why it didn't render, in words an estimator can act on. Null on success. */
+  error: string | null;
+  /** Entity types dropped to get the sheet under the size ceiling, if any. */
+  degraded: string[];
+}
+
+/** Render a drawing to SVG for the Drawings stage. Never throws — a drawing
+ *  that measures fine but won't render is still fully useful, and the upload
+ *  must not fail over a preview.
+ *
+ *  The reason is returned rather than swallowed: it is persisted alongside the
+ *  row so the viewer can tell the estimator what to do about it. A missing xref
+ *  and a sheet too dense to draw are different problems with different answers,
+ *  and "could not be rendered" is neither. */
+export async function renderCad(storagePath: string): Promise<CadRenderOutcome> {
   try {
     const res = await fetch(`${CAD_URL}/render`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ path: storagePath }),
-      signal: AbortSignal.timeout(120_000),
+      signal: AbortSignal.timeout(180_000),
     });
-    if (!res.ok) return null;
     const body = await res.json().catch(() => null);
-    return typeof body?.svg === "string" ? body.svg : null;
-  } catch {
-    return null;
+    if (!res.ok) {
+      return {
+        svg: null,
+        error: String(body?.detail ?? `The renderer returned ${res.status}.`).slice(0, 1000),
+        degraded: [],
+      };
+    }
+    if (typeof body?.svg !== "string" || body.svg.length === 0) {
+      return { svg: null, error: "The renderer returned an empty sheet.", degraded: [] };
+    }
+    return { svg: body.svg, error: null, degraded: Array.isArray(body.degraded) ? body.degraded : [] };
+  } catch (e: any) {
+    const msg = e?.name === "TimeoutError"
+      ? "The drawing took too long to render (over 3 minutes)."
+      : `The CAD service is unreachable (${e?.message ?? e}).`;
+    return { svg: null, error: msg.slice(0, 1000), degraded: [] };
+  }
+}
+
+/** Convert a drawing to DXF and return the bytes. A .dxf comes back as-is; a
+ *  .dwg is converted by the same path extraction used, so what downloads is
+ *  exactly what was measured — not a fresh export that may have moved on. */
+export async function dxfOf(storagePath: string, filename?: string): Promise<{ bytes: Buffer } | { error: string }> {
+  try {
+    const res = await fetch(`${CAD_URL}/dxf`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ path: storagePath, filename }),
+      signal: AbortSignal.timeout(180_000),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      return { error: String(body?.detail ?? `The CAD service returned ${res.status}.`) };
+    }
+    return { bytes: Buffer.from(await res.arrayBuffer()) };
+  } catch (e: any) {
+    return {
+      error: e?.name === "TimeoutError"
+        ? "The conversion took too long (over 3 minutes)."
+        : `The CAD service is unreachable (${e?.message ?? e}).`,
+    };
   }
 }

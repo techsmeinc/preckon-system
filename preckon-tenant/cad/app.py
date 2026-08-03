@@ -11,7 +11,8 @@ a storage path, this returns a summary, Core decides what to persist. It cannot
 read another tenant's files because it is never told they exist.
 
   POST /extract   { "path": "/app/.uploads/<key>" } → the summary dict
-  POST /render    { "path": ... }                   → { file, svg }
+  POST /render    { "path": ... }                   → { file, svg, degraded }
+  POST /dxf       { "path": ... }                   → the DXF text (a DWG is converted)
   GET  /health                                      → { ok: true }
 """
 
@@ -22,9 +23,10 @@ import os
 
 import fitz  # PyMuPDF
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import Response
 from pydantic import BaseModel
 
-from extractor import extract as extract_dxf, render_to_svg
+from extractor import extract as extract_dxf, render_to_svg, to_dxf_path
 
 app = FastAPI(title="preckon-cad", version="1.0.0")
 
@@ -152,3 +154,34 @@ def post_render(req: PathRequest) -> dict:
         raise HTTPException(status_code=422, detail=str(exc))
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"render failed: {exc!r}")
+
+
+@app.post("/dxf")
+def post_dxf(req: PathRequest) -> Response:
+    """Return the drawing as DXF text — converting a DWG on the way through.
+
+    WHY THIS EXISTS. DWG is a closed binary format nothing outside AutoCAD can
+    open; DXF is the interchange format every CAD application reads. The
+    conversion already happens on the way into extraction, so handing the result
+    back costs nothing and means an estimator whose sheet is too dense to
+    preview still leaves with a file they can open. It is the same converted
+    bytes the measurements were taken from, which is the point — download a
+    fresh export from AutoCAD and you are looking at a different drawing.
+    """
+    real = _checked(req.path)
+    try:
+        dxf_path = to_dxf_path(real)
+        with open(dxf_path, "rb") as fh:
+            body = fh.read()
+    except HTTPException:
+        raise
+    except RuntimeError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"DXF conversion failed: {exc!r}")
+    name = os.path.splitext(os.path.basename(req.filename or real))[0] + ".dxf"
+    return Response(
+        content=body,
+        media_type="image/vnd.dxf",
+        headers={"x-preckon-dxf-filename": name},
+    )
