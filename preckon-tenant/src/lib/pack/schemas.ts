@@ -105,6 +105,38 @@ export const SCHEMAS: Record<string, any> = {
       review_reason: { type: "string" },
     },
   },
+  // A section of the technical submission — the written half of a bid, which is
+  // scored separately from the price and often decides it. Stored one row per
+  // section rather than one document so a reviewer can accept the method
+  // statement while sending the HSE section back, and so a section can be
+  // re-run on its own when the programme or the bill moves under it.
+  narrative_section: {
+    type: "object",
+    additionalProperties: false,
+    required: ["section", "title", "body_md"],
+    properties: {
+      // Stable key so the export can order sections the way an evaluator reads
+      // them, regardless of the order the agents happened to finish in.
+      section: {
+        type: "string",
+        enum: [
+          "executive_summary",
+          "company_profile",
+          "technical_approach",
+          "programme",
+          "quality",
+          "hse",
+          "risk_management",
+        ],
+      },
+      title: { type: "string" },
+      body_md: { type: "string" },
+      // What this section was written against. A narrative that cites the bill
+      // and the baseline is checkable; one that doesn't is prose.
+      grounded_in: { type: "string" },
+      word_count: { type: "number", minimum: 0 },
+    },
+  },
   cost_line: {
     type: "object",
     additionalProperties: false,

@@ -35,6 +35,10 @@ export const AGENTS: PackAgent[] = [
   { key: "agent.cost", name: "Cost", kind: "worker", consumes: ["boq_line"], produces: ["cost_line"], job_types: [jt("cost.price_lines", "deep")], permission_keys: [], entitlement_key: null },
   { key: "agent.schedule", name: "Schedule", kind: "worker", consumes: ["boq_line", "cost_line"], produces: ["schedule_activity"], job_types: [jt("schedule.build_programme", "deep")], permission_keys: [], entitlement_key: null },
   { key: "agent.procurement", name: "Procurement", kind: "worker", consumes: ["boq_line", "cost_line"], produces: ["procurement_package"], job_types: [jt("procure.build_packages", "standard")], permission_keys: [], entitlement_key: null },
+  // Consumes the whole picture deliberately: a technical approach written from
+  // the tender alone is boilerplate, one written from the priced bill and the
+  // baseline names real trades, real quantities and real milestones.
+  { key: "agent.narrative", name: "Technical Narrative", kind: "worker", consumes: ["tender_summary", "spec_clause", "boq_line", "cost_line", "schedule_activity", "procurement_package"], produces: ["narrative_section"], job_types: [jt("narrative.compose", "deep")], permission_keys: [], entitlement_key: null },
   { key: "agent.rfi", name: "RFI", kind: "worker", consumes: ["tender_summary", "spec_clause", "drawing_measurement"], produces: ["rfi"], job_types: [jt("rfi.detect", "standard")], permission_keys: [], entitlement_key: null },
   { key: "agent.compliance", name: "Compliance", kind: "worker", consumes: ["tender_summary", "spec_clause", "proposal_doc"], produces: ["compliance_item"], job_types: [jt("compliance.check", "deep")], permission_keys: [], entitlement_key: null },
   { key: "agent.proposal", name: "Proposal", kind: "worker", consumes: ["tender_summary", "boq_line", "cost_line", "schedule_activity", "procurement_package"], produces: ["proposal_doc"], job_types: [jt("proposal.assemble", "deep")], permission_keys: [], entitlement_key: null },
@@ -171,6 +175,17 @@ export const WORKFLOWS: PackWorkflow[] = [
       { id: "gate", kind: "gate", gate_types: ["procurement_package"] },
     ],
     [{ from: "procure", to: "gate" }]
+  ),
+  // B.9 — NarrativeLogix
+  wf(
+    "workflow.narrativelogix",
+    "NarrativeLogix",
+    "narrativelogix",
+    [
+      { id: "narrative", kind: "agent", agent_key: "agent.narrative" },
+      { id: "gate", kind: "gate", gate_types: ["narrative_section"] },
+    ],
+    [{ from: "narrative", to: "gate" }]
   ),
   // B.10 — BidQualification (lifecycle: qualifying)
   wf(
@@ -363,6 +378,12 @@ export const MODULES = [
   { key: "quantlogix", label: "QuantLogix", icon: "calculator", order: 40, description: "Derive the bill of quantities from measurements and clauses." },
   { key: "costlogix", label: "CostLogix", icon: "dollar-sign", order: 50, description: "Price each BOQ line against the rate books." },
   { key: "schedulelogix", label: "ScheduleLogix", icon: "calendar-clock", order: 60, description: "Sequence activities into a delivery programme." },
+  // Sits after the programme and before procurement on purpose: the narrative
+  // is only defensible once there is a priced bill and a baseline to write
+  // against. Written earlier it is the generic boilerplate every evaluator has
+  // read a hundred times — the thing that wins marks is method tied to THIS
+  // project's quantities, durations and milestones.
+  { key: "narrativelogix", label: "NarrativeLogix", icon: "file-text", order: 65, description: "Write the technical submission from the priced scope and programme." },
   { key: "procurelogix", label: "ProcureLogix", icon: "shopping-cart", order: 70, description: "Group scope into RFQ packages by trade and lead-time." },
 ];
 
