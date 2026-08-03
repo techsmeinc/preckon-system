@@ -18,6 +18,20 @@
   --font-display:'General Sans','Inter',system-ui,sans-serif;
   --font-body:'Inter',system-ui,sans-serif; --font-mono:'JetBrains Mono',ui-monospace,monospace;
   --side:250px;
+  /* Native controls — <select> option lists, date pickers, scrollbars — are
+     painted by the OS, not by us. Without this they render in the system's
+     light scheme whatever the app is doing: a white dropdown with a bright blue
+     highlight over a dark page, and option text at near-zero contrast. One
+     declaration fixes every native control in the app at once. */
+  color-scheme:light;
+
+  /* Data-mark fills. A status colour states a CONDITION; at full saturation
+     across a wide mark it states an EMERGENCY. These tints carry the same
+     meaning at a weight that lets the row read as data, with the solid token
+     kept for the 3px cap and the text beside it. */
+  --fill-brand:color-mix(in srgb,var(--brand) 22%,var(--surface));
+  --fill-warn:color-mix(in srgb,var(--amber) 20%,var(--surface));
+  --fill-neutral:color-mix(in srgb,var(--slate-400) 26%,var(--surface));
 }
 [data-theme="dark"]{
   --ink:#EAF1F8; --paper:#0A1626; --surface:#0F2033; --panel-2:#0C1B2E;
