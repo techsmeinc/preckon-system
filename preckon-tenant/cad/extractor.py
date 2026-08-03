@@ -664,20 +664,35 @@ def to_dxf_path(path: str) -> str:
     return _convert_dwg_to_dxf(path)
 
 
-def render_to_svg(path: str) -> dict[str, Any]:
-    """Render a DXF/DWG file's modelspace to a standalone SVG string for the
-    in-portal drawing viewer. Reuses the same DWG→DXF (ODA) conversion path as
-    extraction, then draws with ezdxf's native SVG backend (no matplotlib).
-    Returns {file, svg}."""
-    doc, _auditor = _load_drawing(path)
-    try:
-        from ezdxf import bbox
-        from ezdxf.addons.drawing import Frontend, RenderContext, layout, svg
-        from ezdxf.addons.drawing.config import (
-            Configuration, BackgroundPolicy, ColorPolicy,
-        )
-    except Exception as exc:  # pragma: no cover - depends on ezdxf install
-        raise RuntimeError(f"SVG rendering requires ezdxf.addons.drawing ({exc})")
+# A few pathological drawings render to hundreds of MB (dense hatches) that
+# would OOM the browser. Past this we degrade the pass rather than emit it.
+_SVG_SIZE_LIMIT = 70_000_000
+
+# Entity types ezdxf's renderer mishandles: MULTILEADER content is drawn as the
+# literal class name ("AcDbMLeader") splattered over the drawing, and proxy
+# entities render as garbage. They're annotation callouts — dropping them gives
+# a far cleaner preview.
+_SKIP_TYPES = frozenset({"MULTILEADER", "ACAD_PROXY_ENTITY"})
+
+# Progressive degradation, cheapest loss first. A solid-hatched drawing can
+# render to 500 MB of <path> while carrying almost no information the estimator
+# reads off a preview; the outlines it sits inside carry all of it. Only if that
+# still won't fit do we drop annotation, which does cost the reader something.
+_DEGRADE_TIERS: tuple[frozenset[str], ...] = (
+    frozenset(),
+    frozenset({"HATCH"}),
+    frozenset({"HATCH", "SOLID", "TEXT", "MTEXT", "DIMENSION", "ATTRIB"}),
+)
+
+
+def _render_pass(doc: Drawing, skip: frozenset[str]) -> str:
+    """One full render of modelspace to an SVG string, skipping `skip` types."""
+    from ezdxf import bbox
+    from ezdxf.addons.drawing import Frontend, RenderContext, layout, svg
+    from ezdxf.addons.drawing.config import (
+        Configuration, BackgroundPolicy, ColorPolicy,
+    )
+
     msp = doc.modelspace()
     context = RenderContext(doc)
     # Modelspace defaults to a BLACK background in CAD, so ACI colour 7 (the
@@ -701,12 +716,8 @@ def render_to_svg(path: str) -> dict[str, Any]:
     )
     frontend = Frontend(context, backend, config=cfg)
 
-    # Drop entity types ezdxf's renderer mishandles: MULTILEADER content is drawn
-    # as the literal class name ("AcDbMLeader") splattered over the drawing, and
-    # proxy entities render as garbage. They're annotation callouts — dropping
-    # them gives a far cleaner preview.
-    SKIP_TYPES = {"MULTILEADER", "ACAD_PROXY_ENTITY"}
-    entities = [e for e in msp if e.dxftype() not in SKIP_TYPES]
+    dropped = _SKIP_TYPES | skip
+    entities = [e for e in msp if e.dxftype() not in dropped]
     drawn = entities
 
     # Robust crop: these drawings carry many entities scattered kilometres from
@@ -759,14 +770,45 @@ def render_to_svg(path: str) -> dict[str, Any]:
         svg_string,
         count=1,
     )
-    # A few pathological drawings render to hundreds of MB (dense hatches) that
-    # would OOM the browser. Refuse those so the client falls back to download.
-    if len(svg_string) > 70_000_000:
-        raise RuntimeError(
-            "Drawing is too detailed to preview in the browser "
-            f"(rendered ~{len(svg_string) // 1_000_000} MB). Download the original to open it in a CAD application."
-        )
-    return {"file": os.path.basename(path), "svg": svg_string}
+    return svg_string
+
+
+def render_to_svg(path: str) -> dict[str, Any]:
+    """Render a DXF/DWG file's modelspace to a standalone SVG string for the
+    in-portal drawing viewer. Reuses the same DWG→DXF conversion path as
+    extraction, then draws with ezdxf's native SVG backend (no matplotlib).
+    Returns {file, svg, degraded}.
+
+    A drawing too dense for one pass is retried with the heaviest, least
+    informative entity types dropped rather than refused outright: a preview
+    missing its hatch fill still tells the estimator which sheet they are
+    looking at, and "could not be rendered" tells them nothing at all.
+    """
+    try:
+        from ezdxf.addons.drawing import svg as _svg_probe  # noqa: F401
+    except Exception as exc:  # pragma: no cover - depends on ezdxf install
+        raise RuntimeError(f"SVG rendering requires ezdxf.addons.drawing ({exc})")
+
+    doc, _auditor = _load_drawing(path)
+
+    last_size = 0
+    for tier, skip in enumerate(_DEGRADE_TIERS):
+        svg_string = _render_pass(doc, skip)
+        last_size = len(svg_string)
+        if last_size <= _SVG_SIZE_LIMIT:
+            return {
+                "file": os.path.basename(path),
+                "svg": svg_string,
+                # The viewer says so out loud. A preview that silently lost its
+                # hatching is a preview someone will read a quantity off.
+                "degraded": sorted(skip) if skip else [],
+            }
+
+    raise RuntimeError(
+        "Drawing is too detailed to preview in the browser "
+        f"(rendered ~{last_size // 1_000_000} MB even with hatching and text dropped). "
+        "Download the DXF to open it in a CAD application."
+    )
 
 
 def _crop_to_main_drawing(entities: list, bbox) -> list:

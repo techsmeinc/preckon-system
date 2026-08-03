@@ -484,22 +484,50 @@ function extractJson(text) {
   try { return JSON.parse(text.slice(start, end + 1)); } catch { return null; }
 }
 
+/**
+ * Best-effort doc_type from the filename and mime, for the deterministic path
+ * that runs without an API key. The LLM path classifies from actual content and
+ * ignores this. Returns one of the construction pack's doc_type values:
+ * drawing | specification | tender_letter | addendum | boq | schedule | other.
+ */
+function guessDocType(f) {
+  const name = String(f?.filename ?? "").toLowerCase();
+  const mime = String(f?.mime ?? "").toLowerCase();
+
+  // CAD is unambiguous — browsers send application/octet-stream for these, so
+  // the extension is the only reliable signal.
+  if (/\.(dwg|dxf|dwf|rvt|ifc)$/.test(name) || mime.includes("dwg") || mime.includes("dxf")) return "drawing";
+  if (mime.startsWith("image/")) return "drawing";
+
+  if (/\b(boq|bill[-_ ]?of[-_ ]?quantit|schedule[-_ ]of[-_ ]rates|pricing[-_ ]schedule)/.test(name)) return "boq";
+  if (/\b(addend|amendment|bulletin|clarification)/.test(name)) return "addendum";
+  if (/\b(spec|specification|nbs|masterspec|particular[-_ ]spec)/.test(name)) return "specification";
+  if (/\b(programme|program|schedule|gantt|baseline)/.test(name)) return "schedule";
+  if (/\b(drawing|plan|elevation|section|detail|layout|ga[-_ ]?drawing|sheet)/.test(name)) return "drawing";
+  if (/\b(itt|instruction|invitation|tender[-_ ]letter|cover[-_ ]letter|form[-_ ]of[-_ ]tender)/.test(name)) return "tender_letter";
+
+  // Unknown beats a confident wrong answer — "other" tells a reviewer to look.
+  return "other";
+}
+
 function buildOutputs(env) {
   const t = env.job_type;
   switch (t) {
     case "document.classify_split": {
       const files = env.inputs?.params?.files ?? [];
-      const list = files.length ? files : [{ id: SYNTHETIC_FILE_ID, filename: "tender.pdf", doc_type: "tender_letter", page_count: 1 }];
+      const list = files.length ? files : [{ id: SYNTHETIC_FILE_ID, filename: "tender.pdf", page_count: 1 }];
       return list.map((f) => ({
         type: "document",
         payload: {
           file_id: f.id,
-          doc_type: f.doc_type ?? "tender_letter",
+          doc_type: f.doc_type ?? guessDocType(f),
           title: f.filename ?? "Document",
           page_range: [1, Math.max(1, f.page_count ?? 1)],
         },
         provenance: [], // a document derives from a file, not an artifact
-        confidence: 0.99,
+        // A filename-based guess is not a content classification. Say so, so a
+        // reviewer can tell it apart from the LLM path's real judgement.
+        confidence: f.doc_type ? 0.99 : 0.55,
       }));
     }
     case "tender.extract_summary":

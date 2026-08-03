@@ -325,7 +325,19 @@ async function buildAgentParams(
         "SELECT id, filename, mime, page_count FROM file WHERE tenant_id = ? AND project_id = ? AND status = 'ingested' ORDER BY created_at ASC",
         [tenantId, projectId]
       );
-      params.files = files.map((f) => ({ id: f.id, filename: f.filename, page_count: f.page_count ?? 1, doc_type: "tender_letter" }));
+      // No doc_type is sent. Stamping one here meant the classifier was told
+      // the answer before it looked: the deterministic path echoed it straight
+      // back, so a .dwg came out as a "tender letter", and the LLM path was
+      // handed a false prior that contradicted its own instruction to judge
+      // from content. It also emitted "tender_letter" under the underwriting
+      // pack, which is not in that pack's doc_type enum at all.
+      // mime is real signal; deciding the type is the agent's job.
+      params.files = files.map((f) => ({
+        id: f.id,
+        filename: f.filename,
+        mime: f.mime ?? null,
+        page_count: f.page_count ?? 1,
+      }));
       params.documents = await inlineDocumentText(tenantId, files);
     }
 
