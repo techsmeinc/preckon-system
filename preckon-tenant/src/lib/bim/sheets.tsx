@@ -150,7 +150,7 @@ export function ParsedSheets({ pid }: { pid: string }) {
         </div>
       </div>
 
-      <SheetDetail key={active} pid={pid} fid={active} />
+      <SheetDetail key={active} pid={pid} fid={active} onSaved={files.reload} />
     </div>
   );
 }
@@ -239,81 +239,133 @@ function SheetDetail({ pid, fid, onSaved }: { pid: string; fid: string; onSaved?
         </aside>
       </div>
 
-      {data.schedules.map((s, i) => {
-        const kind = classifySchedule(s);
-        // A door or finishes schedule is a table and reads as one. A cloud of
-        // room tags lifted off the plan is not: rendering it as a table gives
-        // you four hundred cells of the word "BED ROOM", which buries the real
-        // schedules underneath it and tells a reader nothing. Counted once each
-        // it becomes the thing an estimator actually wanted — 54 bedrooms is a
-        // door count, a light count and a floor area waiting to be used.
-        if (kind === "tags") {
+      <Schedules schedules={data.schedules} />
+
+      <Notes notes={data.notes} />
+    </>
+  );
+}
+
+/**
+ * Everything the extractor read as a table, folded away.
+ *
+ * A thirteen-sheet set produces a dozen of these per drawing, and rendered one
+ * under another they ran for several screens of repeated title-block fragments
+ * before the reader reached anything they wanted. Collapsed, the sheet ends
+ * where the drawing ends and a schedule is one click away — which is the right
+ * ratio, because on most sheets the schedules are checked once and the drawing
+ * is looked at twenty times.
+ */
+function Schedules({ schedules }: { schedules: Schedule[] }) {
+  const { t } = useI18n();
+  const [open, setOpen] = useState<number | null>(null);
+  // The first is opened by default only when it is the only one; with several,
+  // opening one arbitrarily is just the old wall of text with extra steps.
+  useEffect(() => { setOpen(schedules.length === 1 ? 0 : null); }, [schedules.length]);
+
+  if (!schedules.length) return null;
+
+  return (
+    <div className="card sch" style={{ marginTop: 12 }}>
+      <div className="chead">
+        <div>
+          <h3>{t("cad.schedules")}</h3>
+          <div className="csub">{t("cad.schedulesSub", { n: schedules.length })}</div>
+        </div>
+      </div>
+
+      <div className="sch-list">
+        {schedules.map((s, i) => {
+          const kind = classifySchedule(s);
+          const isOpen = open === i;
+          const cols = Math.max(s.header.length, ...s.rows.map((r) => r.length), 0);
           return (
-            <div className="card" key={i} style={{ marginTop: 12, padding: "12px 16px" }}>
-              <div className="csub" style={{ marginBottom: 8 }}>
-                {t("cad.tagsOn", { layer: s.layer })}
-              </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                {tagCounts(s).map(([label, n]) => (
-                  <span className="srcchip" key={label}>
-                    {label} <b className="mono">×{n}</b>
-                  </span>
-                ))}
-              </div>
+            <div className={"sch-item" + (isOpen ? " on" : "")} key={i}>
+              <button className="sch-head" onClick={() => setOpen(isOpen ? null : i)} aria-expanded={isOpen}>
+                <span className="tw-glyph" aria-hidden>{isOpen ? "▾" : "▸"}</span>
+                <span className="sch-name">{s.layer || "—"}</span>
+                <span className="sch-meta mono">
+                  {kind === "tags"
+                    ? t("cad.tagsOn", { layer: s.layer })
+                    : `${s.rows.length} × ${cols}`}
+                </span>
+              </button>
+
+              {isOpen && (kind === "tags" ? (
+                // A cloud of room tags is not a table. Rendered as one it is four
+                // hundred cells of the word "BED ROOM"; counted once each it is a
+                // door count and a light count waiting to be used.
+                <div className="sch-tags">
+                  {tagCounts(s).map(([label, n]) => (
+                    <span className="srcchip" key={label}>{label} <b className="mono">×{n}</b></span>
+                  ))}
+                </div>
+              ) : (
+                <div className="sch-body">
+                  {/* A finishes cell is a whole specification sentence. Left to
+                      size themselves those columns run to thousands of pixels, so
+                      the width is capped, the text wraps, and the table scrolls
+                      inside its own box rather than stretching the page. */}
+                  <table className="tbl" style={{ tableLayout: "fixed", minWidth: Math.max(720, cols * 150) }}>
+                    <thead>
+                      <tr>
+                        {Array.from({ length: cols }, (_, j) => (
+                          <th key={j} style={{ width: 150, whiteSpace: "normal", wordBreak: "break-word", verticalAlign: "bottom" }}>
+                            {s.header[j] ?? ""}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {s.rows.slice(0, 60).map((r, j) => (
+                        <tr key={j}>
+                          {Array.from({ length: cols }, (_, k) => (
+                            <td key={k} style={{ width: 150, whiteSpace: "normal", wordBreak: "break-word", verticalAlign: "top" }}>
+                              {r[k] ?? ""}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {s.rows.length > 60 && (
+                    <div className="csub" style={{ padding: "8px 2px 0" }}>
+                      {t("cad.rowsShown", { n: 60, total: s.rows.length })}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           );
-        }
-        return (
-          <div className="tw" key={i} style={{ marginTop: 12, overflowX: "auto", maxWidth: "100%" }}>
-            <div className="csub" style={{ marginBottom: 6 }}>{s.layer}</div>
-            {/* A finishes schedule cell is a full specification sentence
-                ("NOMINAL 600MM X 600MM X 10MM THK GLAZED CERAMIC TILES"). Left
-                to size themselves those columns run to several thousand pixels
-                and the table stops being readable at any zoom. Cap the width,
-                wrap inside it, and top-align so short cells don't float in the
-                middle of a tall row. */}
-            <table className="tbl" style={{ tableLayout: "fixed", minWidth: 720 }}>
-              <thead>
-                <tr>
-                  {s.header.map((h, j) => (
-                    <th key={j} style={{ maxWidth: 200, whiteSpace: "normal", wordBreak: "break-word", verticalAlign: "bottom" }}>
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {s.rows.slice(0, 30).map((r, j) => (
-                  <tr key={j}>
-                    {r.map((c, k) => (
-                      <td key={k} style={{ maxWidth: 200, whiteSpace: "normal", wordBreak: "break-word", verticalAlign: "top" }}>
-                        {c}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {s.rows.length > 30 && (
-              <div className="csub" style={{ marginTop: 6 }}>
-                {t("cad.moreRows", { n: s.rows.length - 30 })}
-              </div>
-            )}
-          </div>
-        );
-      })}
+        })}
+      </div>
+    </div>
+  );
+}
 
-      {data.notes.length > 0 && (
-        <div className="card" style={{ marginTop: 12, padding: "12px 16px" }}>
-          <div className="csub" style={{ marginBottom: 8 }}>{t("cad.notes")}</div>
-          <ul style={{ margin: 0, paddingInlineStart: 18, lineHeight: 1.7 }}>
-            {dedupe(data.notes).slice(0, 20).map((n, i) => (
-              <li key={i} className="csub">{n}</li>
-            ))}
-          </ul>
+function Notes({ notes }: { notes: string[] }) {
+  const { t } = useI18n();
+  const [all, setAll] = useState(false);
+  const real = useMemo(() => dedupe(notes).filter(isRealNote), [notes]);
+  if (!real.length) return null;
+  const shown = all ? real : real.slice(0, 12);
+  return (
+    <div className="card" style={{ marginTop: 12, padding: "14px 18px" }}>
+      <div className="chead" style={{ marginBottom: 8 }}>
+        <div>
+          <h3>{t("cad.notes")}</h3>
+          <div className="csub">{t("cad.notesSub")}</div>
         </div>
-      )}
-    </>
+        {real.length > 12 && (
+          <button className="mini sm" onClick={() => setAll((v) => !v)}>
+            {all ? t("cad.hideTable") : t("cad.rowsShown", { n: shown.length, total: real.length })}
+          </button>
+        )}
+      </div>
+      <ul className="sch-notes">
+        {shown.map((n, i) => <li key={i}>{n}</li>)}
+      </ul>
+    </div>
   );
 }
 
@@ -339,7 +391,7 @@ const clampZoom = (z: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z));
  * booting, converter not yet installed) are fixed by then and the bytes never
  * changed.
  */
-function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadView }) {
+function SheetCanvas({ pid, fid, view, onEdit }: { pid: string; fid: string; view: CadView; onEdit: () => void }) {
   const { t } = useI18n();
   const [svg, setSvg] = useState<string | null>(view.svg);
   const [err, setErr] = useState<string | null>(view.renderError);
@@ -436,6 +488,9 @@ function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadVi
           {/* DXF, not the original: a .dwg opens in AutoCAD and nothing else,
               and these are the exact bytes the quantities were measured from. */}
           <a className="btn btn-ghost" href={dxfHref} download={dxfName}>{t("cad.downloadDxf")}</a>
+          {!view.parseError && (
+            <button className="btn btn-primary" onClick={onEdit}>{t("ed.open")}</button>
+          )}
         </div>
       </div>
 
