@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" role="img" aria-label="Hyderabad skyline">
+  <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#E8FAF6"/><stop offset="1" stop-color="#FFFFFF"/></linearGradient></defs>
+  <rect width="320" height="200" fill="url(#sky)"/>
+  <g fill="#0FA593" opacity=".38">
+    <rect x="118" y="112" width="84" height="56" rx="3"/>
+    <path d="M118 112 h84 v-8 h-84 Z"/>
+    <rect x="122" y="66" width="10" height="46" rx="3"/>
+    <rect x="188" y="66" width="10" height="46" rx="3"/>
+    <path d="M127 66 q0-14 0-14 q0 0 0 14 Z"/>
+    <rect x="60" y="130" width="22" height="38" rx="2"/>
+    <rect x="228" y="126" width="20" height="42" rx="2"/>
+    <rect x="256" y="140" width="20" height="28" rx="2"/>
+    <rect x="30" y="144" width="18" height="24" rx="2"/>
+  </g>
+  <g fill="#15C2A8" opacity=".24">
+    <circle cx="127" cy="60" r="7"/><circle cx="193" cy="60" r="7"/>
+    <path d="M140 112 q20-26 40 0 Z"/>
+  </g>
+  <rect x="0" y="168" width="320" height="2" fill="#0B1B2B" opacity=".18"/>
+</svg>

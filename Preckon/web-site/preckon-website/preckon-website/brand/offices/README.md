@@ -19,6 +19,10 @@ stock image. A city photo pulled from search results is somebody's copyrighted
 work, and a contact page is exactly where a rights holder looks. Unsplash and
 Pexels are free for commercial use; Shutterstock and Getty need a licence.
 
-**Until they exist** the card shows a small labelled placeholder instead of a
-broken-image icon. Nothing breaks if a file is missing — drop it in and it
-appears on the next load.
+**Until they exist** each card shows its `.svg` illustration — original artwork
+drawn for this site, so there is no rights holder to answer to. The SVG is a CSS
+background behind the `<img>`; adding `austin.jpg` (etc.) covers it with no
+markup change, and removing the JPEG falls back to the drawing again.
+
+Keep the SVGs even after adding photos — they are the fallback if an image ever
+404s, and they carry the brand colours.

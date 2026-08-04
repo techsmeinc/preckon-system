@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" role="img" aria-label="Dubai skyline">
+  <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#E8FAF6"/><stop offset="1" stop-color="#FFFFFF"/></linearGradient></defs>
+  <rect width="320" height="200" fill="url(#sky)"/>
+  <g fill="#15C2A8" opacity=".22">
+    <path d="M96 168 L104 66 L108 40 L112 66 L120 168 Z"/>
+    <path d="M104 66 L108 40 L112 66 Z"/>
+  </g>
+  <g fill="#0FA593" opacity=".38">
+    <path d="M150 168 V96 q14-30 30-6 v78 Z"/>
+    <rect x="196" y="112" width="22" height="56" rx="2"/>
+    <rect x="224" y="126" width="16" height="42" rx="2"/>
+    <rect x="58" y="120" width="20" height="48" rx="2"/>
+    <rect x="30" y="136" width="18" height="32" rx="2"/>
+    <rect x="252" y="140" width="20" height="28" rx="2"/>
+    <rect x="280" y="132" width="16" height="36" rx="2"/>
+  </g>
+  <rect x="0" y="168" width="320" height="2" fill="#0B1B2B" opacity=".18"/>
+</svg>

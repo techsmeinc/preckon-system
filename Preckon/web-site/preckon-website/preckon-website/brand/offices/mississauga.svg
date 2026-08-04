@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" role="img" aria-label="Mississauga skyline">
+  <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#E8FAF6"/><stop offset="1" stop-color="#FFFFFF"/></linearGradient></defs>
+  <rect width="320" height="200" fill="url(#sky)"/>
+  <g fill="#0FA593" opacity=".38">
+    <path d="M120 168 V72 q0-8 12-8 t12 8 v96 Z"/>
+    <path d="M156 168 V88 q0-7 11-7 t11 7 v80 Z"/>
+    <rect x="62" y="128" width="22" height="40" rx="2"/>
+    <rect x="200" y="118" width="20" height="50" rx="2"/>
+    <rect x="228" y="134" width="18" height="34" rx="2"/>
+    <rect x="256" y="144" width="22" height="24" rx="2"/>
+    <rect x="30" y="142" width="18" height="26" rx="2"/>
+  </g>
+  <g fill="#15C2A8" opacity=".2">
+    <ellipse cx="132" cy="96" rx="20" ry="5"/><ellipse cx="132" cy="122" rx="20" ry="5"/>
+    <ellipse cx="167" cy="110" rx="17" ry="4"/><ellipse cx="167" cy="134" rx="17" ry="4"/>
+  </g>
+  <rect x="0" y="168" width="320" height="2" fill="#0B1B2B" opacity=".18"/>
+</svg>
