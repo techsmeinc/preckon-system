@@ -559,3 +559,65 @@
   var sl=rd("preckon-lang");if(sl)lang(sl);
 })();
 </script>
+
+<script>
+(function(){
+  // Swap the photograph for a live map on request. Loading it on demand keeps
+  // four third-party frames — and their cookies — off the page entirely for the
+  // visitors who never ask to see one.
+  document.querySelectorAll('.mapbtn').forEach(function(b){
+    b.addEventListener('click', function(){
+      var ph = b.parentElement, f = document.createElement('iframe');
+      f.src = b.getAttribute('data-map');
+      f.loading = 'lazy';
+      f.title = b.getAttribute('aria-label');
+      f.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
+      ph.appendChild(f);
+      b.hidden = true;
+    });
+  });
+
+  // The contact form. This is a static site with no backend, so a submit that
+  // POSTed nowhere would silently swallow the message; handing off to the
+  // visitor's mail client at least delivers it.
+  var f = document.getElementById('contactForm');
+  if (!f) return;
+
+  var NL = String.fromCharCode(10);
+  var EMAIL = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
+
+  function mark(el, bad){
+    var w = el.closest('.field');
+    if (w) w.classList.toggle('err', bad);
+  }
+
+  f.addEventListener('submit', function(e){
+    e.preventDefault();
+    var name = f.querySelector('#cName'),
+        email = f.querySelector('#cEmail'),
+        msg = f.querySelector('#cMsg'),
+        office = f.querySelector('#cOffice'),
+        company = f.querySelector('#cCompany');
+
+    var okName = !!name.value.trim(),
+        okMail = EMAIL.test(email.value.trim()),
+        okMsg = !!msg.value.trim();
+
+    mark(name, !okName); mark(email, !okMail); mark(msg, !okMsg);
+    if (!okName || !okMail || !okMsg) return;
+
+    var body = [
+      'Name: ' + name.value,
+      'Email: ' + email.value,
+      'Company: ' + (company.value || '-'),
+      'Nearest office: ' + office.options[office.selectedIndex].text,
+      '',
+      msg.value
+    ].join(NL);
+
+    window.location.href = 'mailto:admin@techsme.com'
+      + '?subject=' + encodeURIComponent('Preckon enquiry - ' + name.value)
+      + '&body=' + encodeURIComponent(body);
+  });
+})();
+</script>
