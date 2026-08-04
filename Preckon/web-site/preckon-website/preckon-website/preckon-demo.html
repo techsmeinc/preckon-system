@@ -124,9 +124,21 @@
   /* A live map, not a photograph. It answers the question a visitor actually
      has on a contact page — where is this, and how far is it from me — which a
      stock skyline never does, and it needs no image licence. */
-  .office .ph{position:relative; aspect-ratio:16/10; overflow:hidden;
+  /* 4:5, not 16:10. The supplied photographs are portrait (490x604, 1229x1536);
+     forcing them into a landscape box with object-fit:cover would centre-crop
+     away roughly half of each one — you would see a horizontal slice of a
+     building and none of the skyline. The box follows the assets. Swap this to
+     16/10 if the photos are ever re-cropped to landscape. */
+  .office .ph{position:relative; aspect-ratio:4/5; overflow:hidden;
     background:var(--teal-tint) center/cover no-repeat;}
-  .office .ph iframe{width:100%; height:100%; border:0; display:block; filter:saturate(.92);}
+  .office .ph img{width:100%; height:100%; object-fit:cover; display:block;}
+  .office .ph iframe{position:absolute; inset:0; width:100%; height:100%; border:0; display:block; filter:saturate(.92);}
+  .mapbtn{position:absolute; inset-inline-end:10px; inset-block-end:10px; z-index:2;
+    font-family:var(--font-mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+    background:rgba(255,255,255,.94); color:var(--ink); border:1px solid var(--hairline);
+    border-radius:8px; padding:6px 10px; cursor:pointer; transition:background .15s ease;}
+  .mapbtn:hover{background:#fff; border-color:var(--teal);}
+  .mapbtn[hidden]{display:none;}
   /* Until the frame loads, the drawn skyline holds the space rather than a
      grey rectangle — and it is what remains if a visitor blocks third-party
      frames, which plenty do. */
@@ -355,9 +367,10 @@
 
       <div class="office o-dubai">
         <div class="ph">
-          <iframe src="https://maps.google.com/maps?q=Meydan%20Grandstand%2C%206th%20Floor%2C%20Meydan%20Road%2C%20Nad%20Al%20Sheba%201%2C%20Dubai%2C%20United%20Arab%20Emirates&z=15&output=embed"
-                  title="Map of the Dubai office" loading="lazy"
-                  referrerpolicy="no-referrer-when-downgrade"></iframe>
+          <img src="brand/offices/dubai.jpeg" alt="Dubai office" loading="lazy" decoding="async"
+               onerror="this.remove();" />
+          <button class="mapbtn" type="button" data-map="https://maps.google.com/maps?q=Meydan%20Grandstand%2C%206th%20Floor%2C%20Meydan%20Road%2C%20Nad%20Al%20Sheba%201%2C%20Dubai%2C%20United%20Arab%20Emirates&amp;z=15&amp;output=embed"
+                  aria-label="Show map of the Dubai office">View map</button>
         </div>
         <div class="bd">
           <span class="rule"></span>
@@ -370,9 +383,10 @@
 
       <div class="office o-austin">
         <div class="ph">
-          <iframe src="https://maps.google.com/maps?q=5900%20Balcones%20Drive%20STE%204347%2C%20Austin%2C%20Texas%2078731%2C%20USA&z=15&output=embed"
-                  title="Map of the Austin office" loading="lazy"
-                  referrerpolicy="no-referrer-when-downgrade"></iframe>
+          <img src="brand/offices/austin.jpeg" alt="Austin office" loading="lazy" decoding="async"
+               onerror="this.remove();" />
+          <button class="mapbtn" type="button" data-map="https://maps.google.com/maps?q=5900%20Balcones%20Drive%20STE%204347%2C%20Austin%2C%20Texas%2078731%2C%20USA&amp;z=15&amp;output=embed"
+                  aria-label="Show map of the Austin office">View map</button>
         </div>
         <div class="bd">
           <span class="rule"></span>
@@ -386,9 +400,10 @@
 
       <div class="office o-mississauga">
         <div class="ph">
-          <iframe src="https://maps.google.com/maps?q=90%20Burnhamthorpe%20Road%20West%2C%20Suite%201400%2C%20Mississauga%2C%20ON%20L5B%203C3%2C%20Canada&z=15&output=embed"
-                  title="Map of the Mississauga office" loading="lazy"
-                  referrerpolicy="no-referrer-when-downgrade"></iframe>
+          <img src="brand/offices/mississauga.jpeg" alt="Mississauga office" loading="lazy" decoding="async"
+               onerror="this.remove();" />
+          <button class="mapbtn" type="button" data-map="https://maps.google.com/maps?q=90%20Burnhamthorpe%20Road%20West%2C%20Suite%201400%2C%20Mississauga%2C%20ON%20L5B%203C3%2C%20Canada&amp;z=15&amp;output=embed"
+                  aria-label="Show map of the Mississauga office">View map</button>
         </div>
         <div class="bd">
           <span class="rule"></span>
@@ -402,9 +417,10 @@
 
       <div class="office o-hyderabad">
         <div class="ph">
-          <iframe src="https://maps.google.com/maps?q=SBR%20CV%20Towers%2C%20HUDA%20Techno%20Enclave%2C%20Madhapur%2C%20Hyderabad%2C%20Telangana%20500081%2C%20India&z=15&output=embed"
-                  title="Map of the Hyderabad office" loading="lazy"
-                  referrerpolicy="no-referrer-when-downgrade"></iframe>
+          <img src="brand/offices/hyderabad.jpeg" alt="Hyderabad office" loading="lazy" decoding="async"
+               onerror="this.remove();" />
+          <button class="mapbtn" type="button" data-map="https://maps.google.com/maps?q=SBR%20CV%20Towers%2C%20HUDA%20Techno%20Enclave%2C%20Madhapur%2C%20Hyderabad%2C%20Telangana%20500081%2C%20India&amp;z=15&amp;output=embed"
+                  aria-label="Show map of the Hyderabad office">View map</button>
         </div>
         <div class="bd">
           <span class="rule"></span>
