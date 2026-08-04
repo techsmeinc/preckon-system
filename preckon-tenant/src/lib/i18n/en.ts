@@ -343,6 +343,7 @@ export const en = {
   "cad.noRender": "This drawing measured cleanly but the sheet would not draw.",
   "cad.noRenderWhy": "No reason was recorded. Try drawing it again, or download the DXF and open it in your CAD application.",
   "cad.schedules": "Schedules read off the sheet",
+  "cad.tableOn": "Table on layer {layer}",
   "cad.schedulesSub": "{n} table|{n} tables",
   "cad.noSchedules": "No schedule tables were found on this sheet.",
   "cad.showTable": "Show table",

@@ -757,6 +757,8 @@ input[type=color]{width:46px; height:34px; border:1px solid var(--hairline); bor
 .sch-head .tw-glyph{color:var(--slate-400); font-size:11px; width:10px; flex:none;}
 .sch-name{font-size:12.5px; font-weight:600; color:var(--ink); overflow:hidden;
   text-overflow:ellipsis; white-space:nowrap;}
+.sch-layer{font-size:10px; color:var(--slate-400); background:var(--panel-2);
+  border:1px solid var(--hairline); border-radius:5px; padding:1px 6px; flex:none;}
 .sch-meta{margin-inline-start:auto; font-size:11px; color:var(--slate-500); flex:none;}
 /* The table scrolls inside its own box: a finishes schedule is 10 columns of
    full specification sentences and would otherwise stretch the page sideways. */

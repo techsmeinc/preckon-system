@@ -345,6 +345,7 @@ export const fr: Dict = {
   "cad.noRender": "Ce plan a été mesuré correctement mais la planche n’a pas pu être tracée.",
   "cad.noRenderWhy": "Aucune raison n’a été enregistrée. Réessayez, ou téléchargez le DXF et ouvrez-le dans votre application de CAO.",
   "cad.schedules": "Tableaux relevés sur la planche",
+  "cad.tableOn": "Tableau sur le calque {layer}",
   "cad.schedulesSub": "{n} tableau|{n} tableaux",
   "cad.noSchedules": "Aucun tableau n’a été trouvé sur cette planche.",
   "cad.showTable": "Afficher le tableau",

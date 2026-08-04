@@ -92,6 +92,27 @@ function classifySchedule(s: Schedule): "table" | "tags" {
   return distinctHeaders.size < 2 && repetition < 0.35 ? "tags" : "table";
 }
 
+/**
+ * What to call a table that came off a drawing.
+ *
+ * The extractor only knows the CAD layer it found the text on, so the heading
+ * read "A-ANN-SPE" — which is the draughtsman's layer name, not a title, and
+ * tells the estimator nothing about whether it is the door schedule or the
+ * abbreviations key. A real schedule almost always names itself in its own
+ * first cells ("FINISH SCHEDULE", "DOOR SCHEDULE", "GENERAL NOTES"), so use
+ * that when it is there and fall back to the layer when it is not.
+ */
+const TITLE_RE = /\b(SCHEDULE|LEGEND|ABBREVIATION|NOTES?|KEY|TABLE|SPECIFICATION|FINISHES?)\b/i;
+function scheduleTitle(s: Schedule): string | null {
+  const cells = [...s.header, ...s.rows.slice(0, 3).flat()];
+  for (const raw of cells) {
+    const c = String(raw ?? "").trim();
+    // Long enough to be a title, short enough not to be a specification line.
+    if (c.length >= 4 && c.length <= 60 && TITLE_RE.test(c)) return c;
+  }
+  return null;
+}
+
 /** The distinct labels in a tag cloud with how many times each appears. */
 function tagCounts(s: Schedule): Array<[string, number]> {
   const counts = new Map<string, number>();
@@ -279,16 +300,19 @@ function Schedules({ schedules }: { schedules: Schedule[] }) {
           const kind = classifySchedule(s);
           const isOpen = open === i;
           const cols = Math.max(s.header.length, ...s.rows.map((r) => r.length), 0);
+          const named = scheduleTitle(s);
+          const title = kind === "tags"
+            ? t("cad.tagsOn", { layer: s.layer })
+            : named ?? t("cad.tableOn", { layer: s.layer || "—" });
           return (
             <div className={"sch-item" + (isOpen ? " on" : "")} key={i}>
               <button className="sch-head" onClick={() => setOpen(isOpen ? null : i)} aria-expanded={isOpen}>
                 <span className="tw-glyph" aria-hidden>{isOpen ? "▾" : "▸"}</span>
-                <span className="sch-name">{s.layer || "—"}</span>
-                <span className="sch-meta mono">
-                  {kind === "tags"
-                    ? t("cad.tagsOn", { layer: s.layer })
-                    : `${s.rows.length} × ${cols}`}
-                </span>
+                <span className="sch-name">{title}</span>
+                {/* The layer stays visible even when the table names itself —
+                    it is how you find the same text back in the CAD file. */}
+                {named && <span className="sch-layer mono">{s.layer}</span>}
+                <span className="sch-meta mono">{kind === "tags" ? "" : `${s.rows.length} × ${cols}`}</span>
               </button>
 
               {isOpen && (kind === "tags" ? (
