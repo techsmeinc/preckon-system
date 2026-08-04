@@ -37,7 +37,10 @@ const WIDTHS = [12, 12, 10, 9, 62, 8, 11, 14, 15, 22];
 
 /** Excel forbids : \ / ? * [ ] in a tab name and caps it at 31 characters. */
 function tabName(raw: string, taken: Set<string>): string {
-  const base = (raw || "Division").replace(/[:\\/?*[\]]/g, " ").trim().slice(0, 28) || "Division";
+  const base = (raw || "Division")
+    .replace(/[:\\/?*[\]]/g, " ")
+    .replace(/\s+/g, " ")     // "Finishes / Painting" would otherwise tab as "Finishes  Painting"
+    .trim().slice(0, 28) || "Division";
   let out = base;
   let i = 2;
   while (taken.has(out.toLowerCase())) out = `${base.slice(0, 26)} ${i++}`;
