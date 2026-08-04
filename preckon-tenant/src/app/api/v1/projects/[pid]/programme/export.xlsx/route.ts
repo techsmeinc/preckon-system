@@ -1,7 +1,7 @@
 import ExcelJS from "exceljs";
 import { route } from "@/lib/http";
 import { requirePermission, requireProject } from "@/lib/context";
-import { addLetterhead, shortDate, longDate, BOX as RULED, BOQ_HEAD, BOQ_BAND, BOQ_TITLE } from "@/lib/xlsx-brand";
+import { addLetterhead, centreColumn, shortDate, longDate, BOX as RULED, BOQ_HEAD, BOQ_BAND, BOQ_TITLE } from "@/lib/xlsx-brand";
 
 // POST /projects/{pid}/programme/export.xlsx — the work programme as a
 // contractor's Gantt workbook.
@@ -97,7 +97,12 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
   ws.mergeCells(2, 1, 5, W0 + weeks);
   ws.getCell(2, 1).border = { top: medium, left: medium, bottom: medium, right: medium };
   for (let r0 = 2; r0 <= 5; r0++) ws.getRow(r0).height = 16;
-  await addLetterhead(wb, ws, { centreCol: (W0 + weeks) / 2 - 3, topRow: 2, width: 300, height: 58 });
+  const LOGO_PX = 300;
+  const colWidths = [5, 46, 8, 9, 10, 10, 13, ...Array.from({ length: weeks }, () => 2.6)];
+  await addLetterhead(wb, ws, {
+    centreCol: centreColumn(colWidths, LOGO_PX),
+    topRow: 2, width: LOGO_PX, height: 58,
+  });
 
   // ── Title ─────────────────────────────────────────────────────────────────
   ws.mergeCells(6, 1, 6, W0 + weeks);

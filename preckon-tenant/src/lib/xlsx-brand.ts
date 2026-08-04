@@ -23,7 +23,29 @@ export const BOQ_TITLE = "FF1F4E79"; // "BILL OF QUANTITIES" — blue
 export const RULE = { style: "thin" as const, color: { argb: "FF9E9E9E" } };
 export const BOX = { top: RULE, left: RULE, bottom: RULE, right: RULE };
 
-/** Place the letterhead in the top-left. Returns false when the asset is absent. */
+/**
+ * The fractional column at which an image of `imgPx` wide starts if it is to sit
+ * in the visual centre of columns whose widths are `widths`.
+ *
+ * Centring by column INDEX is wrong whenever columns differ in width, which on a
+ * Gantt they wildly do: seven label columns carry ~101 width units and each of
+ * sixty week columns carries 2.6, so the middle column by count sits far to the
+ * right of the middle by eye. Excel anchors images at a fractional column, so
+ * the sum of widths is what has to be halved.
+ */
+export function centreColumn(widths: number[], imgPx: number): number {
+  const PX = 7;                                   // ≈ pixels per Excel width unit
+  const total = widths.reduce((a, b) => a + b, 0) * PX;
+  let target = Math.max(0, total / 2 - imgPx / 2); // left edge of a centred image
+  for (let i = 0; i < widths.length; i++) {
+    const w = widths[i] * PX;
+    if (target < w) return i + target / w;        // column i, part-way across
+    target -= w;
+  }
+  return widths.length - 1;
+}
+
+/** Place the letterhead. Returns false when the asset is absent. */
 export async function addLetterhead(
   wb: ExcelJS.Workbook,
   ws: ExcelJS.Worksheet,

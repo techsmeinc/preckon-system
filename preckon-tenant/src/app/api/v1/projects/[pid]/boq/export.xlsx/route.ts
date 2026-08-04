@@ -2,7 +2,7 @@ import ExcelJS from "exceljs";
 import { route } from "@/lib/http";
 import { requirePermission, requireProject } from "@/lib/context";
 import { query } from "@/lib/db";
-import { addLetterhead, longDate, BOX, BOQ_HEAD, BOQ_BAND, BOQ_TBP, BOQ_TITLE } from "@/lib/xlsx-brand";
+import { addLetterhead, centreColumn, longDate, BOX, BOQ_HEAD, BOQ_BAND, BOQ_TBP, BOQ_TITLE } from "@/lib/xlsx-brand";
 
 // GET /projects/{pid}/boq/export.xlsx — the priced bill in submission format.
 //
@@ -91,7 +91,9 @@ export const GET = route<{ pid: string }>(async (_req, ctx, { pid }) => {
     right: { style: "medium", color: { argb: "FF000000" } },
   };
   for (let r0 = 4; r0 <= 7; r0++) ws.getRow(r0).height = 20;
-  await addLetterhead(wb, ws, { centreCol: HEAD.length / 2 - 1.6, topRow: 4, width: 300, height: 62 });
+  await addLetterhead(wb, ws, {
+    centreCol: centreColumn(WIDTHS, 320), topRow: 4, width: 320, height: 62,
+  });
 
   // ── Title ─────────────────────────────────────────────────────────────────
   ws.mergeCells(9, 1, 9, HEAD.length);
