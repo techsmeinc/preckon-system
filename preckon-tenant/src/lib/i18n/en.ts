@@ -7,6 +7,16 @@
 
 export const en = {
   /* ── common ───────────────────────────────────────────────────────────── */
+  "cover.title": "Submission cover",
+  "cover.sub": "Printed on the header of every exported bill and programme",
+  "cover.refNo": "Ref No.",
+  "cover.number": "Project number",
+  "cover.name": "Project name",
+  "cover.location": "Project location",
+  "cover.client": "Client",
+  "cover.submittedTo": "Submitted to",
+  "cover.saved": "Cover details saved",
+  "cover.missing": "{n} blank",
   "common.cancel": "Cancel",
   "common.save": "Save",
   "common.saving": "Saving…",

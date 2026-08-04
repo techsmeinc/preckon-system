@@ -8,6 +8,16 @@ import type { Dict } from "./en";
 
 export const ar: Dict = {
   /* ── common ───────────────────────────────────────────────────────────── */
+  "cover.title": "غلاف التقديم",
+  "cover.sub": "يُطبع في ترويسة كل جدول كميات وبرنامج زمني مُصدَّر",
+  "cover.refNo": "الرقم المرجعي",
+  "cover.number": "رقم المشروع",
+  "cover.name": "اسم المشروع",
+  "cover.location": "موقع المشروع",
+  "cover.client": "العميل",
+  "cover.submittedTo": "مُقدَّم إلى",
+  "cover.saved": "تم حفظ بيانات الغلاف",
+  "cover.missing": "{n} فارغ",
   "common.cancel": "إلغاء",
   "common.save": "حفظ",
   "common.saving": "جارٍ الحفظ…",

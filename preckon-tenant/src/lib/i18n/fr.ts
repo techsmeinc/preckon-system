@@ -9,6 +9,16 @@ import type { Dict } from "./en";
 
 export const fr: Dict = {
   /* ── common ───────────────────────────────────────────────────────────── */
+  "cover.title": "Page de garde",
+  "cover.sub": "Imprimée en en-tête de chaque DQE et planning exportés",
+  "cover.refNo": "Réf. n°",
+  "cover.number": "Numéro de projet",
+  "cover.name": "Nom du projet",
+  "cover.location": "Lieu du projet",
+  "cover.client": "Client",
+  "cover.submittedTo": "Soumis à",
+  "cover.saved": "Page de garde enregistrée",
+  "cover.missing": "{n} vide(s)",
   "common.cancel": "Annuler",
   "common.save": "Enregistrer",
   "common.saving": "Enregistrement…",

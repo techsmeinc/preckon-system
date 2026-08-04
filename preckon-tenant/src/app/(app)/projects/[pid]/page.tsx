@@ -4,6 +4,7 @@
 // autopilot that can run the whole thing end to end.
 
 import { use } from "react";
+import { ProjectCover } from "@/lib/project-cover";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useApi, useCan, useToast, Skeleton } from "@/lib/ui";
@@ -123,6 +124,8 @@ export default function ProjectOverviewPage({ params }: { params: Promise<{ pid:
           </div>
         </div>
       </div>
+
+      <ProjectCover pid={pid} />
 
       <div className="card" style={{ marginBottom: 16, borderColor: auto ? "var(--brand)" : undefined }}>
         <div className="chead">
