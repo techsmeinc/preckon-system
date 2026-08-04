@@ -12,9 +12,14 @@ import type ExcelJS from "exceljs";
 
 const LOGO = path.join(process.cwd(), "public", "brand", "techsme-logo.png");
 
-export const INK = "FF1F3864";       // header fill
-export const GREY = "FFD9D9D9";      // section band
+export const INK = "FF1F3864";       // programme header fill
+export const GREY = "FFD9D9D9";      // programme section band
 export const CRIT = "FFC00000";      // critical path / milestones
+// Submission palette, taken from the reference priced BOQ.
+export const BOQ_HEAD = "FF31708E";  // column headings — dark slate teal
+export const BOQ_BAND = "FFDCE6F1";  // section / sub-section bands — pale blue
+export const BOQ_TBP  = "FFFDE9D9";  // "To be priced" cells — pale peach
+export const BOQ_TITLE = "FF1F4E79"; // "BILL OF QUANTITIES" — blue
 export const RULE = { style: "thin" as const, color: { argb: "FF9E9E9E" } };
 export const BOX = { top: RULE, left: RULE, bottom: RULE, right: RULE };
 
@@ -22,16 +27,19 @@ export const BOX = { top: RULE, left: RULE, bottom: RULE, right: RULE };
 export async function addLetterhead(
   wb: ExcelJS.Workbook,
   ws: ExcelJS.Worksheet,
-  opts: { widthCols?: number } = {}
+  opts: { centreCol?: number; topRow?: number; width?: number; height?: number } = {}
 ): Promise<boolean> {
   try {
     const buffer = await fs.readFile(LOGO);
     const id = wb.addImage({ buffer: buffer as any, extension: "png" });
     // Anchored across the first rows the header block leaves free, so the sheet
     // opens looking like a letterhead rather than a data dump.
+    // Centred in the letterhead box rather than tucked in a corner: the
+    // reference submission leads with the mark, and a tender document is judged
+    // on presentation before anyone reads a quantity.
     ws.addImage(id, {
-      tl: { col: 0.2, row: 0.2 },
-      ext: { width: 260, height: 40 },
+      tl: { col: opts.centreCol ?? 0.3, row: (opts.topRow ?? 1) + 0.25 },
+      ext: { width: opts.width ?? 300, height: opts.height ?? 52 },
       editAs: "oneCell",
     });
     return true;
