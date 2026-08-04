@@ -499,6 +499,7 @@ export const en = {
   "prog.unassigned": "Unassigned",
   "prog.zoomIn": "Zoom in",
   "prog.zoomOut": "Zoom out",
+  "prog.exportXlsx": "Export Excel",
   "prog.export": "Export CSV",
   "prog.addSection": "Add section",
   "prog.colActivity": "Activity",

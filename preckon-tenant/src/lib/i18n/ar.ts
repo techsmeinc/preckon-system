@@ -500,6 +500,7 @@ export const ar: Dict = {
   "prog.unassigned": "غير مُسند",
   "prog.zoomIn": "تكبير",
   "prog.zoomOut": "تصغير",
+  "prog.exportXlsx": "تصدير إلى Excel",
   "prog.export": "تصدير CSV",
   "prog.addSection": "إضافة قسم",
   "prog.colActivity": "النشاط",

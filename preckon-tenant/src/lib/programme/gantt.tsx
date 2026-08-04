@@ -218,6 +218,51 @@ export function ProgrammeGantt({
     URL.revokeObjectURL(a.href);
   }
 
+  /**
+   * The programme as a formatted Gantt workbook.
+   *
+   * The computed tree is posted rather than recomputed on the server: the
+   * critical path, floats and dates come from the CPM pass above, and a second
+   * implementation would drift from what is on screen — an export that quietly
+   * disagrees with the plan it copies is worse than no export.
+   */
+  async function exportXlsx() {
+    const payload = {
+      commencement: commencement ?? new Date().toISOString().slice(0, 10),
+      projectName: undefined as string | undefined,
+      rows: tree.map((n) => ({
+        wbs: String(n.a.payload?.wbs ?? ""),
+        name: n.name,
+        depth: n.depth,
+        isSection: n.isSection,
+        sowRef: String(n.a.payload?.sow_ref ?? ""),
+        start: n.es,
+        finish: n.ef,
+        dur: n.milestone ? 0 : n.dur,
+        critical: !!n.critical,
+        milestone: !!n.milestone,
+        percent: n.percent,
+        assignee: nameFor(n.a.payload?.assignee, members),
+        predecessors: n.links
+          .map((l) => `${l.activity} (${l.type}${l.lag_days ? `${l.lag_days > 0 ? "+" : ""}${l.lag_days}` : ""})`)
+          .join("; "),
+        basis: String(n.a.payload?.basis ?? ""),
+      })),
+    };
+    const res = await fetch(`/api/v1/projects/${pid}/programme/export.xlsx`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) return;
+    const blob = await res.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "work-programme.xlsx";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
   // Week/month ticks across the top.
   const ticks: number[] = [];
   const step = dayW < 4 ? 28 : dayW < 8 ? 14 : 7;
@@ -234,6 +279,7 @@ export function ProgrammeGantt({
         </div>
         <div className="prog-actions">
           <button className="mini sm" onClick={exportCsv}>{t("prog.export")}</button>
+          <button className="mini sm" onClick={exportXlsx}>{t("prog.exportXlsx")}</button>
           {canEdit && <button className="mini sm" disabled={busy} onClick={() => add("section")}>{t("prog.addSection")}</button>}
         </div>
       </div>

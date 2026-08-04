@@ -501,6 +501,7 @@ export const fr: Dict = {
   "prog.unassigned": "Non affecté",
   "prog.zoomIn": "Zoom avant",
   "prog.zoomOut": "Zoom arrière",
+  "prog.exportXlsx": "Exporter Excel",
   "prog.export": "Exporter CSV",
   "prog.addSection": "Ajouter une section",
   "prog.colActivity": "Activité",
