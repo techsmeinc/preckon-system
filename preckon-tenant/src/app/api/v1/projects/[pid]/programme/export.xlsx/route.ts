@@ -1,7 +1,7 @@
 import ExcelJS from "exceljs";
 import { route } from "@/lib/http";
 import { requirePermission, requireProject } from "@/lib/context";
-import { addLetterhead, shortDate, longDate } from "@/lib/xlsx-brand";
+import { addLetterhead, shortDate, longDate, BOX as RULED, BOQ_HEAD, BOQ_BAND, BOQ_TITLE } from "@/lib/xlsx-brand";
 
 // POST /projects/{pid}/programme/export.xlsx — the work programme as a
 // contractor's Gantt workbook.
@@ -36,8 +36,8 @@ const PHASE = [
   "FF7E57C2", "FF00838F", "FF00897B", "FFB8860B", "FFC2185B",
   "FF2E7D32", "FF3949AB", "FF1565C0", "FF8D6E63", "FF5D4037",
 ];
-const GREY_SECTION = "FFD9D9D9";
-const HEAD_FILL = "FF1F3864";
+const GREY_SECTION = BOQ_BAND;   // same pale blue as the bill — one office, one palette
+const HEAD_FILL = BOQ_HEAD;
 const CRIT_EDGE = "FFC00000";
 
 const thin = { style: "thin" as const, color: { argb: "FF9E9E9E" } };
@@ -68,7 +68,7 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
   const wb = new ExcelJS.Workbook();
   wb.creator = "Preckon";
   const ws = wb.addWorksheet("Programme", {
-    views: [{ state: "frozen", xSplit: 7, ySplit: 9 }],
+    views: [{ state: "frozen", xSplit: 7, ySplit: 11 }],
     pageSetup: { orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
   });
 
@@ -79,36 +79,55 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
     ...Array.from({ length: weeks }, () => ({ width: 2.6 })),
   ];
 
-  await addLetterhead(wb, ws);
+  // ── Reference + letterhead box ────────────────────────────────────────────
+  const ref = ws.getCell(1, 1);
+  ref.value = `Ref No: QO/${body.projectCode ?? "—"}/${String(new Date().getFullYear()).slice(2)}`;
+  ref.font = { bold: true, size: 8, color: { argb: CRIT_EDGE } };
 
-  // ── Title ────────────────────────────────────────────────────────────────
-  ws.mergeCells(1, 1, 1, W0 + weeks);
-  const title = ws.getCell(1, 1);
+  const medium = { style: "medium" as const, color: { argb: "FF000000" } };
+  ws.mergeCells(2, 1, 5, W0 + weeks);
+  ws.getCell(2, 1).border = { top: medium, left: medium, bottom: medium, right: medium };
+  for (let r0 = 2; r0 <= 5; r0++) ws.getRow(r0).height = 16;
+  await addLetterhead(wb, ws, { centreCol: (W0 + weeks) / 2 - 3, topRow: 2, width: 300, height: 58 });
+
+  // ── Title ─────────────────────────────────────────────────────────────────
+  ws.mergeCells(6, 1, 6, W0 + weeks);
+  const title = ws.getCell(6, 1);
   title.value = "PROJECT WORK PROGRAMME";
-  title.font = { bold: true, size: 14 };
+  title.font = { bold: true, size: 13, color: { argb: BOQ_TITLE } };
   title.alignment = { horizontal: "center", vertical: "middle" };
-  ws.getRow(1).height = 26;
+  title.border = RULED;
+  ws.getRow(6).height = 22;
 
-  // ── Header block: the facts an evaluator checks before reading a single bar
+  // ── Header block — the facts an evaluator checks before reading a bar ─────
   const info: Array<[string, string, string, string]> = [
-    ["Project No.", body.projectCode ?? "—", "Location", body.location ?? "—"],
-    ["Project", body.projectName ?? (project as any)?.name ?? "—", "Submission", ""],
-    ["Client", body.client ?? "—", "Duration", `${spanDays} calendar days (≈ ${Math.ceil(spanDays / 7)} weeks)`],
+    ["Project No.", body.projectCode ?? "", "Location", body.location ?? ""],
+    ["Project", body.projectName ?? (project as any)?.name ?? "", "Submission", longDate(new Date())],
+    ["Client", body.client ?? "", "Duration", `${spanDays} calendar days  (≈ ${Math.ceil(spanDays / 7)} weeks)`],
   ];
   info.forEach(([k1, v1, k2, v2], i) => {
-    const r = 3 + i;
-    ws.getCell(r, 1).value = k1;
-    ws.mergeCells(r, 2, r, 4);
-    ws.getCell(r, 2).value = v1;
-    ws.getCell(r, 5).value = k2;
-    ws.mergeCells(r, 6, r, Math.min(W0 + weeks, 6 + 14));
-    ws.getCell(r, 6).value = v2;
-    for (const c of [1, 5]) ws.getCell(r, c).font = { bold: true, size: 9 };
-    for (let c = 1; c <= 6; c++) ws.getCell(r, c).border = BOX;
+    const r0 = 7 + i;
+    const band = (c: any) => {
+      c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: BOQ_BAND } };
+      c.font = { bold: true, size: 8.5 };
+      c.border = RULED;
+    };
+    ws.getCell(r0, 1).value = k1; band(ws.getCell(r0, 1));
+    ws.mergeCells(r0, 2, r0, 5);
+    ws.getCell(r0, 2).value = v1;
+    ws.getCell(r0, 2).font = { size: 8.5 };
+    ws.getCell(r0, 2).border = RULED;
+    ws.getCell(r0, 6).value = k2; band(ws.getCell(r0, 6));
+    ws.mergeCells(r0, 7, r0, Math.min(W0 + weeks, 7 + 30));
+    ws.getCell(r0, 7).value = v2;
+    ws.getCell(r0, 7).font = { size: 8.5 };
+    ws.getCell(r0, 7).border = RULED;
+    ws.getRow(r0).height = 14;
   });
 
   // ── Month band + week numbers ────────────────────────────────────────────
-  const MONTH_ROW = 8, WEEK_ROW = 9;
+  // Rows 1-9 carry the reference, letterhead, title and header block.
+  const MONTH_ROW = 10, WEEK_ROW = 11;
   LABEL.forEach((h, i) => {
     ws.mergeCells(MONTH_ROW, i + 1, WEEK_ROW, i + 1);
     const c = ws.getCell(MONTH_ROW, i + 1);
@@ -230,8 +249,11 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
 
   // Legend, below the grid.
   const legendRow = r + 1;
+  const swatch = ws.getCell(legendRow, 1);
+  swatch.fill = { type: "pattern", pattern: "solid", fgColor: { argb: CRIT_EDGE } };
+  swatch.border = RULED;
   ws.getCell(legendRow, 2).value = "Critical path";
-  ws.getCell(legendRow, 2).font = { size: 8, bold: true, color: { argb: CRIT_EDGE } };
+  ws.getCell(legendRow, 2).font = { size: 8, bold: true };
   ws.getCell(legendRow, 5).value = "◆ Milestone";
   ws.getCell(legendRow, 5).font = { size: 8, bold: true, color: { argb: CRIT_EDGE } };
   ws.mergeCells(legendRow + 1, 1, legendRow + 1, W0 + weeks);
