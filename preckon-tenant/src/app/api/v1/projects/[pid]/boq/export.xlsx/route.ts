@@ -2,7 +2,7 @@ import ExcelJS from "exceljs";
 import { route } from "@/lib/http";
 import { requirePermission, requireProject } from "@/lib/context";
 import { query } from "@/lib/db";
-import { addLetterhead, longDate, INK, GREY, BOX } from "@/lib/xlsx-brand";
+import { addLetterhead, longDate, BOX, BOQ_HEAD, BOQ_BAND, BOQ_TBP, BOQ_TITLE } from "@/lib/xlsx-brand";
 
 // GET /projects/{pid}/boq/export.xlsx — the priced bill in submission format.
 //
@@ -70,20 +70,39 @@ export const GET = route<{ pid: string }>(async (_req, ctx, { pid }) => {
   const wb = new ExcelJS.Workbook();
   wb.creator = "Preckon";
   const ws = wb.addWorksheet("BOQ", {
-    views: [{ state: "frozen", ySplit: 13 }],
+    views: [{ state: "frozen", ySplit: 15 }],
     pageSetup: { orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
   });
   ws.columns = WIDTHS.map((w) => ({ width: w }));
-  await addLetterhead(wb, ws);
 
-  // ── Title + header block (rows 7-12, letterhead occupies the space above) ──
-  ws.mergeCells(7, 1, 7, HEAD.length);
-  const title = ws.getCell(7, 1);
+  // ── Reference + letterhead box ────────────────────────────────────────────
+  const ref = ws.getCell(2, 1);
+  ref.value = `Ref No: QO/${(project as any)?.code ?? "—"}/${String(new Date().getFullYear()).slice(2)}`;
+  ref.font = { bold: true, size: 9 };
+
+  // The mark sits inside a ruled box, centred — the reference submission leads
+  // with it, and a tender is judged on presentation before a quantity is read.
+  ws.mergeCells(4, 1, 7, HEAD.length);
+  const box = ws.getCell(4, 1);
+  box.border = {
+    top: { style: "medium", color: { argb: "FF000000" } },
+    left: { style: "medium", color: { argb: "FF000000" } },
+    bottom: { style: "medium", color: { argb: "FF000000" } },
+    right: { style: "medium", color: { argb: "FF000000" } },
+  };
+  for (let r0 = 4; r0 <= 7; r0++) ws.getRow(r0).height = 20;
+  await addLetterhead(wb, ws, { centreCol: HEAD.length / 2 - 1.6, topRow: 4, width: 300, height: 62 });
+
+  // ── Title ─────────────────────────────────────────────────────────────────
+  ws.mergeCells(9, 1, 9, HEAD.length);
+  const title = ws.getCell(9, 1);
   title.value = "BILL OF QUANTITIES";
-  title.font = { bold: true, size: 14 };
-  title.alignment = { horizontal: "center" };
-  ws.getRow(7).height = 24;
+  title.font = { bold: true, size: 13, color: { argb: BOQ_TITLE } };
+  title.alignment = { horizontal: "center", vertical: "middle" };
+  title.border = BOX;
+  ws.getRow(9).height = 22;
 
+  // ── Meta block: label cells banded, values plain ──────────────────────────
   const meta: Array<[string, string]> = [
     ["Project Number", String((project as any)?.code ?? "")],
     ["Project Name", String((project as any)?.name ?? "")],
@@ -92,25 +111,32 @@ export const GET = route<{ pid: string }>(async (_req, ctx, { pid }) => {
     ["Submitted to", String((project as any)?.client_name ?? "")],
   ];
   meta.forEach(([k, v], i) => {
-    const r = 8 + i;
-    ws.getCell(r, 1).value = k;
-    ws.getCell(r, 1).font = { bold: true, size: 9 };
-    ws.mergeCells(r, 5, r, 7);
-    ws.getCell(r, 5).value = v;
-    ws.getCell(r, 5).font = { size: 9 };
+    const r0 = 10 + i;
+    ws.mergeCells(r0, 1, r0, 4);
+    const kc = ws.getCell(r0, 1);
+    kc.value = k;
+    kc.font = { bold: true, size: 9 };
+    kc.fill = { type: "pattern", pattern: "solid", fgColor: { argb: BOQ_BAND } };
+    kc.border = BOX;
+    ws.mergeCells(r0, 5, r0, HEAD.length);
+    const vc = ws.getCell(r0, 5);
+    vc.value = v;
+    vc.font = { size: 9 };
+    vc.border = BOX;
+    ws.getRow(r0).height = 15;
   });
 
   // ── Column headings ───────────────────────────────────────────────────────
-  const HR = 13;
+  const HR = 15;
   HEAD.forEach((h, i) => {
     const c = ws.getCell(HR, i + 1);
     c.value = i === 7 ? `RATE (IN ${currency || "—"})` : i === 8 ? `AMOUNT (IN ${currency || "—"})` : h;
     c.font = { bold: true, size: 9, color: { argb: "FFFFFFFF" } };
-    c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: INK } };
+    c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: BOQ_HEAD } };
     c.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
     c.border = BOX;
   });
-  ws.getRow(HR).height = 28;
+  ws.getRow(HR).height = 30;
 
   // ── Body ──────────────────────────────────────────────────────────────────
   let r = HR + 1;
@@ -127,10 +153,12 @@ export const GET = route<{ pid: string }>(async (_req, ctx, { pid }) => {
     const sc = ws.getCell(r, 5);
     sc.value = trade;
     sc.font = { bold: true, size: 9.5 };
+    sc.alignment = { horizontal: "center", vertical: "middle" };
     for (let c = 1; c <= HEAD.length; c++) {
       const cell = ws.getCell(r, c);
-      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: GREY } };
+      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: BOQ_BAND } };
       cell.border = BOX;
+      if (c <= 2) cell.alignment = { horizontal: "center" };
     }
     r++;
 
@@ -155,9 +183,21 @@ export const GET = route<{ pid: string }>(async (_req, ctx, { pid }) => {
       vals.forEach((v, i) => {
         const c = ws.getCell(r, i + 1);
         c.value = v;
-        c.font = { size: 9, color: l.review_required && i === 9 ? { argb: "FFC00000" } : undefined };
+        const tbp = (i === 7 || i === 8) && typeof v === "string";
+        c.font = {
+          size: 9,
+          italic: tbp || i === 9,
+          color: l.review_required && i === 9 ? { argb: "FFC00000" } : undefined,
+        };
         c.border = BOX;
-        c.alignment = { vertical: "top", wrapText: i === 4 || i === 9, horizontal: i >= 5 && i <= 8 ? "right" : "left" };
+        c.alignment = {
+          vertical: "top",
+          wrapText: i === 4 || i === 9,
+          horizontal: i <= 3 ? "center" : i >= 5 && i <= 8 ? "right" : "left",
+        };
+        // An unpriced cell is tinted rather than left blank: a reader scanning
+        // the bill can see at a glance how much of it is still to be priced.
+        if (tbp) c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: BOQ_TBP } };
         if (i === 6) c.numFmt = "#,##0.00";
         if ((i === 7 || i === 8) && typeof v === "number") c.numFmt = "#,##0.000";
       });
@@ -185,7 +225,7 @@ export const GET = route<{ pid: string }>(async (_req, ctx, { pid }) => {
   gv.font = { bold: true, size: 11 };
   for (let c = 1; c <= HEAD.length; c++) {
     ws.getCell(r, c).border = BOX;
-    ws.getCell(r, c).fill = { type: "pattern", pattern: "solid", fgColor: { argb: GREY } };
+    ws.getCell(r, c).fill = { type: "pattern", pattern: "solid", fgColor: { argb: BOQ_BAND } };
   }
 
   if (unpriced) {
