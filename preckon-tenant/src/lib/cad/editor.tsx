@@ -1,0 +1,413 @@
+"use client";
+// DrawLogix editor — the issued drawing, opened for markup.
+//
+// The estimator's question is never "can I redraw this building". It is "the
+// wall on grid C is 200 not 150, and nobody has dimensioned the plant room."
+// So this is a CAD editor scoped to what a bill needs: draw, dimension, hatch,
+// annotate, move, erase — on real DXF geometry, with real object snaps, at real
+// coordinates, and it writes a real DXF back out.
+//
+// Two exits, deliberately different:
+//   Download DXF   — the marked-up sheet leaves for the consultant.
+//   Save to project — the marked-up sheet comes BACK IN as a project file, so
+//                     the sidecar re-reads it and the agents measure the version
+//                     that carries the correction. That is the one that matters.
+//
+// The original file is never overwritten. A markup is a revision, and an issued
+// drawing that silently changed under a signed-off quantity is how a bill stops
+// being defensible.
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import DxfParser from "dxf-parser";
+import { api } from "@/lib/apiclient";
+import { useCan, useToast } from "@/lib/ui";
+import { useI18n } from "@/lib/i18n";
+import {
+  nativeUnit, parseToModel, serializeModel, unitFactor as unitFactorOf, withIds,
+  UNIT_OPTIONS, type DxfModel,
+} from "./model";
+import {
+  ALL_SNAP_MODES, CadViewport, DEFAULT_SNAPS, type CadHandle, type SnapMode, type Tool,
+} from "./viewport";
+
+const DRAW: Array<[Tool, string, string]> = [
+  ["line", "ed.line", "╱"],
+  ["polyline", "ed.polyline", "⌁"],
+  ["rect", "ed.rect", "▭"],
+  ["circle", "ed.circle", "◯"],
+  ["text", "ed.text", "T"],
+  ["dimension", "ed.dimension", "↔"],
+  ["hatch", "ed.hatch", "▨"],
+];
+const MODIFY: Array<[Tool, string, string]> = [
+  ["move", "ed.move", "✥"],
+  ["copy", "ed.copy", "⧉"],
+  ["rotate", "ed.rotate", "⟳"],
+  ["scale", "ed.scale", "⤢"],
+  ["mirror", "ed.mirror", "◧"],
+];
+const SNAP_KEY: Record<SnapMode, string> = {
+  end: "ed.snapEnd", mid: "ed.snapMid", center: "ed.snapCenter",
+  intersection: "ed.snapInt", perp: "ed.snapPerp", nearest: "ed.snapNear", node: "ed.snapNode",
+};
+
+// Muted swatches for the layer list — the canvas is bright-on-black, a panel is not.
+const ACI_CHIP: Record<number, string> = {
+  1: "#dc2626", 2: "#ca8a04", 3: "#16a34a", 4: "#0891b2", 5: "#2563eb",
+  6: "#c026d3", 7: "#374151", 8: "#6b7280", 9: "#9ca3af", 30: "#ea580c",
+};
+
+function download(text: string, filename: string) {
+  const url = URL.createObjectURL(new Blob([text], { type: "application/dxf" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export function CadEditor({
+  pid, fid, filename, onClose, onSaved,
+}: {
+  pid: string;
+  fid: string;
+  filename: string;
+  onClose: () => void;
+  onSaved?: () => void;
+}) {
+  const { t } = useI18n();
+  const toast = useToast();
+  const canUpload = useCan("artifact.edit");
+  const vp = useRef<CadHandle>(null);
+
+  const [model, setModel] = useState<DxfModel | null>(null);
+  const [past, setPast] = useState<DxfModel[]>([]);
+  const [future, setFuture] = useState<DxfModel[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [dirty, setDirty] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const [tool, setTool] = useState<Tool>("select");
+  const [measuring, setMeasuring] = useState(false);
+  const [activeLayer, setActiveLayer] = useState("0");
+  const [selCount, setSelCount] = useState(0);
+  const [mono, setMono] = useState(false);
+  const [osnap, setOsnap] = useState(true);
+  const [snaps, setSnaps] = useState<SnapMode[]>(DEFAULT_SNAPS);
+  const [snapMenu, setSnapMenu] = useState(false);
+  const [ortho, setOrtho] = useState(false);
+  const [polar, setPolar] = useState(false);
+  const [display, setDisplay] = useState("mm");
+  const [precision, setPrecision] = useState(0);
+  const [filter, setFilter] = useState("");
+
+  /* ── load ────────────────────────────────────────────────────────────── */
+  useEffect(() => {
+    let live = true;
+    setLoading(true);
+    setError(null);
+    // The DXF endpoint returns the converted bytes for a .dwg too, so the editor
+    // never has to care which format was uploaded.
+    fetch(`/api/v1/projects/${pid}/files/${fid}/dxf`, { credentials: "include" })
+      .then(async (r) => {
+        if (!r.ok) throw new Error(`${r.status}`);
+        return r.text();
+      })
+      .then((text) => {
+        if (!live) return;
+        const raw = parseToModel(new DxfParser().parseSync(text) as any);
+        if (!raw.entities.length) throw new Error("empty");
+        const m = withIds(raw);
+        setModel(m);
+        setDisplay(nativeUnit(m.insunits));
+        setActiveLayer(m.layers.some((l) => l.name === "0") ? "0" : (m.layers[0]?.name ?? "0"));
+      })
+      .catch((e) => { if (live) setError(e?.message === "empty" ? t("ed.noGeometry") : t("ed.loadFail")); })
+      .finally(() => { if (live) setLoading(false); });
+    return () => { live = false; };
+  }, [pid, fid, t]);
+
+  /* ── history ─────────────────────────────────────────────────────────── */
+  const apply = useCallback((next: DxfModel) => {
+    setModel((cur) => {
+      if (cur) setPast((p) => [...p.slice(-49), cur]);
+      return next;
+    });
+    setFuture([]);
+    setDirty(true);
+  }, []);
+  const undo = useCallback(() => {
+    setPast((p) => {
+      if (!p.length) return p;
+      setModel((cur) => { if (cur) setFuture((f) => [cur, ...f]); return p[p.length - 1]; });
+      return p.slice(0, -1);
+    });
+  }, []);
+  const redo = useCallback(() => {
+    setFuture((f) => {
+      if (!f.length) return f;
+      setModel((cur) => { if (cur) setPast((p) => [...p, cur]); return f[0]; });
+      return f.slice(1);
+    });
+  }, []);
+
+  // Ctrl+Z / Ctrl+Y, plus the AutoCAD function keys people already have in their
+  // fingers: F3 osnap, F8 ortho, F10 polar.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = document.activeElement;
+      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) return;
+      if (e.key === "F3") { e.preventDefault(); setOsnap((v) => !v); return; }
+      if (e.key === "F8") { e.preventDefault(); setOrtho((v) => !v); return; }
+      if (e.key === "F10") { e.preventDefault(); setPolar((v) => !v); return; }
+      if (!(e.ctrlKey || e.metaKey)) return;
+      const k = e.key.toLowerCase();
+      if (k === "z" && !e.shiftKey) { e.preventDefault(); undo(); }
+      else if ((k === "z" && e.shiftKey) || k === "y") { e.preventDefault(); redo(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [undo, redo]);
+
+  // Leaving with unsaved markup should cost a click, not a drawing.
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
+
+  /* ── layers ──────────────────────────────────────────────────────────── */
+  const setLayers = (fn: (l: DxfModel["layers"]) => DxfModel["layers"]) =>
+    setModel((m) => (m ? { ...m, layers: fn(m.layers) } : m));
+  const toggleLayer = (name: string) =>
+    setLayers((ls) => ls.map((l) => (l.name === name ? { ...l, visible: !l.visible } : l)));
+  const allLayers = (visible: boolean) => setLayers((ls) => ls.map((l) => ({ ...l, visible })));
+
+  const counts = useMemo(() => {
+    const c = new Map<string, number>();
+    for (const e of model?.entities ?? []) c.set(e.layer, (c.get(e.layer) ?? 0) + 1);
+    return c;
+  }, [model?.entities]);
+
+  const layerList = useMemo(() => {
+    const q = filter.trim().toLowerCase();
+    const ls = model?.layers ?? [];
+    return q ? ls.filter((l) => l.name.toLowerCase().includes(q)) : ls;
+  }, [model?.layers, filter]);
+
+  /* ── exits ───────────────────────────────────────────────────────────── */
+  const base = filename.replace(/\.[^.]+$/, "");
+  function doDownload() {
+    if (!model) return;
+    download(serializeModel(model), `${base}-markup.dxf`);
+  }
+  async function doSave() {
+    if (!model) return;
+    setSaving(true);
+    try {
+      const name = `${base}-markup.dxf`;
+      const file = new File([serializeModel(model)], name, { type: "application/dxf" });
+      await api.upload(`/projects/${pid}/files`, file);
+      setDirty(false);
+      toast(t("ed.saved"));
+      onSaved?.();
+    } catch (e: any) {
+      toast(e?.message ?? t("common.loadFail"));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const pick = (nt: Tool) => { setTool(nt); setMeasuring(false); };
+  const factor = model ? unitFactorOf(model.insunits, display) : 1;
+
+  if (loading) return <div className="cad-empty"><p className="csub">{t("ed.loading")}</p></div>;
+  if (error || !model) {
+    return (
+      <div className="cad-empty">
+        <h4>{t("ed.cannotEdit")}</h4>
+        <p className="csub">{error}</p>
+        <div className="cad-tools" style={{ justifyContent: "center", marginTop: 12 }}>
+          <button className="btn btn-ghost" onClick={onClose}>{t("ed.close")}</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="ced">
+      {/* ── ribbon ─────────────────────────────────────────────────────── */}
+      <div className="ced-rib">
+        <div className="ced-grp">
+          <button className={"ced-t" + (tool === "select" && !measuring ? " on" : "")} onClick={() => pick("select")}>▣ {t("ed.select")}</button>
+          <button className={"ced-t" + (tool === "pan" ? " on" : "")} onClick={() => pick("pan")}>✋ {t("ed.pan")}</button>
+          <button className={"ced-t" + (measuring ? " on" : "")} onClick={() => { setMeasuring((v) => !v); setTool("select"); }}>⟷ {t("ed.measure")}</button>
+        </div>
+
+        <span className="ced-sep" />
+        <div className="ced-grp">
+          {DRAW.map(([k, label, glyph]) => (
+            <button key={k} className={"ced-t" + (tool === k && !measuring ? " on" : "")} onClick={() => pick(k)}>
+              {glyph} {t(label as any)}
+            </button>
+          ))}
+        </div>
+
+        <span className="ced-sep" />
+        <div className="ced-grp">
+          {MODIFY.map(([k, label, glyph]) => (
+            <button
+              key={k}
+              className={"ced-t" + (tool === k && !measuring ? " on" : "")}
+              disabled={!selCount}
+              title={selCount ? undefined : t("ed.selectFirst")}
+              onClick={() => pick(k)}
+            >
+              {glyph} {t(label as any)}
+            </button>
+          ))}
+          <button className="ced-t" disabled={!selCount} onClick={() => vp.current?.deleteSelection()}>✕ {t("ed.erase")}</button>
+        </div>
+
+        <span className="ced-sep" />
+        <div className="ced-grp">
+          <button className="ced-t" disabled={!past.length} onClick={undo}>↶ {t("ed.undo")}</button>
+          <button className="ced-t" disabled={!future.length} onClick={redo}>↷ {t("ed.redo")}</button>
+        </div>
+
+        <span className="ced-spacer" />
+
+        <div className="ced-grp">
+          <button className="ced-t" onClick={() => vp.current?.zoom(1 / 1.3)}>−</button>
+          <button className="ced-t" onClick={() => vp.current?.zoom(1.3)}>+</button>
+          <button className="ced-t" onClick={() => vp.current?.fit()}>{t("ed.fit")}</button>
+        </div>
+      </div>
+
+      {/* ── status strip: the drafting aids, where AutoCAD puts them ────── */}
+      <div className="ced-aids">
+        <button className={"ced-aid" + (osnap ? " on" : "")} onClick={() => setOsnap((v) => !v)}>{t("ed.osnap")} <kbd>F3</kbd></button>
+        <div className="ced-snapwrap">
+          <button className="ced-aid" onClick={() => setSnapMenu((v) => !v)} aria-expanded={snapMenu}>{t("ed.snapModes", { n: snaps.length })} ▾</button>
+          {snapMenu && (
+            <div className="ced-snapmenu" onMouseLeave={() => setSnapMenu(false)}>
+              {ALL_SNAP_MODES.map((m) => (
+                <label key={m}>
+                  <input
+                    type="checkbox"
+                    checked={snaps.includes(m)}
+                    onChange={() => setSnaps((s) => (s.includes(m) ? s.filter((x) => x !== m) : [...s, m]))}
+                  />
+                  {t(SNAP_KEY[m] as any)}
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+        <button className={"ced-aid" + (ortho ? " on" : "")} onClick={() => { setOrtho((v) => !v); setPolar(false); }}>{t("ed.ortho")} <kbd>F8</kbd></button>
+        <button className={"ced-aid" + (polar ? " on" : "")} onClick={() => { setPolar((v) => !v); setOrtho(false); }}>{t("ed.polar")} <kbd>F10</kbd></button>
+        <button className={"ced-aid" + (mono ? " on" : "")} onClick={() => setMono((v) => !v)}>{t("ed.mono")}</button>
+
+        <span className="ced-spacer" />
+
+        <label className="ced-fld">
+          {t("ed.activeLayer")}
+          <select value={activeLayer} onChange={(e) => setActiveLayer(e.target.value)}>
+            {model.layers.map((l) => <option key={l.name} value={l.name}>{l.name}</option>)}
+          </select>
+        </label>
+        <label className="ced-fld">
+          {t("ed.units")}
+          <select value={display} onChange={(e) => setDisplay(e.target.value)}>
+            {UNIT_OPTIONS.map((u) => <option key={u} value={u}>{u}</option>)}
+          </select>
+        </label>
+        <label className="ced-fld">
+          {t("ed.precision")}
+          <select value={precision} onChange={(e) => setPrecision(Number(e.target.value))}>
+            {[0, 1, 2, 3].map((p) => <option key={p} value={p}>{p}</option>)}
+          </select>
+        </label>
+      </div>
+
+      {/* ── canvas + layers ────────────────────────────────────────────── */}
+      <div className="ced-body">
+        <div className="ced-canvas">
+          <CadViewport
+            ref={vp}
+            model={model}
+            mono={mono}
+            units={display}
+            unitFactor={factor}
+            precision={precision}
+            measuring={measuring}
+            fitOn={fid}
+            tool={tool}
+            activeLayer={activeLayer}
+            osnap={osnap}
+            snapModes={snaps}
+            ortho={ortho}
+            polar={polar}
+            onChange={apply}
+            onOperationDone={() => setTool("select")}
+            onSelectionChange={setSelCount}
+          />
+        </div>
+
+        <aside className="ced-side">
+          <h4>{t("ed.layers")}</h4>
+          <input
+            className="ced-filter"
+            value={filter}
+            placeholder={t("ed.layerFilter")}
+            onChange={(e) => setFilter(e.target.value)}
+          />
+          <div className="ced-layeracts">
+            <button className="mini sm" onClick={() => allLayers(true)}>{t("ed.allOn")}</button>
+            <button className="mini sm" onClick={() => allLayers(false)}>{t("ed.allOff")}</button>
+          </div>
+          <div className="ced-layers">
+            {layerList.map((l) => (
+              <div className={"ced-layer" + (l.visible ? "" : " off")} key={l.name}>
+                <button className="eye" onClick={() => toggleLayer(l.name)} aria-label={l.name} title={t("ed.toggleLayer")}>
+                  {l.visible ? "◉" : "○"}
+                </button>
+                <i style={{ background: ACI_CHIP[l.aci] ?? "#374151" }} />
+                {/* Clicking the name selects that layer's geometry — the fastest
+                    way to erase a whole redundant layer or move it as one. */}
+                <button
+                  className="nm"
+                  title={t("ed.selectLayer")}
+                  onClick={() => { pick("select"); vp.current?.selectLayer(l.name); }}
+                >
+                  {l.name}
+                </button>
+                <b className="mono">{counts.get(l.name) ?? 0}</b>
+              </div>
+            ))}
+          </div>
+
+          <div className="ced-stats">
+            <div className="trow-lbl" style={{ borderTop: 0 }}>{t("ed.entities")} <b className="mono">{model.entities.length}</b></div>
+            <div className="trow-lbl">{t("ed.selected")} <b className="mono">{selCount}</b></div>
+          </div>
+        </aside>
+      </div>
+
+      {/* ── exits ──────────────────────────────────────────────────────── */}
+      <div className="ced-foot">
+        <span className="csub">{dirty ? t("ed.unsaved") : t("ed.saveHint")}</span>
+        <span className="ced-spacer" />
+        <button className="btn btn-ghost" onClick={onClose}>{t("ed.close")}</button>
+        <button className="btn btn-ghost" onClick={doDownload}>{t("ed.download")}</button>
+        {canUpload && (
+          <button className="btn btn-primary" disabled={saving || !dirty} onClick={doSave}>
+            {saving ? t("ed.saving") : t("ed.save")}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}

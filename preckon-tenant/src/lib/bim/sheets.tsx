@@ -15,10 +15,11 @@
 // number, not by hunting a wall of text. Sheets are ordered by name so the set
 // reads 01, 02, 03 — the order it was issued in — and the first opens by default.
 
-import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { useApi, Skeleton } from "@/lib/ui";
 import { api } from "@/lib/apiclient";
 import { useI18n } from "@/lib/i18n";
+import { CadEditor } from "@/lib/cad/editor";
 
 interface CadLayerView {
   layer: string;
@@ -52,6 +53,24 @@ type Schedule = CadView["schedules"][number];
 
 /** Order-preserving de-duplication — a repeated note is noise, not emphasis. */
 const dedupe = (xs: string[]) => [...new Set(xs.map((x) => x.trim()).filter(Boolean))];
+
+/**
+ * Is this line of text a note, or a fragment the extractor picked up off the
+ * sheet?
+ *
+ * Every drawing carries loose text that is not prose: keynote numbers ("1",
+ * "2", "8A"), grid references, a lone "1 : 100". Listed as bullets they read as
+ * a note list with eight empty entries in it, which is what the estimator saw.
+ * A note has words in it — at least two, or one long enough to say something.
+ */
+function isRealNote(s: string): boolean {
+  const t = s.trim();
+  if (t.length < 4) return false;
+  if (!/[A-Za-z؀-ۿ]{3}/.test(t)) return false;      // no word in it at all
+  if (/^[\d\s.,:;/×x+\-—–()]+$/.test(t)) return false;         // pure numbering / a scale
+  const words = t.split(/\s+/).filter((w) => w.length > 1);
+  return words.length >= 2 || t.length >= 14;
+}
 
 /**
  * Is this a real schedule, or room tags the parser mistook for one?
@@ -136,11 +155,27 @@ export function ParsedSheets({ pid }: { pid: string }) {
   );
 }
 
-function SheetDetail({ pid, fid }: { pid: string; fid: string }) {
+function SheetDetail({ pid, fid, onSaved }: { pid: string; fid: string; onSaved?: () => void }) {
   const { t } = useI18n();
   const { data, loading, error } = useApi<CadView>(`/projects/${pid}/files/${fid}/cad`);
+  const [editing, setEditing] = useState(false);
+
   if (loading) return <Skeleton rows={4} />;
   if (error || !data) return <div className="csub">{error ?? t("common.loadFail")}</div>;
+
+  // The editor takes the whole panel. A CAD canvas beside a measurement summary
+  // is two half-usable columns; drawing needs the width.
+  if (editing) {
+    return (
+      <CadEditor
+        pid={pid}
+        fid={fid}
+        filename={data.filename}
+        onClose={() => setEditing(false)}
+        onSaved={() => { setEditing(false); onSaved?.(); }}
+      />
+    );
+  }
 
   return (
     <>
@@ -152,7 +187,7 @@ function SheetDetail({ pid, fid }: { pid: string; fid: string }) {
 
       <div className="bim-wrap">
         <div className="bim-main">
-          <SheetCanvas pid={pid} fid={fid} view={data} />
+          <SheetCanvas pid={pid} fid={fid} view={data} onEdit={() => setEditing(true)} />
         </div>
 
         <aside className="bim-side">
