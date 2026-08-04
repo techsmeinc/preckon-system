@@ -385,7 +385,7 @@
       <a href="preckon-pricing.html" data-i18n="nav.pricing">Pricing</a>
     </div>
     <div class="nav-tools">
-      <select class="lang-select" aria-label="Language" onchange="PK.setLang(this.value)"><option value="en">EN</option><option value="ar">العربية</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option></select>
+      <select class="lang-select" aria-label="Language" onchange="PK.setLang(this.value)"><option value="en">EN</option><option value="ar">العربية</option></select>
       <button class="theme-toggle" type="button" aria-label="Toggle theme" onclick="PK.toggleTheme()"><svg class="ic-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><svg class="ic-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19"/></svg></button>
     </div>
     <div class="nav-cta">
@@ -869,10 +869,7 @@
   var root=document.documentElement;
   var I18N={
     en:{"nav.platform":"Platform","nav.modules":"Modules","nav.why":"Why us","nav.security":"Security","nav.pricing":"Pricing","cta.demo":"Book a demo"},
-    ar:{"nav.platform":"\u0627\u0644\u0645\u0646\u0635\u0629","nav.modules":"\u0627\u0644\u0648\u062d\u062f\u0627\u062a","nav.why":"\u0644\u0645\u0627\u0630\u0627 \u0646\u062d\u0646","nav.security":"\u0627\u0644\u0623\u0645\u0627\u0646","nav.pricing":"\u0627\u0644\u0623\u0633\u0639\u0627\u0631","cta.demo":"\u0627\u062d\u062c\u0632 \u0639\u0631\u0636\u064b\u0627"},
-    fr:{"nav.platform":"Plateforme","nav.modules":"Modules","nav.why":"Pourquoi nous","nav.security":"S\u00e9curit\u00e9","nav.pricing":"Tarifs","cta.demo":"R\u00e9server une d\u00e9mo"},
-    de:{"nav.platform":"Plattform","nav.modules":"Module","nav.why":"Warum wir","nav.security":"Sicherheit","nav.pricing":"Preise","cta.demo":"Demo buchen"},
-    es:{"nav.platform":"Plataforma","nav.modules":"M\u00f3dulos","nav.why":"Por qu\u00e9 nosotros","nav.security":"Seguridad","nav.pricing":"Precios","cta.demo":"Reservar una demo"}
+    ar:{"nav.platform":"المنصة","nav.modules":"الوحدات","nav.why":"لماذا نحن","nav.security":"الأمان","nav.pricing":"الأسعار","cta.demo":"احجز عرضًا"}
   };
   var RTL={ar:1};
   function st(k,v){try{localStorage.setItem(k,v)}catch(e){}}
@@ -882,6 +879,11 @@
     root.setAttribute("lang",l);root.setAttribute("dir",RTL[l]?"rtl":"ltr");st("preckon-lang",l);
     var d=I18N[l]||I18N.en;
     document.querySelectorAll("[data-i18n]").forEach(function(el){var k=el.getAttribute("data-i18n");if(d[k])el.textContent=d[k];});
+    // Placeholders and aria-labels are content too. Translating only textContent
+    // leaves an Arabic form with English hints inside every box, which is the
+    // half-translated state that reads worse than no translation at all.
+    document.querySelectorAll("[data-i18n-ph]").forEach(function(el){var k=el.getAttribute("data-i18n-ph");if(d[k])el.setAttribute("placeholder",d[k]);});
+    document.querySelectorAll("[data-i18n-al]").forEach(function(el){var k=el.getAttribute("data-i18n-al");if(d[k])el.setAttribute("aria-label",d[k]);});
     var s=document.querySelector(".lang-select");if(s)s.value=l;
   }
   window.PK={toggleTheme:function(){theme(root.getAttribute("data-theme")==="dark"?"light":"dark");},setLang:lang};
