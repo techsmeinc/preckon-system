@@ -382,6 +382,7 @@ export const fr: Dict = {
   "stage.narrativelogix": "Mémoire technique",
   "type.narrative_section": "Mémoire technique",
   "boq.needsReview": "À examiner",
+  "boq.exportXlsx": "Exporter Excel",
   "boq.exportCsv": "Exporter vers Excel (CSV)",
   "boq.unverified": "Références non vérifiées",
   "boq.unverifiedCitation": "référence non vérifiée",

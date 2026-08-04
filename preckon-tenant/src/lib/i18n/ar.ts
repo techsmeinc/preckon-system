@@ -381,6 +381,7 @@ export const ar: Dict = {
   "stage.narrativelogix": "العرض الفني",
   "type.narrative_section": "العرض الفني",
   "boq.needsReview": "بحاجة إلى مراجعة",
+  "boq.exportXlsx": "تصدير إلى Excel",
   "boq.exportCsv": "تصدير إلى Excel (CSV)",
   "boq.unverified": "مراجع غير مُتحقَّق منها",
   "boq.unverifiedCitation": "مرجع غير مُتحقَّق منه",

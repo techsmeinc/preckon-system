@@ -85,6 +85,9 @@ export default function BoqSurface({ pid, stage, artifacts, rows, workflows, run
             <div className="csub">{t("boq.titleSub")}</div>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
+            <a className="mini" href={`/api/v1/projects/${pid}/boq/export.xlsx`} download>
+              {t("boq.exportXlsx")}
+            </a>
             <a className="mini" href={`/api/v1/projects/${pid}/boq/export.csv`} download>
               {t("boq.exportCsv")}
             </a>

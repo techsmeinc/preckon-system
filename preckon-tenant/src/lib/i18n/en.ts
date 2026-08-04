@@ -380,6 +380,7 @@ export const en = {
   "stage.narrativelogix": "Technical Narrative",
   "type.narrative_section": "Technical narrative",
   "boq.needsReview": "Needs review",
+  "boq.exportXlsx": "Export Excel",
   "boq.exportCsv": "Export to Excel (CSV)",
   "boq.unverified": "Unverified citations",
   "boq.unverifiedCitation": "unverified citation",
