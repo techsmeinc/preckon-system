@@ -211,7 +211,7 @@
 <header class="hero">
   <div class="wrap">
     <span class="eyebrow">Security &amp; trust</span>
-    <h1>Your tender documents never leave your control.</h1>
+    <h1 data-i18n="h1.security">Your tender documents never leave your control.</h1>
     <p class="sub">Preckon ingests some of the most sensitive documents a contractor holds — live bids, contracts, full design sets. Security isn't a page of fine print here; it's built into how every document is handled, from upload to audit.</p>
     <div class="trust-chips">
       <span class="tc"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg> Encrypted in transit &amp; at rest</span>
@@ -227,7 +227,7 @@
   <div class="wrap">
     <div class="reveal">
       <span class="kicker">The trust path</span>
-      <h2 class="h2">What protects a document at every step.</h2>
+      <h2 class="h2" data-i18n="h2.security.0">What protects a document at every step.</h2>
       <p class="lede">Follow a drawing set from the moment it's uploaded. Each stage adds a control — encryption, isolation, independence, review, audit — before anything moves on.</p>
     </div>
     <div class="path reveal">
@@ -275,7 +275,7 @@
   <div class="wrap">
     <div class="reveal center" style="max-width:660px;">
       <span class="kicker">The pillars</span>
-      <h2 class="h2">Six commitments behind that path.</h2>
+      <h2 class="h2" data-i18n="h2.security.1">Six commitments behind that path.</h2>
     </div>
     <div class="pillars reveal">
       <div class="pcard"><span class="iic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><h4>Encrypted end to end</h4><p>TLS in transit and AES-256 at rest. Your documents are protected the moment they're uploaded and everywhere they sit.</p></div>
@@ -304,7 +304,7 @@
   <div class="wrap">
     <div class="reveal center" style="max-width:660px;">
       <span class="kicker">Compliance &amp; posture</span>
-      <h2 class="h2">Where we are, stated plainly.</h2>
+      <h2 class="h2" data-i18n="h2.security.2">Where we are, stated plainly.</h2>
       <p class="lede">We'd rather tell you exactly where things stand than imply a certificate we don't hold yet.</p>
     </div>
     <div class="posture reveal">
@@ -324,7 +324,7 @@
   <div class="wrap">
     <div class="reveal center" style="max-width:660px;">
       <span class="kicker">Security questions</span>
-      <h2 class="h2">The ones your IT team will ask.</h2>
+      <h2 class="h2" data-i18n="h2.security.3">The ones your IT team will ask.</h2>
     </div>
     <div class="faq reveal">
       <details open>
@@ -367,14 +367,14 @@
     <div class="top">
       <div>
         <a class="brand" href="index.html"><svg class="mark" viewBox="0 0 48 56" width="25" height="29" fill="none" aria-hidden="true"><path d="M16 50V8h14a13 13 0 0 1 0 26H16" stroke="var(--ink)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="25" cy="21" r="3.6" fill="var(--teal)"/></svg><span class="wm">Preck<span class="o">o</span>n</span></a>
-        <p class="blurb">From drawings to a defensible estimate. AI-native preconstruction, reviewed by your team.</p>
+        <p class="blurb" data-i18n="ft.blurb">From drawings to a defensible estimate. AI-native preconstruction, reviewed by your team.</p>
       </div>
-      <div class="col"><h6>Platform</h6><a href="preckon-platform.html">Architecture</a><a href="preckon-modules.html">Modules</a><a href="preckon-platform.html#foundation">Foundation</a><a href="#">Security</a></div>
-      <div class="col"><h6>Company</h6><a href="preckon-pricing.html">Pricing</a><a href="index.html#partners">Design partners</a><a href="preckon-why.html">Why us</a><a href="preckon-demo.html">Contact</a></div>
-      <div class="col"><h6>Get started</h6><a href="preckon-demo.html">Book a demo</a><a href="index.html#partners">Design Partner Program</a><a href="index.html#how">Watch overview</a></div>
+      <div class="col"><h6 data-i18n="ft.platform">Platform</h6><a href="preckon-platform.html" data-i18n="ft.arch">Architecture</a><a href="preckon-modules.html" data-i18n="ft.modules">Modules</a><a href="preckon-platform.html#foundation" data-i18n="ft.foundation">Foundation</a><a href="#" data-i18n="ft.security">Security</a></div>
+      <div class="col"><h6 data-i18n="ft.company">Company</h6><a href="preckon-pricing.html" data-i18n="ft.pricing">Pricing</a><a href="index.html#partners" data-i18n="ft.partners">Design partners</a><a href="preckon-why.html" data-i18n="ft.why">Why us</a><a href="preckon-demo.html" data-i18n="ft.contact">Contact</a></div>
+      <div class="col"><h6 data-i18n="ft.start">Get started</h6><a href="preckon-demo.html" data-i18n="ft.demo">Book a demo</a><a href="index.html#partners" data-i18n="ft.dpp">Design Partner Program</a><a href="index.html#how" data-i18n="ft.watch">Watch overview</a></div>
     </div>
     <div class="base">
-      <span class="k">© 2026 TechSME Inc. · All rights reserved</span>
+      <span class="k" data-i18n="ft.rights">© 2026 TechSME Inc. · All rights reserved</span>
       <span class="k">Dubai · Austin · Mississauga · Hyderabad</span>
     </div>
   </div>
@@ -391,8 +391,8 @@
 (function(){
   var root=document.documentElement;
   var I18N={
-    en:{"nav.platform":"Platform","nav.modules":"Modules","nav.why":"Why us","nav.security":"Security","nav.pricing":"Pricing","cta.demo":"Book a demo"},
-    ar:{"nav.platform":"المنصة","nav.modules":"الوحدات","nav.why":"لماذا نحن","nav.security":"الأمان","nav.pricing":"الأسعار","cta.demo":"احجز عرضًا"}
+    en:{"nav.platform":"Platform","nav.modules":"Modules","nav.why":"Why us","nav.security":"Security","nav.pricing":"Pricing","cta.demo":"Book a demo","ft.blurb":"From drawings to a defensible estimate. AI-native preconstruction, reviewed by your team.","ft.platform":"Platform","ft.company":"Company","ft.start":"Get started","ft.arch":"Architecture","ft.modules":"Modules","ft.foundation":"Foundation","ft.security":"Security","ft.pricing":"Pricing","ft.partners":"Design partners","ft.why":"Why us","ft.contact":"Contact","ft.demo":"Book a demo","ft.dpp":"Design Partner Program","ft.watch":"Watch overview","ft.about":"About","ft.rights":"© 2026 TechSME Inc. · All rights reserved","h1.security":"Your tender documents never leave your control.","h2.security.0":"What protects a document at every step.","h2.security.1":"Six commitments behind that path.","h2.security.2":"Where we are, stated plainly.","h2.security.3":"The ones your IT team will ask."},
+    ar:{"nav.platform":"المنصة","nav.modules":"الوحدات","nav.why":"لماذا نحن","nav.security":"الأمان","nav.pricing":"الأسعار","cta.demo":"احجز عرضًا","ft.blurb":"من المخططات إلى تقدير قابل للدفاع عنه. مرحلة ما قبل الإنشاء بالذكاء الاصطناعي، يراجعها فريقك.","ft.platform":"المنصة","ft.company":"الشركة","ft.start":"ابدأ الآن","ft.arch":"البنية","ft.modules":"الوحدات","ft.foundation":"الأساس","ft.security":"الأمان","ft.pricing":"الأسعار","ft.partners":"شركاء التصميم","ft.why":"لماذا نحن","ft.contact":"اتصل بنا","ft.demo":"احجز عرضًا توضيحيًا","ft.dpp":"برنامج شركاء التصميم","ft.watch":"شاهد نظرة عامة","ft.about":"من نحن","ft.rights":"© 2026 TechSME Inc. · جميع الحقوق محفوظة","h1.security":"مستندات مناقصتك لا تغادر سيطرتك أبدًا.","h2.security.0":"ما يحمي المستند في كل خطوة.","h2.security.1":"ستة التزامات وراء هذا المسار.","h2.security.2":"أين نحن، بوضوح تام.","h2.security.3":"الأسئلة التي سيطرحها فريق تقنية المعلومات لديك."}
   };
   var RTL={ar:1};
   function st(k,v){try{localStorage.setItem(k,v)}catch(e){}}
