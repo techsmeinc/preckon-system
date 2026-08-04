@@ -33,8 +33,17 @@ interface Row {
  *  eye follows a band of colour down the sheet — so the bars carry the section's
  *  identity rather than a single accent for everything. */
 const PHASE = [
-  "FF7E57C2", "FF00838F", "FF00897B", "FFB8860B", "FFC2185B",
-  "FF2E7D32", "FF3949AB", "FF1565C0", "FF8D6E63", "FF5D4037",
+  "FF4A90D9",  // preliminaries — light blue
+  "FF7030A0",  // demolition / site prep — purple
+  "FF1F8A8A",  // substructure — teal
+  "FF2E9B7F",  // superstructure — green-teal
+  "FFE36C09",  // building envelope — orange
+  "FFC0165B",  // roofing & waterproofing — magenta
+  "FF3C9E3C",  // façade — green
+  "FF5B4FC7",  // MEP — indigo
+  "FF2E86C1",  // external works — steel blue
+  "FFB8860B",  // testing & commissioning — gold
+  "FFC00000",  // handover — red
 ];
 const GREY_SECTION = BOQ_BAND;   // same pale blue as the bill — one office, one palette
 const HEAD_FILL = BOQ_HEAD;
@@ -180,7 +189,7 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
 
   for (const row of rows) {
     const rowRef = ws.getRow(r);
-    rowRef.height = 15;
+    rowRef.height = 13.5;
 
     if (row.isSection) {
       phase++;
@@ -197,8 +206,10 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
       for (let cc = 1; cc <= W0 + weeks; cc++) {
         const cell = ws.getCell(r, cc);
         cell.border = BOX;
-        if (cc <= W0) continue;
-        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: GREY_SECTION } };
+        // Only the label side is banded. Carrying the fill across the chart
+        // draws a solid stripe through the timeline and the bars stop reading
+        // as bars — the section is a heading, not an activity.
+        if (cc <= W0) cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: GREY_SECTION } };
       }
       r++;
       continue;
@@ -237,10 +248,17 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
         }
       } else if (covered) {
         cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: colour } };
+        const white = { style: "thin" as const, color: { argb: "FFFFFFFF" } };
+        cell.border = { ...BOX, left: white, right: white };
         if (row.critical) {
           // Critical activities carry a red top/bottom edge as well as colour,
           // so the critical path survives a monochrome print.
-          cell.border = { ...BOX, top: { style: "medium", color: { argb: CRIT_EDGE } }, bottom: { style: "medium", color: { argb: CRIT_EDGE } } };
+          const white = { style: "thin" as const, color: { argb: "FFFFFFFF" } };
+          cell.border = {
+            top: { style: "medium", color: { argb: CRIT_EDGE } },
+            bottom: { style: "medium", color: { argb: CRIT_EDGE } },
+            left: white, right: white,
+          };
         }
       }
     }
