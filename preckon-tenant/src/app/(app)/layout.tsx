@@ -25,6 +25,7 @@ const NAV: { group: Key; items: { href: string; label: Key; icon: IconName }[] }
     { href: "/projects", label: "nav.projects", icon: "projects" },
   ] },
   { group: "nav.tools", items: [
+    { href: "/drawings", label: "nav.drawings", icon: "drawings" },
     { href: "/library", label: "nav.library", icon: "library" },
   ] },
   // Admin is role-gated (blueprint §1) — see ADMIN_PERMS below.
@@ -271,6 +272,7 @@ function crumbFor(path: string, projects: ProjectLite[], t: (k: Key) => string):
   }
   if (path.startsWith("/overview")) return t("nav.dashboard");
   if (path.startsWith("/projects")) return t("nav.projects");
+  if (path.startsWith("/drawings")) return t("nav.drawings");
   if (path.startsWith("/library")) return t("nav.library");
   if (path.startsWith("/admin")) return t("nav.admin");
   if (path.startsWith("/settings")) return t("nav.settings");

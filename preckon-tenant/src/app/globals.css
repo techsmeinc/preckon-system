@@ -806,6 +806,12 @@ input[type=color]{width:46px; height:34px; border:1px solid var(--hairline); bor
   background:var(--surface); border:1px solid var(--hairline); border-radius:7px; padding:4px 8px;
   text-transform:none; letter-spacing:0;}
 
+/* The source bar on the standalone editor: which project, which sheet, or a
+   file straight off the disk. */
+.ced-source{display:flex; align-items:center; gap:14px; flex-wrap:wrap;}
+.ced-source .ced-fld select{min-width:190px; max-width:min(380px, 60vw);}
+.ced-source .btn{display:inline-flex; align-items:center; gap:7px; font-size:12.5px; padding:8px 13px;}
+
 .ced-body{display:grid; grid-template-columns:1fr 250px;}
 @media(max-width:1000px){ .ced-body{grid-template-columns:1fr;} }
 .ced-canvas{height:620px; min-width:0; border-inline-end:1px solid var(--hairline);}

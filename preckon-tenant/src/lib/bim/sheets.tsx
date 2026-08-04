@@ -19,7 +19,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as
 import { useApi, Skeleton } from "@/lib/ui";
 import { api } from "@/lib/apiclient";
 import { useI18n } from "@/lib/i18n";
-import { CadEditor } from "@/lib/cad/editor";
+import Link from "next/link";
 
 interface CadLayerView {
   layer: string;
@@ -171,32 +171,17 @@ export function ParsedSheets({ pid }: { pid: string }) {
         </div>
       </div>
 
-      <SheetDetail key={active} pid={pid} fid={active} onSaved={files.reload} />
+      <SheetDetail key={active} pid={pid} fid={active} />
     </div>
   );
 }
 
-function SheetDetail({ pid, fid, onSaved }: { pid: string; fid: string; onSaved?: () => void }) {
+function SheetDetail({ pid, fid }: { pid: string; fid: string }) {
   const { t } = useI18n();
   const { data, loading, error } = useApi<CadView>(`/projects/${pid}/files/${fid}/cad`);
-  const [editing, setEditing] = useState(false);
 
   if (loading) return <Skeleton rows={4} />;
   if (error || !data) return <div className="csub">{error ?? t("common.loadFail")}</div>;
-
-  // The editor takes the whole panel. A CAD canvas beside a measurement summary
-  // is two half-usable columns; drawing needs the width.
-  if (editing) {
-    return (
-      <CadEditor
-        pid={pid}
-        fid={fid}
-        filename={data.filename}
-        onClose={() => setEditing(false)}
-        onSaved={() => { setEditing(false); onSaved?.(); }}
-      />
-    );
-  }
 
   return (
     <>
@@ -208,7 +193,7 @@ function SheetDetail({ pid, fid, onSaved }: { pid: string; fid: string; onSaved?
 
       <div className="bim-wrap">
         <div className="bim-main">
-          <SheetCanvas pid={pid} fid={fid} view={data} onEdit={() => setEditing(true)} />
+          <SheetCanvas pid={pid} fid={fid} view={data} />
         </div>
 
         <aside className="bim-side">
@@ -415,7 +400,7 @@ const clampZoom = (z: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z));
  * booting, converter not yet installed) are fixed by then and the bytes never
  * changed.
  */
-function SheetCanvas({ pid, fid, view, onEdit }: { pid: string; fid: string; view: CadView; onEdit: () => void }) {
+function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadView }) {
   const { t } = useI18n();
   const [svg, setSvg] = useState<string | null>(view.svg);
   const [err, setErr] = useState<string | null>(view.renderError);
@@ -512,8 +497,12 @@ function SheetCanvas({ pid, fid, view, onEdit }: { pid: string; fid: string; vie
           {/* DXF, not the original: a .dwg opens in AutoCAD and nothing else,
               and these are the exact bytes the quantities were measured from. */}
           <a className="btn btn-ghost" href={dxfHref} download={dxfName}>{t("cad.downloadDxf")}</a>
+          {/* The editor is a workspace tool, not a panel inside this card —
+              drawing needs the width, and an estimator opens it for drawings
+              that are not on this stage at all. This just arrives there with
+              the project and sheet already chosen. */}
           {!view.parseError && (
-            <button className="btn btn-primary" onClick={onEdit}>{t("ed.open")}</button>
+            <Link className="btn btn-primary" href={`/drawings?pid=${pid}&fid=${fid}`}>{t("ed.open")}</Link>
           )}
         </div>
       </div>

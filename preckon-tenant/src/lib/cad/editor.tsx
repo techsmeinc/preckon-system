@@ -67,12 +67,16 @@ function download(text: string, filename: string) {
 }
 
 export function CadEditor({
-  pid, fid, filename, onClose, onSaved,
+  pid, fid, filename, dxfText, onClose, onSaved,
 }: {
-  pid: string;
-  fid: string;
+  /** Present when the drawing belongs to a project — enables Save to project. */
+  pid?: string;
+  /** Fetch the drawing from this project file. Ignored when `dxfText` is given. */
+  fid?: string;
   filename: string;
-  onClose: () => void;
+  /** An already-loaded DXF — a file opened from disk, never uploaded. */
+  dxfText?: string;
+  onClose?: () => void;
   onSaved?: () => void;
 }) {
   const { t } = useI18n();
@@ -107,26 +111,32 @@ export function CadEditor({
     let live = true;
     setLoading(true);
     setError(null);
-    // The DXF endpoint returns the converted bytes for a .dwg too, so the editor
-    // never has to care which format was uploaded.
-    fetch(`/api/v1/projects/${pid}/files/${fid}/dxf`, { credentials: "include" })
-      .then(async (r) => {
-        if (!r.ok) throw new Error(`${r.status}`);
-        return r.text();
-      })
-      .then((text) => {
-        if (!live) return;
-        const raw = parseToModel(new DxfParser().parseSync(text) as any);
-        if (!raw.entities.length) throw new Error("empty");
-        const m = withIds(raw);
-        setModel(m);
-        setDisplay(nativeUnit(m.insunits));
-        setActiveLayer(m.layers.some((l) => l.name === "0") ? "0" : (m.layers[0]?.name ?? "0"));
-      })
+    setPast([]); setFuture([]); setDirty(false);
+
+    const take = (text: string) => {
+      if (!live) return;
+      const raw = parseToModel(new DxfParser().parseSync(text) as any);
+      if (!raw.entities.length) throw new Error("empty");
+      const m = withIds(raw);
+      setModel(m);
+      setDisplay(nativeUnit(m.insunits));
+      setActiveLayer(m.layers.some((l) => l.name === "0") ? "0" : (m.layers[0]?.name ?? "0"));
+    };
+
+    // A file opened from disk is already in hand. Otherwise fetch it: the DXF
+    // endpoint returns converted bytes for a .dwg too, so the editor never has
+    // to care which format was uploaded.
+    const load = dxfText !== undefined
+      ? Promise.resolve().then(() => take(dxfText))
+      : fetch(`/api/v1/projects/${pid}/files/${fid}/dxf`, { credentials: "include" })
+          .then(async (r) => { if (!r.ok) throw new Error(`${r.status}`); return r.text(); })
+          .then(take);
+
+    load
       .catch((e) => { if (live) setError(e?.message === "empty" ? t("ed.noGeometry") : t("ed.loadFail")); })
       .finally(() => { if (live) setLoading(false); });
     return () => { live = false; };
-  }, [pid, fid, t]);
+  }, [pid, fid, dxfText, t]);
 
   /* ── history ─────────────────────────────────────────────────────────── */
   const apply = useCallback((next: DxfModel) => {
@@ -204,7 +214,7 @@ export function CadEditor({
     download(serializeModel(model), `${base}-markup.dxf`);
   }
   async function doSave() {
-    if (!model) return;
+    if (!model || !pid) return;
     setSaving(true);
     try {
       const name = `${base}-markup.dxf`;
@@ -229,9 +239,11 @@ export function CadEditor({
       <div className="cad-empty">
         <h4>{t("ed.cannotEdit")}</h4>
         <p className="csub">{error}</p>
-        <div className="cad-tools" style={{ justifyContent: "center", marginTop: 12 }}>
-          <button className="btn btn-ghost" onClick={onClose}>{t("ed.close")}</button>
-        </div>
+        {onClose && (
+          <div className="cad-tools" style={{ justifyContent: "center", marginTop: 12 }}>
+            <button className="btn btn-ghost" onClick={onClose}>{t("ed.close")}</button>
+          </div>
+        )}
       </div>
     );
   }
@@ -343,7 +355,7 @@ export function CadEditor({
             unitFactor={factor}
             precision={precision}
             measuring={measuring}
-            fitOn={fid}
+            fitOn={fid ?? filename}
             tool={tool}
             activeLayer={activeLayer}
             osnap={osnap}
@@ -398,11 +410,11 @@ export function CadEditor({
 
       {/* ── exits ──────────────────────────────────────────────────────── */}
       <div className="ced-foot">
-        <span className="csub">{dirty ? t("ed.unsaved") : t("ed.saveHint")}</span>
+        <span className="csub">{dirty ? t("ed.unsaved") : pid ? t("ed.saveHint") : t("ed.localHint")}</span>
         <span className="ced-spacer" />
-        <button className="btn btn-ghost" onClick={onClose}>{t("ed.close")}</button>
+        {onClose && <button className="btn btn-ghost" onClick={onClose}>{t("ed.close")}</button>}
         <button className="btn btn-ghost" onClick={doDownload}>{t("ed.download")}</button>
-        {canUpload && (
+        {pid && canUpload && (
           <button className="btn btn-primary" disabled={saving || !dirty} onClick={doSave}>
             {saving ? t("ed.saving") : t("ed.save")}
           </button>
