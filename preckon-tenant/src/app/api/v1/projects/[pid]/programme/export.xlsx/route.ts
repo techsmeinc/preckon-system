@@ -1,5 +1,6 @@
 import ExcelJS from "exceljs";
 import { route } from "@/lib/http";
+import { queryOne } from "@/lib/db";
 import { requirePermission, requireProject } from "@/lib/context";
 import { addLetterhead, centreColumn, shortDate, longDate, BOX as RULED, BOQ_HEAD, BOQ_BAND, BOQ_TITLE } from "@/lib/xlsx-brand";
 
@@ -58,7 +59,16 @@ const fmt = shortDate;
 
 export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
   requirePermission(ctx, "artifact.read");
-  const project = await requireProject(ctx, pid);
+  await requireProject(ctx, pid);
+  // requireProject only resolves access — it returns id and lifecycle, nothing
+  // else. Reading name/code off it silently yielded undefined, which is why the
+  // exported header block came out blank.
+  const P = await queryOne<any>(
+    `SELECT name, code, client_name, location, submitted_to, ref_no
+       FROM project WHERE id = ? AND tenant_id = ?`,
+    [pid, ctx.tenantId]
+  );
+
 
   const body = (await req.json()) as {
     rows: Row[];
@@ -77,7 +87,7 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
   const wb = new ExcelJS.Workbook();
   wb.creator = "Preckon";
   const ws = wb.addWorksheet("Programme", {
-    views: [{ state: "frozen", xSplit: 7, ySplit: 11 }],
+    views: [{ state: "frozen", xSplit: 7, ySplit: 12 }],
     pageSetup: { orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
   });
 
@@ -88,11 +98,9 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
     ...Array.from({ length: weeks }, () => ({ width: 2.6 })),
   ];
 
-  // ── Reference + letterhead box ────────────────────────────────────────────
-  const ref = ws.getCell(1, 1);
-  ref.value = `Ref No: QO/${body.projectCode ?? "—"}/${String(new Date().getFullYear()).slice(2)}`;
-  ref.font = { bold: true, size: 8, color: { argb: CRIT_EDGE } };
-
+  // ── Letterhead box ────────────────────────────────────────────────────────
+  // The reference sits in the header table below, with the other cover details,
+  // rather than floating above the letterhead as an unlabelled cell.
   const medium = { style: "medium" as const, color: { argb: "FF000000" } };
   ws.mergeCells(2, 1, 5, W0 + weeks);
   ws.getCell(2, 1).border = { top: medium, left: medium, bottom: medium, right: medium };
@@ -114,10 +122,13 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
   ws.getRow(6).height = 22;
 
   // ── Header block — the facts an evaluator checks before reading a bar ─────
+  // Cover details come from the project record — saved once in the app rather
+  // than retyped into Excel after every download.
   const info: Array<[string, string, string, string]> = [
-    ["Project No.", body.projectCode ?? "", "Location", body.location ?? ""],
-    ["Project", body.projectName ?? (project as any)?.name ?? "", "Submission", longDate(new Date())],
-    ["Client", body.client ?? "", "Duration", `${spanDays} calendar days  (≈ ${Math.ceil(spanDays / 7)} weeks)`],
+    ["Ref No.", String(P?.ref_no ?? body.projectCode ?? ""), "Location", String(P?.location ?? body.location ?? "")],
+    ["Project No.", String(P?.code ?? body.projectCode ?? ""), "Submission", longDate(new Date())],
+    ["Project", String(P?.name ?? body.projectName ?? ""), "Submitted to", String(P?.submitted_to ?? "")],
+    ["Client", String(P?.client_name ?? body.client ?? ""), "Duration", `${spanDays} calendar days  (≈ ${Math.ceil(spanDays / 7)} weeks)`],
   ];
   info.forEach(([k1, v1, k2, v2], i) => {
     const r0 = 7 + i;
@@ -141,7 +152,7 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
 
   // ── Month band + week numbers ────────────────────────────────────────────
   // Rows 1-9 carry the reference, letterhead, title and header block.
-  const MONTH_ROW = 10, WEEK_ROW = 11;
+  const MONTH_ROW = 11, WEEK_ROW = 12;
   LABEL.forEach((h, i) => {
     ws.mergeCells(MONTH_ROW, i + 1, WEEK_ROW, i + 1);
     const c = ws.getCell(MONTH_ROW, i + 1);
@@ -287,7 +298,7 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
   ws.getCell(legendRow + 3, 1).font = { size: 8, italic: true, color: { argb: "FF9E9E9E" } };
 
   const buf = await wb.xlsx.writeBuffer();
-  const safe = String(body.projectName ?? (project as any)?.name ?? "project").replace(/[^\w.-]+/g, "_");
+  const safe = String(body.projectName ?? P?.name ?? "project").replace(/[^\w.-]+/g, "_");
   return new Response(buf as any, {
     headers: {
       "content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

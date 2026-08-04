@@ -1,7 +1,7 @@
 import ExcelJS from "exceljs";
 import { route } from "@/lib/http";
 import { requirePermission, requireProject } from "@/lib/context";
-import { query } from "@/lib/db";
+import { query, queryOne } from "@/lib/db";
 import { addLetterhead, centreColumn, longDate, BOX, BOQ_HEAD, BOQ_BAND, BOQ_TBP, BOQ_TITLE } from "@/lib/xlsx-brand";
 
 // GET /projects/{pid}/boq/export.xlsx — the priced bill in submission format.
@@ -34,7 +34,16 @@ const WIDTHS = [12, 12, 10, 9, 62, 8, 11, 14, 15, 22];
 
 export const GET = route<{ pid: string }>(async (_req, ctx, { pid }) => {
   requirePermission(ctx, "artifact.read");
-  const project = await requireProject(ctx, pid);
+  await requireProject(ctx, pid);
+  // requireProject only resolves access — it returns id and lifecycle, nothing
+  // else. Reading name/code off it silently yielded undefined, which is why the
+  // exported header block came out blank.
+  const P = await queryOne<any>(
+    `SELECT name, code, client_name, location, submitted_to, ref_no
+       FROM project WHERE id = ? AND tenant_id = ?`,
+    [pid, ctx.tenantId]
+  );
+
 
   const boq = await query<{ payload: any }>(
     `SELECT payload FROM artifact
@@ -70,16 +79,16 @@ export const GET = route<{ pid: string }>(async (_req, ctx, { pid }) => {
   const wb = new ExcelJS.Workbook();
   wb.creator = "Preckon";
   const ws = wb.addWorksheet("BOQ", {
-    views: [{ state: "frozen", ySplit: 15 }],
+    views: [{ state: "frozen", ySplit: 17 }],
     pageSetup: { orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
   });
   ws.columns = WIDTHS.map((w) => ({ width: w }));
 
-  // ── Reference + letterhead box ────────────────────────────────────────────
-  const ref = ws.getCell(2, 1);
-  ref.value = `Ref No: QO/${(project as any)?.code ?? "—"}/${String(new Date().getFullYear()).slice(2)}`;
-  ref.font = { bold: true, size: 9 };
-
+  // ── Letterhead box ────────────────────────────────────────────────────────
+  // The reference used to float above the letterhead as a loose cell. It belongs
+  // in the header table with the other cover details: a value with no label is
+  // only meaningful to whoever wrote it.
+  //
   // The mark sits inside a ruled box, centred — the reference submission leads
   // with it, and a tender is judged on presentation before a quantity is read.
   ws.mergeCells(4, 1, 7, HEAD.length);
@@ -106,11 +115,13 @@ export const GET = route<{ pid: string }>(async (_req, ctx, { pid }) => {
 
   // ── Meta block: label cells banded, values plain ──────────────────────────
   const meta: Array<[string, string]> = [
-    ["Project Number", String((project as any)?.code ?? "")],
-    ["Project Name", String((project as any)?.name ?? "")],
-    ["Project Location", ""],
+    ["Ref No.", String(P?.ref_no ?? "")],
+    ["Project Number", String(P?.code ?? "")],
+    ["Project Name", String(P?.name ?? "")],
+    ["Project Location", String(P?.location ?? "")],
+    ["Client", String(P?.client_name ?? "")],
     ["Submission Date", longDate(new Date())],
-    ["Submitted to", String((project as any)?.client_name ?? "")],
+    ["Submitted to", String(P?.submitted_to ?? "")],
   ];
   meta.forEach(([k, v], i) => {
     const r0 = 10 + i;
@@ -129,7 +140,7 @@ export const GET = route<{ pid: string }>(async (_req, ctx, { pid }) => {
   });
 
   // ── Column headings ───────────────────────────────────────────────────────
-  const HR = 15;
+  const HR = 17;
   HEAD.forEach((h, i) => {
     const c = ws.getCell(HR, i + 1);
     c.value = i === 7 ? `RATE (IN ${currency || "—"})` : i === 8 ? `AMOUNT (IN ${currency || "—"})` : h;
@@ -240,7 +251,7 @@ export const GET = route<{ pid: string }>(async (_req, ctx, { pid }) => {
   }
 
   const buf = await wb.xlsx.writeBuffer();
-  const safe = String((project as any)?.name ?? "project").replace(/[^\w.-]+/g, "_");
+  const safe = String(P?.name ?? "project").replace(/[^\w.-]+/g, "_");
   return new Response(buf as any, {
     headers: {
       "content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
