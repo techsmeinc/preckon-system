@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preckon — QA checklist</title>
+<style>
+/* ── tokens ───────────────────────────────────────────────────────────────
+   The palette is the product's own: the blues are the exact inks the exported
+   bill and programme print in (#1F4E79 title, #31708E header band), so the
+   checklist and the thing it checks look like they come from one place. The
+   neutrals carry a slight blue bias for the same reason — a pure grey beside
+   these blues reads as unrelated. Status colours are deliberately outside that
+   family: a result must never be mistaken for chrome. */
+:root{
+  --paper:#F5F8F9; --card:#FFFFFF; --sunken:#EDF2F4;
+  --ink:#0F1C24; --ink-2:#3D5260; --ink-3:#6C818D;
+  --line:#D9E3E8; --line-2:#C3D2D9;
+  --accent:#1F4E79; --accent-2:#31708E; --accent-soft:#E4EDF3;
+  --pass:#1B7F4B; --fail:#B3261E; --blocked:#A15C00; --untested:#96A6AF;
+  --pass-bg:#E6F3EC; --fail-bg:#FBE9E7; --blocked-bg:#FBF0DF; --untested-bg:#EDF2F4;
+  --shadow:0 1px 2px rgba(15,28,36,.06), 0 8px 24px rgba(15,28,36,.05);
+  --sans:ui-sans-serif,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"Cascadia Mono","Cascadia Code",Consolas,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#0C1418; --card:#121D23; --sunken:#0A1216;
+    --ink:#E7EEF1; --ink-2:#A9BCC5; --ink-3:#7A8F9A;
+    --line:#22333C; --line-2:#2E434E;
+    --accent:#7FB4D8; --accent-2:#5C93B5; --accent-soft:#16262F;
+    --pass:#5FD39A; --fail:#F0837B; --blocked:#E0A85A; --untested:#728690;
+    --pass-bg:#10241B; --fail-bg:#2A1614; --blocked-bg:#28200F; --untested-bg:#16232A;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0C1418; --card:#121D23; --sunken:#0A1216;
+  --ink:#E7EEF1; --ink-2:#A9BCC5; --ink-3:#7A8F9A;
+  --line:#22333C; --line-2:#2E434E;
+  --accent:#7FB4D8; --accent-2:#5C93B5; --accent-soft:#16262F;
+  --pass:#5FD39A; --fail:#F0837B; --blocked:#E0A85A; --untested:#728690;
+  --pass-bg:#10241B; --fail-bg:#2A1614; --blocked-bg:#28200F; --untested-bg:#16232A;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+}
+:root[data-theme="light"]{
+  --paper:#F5F8F9; --card:#FFFFFF; --sunken:#EDF2F4;
+  --ink:#0F1C24; --ink-2:#3D5260; --ink-3:#6C818D;
+  --line:#D9E3E8; --line-2:#C3D2D9;
+  --accent:#1F4E79; --accent-2:#31708E; --accent-soft:#E4EDF3;
+  --pass:#1B7F4B; --fail:#B3261E; --blocked:#A15C00; --untested:#96A6AF;
+  --pass-bg:#E6F3EC; --fail-bg:#FBE9E7; --blocked-bg:#FBF0DF; --untested-bg:#EDF2F4;
+  --shadow:0 1px 2px rgba(15,28,36,.06), 0 8px 24px rgba(15,28,36,.05);
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--paper); color:var(--ink); font-family:var(--sans);
+  font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;}
+.wrap{max-width:1180px; margin:0 auto; padding:0 20px 96px;}
+
+/* ── masthead ─────────────────────────────────────────────────────────── */
+.mast{padding:38px 0 22px; display:flex; align-items:flex-end; gap:24px; flex-wrap:wrap;}
+.mast h1{margin:0; font-size:29px; line-height:1.15; letter-spacing:-.02em; font-weight:650;
+  text-wrap:balance;}
+.eyebrow{font-family:var(--mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--accent-2); margin:0 0 8px;}
+.mast p{margin:8px 0 0; color:var(--ink-2); max-width:62ch;}
+.mast .grow{flex:1 1 320px;}
+.theme{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+  background:transparent; color:var(--ink-3); border:1px solid var(--line);
+  border-radius:999px; padding:7px 13px; cursor:pointer;}
+.theme:hover{border-color:var(--line-2); color:var(--ink);}
+
+/* ── progress ─────────────────────────────────────────────────────────── */
+.summary{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px;
+  margin:6px 0 18px;}
+.tile{background:var(--card); border:1px solid var(--line); border-radius:12px;
+  padding:13px 15px; box-shadow:var(--shadow); position:relative; overflow:hidden;}
+.tile::before{content:""; position:absolute; inset:0 auto 0 0; width:3px; background:var(--edge,var(--line-2));}
+.tile .k{font-family:var(--mono); font-size:10px; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--ink-3);}
+.tile .v{font-size:26px; font-weight:650; letter-spacing:-.02em; font-variant-numeric:tabular-nums;
+  margin-top:3px;}
+.tile.pass{--edge:var(--pass);} .tile.pass .v{color:var(--pass);}
+.tile.fail{--edge:var(--fail);} .tile.fail .v{color:var(--fail);}
+.tile.blocked{--edge:var(--blocked);} .tile.blocked .v{color:var(--blocked);}
+.tile.untested{--edge:var(--untested);} .tile.untested .v{color:var(--ink-2);}
+.tile.total{--edge:var(--accent);}
+
+.bar{height:8px; border-radius:999px; background:var(--sunken); overflow:hidden;
+  display:flex; border:1px solid var(--line); margin-bottom:20px;}
+.bar i{display:block; height:100%;}
+.bar .p{background:var(--pass);} .bar .f{background:var(--fail);} .bar .b{background:var(--blocked);}
+
+/* ── controls ─────────────────────────────────────────────────────────── */
+.controls{position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter:blur(10px); border-bottom:1px solid var(--line);
+  padding:12px 0; margin-bottom:6px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+.seg{display:inline-flex; background:var(--sunken); border:1px solid var(--line);
+  border-radius:9px; padding:2px; gap:2px;}
+.seg button{font-family:var(--sans); font-size:12.5px; font-weight:550; color:var(--ink-2);
+  background:transparent; border:0; border-radius:7px; padding:6px 11px; cursor:pointer;
+  white-space:nowrap;}
+.seg button:hover{color:var(--ink);}
+.seg button[aria-pressed="true"]{background:var(--card); color:var(--ink); box-shadow:var(--shadow);}
+.seg button .n{font-family:var(--mono); font-size:10.5px; color:var(--ink-3); margin-inline-start:5px;}
+.find{flex:1 1 200px; min-width:160px;}
+.find input{width:100%; font-family:var(--sans); font-size:13.5px; color:var(--ink);
+  background:var(--card); border:1px solid var(--line); border-radius:9px; padding:8px 12px;}
+.find input:focus{outline:none; border-color:var(--accent-2);
+  box-shadow:0 0 0 3px var(--accent-soft);}
+.act{font-family:var(--sans); font-size:12.5px; font-weight:600; color:var(--ink);
+  background:var(--card); border:1px solid var(--line); border-radius:9px; padding:8px 13px;
+  cursor:pointer;}
+.act:hover{border-color:var(--line-2);}
+.act.pri{background:var(--accent); border-color:var(--accent); color:#fff;}
+:root[data-theme="dark"] .act.pri, @media (prefers-color-scheme: dark){}
+.act:focus-visible,.seg button:focus-visible,.theme:focus-visible,.row-head:focus-visible{
+  outline:2px solid var(--accent-2); outline-offset:2px;}
+
+/* ── groups + rows ────────────────────────────────────────────────────── */
+.group{margin-top:26px;}
+.group > h2{margin:0 0 9px; font-family:var(--mono); font-size:11px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--ink-3); display:flex; align-items:center; gap:10px;}
+.group > h2::after{content:""; flex:1; height:1px; background:var(--line);}
+
+.row{background:var(--card); border:1px solid var(--line); border-radius:11px;
+  margin-bottom:7px; box-shadow:var(--shadow); overflow:hidden;
+  border-inline-start:3px solid var(--untested);}
+.row[data-r="PASS"]{border-inline-start-color:var(--pass);}
+.row[data-r="FAIL"]{border-inline-start-color:var(--fail);}
+.row[data-r="BLOCKED"]{border-inline-start-color:var(--blocked);}
+
+.row-head{display:grid; grid-template-columns:74px 1fr auto auto; gap:12px; align-items:center;
+  width:100%; padding:11px 14px; background:transparent; border:0; cursor:pointer; text-align:start;
+  font-family:inherit; color:inherit;}
+.row-head:hover{background:var(--sunken);}
+.cid{font-family:var(--mono); font-size:11.5px; color:var(--ink-3); letter-spacing:.02em;}
+.cname{font-size:14px; font-weight:550; line-height:1.35;}
+.cname .newflag{font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--accent); background:var(--accent-soft); border-radius:4px; padding:2px 5px;
+  margin-inline-start:8px; vertical-align:1px;}
+.carea{font-size:11.5px; color:var(--ink-3); margin-top:2px;}
+.pri{font-family:var(--mono); font-size:10px; letter-spacing:.08em; color:var(--ink-3);
+  border:1px solid var(--line); border-radius:5px; padding:2px 6px;}
+.pri.P1{color:var(--accent); border-color:var(--accent); font-weight:700;}
+.state{font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+  border-radius:999px; padding:4px 9px; white-space:nowrap;
+  background:var(--untested-bg); color:var(--ink-3);}
+.row[data-r="PASS"] .state{background:var(--pass-bg); color:var(--pass);}
+.row[data-r="FAIL"] .state{background:var(--fail-bg); color:var(--fail);}
+.row[data-r="BLOCKED"] .state{background:var(--blocked-bg); color:var(--blocked);}
+
+.row-body{display:none; padding:2px 14px 14px; border-top:1px solid var(--line);}
+.row.open .row-body{display:block;}
+.pair{display:grid; grid-template-columns:88px 1fr; gap:6px 14px; margin:12px 0;
+  font-size:13.5px; line-height:1.55;}
+.pair dt{font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-3); padding-top:3px;}
+.pair dd{margin:0; color:var(--ink-2);}
+.pair dd strong{color:var(--ink); font-weight:600;}
+.verdict{display:flex; gap:7px; flex-wrap:wrap; align-items:center; margin-top:4px;}
+.verdict button{font-family:var(--sans); font-size:12.5px; font-weight:600; cursor:pointer;
+  border-radius:8px; padding:7px 14px; border:1px solid var(--line); background:var(--card);
+  color:var(--ink-2);}
+.verdict button:hover{border-color:var(--line-2); color:var(--ink);}
+.verdict button[aria-pressed="true"][data-v="PASS"]{background:var(--pass-bg); border-color:var(--pass); color:var(--pass);}
+.verdict button[aria-pressed="true"][data-v="FAIL"]{background:var(--fail-bg); border-color:var(--fail); color:var(--fail);}
+.verdict button[aria-pressed="true"][data-v="BLOCKED"]{background:var(--blocked-bg); border-color:var(--blocked); color:var(--blocked);}
+.verdict .clear{margin-inline-start:auto; font-weight:500; color:var(--ink-3);}
+.row-body textarea{width:100%; margin-top:11px; min-height:56px; resize:vertical;
+  font-family:var(--sans); font-size:13px; color:var(--ink); background:var(--sunken);
+  border:1px solid var(--line); border-radius:9px; padding:9px 11px;}
+.row-body textarea:focus{outline:none; border-color:var(--accent-2); box-shadow:0 0 0 3px var(--accent-soft);}
+
+.empty{text-align:center; padding:60px 20px; color:var(--ink-3);}
+footer{margin-top:40px; padding-top:18px; border-top:1px solid var(--line);
+  font-size:12.5px; color:var(--ink-3); display:flex; gap:14px; flex-wrap:wrap;}
+
+@media (max-width:720px){
+  .row-head{grid-template-columns:1fr auto; gap:8px 10px;}
+  .cid{grid-column:1/-1;}
+  .pri{display:none;}
+  .pair{grid-template-columns:1fr;}
+  .pair dt{padding-top:8px;}
+}
+@media print{
+  .controls,.theme,.verdict,.act{display:none !important;}
+  .row-body{display:block !important;}
+  body{background:#fff;}
+  .row{break-inside:avoid; box-shadow:none;}
+}
+@media (prefers-reduced-motion:no-preference){
+  .row{transition:border-color .12s ease;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="mast">
+    <div class="grow">
+      <p class="eyebrow">Release verification</p>
+      <h1>Preckon — QA checklist</h1>
+      <p>192 cases across the Host plane, the Tenant workspace and deployment.
+         Results save in this browser as you go; Export CSV writes the sheet back out.</p>
+    </div>
+    <button class="theme" id="theme" type="button">Theme</button>
+  </header>
+
+  <div class="summary" id="summary"></div>
+  <div class="bar" id="bar"></div>
+
+  <div class="controls">
+    <div class="seg" id="f-plane"></div>
+    <div class="seg" id="f-result"></div>
+    <div class="seg" id="f-pri"></div>
+    <div class="find"><input id="q" type="search" placeholder="Search cases, steps, expected results…" aria-label="Search"></div>
+    <button class="act" id="expand" type="button">Expand all</button>
+    <button class="act pri" id="export" type="button">Export CSV</button>
+    <button class="act" id="reset" type="button">Reset</button>
+  </div>
+
+  <main id="list"></main>
+
+  <footer>
+    <span>Generated 5 August 2026</span>
+    <span>Untested cases are untested — nothing here is marked passed that was not seen to pass.</span>
+  </footer>
+</div>
+
+<script>
+const CASES = [{"id":"H-01","plane":"Host","area":"Auth","name":"Sign in as owner","steps":"Open host URL -> admin@techsme.com / password -> Sign in","expect":"Lands on Overview; sidebar + top bar render","pri":"P1","result":"","note":"","new":false},{"id":"H-02","plane":"Host","area":"Auth","name":"Reject wrong password","steps":"Admin email + wrong password -> Sign in","expect":"Clear error message; no session created","pri":"P1","result":"","note":"","new":false},{"id":"H-03","plane":"Host","area":"Auth","name":"Session expiry -> login","steps":"With an expired/cleared session, open /tenants","expect":"Auto-redirects to the login screen (no error panel)","pri":"P1","result":"","note":"","new":false},{"id":"H-04","plane":"Host","area":"Auth","name":"Sign out","steps":"Click sign out in the sidebar","expect":"Returns to login; protected pages inaccessible","pri":"P2","result":"","note":"","new":false},{"id":"H-05","plane":"Host","area":"Overview","name":"KPI tiles populate","steps":"Open Overview","expect":"Tenants, MRR, active/past-due show real numbers (not all 0 / dash)","pri":"P1","result":"","note":"","new":false},{"id":"H-06","plane":"Host","area":"Overview","name":"Recurring revenue + attention","steps":"Review Overview cards","expect":"MRR by currency listed; 'needs attention' shows the past-due tenant","pri":"P2","result":"","note":"","new":false},{"id":"H-07","plane":"Host","area":"Overview","name":"Recent activity + system status","steps":"Scroll Overview","expect":"Audit activity feed populated; system status reads Healthy","pri":"P2","result":"","note":"","new":false},{"id":"H-08","plane":"Host","area":"Tenants","name":"List all tenants","steps":"Open Tenants","expect":"All customer orgs listed with edition, status, region, seats","pri":"P1","result":"","note":"","new":false},{"id":"H-09","plane":"Host","area":"Tenants","name":"Filter by status","steps":"Click Active / Trial / Suspended tabs","expect":"List filters correctly to the chosen status","pri":"P2","result":"","note":"","new":false},{"id":"H-10","plane":"Host","area":"Tenants","name":"Search","steps":"Type a name in search","expect":"List narrows to matches","pri":"P3","result":"","note":"","new":false},{"id":"H-11","plane":"Host","area":"Tenants","name":"Open tenant drawer","steps":"Click a tenant row","expect":"Drawer shows detail + real usage/entitlement counts","pri":"P1","result":"","note":"","new":false},{"id":"H-12","plane":"Host","area":"Tenants","name":"Create tenant","steps":"New tenant -> name, subdomain, owner email, edition -> Create","expect":"Tenant created; owner credentials + Open-workspace link shown","pri":"P1","result":"","note":"","new":false},{"id":"H-13","plane":"Host","area":"Tenants","name":"Suspend / restore","steps":"Suspend a tenant, then restore","expect":"Status flips; audited; reversible","pri":"P2","result":"","note":"","new":false},{"id":"H-14","plane":"Host","area":"Tenants","name":"Impersonate","steps":"Click impersonate on a tenant","expect":"Opens that tenant workspace as its owner (audited)","pri":"P2","result":"","note":"","new":false},{"id":"H-15","plane":"Host","area":"Subscriptions","name":"Billing summary","steps":"Open Subscriptions","expect":"MRR, status counts, billing health all populated","pri":"P1","result":"","note":"","new":false},{"id":"H-16","plane":"Host","area":"Subscriptions","name":"Invoices list","steps":"Review invoices","expect":"Invoices with numbers + paid/open status (no raw UUIDs)","pri":"P2","result":"","note":"","new":false},{"id":"H-17","plane":"Host","area":"Subscriptions","name":"Invoice actions","steps":"On an open invoice -> Retry / Remind","expect":"Action succeeds with a confirmation toast","pri":"P3","result":"","note":"","new":false},{"id":"H-18","plane":"Host","area":"Editions","name":"Edition cards + counts","steps":"Open Editions","expect":"Each edition card shows module/feature/tenant counts","pri":"P1","result":"","note":"","new":false},{"id":"H-19","plane":"Host","area":"Editions","name":"Feature matrix","steps":"Open the matrix","expect":"Editions x features grid renders with cell states","pri":"P2","result":"","note":"","new":false},{"id":"H-20","plane":"Host","area":"Editions","name":"Edit edition features","steps":"Open an edition -> toggle a feature -> Save","expect":"Change persists; matrix reflects it","pri":"P2","result":"","note":"","new":false},{"id":"H-21","plane":"Host","area":"Features","name":"Feature catalog","steps":"Open Features","expect":"Features grouped by category; type/status shown","pri":"P2","result":"","note":"","new":false},{"id":"H-22","plane":"Host","area":"Features","name":"Create feature","steps":"Add feature -> key, name, type -> Save","expect":"Feature appears in the catalog","pri":"P3","result":"","note":"","new":false},{"id":"H-23","plane":"Host","area":"Pricing","name":"Edition prices","steps":"Open Pricing","expect":"Each edition shows real monthly/annual prices (not 'Custom')","pri":"P1","result":"","note":"","new":false},{"id":"H-24","plane":"Host","area":"Pricing","name":"Edit a price","steps":"Edit an edition price -> Save","expect":"New amount persists and displays formatted","pri":"P2","result":"","note":"","new":false},{"id":"H-25","plane":"Host","area":"Pricing","name":"Usage rates + coupons","steps":"Review usage rates / coupons","expect":"Metered rates listed; coupon create works","pri":"P3","result":"","note":"","new":false},{"id":"H-26","plane":"Host","area":"Observability","name":"Queues + workers","steps":"Open Observability","expect":"Queue depth, worker heartbeats, throughput chart render","pri":"P1","result":"","note":"","new":false},{"id":"H-27","plane":"Host","area":"Observability","name":"AI health","steps":"Review AI health panel","expect":"Providers/models with success rate + latency shown","pri":"P2","result":"","note":"","new":false},{"id":"H-28","plane":"Host","area":"Observability","name":"Failed jobs","steps":"Review failed jobs (if any) -> Retry/Resolve","expect":"Tenant shown by name (not UUID); actions work","pri":"P2","result":"","note":"","new":false},{"id":"H-29","plane":"Host","area":"Audit","name":"Audit log list + filter","steps":"Open Audit -> filter by action/date","expect":"Events listed; filter narrows results","pri":"P2","result":"","note":"","new":false},{"id":"H-30","plane":"Host","area":"Audit","name":"Verify chain","steps":"Click Verify audit chain","expect":"Reports chain integrity OK","pri":"P1","result":"","note":"","new":false},{"id":"H-31","plane":"Host","area":"Audit","name":"Export","steps":"Click export","expect":"Audit export produced/downloaded","pri":"P3","result":"","note":"","new":false},{"id":"H-32","plane":"Host","area":"Notifications","name":"Inbox + bell","steps":"Open Notifications / bell","expect":"Inbox populated; unread badge count correct","pri":"P2","result":"","note":"","new":false},{"id":"H-33","plane":"Host","area":"Notifications","name":"Mark read / read all","steps":"Mark one, then all read","expect":"Unread count decrements to 0","pri":"P3","result":"","note":"","new":false},{"id":"H-34","plane":"Host","area":"Notifications","name":"Compose broadcast","steps":"Compose -> audience -> Send","expect":"Broadcast recorded; audience preview correct","pri":"P3","result":"","note":"","new":false},{"id":"H-35","plane":"Host","area":"Users & roles","name":"Host users list","steps":"Open Host users & roles","expect":"Admin user + roles + permission matrix render","pri":"P2","result":"","note":"","new":false},{"id":"H-36","plane":"Host","area":"Users & roles","name":"Add host user","steps":"Add user -> email, role -> Save","expect":"User created; can sign in","pri":"P2","result":"","note":"","new":false},{"id":"H-37","plane":"Host","area":"Users & roles","name":"Create/edit role","steps":"New role -> pick permissions -> Save","expect":"Role created; permission counts correct; system roles read-only","pri":"P2","result":"","note":"","new":false},{"id":"H-38","plane":"Host","area":"Settings","name":"General / Security tabs","steps":"Open Settings tabs","expect":"Values render; no 'not wired' dev disclaimers","pri":"P2","result":"","note":"","new":false},{"id":"H-39","plane":"Host","area":"Settings","name":"AI providers / Email","steps":"Review AI + Email tabs","expect":"Providers/routing/domains manageable; no secrets leaked","pri":"P3","result":"","note":"","new":false},{"id":"H-40","plane":"Host","area":"UX/Responsive","name":"Sidebar collapse + mobile","steps":"Toggle collapse; shrink window < 860px","expect":"Collapses to rail; hamburger drawer on mobile; tables scroll","pri":"P2","result":"","note":"","new":false},{"id":"H-41","plane":"Host","area":"UX/Copy","name":"No placeholder/dev copy","steps":"Skim every page","expect":"No 'coming soon', 'localhost', TODO, spec-refs, raw UUIDs as labels","pri":"P1","result":"","note":"","new":false},{"id":"T-01","plane":"Tenant","area":"Auth","name":"Sign in as owner","steps":"Open the tenant URL -> owner@cedarstone.build / password -> Sign in","expect":"Lands on Dashboard; workspace renders as 'Cedar & Stone Builders'","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-02","plane":"Tenant","area":"Auth","name":"Reject wrong password","steps":"Wrong password -> Sign in","expect":"Clear error; no session created","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-03","plane":"Tenant","area":"Auth","name":"Sign-in throttling","steps":"Fail sign-in four times inside a minute","expect":"Fourth attempt is rate-limited (429), not accepted","pri":"P2","result":"PASS","note":"","new":false},{"id":"T-04","plane":"Tenant","area":"Auth","name":"Session expiry -> login","steps":"Expired session -> open any page","expect":"Auto-redirect to /login","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-05","plane":"Tenant","area":"Auth","name":"Host admin rejected","steps":"Try a Host staff email on the tenant","expect":"Rejected - separate identity pool","pri":"P2","result":"PASS","note":"","new":false},{"id":"T-06","plane":"Tenant","area":"Language","name":"Switcher sits before Search","steps":"Look at the top bar","expect":"Language control is left of the Search field on every screen","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-07","plane":"Tenant","area":"Language","name":"Arabic switches to RTL","steps":"Top bar -> Arabic","expect":"UI translates; dir=rtl; layout mirrors; digits stay Western","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-08","plane":"Tenant","area":"Language","name":"French keeps LTR","steps":"Top bar -> Francais","expect":"UI translates; direction stays LTR; no clipped labels","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-09","plane":"Tenant","area":"Language","name":"No raw keys in any locale","steps":"Walk the chain and Admin in all three languages","expect":"No untranslated identifiers such as 'bundle.loading' on screen","pri":"P2","result":"PASS","note":"","new":false},{"id":"T-10","plane":"Tenant","area":"Language","name":"Per-user override beats workspace default","steps":"Admin sets the workspace default; a user picks a different language","expect":"The user's choice wins and survives reload; others keep the default","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-11","plane":"Tenant","area":"Dashboard","name":"Greeting + review queue","steps":"Open Dashboard","expect":"Greets the signed-in person; 'Needs your review' lists real pending items","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-12","plane":"Tenant","area":"Dashboard","name":"Chain bundles hydrate progressively","steps":"Open Dashboard on a workspace with several projects","expect":"Cards fill in as each project resolves - no all-or-nothing skeleton","pri":"P2","result":"PASS","note":"","new":false},{"id":"T-13","plane":"Tenant","area":"Dashboard","name":"Command palette","steps":"Cmd-K / Ctrl-K -> type a screen name","expect":"Palette opens and navigates there","pri":"P2","result":"PASS","note":"","new":false},{"id":"T-14","plane":"Tenant","area":"Projects","name":"List projects","steps":"Open Projects","expect":"Portfolio listed with code, client, chain stage, status","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-15","plane":"Tenant","area":"Projects","name":"Create project","steps":"New project -> name, code, client -> Create","expect":"Created on the domain's lifecycle; opens the workspace","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-16","plane":"Tenant","area":"Projects","name":"Archive project","steps":"Trash icon on a row -> confirm","expect":"Removed from the list; history retained; audited","pri":"P2","result":"PASS","note":"","new":false},{"id":"T-17","plane":"Tenant","area":"Chain","name":"Chain progress on the project","steps":"Open a project","expect":"'Chain progress' shows Documents / Tender / Drawings / Specs / BOQ / Estimate / Schedule / Procurement with per-stage status","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-18","plane":"Tenant","area":"Chain","name":"Stage tabs open their own surface","steps":"Click each stage tab in turn","expect":"Each renders its purpose-built surface, not a generic table; none errors","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-19","plane":"Tenant","area":"Chain","name":"Stage status is honest","steps":"Compare a stage chip against its artifacts","expect":"Complete / Needs review / Processing / Pending match the underlying records","pri":"P2","result":"PASS","note":"","new":false},{"id":"T-20","plane":"Tenant","area":"Documents","name":"Upload + ingest","steps":"Documents -> upload a tender PDF","expect":"File ingested; friendly type and status; page text extracted","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-21","plane":"Tenant","area":"Documents","name":"Document text reaches the agents","steps":"Run a stage that reads documents after uploading","expect":"Output references the uploaded content - not generic filler","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-22","plane":"Tenant","area":"BIM Studio","name":"All disciplines present","steps":"Drawings -> BIM Studio","expect":"Ribbon shows Architecture, Structural, Civil, Electrical, Mechanical, Plumbing, Fire with their catalog items","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-23","plane":"Tenant","area":"BIM Studio","name":"Place an element","steps":"Pick a catalog item, e.g. Wall","expect":"Element is added, drawn on the plan, and counted in the legend","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-24","plane":"Tenant","area":"BIM Studio","name":"Walls are legible on the plan","steps":"Draw walls and partitions","expect":"They read as dark bands against the slab - not invisible on the sheet","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-25","plane":"Tenant","area":"BIM Studio","name":"Undo / redo","steps":"Ctrl-Z then Ctrl-Shift-Z","expect":"Last command reverses and reapplies","pri":"P2","result":"PASS","note":"","new":false},{"id":"T-26","plane":"Tenant","area":"BIM Studio","name":"Save with concurrency check","steps":"Save; then save again from a stale second tab","expect":"First save succeeds; the stale one is refused, not silently overwritten","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-27","plane":"Tenant","area":"BIM Studio","name":"One canvas only","steps":"Scroll the Drawings stage","expect":"BIM Studio is the only authored canvas; the takeoff register is a table below it","pri":"P2","result":"PASS","note":"Earlier note 'showing on the right not below' was the CAD facts panel beside the issued sheet, not the register - the register is below. Re-confirm.","new":false},{"id":"T-28","plane":"Tenant","area":"BIM assistant","name":"Draw from a prompt","steps":"Type 'Draw a 12 by 8 m clinic with a corridor, then doors and windows' -> Draw","expect":"Model appears: closed external walls, two corridor partitions, hosted doors and windows","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-29","plane":"Tenant","area":"BIM assistant","name":"Reports a missing API key plainly","steps":"Unset ANTHROPIC_API_KEY on the worker -> Draw","expect":"Clear message that the key is not set - no silent no-op, no stack trace","pri":"P1","result":"","note":"Previously 'Unable to find API Key'. Retest: the key lives ONLY on the worker (see T-88), so unset it in the worker service, not the app.","new":false},{"id":"T-30","plane":"Tenant","area":"BIM assistant","name":"Specialist scoping","steps":"Choose Electrical -> ask for lighting","expect":"Only electrical elements are added; it cannot clear the model or place another discipline","pri":"P2","result":"PASS","note":"","new":false},{"id":"T-31","plane":"Tenant","area":"BIM assistant","name":"Nothing saved on a failed run","steps":"Interrupt a draw mid-way","expect":"The model is unchanged - commands persist once, at the end","pri":"P2","result":"PASS","note":"","new":false},{"id":"T-32","plane":"Tenant","area":"BIM assistant","name":"Audited","steps":"Draw, then open Trace","expect":"A bim.agent entry records the specialist and instruction","pri":"P3","result":"PASS","note":"","new":false},{"id":"T-33","plane":"Tenant","area":"Takeoff","name":"Measure into BOQ","steps":"BIM Studio -> Measure into BOQ","expect":"One drawing_measurement per measured item, as source 'human' (no review needed)","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-34","plane":"Tenant","area":"Takeoff","name":"Quantities net openings","steps":"Check a wall carrying windows","expect":"Elevational area = length x height less each opening; the working shows in Method","pri":"P1","result":"","note":"Open the measurement row -> the Method field. It is now editable too (see T-105).","new":false},{"id":"T-35","plane":"Tenant","area":"Takeoff","name":"Re-measuring supersedes","steps":"Edit the model -> Measure again","expect":"Previous BIM-derived measurements are superseded, not duplicated","pri":"P2","result":"FAIL","note":"Open defect.","new":false},{"id":"T-36","plane":"Tenant","area":"Takeoff","name":"Takeoff register","steps":"Scroll below the Studio","expect":"Measurements listed with quantity, confidence and status; any row can be opened","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-37","plane":"Tenant","area":"CAD","name":"DXF is parsed on upload","steps":"Documents -> upload a .dxf","expect":"Ingested as CAD, not as text; the row shows units, layer / block / sheet counts","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-38","plane":"Tenant","area":"CAD","name":"DWG is parsed with no extra setup","steps":"Upload a .dwg with no ODA File Converter configured","expect":"Parsed via the bundled LibreDWG; units, layers, blocks and footprint all read","pri":"P1","result":"","note":"Footprint appears in the Issued drawings panel beside the sheet, and only when a closed outline was found. Retest there.","new":false},{"id":"T-39","plane":"Tenant","area":"CAD","name":"An unreadable drawing fails loudly","steps":"Upload a corrupt or unsupported drawing","expect":"Marked failed with a message telling the estimator to re-save as DXF - never silently ingested as garbage","pri":"P2","result":"PASS","note":"","new":false},{"id":"T-40","plane":"Tenant","area":"CAD","name":"Issued drawings panel","steps":"Drawings -> Issued drawings","expect":"The sheet renders, with units, footprint, block counts and per-layer metres beside it","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-41","plane":"Tenant","area":"CAD","name":"Footprint uses the largest outline, not the sum","steps":"Compare the stated footprint against the drawing's real overall dimensions","expect":"Matches L x W; it is not the inflated sum of every closed outline on the layer","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-42","plane":"Tenant","area":"CAD","name":"Unitless drawings are not converted","steps":"Upload a drawing with no $INSUNITS","expect":"Lengths and areas are NOT presented as m/m2 - the agent is told the units are unstated","pri":"P2","result":"","note":"","new":false},{"id":"T-43","plane":"Tenant","area":"CAD","name":"Takeoff cites the drawing","steps":"Run the Drawings workflow after uploading a .dxf","expect":"Each measurement's Method names the layer or block it came from, e.g. 'count of DOOR_SINGLE_900 = 5 (A-DOOR)'","pri":"P1","result":"FAIL","note":"Open defect.","new":false},{"id":"T-44","plane":"Tenant","area":"CAD","name":"Nothing is invented","steps":"Ask for a quantity the drawing cannot support, e.g. wall area with no height","expect":"Returns provisional with a stated reason rather than a fabricated number","pri":"P1","result":"FAIL","note":"Open defect.","new":false},{"id":"T-45","plane":"Tenant","area":"CAD","name":"Derivation from a drawing note","steps":"Include a thickness note such as 'SLAB 200mm THK'","expect":"Volume = area x thickness with the formula and both inputs written into Method","pri":"P1","result":"FAIL","note":"Open defect.","new":false},{"id":"T-46","plane":"Tenant","area":"CAD","name":"BOQ inherits the CAD quantities","steps":"Run the BOQ stage after confirming measurements","expect":"Counted, linear and area lines carry the drawing's numbers and cite their layer or block","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-47","plane":"Tenant","area":"CAD","name":"Programme is driven by those quantities","steps":"Run the Schedule stage","expect":"Activities name the driving quantity and durations follow from it, sequenced by construction logic","pri":"P1","result":"BLOCKED","note":"Blocked behind T-43/T-44/T-45.","new":false},{"id":"T-48","plane":"Tenant","area":"CAD","name":"Fanned-out stages get the same evidence","steps":"Inspect a per-sheet takeoff job's envelope","expect":"Documents and CAD facts are present on child jobs, not only on single-dispatch ones","pri":"P2","result":"","note":"","new":false},{"id":"T-49","plane":"Tenant","area":"CAD","name":"The parser holds no credentials","steps":"Inspect the cad container","expect":"No database env, uploads mounted read-only, runs as a non-root user","pri":"P2","result":"","note":"","new":false},{"id":"T-50","plane":"Tenant","area":"Stages","name":"Tender surface","steps":"Open Tender","expect":"Scope, dates and conditions readable; proposals reviewable in place","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-51","plane":"Tenant","area":"Stages","name":"Specs surface","steps":"Open Specs","expect":"Specification clauses grouped and traceable to their document page","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-52","plane":"Tenant","area":"Stages","name":"BOQ surface","steps":"Open BOQ","expect":"Items grouped by division with normalised units; quantities trace to measurements","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-53","plane":"Tenant","area":"Stages","name":"Estimate surface","steps":"Open Estimate","expect":"Rate x quantity = amount on every line; totals foot correctly","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-54","plane":"Tenant","area":"Stages","name":"Schedule surface","steps":"Open Schedule","expect":"Activities sequenced with durations derived from quantities and output rates","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-55","plane":"Tenant","area":"Stages","name":"Procurement surface","steps":"Open Procurement","expect":"Packages listed against their BOQ items","pri":"P2","result":"","note":"","new":false},{"id":"T-56","plane":"Tenant","area":"Review","name":"Confirm on the producing stage","steps":"Accept a pending proposal from its own stage tab","expect":"Confirmed there - no separate Review screen; gate resumes","pri":"P1","result":"","note":"","new":false},{"id":"T-57","plane":"Tenant","area":"Review","name":"Edit marks downstream stale","steps":"Correct a CONFIRMED quantity: open the row -> Correct this -> change the number -> Save correction","expect":"New version created; the old one is superseded; dependent artifacts flagged stale and the toast says how many","pri":"P2","result":"","note":"Was not reachable before - a confirmed record was read-only in the drawer. See T-104.","new":false},{"id":"T-58","plane":"Tenant","area":"Review","name":"Accept all high-confidence","steps":"Use Accept all where offered","expect":"Only high-confidence proposals are confirmed; flagged ones remain","pri":"P2","result":"","note":"","new":false},{"id":"T-59","plane":"Tenant","area":"Runs","name":"Runs list","steps":"Project -> Runs","expect":"Runs listed by friendly workflow name and status","pri":"P2","result":"","note":"","new":false},{"id":"T-60","plane":"Tenant","area":"Runs","name":"Run detail timeline","steps":"Open a run","expect":"Step timeline with gates; statuses correct; pauses at the scope gate","pri":"P1","result":"","note":"","new":false},{"id":"T-61","plane":"Tenant","area":"Runs","name":"Real agents produce real output","steps":"With a key set, run the chain on an uploaded tender","expect":"Each step takes real model time and its output differs per project - not identical stub text","pri":"P2","result":"","note":"","new":false},{"id":"T-62","plane":"Tenant","area":"Runs","name":"Re-run stale","steps":"Edit a confirmed artifact -> Re-run stale","expect":"Only stale-producing steps re-run; outputs superseded","pri":"P2","result":"","note":"","new":false},{"id":"T-63","plane":"Tenant","area":"Copilot","name":"Workspace Copilot","steps":"Sidebar -> Copilot","expect":"Answers with workspace context","pri":"P2","result":"PASS","note":"","new":false},{"id":"T-64","plane":"Tenant","area":"Copilot","name":"Per-project Copilot","steps":"Open a project -> Ask Copilot","expect":"Answers from that project's own records; does not leak another project's data","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-65","plane":"Tenant","area":"Trace","name":"Artifact graph","steps":"Project -> Trace","expect":"Artifacts grouped by type with human labels, not bare UUIDs","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-66","plane":"Tenant","area":"Trace","name":"Lineage detail","steps":"Select an artifact","expect":"Provenance, producing job and model, and audit trail shown","pri":"P2","result":"PASS","note":"","new":false},{"id":"T-67","plane":"Tenant","area":"Trace","name":"Verify audit chain","steps":"Click Verify audit chain","expect":"Reports the hash chain intact","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-68","plane":"Tenant","area":"Colleagues","name":"Personas roster","steps":"Project -> Colleagues","expect":"Personas listed with names; default marked","pri":"P2","result":"PASS","note":"","new":false},{"id":"T-69","plane":"Tenant","area":"Colleagues","name":"Chat with a colleague","steps":"Send a message","expect":"Replies in scope; the review lens shows only in-scope items","pri":"P2","result":"PASS","note":"","new":false},{"id":"T-70","plane":"Tenant","area":"Standards","name":"Rules + validate","steps":"Project -> Standards -> Validate","expect":"Rules listed; violations shown as readable fields","pri":"P2","result":"PASS","note":"","new":false},{"id":"T-71","plane":"Tenant","area":"Library","name":"Add entry","steps":"Library -> Add entry -> collection + fields","expect":"Entry appears grouped by collection","pri":"P2","result":"PASS","note":"","new":false},{"id":"T-72","plane":"Tenant","area":"Library","name":"Edit creates a version","steps":"Edit an entry -> Save","expect":"Version increments; history kept","pri":"P2","result":"PASS","note":"","new":false},{"id":"T-73","plane":"Tenant","area":"Library","name":"Rate book reaches the estimator","steps":"Add a rate to a rate_book collection, then open a project -> Estimate -> run CostLogix","expect":"The estimate uses library rates rather than inventing them; the line's Rate source names the library entry","pri":"P2","result":"","note":"Earlier note 'no estimate option': Estimate is a stage tab inside a project, not a Library action. Run it from the project.","new":false},{"id":"T-74","plane":"Tenant","area":"Admin","name":"Team + roles","steps":"Admin -> Team","expect":"People and roles listed; tiers shown as labels","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-75","plane":"Tenant","area":"Admin","name":"Add user","steps":"Add user -> email, role -> Add","expect":"User added; temporary password shown in a copyable panel","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-76","plane":"Tenant","area":"Admin","name":"Custom role CRUD","steps":"Create a role -> permissions -> Save; edit; delete","expect":"Custom role works; system roles stay read-only","pri":"P2","result":"PASS","note":"","new":false},{"id":"T-77","plane":"Tenant","area":"Admin","name":"Branding","steps":"Admin -> Branding -> workspace name + brand colour -> Save","expect":"Name and colour apply across the app for everyone","pri":"P2","result":"PASS","note":"","new":false},{"id":"T-78","plane":"Tenant","area":"Admin","name":"Workspace default language","steps":"Admin -> Branding -> language -> Save for everyone","expect":"New sessions without a personal choice open in that language","pri":"P2","result":"PASS","note":"","new":false},{"id":"T-79","plane":"Tenant","area":"Admin","name":"Plan + usage","steps":"Admin -> Plan","expect":"Edition, seats, licensed products and usage shown; no dev URLs","pri":"P2","result":"PASS","note":"","new":false},{"id":"T-80","plane":"Tenant","area":"Settings","name":"Profile + preferences","steps":"Settings -> Profile / Preferences","expect":"Name, currency, date format and theme persist","pri":"P2","result":"PASS","note":"","new":false},{"id":"T-81","plane":"Tenant","area":"Settings","name":"Notifications","steps":"Settings -> Notifications -> toggle","expect":"Choices persist","pri":"P2","result":"PASS","note":"","new":false},{"id":"T-82","plane":"Tenant","area":"UX","name":"Collapse + mobile","steps":"Toggle the sidebar; shrink below 860px","expect":"Rail collapse; off-canvas drawer; tables scroll; drawers go full-width","pri":"P2","result":"","note":"","new":false},{"id":"T-83","plane":"Tenant","area":"UX","name":"No placeholder or dev copy","steps":"Skim every page in all three languages","expect":"No 'Riverside' leftovers, section refs, 'walking-skeleton', or raw keys as titles","pri":"P1","result":"","note":"","new":false},{"id":"T-84","plane":"Tenant","area":"UX","name":"Errors read as errors","steps":"Trigger a failure, e.g. draw with no key","expect":"Message is styled as a failure, not a green success tick","pri":"P2","result":"","note":"","new":false},{"id":"T-85","plane":"Tenant","area":"Data","name":"Tenant isolation","steps":"Confirm only this tenant's data is visible","expect":"No cross-tenant projects, artifacts or users","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-86","plane":"Tenant","area":"Data","name":"Audit chain integrity","steps":"Work a project through the whole chain -> Verify","expect":"Chain verifies after many operations","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-87","plane":"Tenant","area":"Data","name":"End-to-end chain completeness","steps":"Upload a real tender and run every stage","expect":"Reaches Procurement with artifacts at each stage and nothing left pending","pri":"P1","result":"PASS","note":"","new":false},{"id":"T-88","plane":"Tenant","area":"Data","name":"The API key never leaves the worker","steps":"Inspect the app container's environment","expect":"ANTHROPIC_API_KEY is absent there; only the worker holds it","pri":"P2","result":"","note":"","new":false},{"id":"T-89","plane":"Tenant","area":"Drawing editor","name":"Reachable as a workspace tool","steps":"Sidebar -> TOOLS -> Drawing editor","expect":"Opens /drawings with a project picker, a sheet picker and an Open-a-.dxf button","pri":"P1","result":"","note":"","new":true},{"id":"T-90","plane":"Tenant","area":"Drawing editor","name":"Deep link from DrawLogix","steps":"Drawings -> Issued drawings -> Edit & mark up","expect":"Opens the editor with that project and that sheet already selected","pri":"P1","result":"","note":"","new":true},{"id":"T-91","plane":"Tenant","area":"Drawing editor","name":"Issued drawing loads as real geometry","steps":"Pick a sheet","expect":"Linework and text draw on a dark canvas; the layer list is populated with per-layer object counts","pri":"P1","result":"","note":"","new":true},{"id":"T-92","plane":"Tenant","area":"Drawing editor","name":"Navigation","steps":"Wheel over the canvas; drag with the middle or right button; press Fit","expect":"Wheel zooms about the cursor; middle/right drag pans in any tool; Fit frames the drawing, ignoring stray far-off entities","pri":"P1","result":"","note":"","new":true},{"id":"T-93","plane":"Tenant","area":"Drawing editor","name":"Draw tools","steps":"Draw a line, polyline (Enter to finish), rectangle, circle and a text label","expect":"Each is added on the active layer and appears in the object count","pri":"P1","result":"","note":"","new":true},{"id":"T-94","plane":"Tenant","area":"Drawing editor","name":"Dimension","steps":"Dimension -> click two points -> click to place the dimension line","expect":"An aligned dimension is drawn on a DIMENSIONS layer, its value in the chosen unit","pri":"P1","result":"","note":"","new":true},{"id":"T-95","plane":"Tenant","area":"Drawing editor","name":"Object snap","steps":"Turn Object snap on; hover a line end, a midpoint and a crossing","expect":"A distinct green marker appears per snap type with a label; F3 toggles snapping off","pri":"P1","result":"","note":"","new":true},{"id":"T-96","plane":"Tenant","area":"Drawing editor","name":"Ortho and polar","steps":"Press F8, draw a line; press F10, draw another","expect":"F8 constrains to horizontal/vertical; F10 snaps to the polar increment; a tracking line is shown","pri":"P2","result":"","note":"","new":true},{"id":"T-97","plane":"Tenant","area":"Drawing editor","name":"Select and modify","steps":"Window-select, then Move, Copy, Rotate, Mirror, Scale and Erase","expect":"A ghost preview follows the cursor; the operation applies to the selection and the tool returns to Select","pri":"P1","result":"","note":"","new":true},{"id":"T-98","plane":"Tenant","area":"Drawing editor","name":"Hatch","steps":"Select a closed shape -> Hatch; or trace a boundary and press Enter","expect":"The area fills with 45-degree hatch lines on a HATCH layer","pri":"P2","result":"","note":"","new":true},{"id":"T-99","plane":"Tenant","area":"Drawing editor","name":"Layers","steps":"Toggle a layer off; click a layer name; filter the list","expect":"Hiding removes it from the canvas AND from snapping; clicking the name selects everything on it","pri":"P2","result":"","note":"","new":true},{"id":"T-100","plane":"Tenant","area":"Drawing editor","name":"Measure","steps":"Measure -> click a chain of points","expect":"Running total per segment and, from three points, an enclosed area, in the selected unit","pri":"P1","result":"","note":"","new":true},{"id":"T-101","plane":"Tenant","area":"Drawing editor","name":"Undo / redo","steps":"Ctrl-Z, Ctrl-Y after several edits","expect":"Every edit reverses and reapplies in order","pri":"P2","result":"","note":"","new":true},{"id":"T-102","plane":"Tenant","area":"Drawing editor","name":"Download DXF","steps":"Mark up a sheet -> Download DXF","expect":"A valid DXF downloads and reopens in AutoCAD / LibreCAD with the markup on its own layers","pri":"P1","result":"","note":"","new":true},{"id":"T-103","plane":"Tenant","area":"Drawing editor","name":"Save to project keeps the original","steps":"Mark up an issued sheet -> Save to project","expect":"A NEW file appears in Documents named '<sheet>-markup.dxf'; the original sheet is unchanged; the sidecar re-reads the new one","pri":"P1","result":"","note":"","new":true},{"id":"T-104","plane":"Tenant","area":"Drawing editor","name":"Open a .dxf from disk","steps":"Open a .dxf -> pick a local file","expect":"Loads without uploading anything; Save to project is not offered; Download DXF is","pri":"P2","result":"","note":"","new":true},{"id":"T-105","plane":"Tenant","area":"Drawing editor","name":"A .dwg from disk is refused clearly","steps":"Open a .dxf -> pick a local .dwg","expect":"Explains that a .dwg must be uploaded to a project first because the converter runs on the server","pri":"P2","result":"","note":"","new":true},{"id":"T-106","plane":"Tenant","area":"Drawing editor","name":"Unsaved markup is protected","steps":"Mark up, then try to close the tab","expect":"The browser warns before losing the markup","pri":"P3","result":"","note":"","new":true},{"id":"T-107","plane":"Tenant","area":"Drawing editor","name":"Canvas is never mirrored in Arabic","steps":"Switch to Arabic and open the editor","expect":"Page furniture flips to RTL; the drawing itself stays as drawn","pri":"P2","result":"","note":"","new":true},{"id":"T-108","plane":"Tenant","area":"Issued drawings","name":"Schedules are folded, not stacked","steps":"Open a sheet carrying several extracted tables","expect":"Each table is one collapsed row showing its size; opening one scrolls inside its own box rather than stretching the page","pri":"P1","result":"","note":"","new":true},{"id":"T-109","plane":"Tenant","area":"Issued drawings","name":"A table is named after itself","steps":"Open a sheet whose schedule is titled, e.g. FINISH SCHEDULE","expect":"The heading reads the schedule's own title, with the CAD layer beside it as a chip - not the bare layer name","pri":"P2","result":"","note":"","new":true},{"id":"T-110","plane":"Tenant","area":"Issued drawings","name":"Room tags are counted, not tabulated","steps":"Open a floor plan whose room labels were read as a table","expect":"Shown as counted chips (e.g. BED ROOM x54), not hundreds of repeated cells","pri":"P2","result":"","note":"","new":true},{"id":"T-111","plane":"Tenant","area":"Issued drawings","name":"Notes list only notes","steps":"Open a sheet with keynote numbers on it","expect":"No bullets reading '1', '2', '3'; only text with words in it, capped with a show-all control","pri":"P2","result":"","note":"","new":true},{"id":"T-112","plane":"Tenant","area":"Review","name":"A confirmed record can be corrected","steps":"Open any confirmed artifact from its stage -> Correct this","expect":"The fields become editable behind a warning that a new version supersedes this one and marks downstream stale","pri":"P1","result":"","note":"","new":true},{"id":"T-113","plane":"Tenant","area":"Review","name":"Corrections are audited as human","steps":"Save a correction -> open Trace","expect":"The new version's source is 'human', the old one reads superseded, and the edit is on the audit chain","pri":"P2","result":"","note":"","new":true},{"id":"T-114","plane":"Tenant","area":"Review","name":"Long text has room","steps":"Correct a spec clause, a narrative section, a tender scope or a BOQ note","expect":"The field is a multi-line box, not a single-line input","pri":"P2","result":"","note":"","new":true},{"id":"T-115","plane":"Tenant","area":"Review","name":"A rejected record stays closed","steps":"Open a rejected artifact","expect":"Read-only, with an explanation that nothing downstream depends on it","pri":"P3","result":"","note":"","new":true},{"id":"T-116","plane":"Tenant","area":"Review","name":"Correct an accepted measurement from the register","steps":"Drawings -> takeoff register -> an Accepted row -> Correct this","expect":"Opens the same drawer in correction mode; quantity, unit, location and method are all editable","pri":"P1","result":"","note":"","new":true},{"id":"T-117","plane":"Tenant","area":"Projects","name":"Archived projects are reachable","steps":"Archive a project, then scroll to the bottom of Projects","expect":"An 'Archived projects' section appears with a count; opening it lists them with the date archived","pri":"P2","result":"","note":"","new":true},{"id":"T-118","plane":"Tenant","area":"Projects","name":"Restore an archived project","steps":"Archived projects -> Restore","expect":"Returns to the main list with its chain and audit history intact; the section disappears when empty","pri":"P2","result":"","note":"","new":true},{"id":"T-119","plane":"Tenant","area":"Projects","name":"Restore is permissioned","steps":"Sign in as a role without project.archive","expect":"No Restore button; the API refuses the change","pri":"P3","result":"","note":"","new":true},{"id":"T-120","plane":"Tenant","area":"Exports","name":"Submission cover form","steps":"Project -> Overview -> Submission cover","expect":"Ref No., project number, name, location, client and 'Submitted to' are editable and persist","pri":"P1","result":"","note":"","new":true},{"id":"T-121","plane":"Tenant","area":"Exports","name":"Blank cover fields are counted, not hidden","steps":"Leave two fields empty","expect":"A chip states how many are blank, so they are filled before submission","pri":"P3","result":"","note":"","new":true},{"id":"T-122","plane":"Tenant","area":"Exports","name":"Priced BOQ workbook","steps":"BOQ -> Export Excel","expect":"Downloads a workbook with a Cover sheet, one sheet per division, and a Summary sheet","pri":"P1","result":"","note":"","new":true},{"id":"T-123","plane":"Tenant","area":"Exports","name":"The bill scrolls","steps":"Open a division sheet and scroll","expect":"Only the heading row is frozen; the whole bill scrolls - no block of branding pinned at the top","pri":"P1","result":"","note":"","new":true},{"id":"T-124","plane":"Tenant","area":"Exports","name":"Wrapped rows are fully visible","steps":"Find a long item description","expect":"The row is tall enough to show all of it; nothing is clipped to one line","pri":"P1","result":"","note":"","new":true},{"id":"T-125","plane":"Tenant","area":"Exports","name":"Cover carries the submission details","steps":"Open the Cover sheet","expect":"TechSME logo centred in the letterhead box; Ref No., project number, name, location, client, date and 'Submitted to' filled from the form","pri":"P1","result":"","note":"","new":true},{"id":"T-126","plane":"Tenant","area":"Exports","name":"Summary foots","steps":"Open the Summary sheet","expect":"Per-division totals, a grand total, unpriced counts, and a disclaimer when anything is unpriced","pri":"P1","result":"","note":"","new":true},{"id":"T-127","plane":"Tenant","area":"Exports","name":"Unpriced lines are marked, not zeroed","steps":"Export a bill with rates missing","expect":"Those cells read 'To be priced' on a tinted fill and are excluded from the total, which is declared provisional","pri":"P1","result":"","note":"","new":true},{"id":"T-128","plane":"Tenant","area":"Exports","name":"Work programme workbook","steps":"Schedule -> Export Excel","expect":"Downloads a Gantt: month and week header rows, coloured phase bars, milestone diamonds, critical path marked","pri":"P1","result":"","note":"","new":true},{"id":"T-129","plane":"Tenant","area":"Exports","name":"Programme header block","steps":"Open the programme sheet","expect":"Letterhead with the logo centred by column width, then the project details; panes frozen at the week row so bars scroll under fixed headings","pri":"P1","result":"","note":"","new":true},{"id":"T-130","plane":"Tenant","area":"Exports","name":"Exports open clean in Excel","steps":"Open both workbooks in desktop Excel","expect":"No repair prompt, no broken formulas, colours and borders as designed","pri":"P1","result":"","note":"","new":true},{"id":"T-131","plane":"Tenant","area":"Narrative","name":"Stage exists before Procurement","steps":"Open a project's tabs","expect":"A Technical Narrative stage sits between Schedule and Procurement","pri":"P2","result":"","note":"","new":true},{"id":"T-132","plane":"Tenant","area":"Narrative","name":"Seven sections, generated one at a time","steps":"Narrative -> Generate on a section","expect":"Only that section is written; the others are untouched","pri":"P1","result":"","note":"","new":true},{"id":"T-133","plane":"Tenant","area":"Narrative","name":"Sections are editable","steps":"Open a section -> Correct","expect":"The body is a multi-line editor and the correction supersedes the generated version","pri":"P2","result":"","note":"","new":true},{"id":"T-134","plane":"Tenant","area":"Narrative","name":"Download all","steps":"Narrative -> Download all","expect":"A single Markdown document with all seven sections in order","pri":"P2","result":"","note":"","new":true},{"id":"D-01","plane":"Deployment","area":"Infra","name":"Both planes up","steps":"docker compose up on host + tenant","expect":"All containers healthy; apps serve 200","pri":"P1","result":"","note":"","new":false},{"id":"D-02","plane":"Deployment","area":"Infra","name":"Seed reproducible","steps":"Run seed scripts on a fresh volume","expect":"Catalog + demo tenant(s) created without error","pri":"P1","result":"","note":"","new":false},{"id":"D-03","plane":"Deployment","area":"Infra","name":"HTTPS (host)","steps":"Open the host over its domain","expect":"Valid TLS; login works; cookies stick","pri":"P1","result":"","note":"","new":false},{"id":"D-04","plane":"Deployment","area":"Infra","name":"HTTPS (tenant)","steps":"Open the tenant over its domain","expect":"Valid TLS; login works","pri":"P2","result":"","note":"","new":false},{"id":"D-05","plane":"Deployment","area":"Infra","name":"Reverse proxy","steps":"Both apps reachable behind nginx","expect":"Correct app served per hostname; no port clash","pri":"P2","result":"","note":"","new":false},{"id":"D-06","plane":"Deployment","area":"Security","name":"Secrets rotated","steps":"Inspect env/override","expect":"BETTER_AUTH_SECRET 32+, DB pw + service token not defaults","pri":"P1","result":"","note":"","new":false},{"id":"D-07","plane":"Deployment","area":"Security","name":"DB not exposed","steps":"Port scan the public IP","expect":"MySQL (3306/3307) not publicly reachable","pri":"P1","result":"","note":"","new":false},{"id":"D-08","plane":"Deployment","area":"Security","name":"Admin password changed","steps":"Change seeded admin password","expect":"Default demo password no longer valid","pri":"P1","result":"","note":"","new":false},{"id":"D-09","plane":"Deployment","area":"Provisioning","name":"Host -> tenant bootstrap","steps":"Create a tenant in the host","expect":"Tenant provisioned live in the tenant plane (not mirror)","pri":"P2","result":"","note":"","new":false},{"id":"D-10","plane":"Deployment","area":"Ops","name":"Logs + restart","steps":"Tail logs; restart a service","expect":"Logs clean; service recovers; data persists","pri":"P2","result":"","note":"","new":false},{"id":"D-11","plane":"Deployment","area":"Ops","name":"Update flow","steps":"Sync source -> docker compose up --build","expect":"New build deploys without data loss","pri":"P2","result":"","note":"","new":false},{"id":"D-12","plane":"Deployment","area":"Ops","name":"The build picks up new dependencies","steps":"Add a dependency, sync package.json + package-lock.json, rebuild","expect":"The npm install layer re-runs instead of reporting CACHED; the new module resolves","pri":"P1","result":"","note":"Added after a deploy failed on 'Cannot resolve dxf-parser': package.json had not been copied, so Docker reused the cached deps layer.","new":true},{"id":"D-13","plane":"Deployment","area":"Ops","name":"The running container has the code you shipped","steps":"After a rebuild, list the built routes inside the container","expect":"The new route is present; a stale build is caught here rather than in the browser","pri":"P1","result":"","note":"","new":true},{"id":"D-14","plane":"Deployment","area":"Perf","name":"Basic load","steps":"Click through main pages","expect":"Pages respond < ~1s; no console errors","pri":"P2","result":"","note":"","new":false},{"id":"D-15","plane":"Deployment","area":"Perf","name":"A large drawing stays usable","steps":"Open a 13-sheet set's biggest drawing in the editor","expect":"Pan and zoom stay responsive; labels drop out when too small rather than stalling the frame","pri":"P2","result":"","note":"","new":true},{"id":"D-16","plane":"Deployment","area":"Backup","name":"DB volume backup","steps":"Dump the MySQL volume","expect":"Backup produced; restorable","pri":"P3","result":"","note":"","new":false},{"id":"D-17","plane":"Deployment","area":"Compat","name":"Cross-browser","steps":"Open in Chrome + one other","expect":"Renders + works in both","pri":"P3","result":"","note":"","new":false}];
+const KEY = "preckon-qa-v2";
+const RESULTS = ["PASS","FAIL","BLOCKED"];
+
+/* Seeded from the sheet, then overlaid with whatever this browser has recorded,
+   so re-opening the file never silently discards an afternoon's testing. */
+let state = {};
+for (const c of CASES) state[c.id] = { r: c.result || "", n: c.note || "" };
+try {
+  const saved = JSON.parse(localStorage.getItem(KEY) || "{}");
+  for (const id in saved) if (state[id]) state[id] = { ...state[id], ...saved[id] };
+} catch { /* corrupt or blocked storage — fall back to the sheet */ }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} };
+
+const filters = { plane: "all", result: "all", pri: "all", q: "" };
+const el = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+
+const planes = ["all", ...new Set(CASES.map((c) => c.plane))];
+const pris   = ["all", ...new Set(CASES.map((c) => c.pri))].sort();
+
+function matches(c) {
+  if (filters.plane !== "all" && c.plane !== filters.plane) return false;
+  if (filters.pri !== "all" && c.pri !== filters.pri) return false;
+  const r = state[c.id].r;
+  if (filters.result === "untested" ? r : filters.result !== "all" && r !== filters.result) return false;
+  if (filters.q) {
+    const hay = (c.id + " " + c.name + " " + c.area + " " + c.steps + " " + c.expect).toLowerCase();
+    if (!hay.includes(filters.q)) return false;
+  }
+  return true;
+}
+
+function counts(list) {
+  const n = { total: list.length, PASS: 0, FAIL: 0, BLOCKED: 0, untested: 0 };
+  for (const c of list) {
+    const r = state[c.id].r;
+    if (RESULTS.includes(r)) n[r]++; else n.untested++;
+  }
+  return n;
+}
+
+function renderSeg(node, options, active, onPick, label) {
+  node.setAttribute("role", "group");
+  node.setAttribute("aria-label", label);
+  node.innerHTML = options.map((o) =>
+    `<button type="button" data-v="${esc(o.v)}" aria-pressed="${o.v === active}">${esc(o.t)}` +
+    (o.n === undefined ? "" : `<span class="n">${o.n}</span>`) + `</button>`
+  ).join("");
+  node.onclick = (e) => {
+    const b = e.target.closest("button");
+    if (b) onPick(b.dataset.v);
+  };
+}
+
+function renderControls() {
+  renderSeg(el("f-plane"), planes.map((p) => ({
+    v: p, t: p === "all" ? "All planes" : p,
+    n: p === "all" ? CASES.length : CASES.filter((c) => c.plane === p).length,
+  })), filters.plane, (v) => { filters.plane = v; render(); }, "Filter by plane");
+
+  const scope = CASES.filter((c) => filters.plane === "all" || c.plane === filters.plane);
+  const n = counts(scope);
+  renderSeg(el("f-result"), [
+    { v: "all", t: "All", n: n.total },
+    { v: "untested", t: "Untested", n: n.untested },
+    { v: "PASS", t: "Passed", n: n.PASS },
+    { v: "FAIL", t: "Failed", n: n.FAIL },
+    { v: "BLOCKED", t: "Blocked", n: n.BLOCKED },
+  ], filters.result, (v) => { filters.result = v; render(); }, "Filter by result");
+
+  renderSeg(el("f-pri"), pris.map((p) => ({ v: p, t: p === "all" ? "Any priority" : p })),
+    filters.pri, (v) => { filters.pri = v; render(); }, "Filter by priority");
+}
+
+function renderSummary() {
+  const scope = CASES.filter((c) => filters.plane === "all" || c.plane === filters.plane);
+  const n = counts(scope);
+  el("summary").innerHTML = [
+    ["total", "Cases", n.total], ["pass", "Passed", n.PASS], ["fail", "Failed", n.FAIL],
+    ["blocked", "Blocked", n.BLOCKED], ["untested", "Untested", n.untested],
+  ].map(([k, label, v]) => `<div class="tile ${k}"><div class="k">${label}</div><div class="v">${v}</div></div>`).join("");
+  const pct = (x) => (n.total ? (x / n.total) * 100 : 0);
+  el("bar").innerHTML =
+    `<i class="p" style="width:${pct(n.PASS)}%"></i>` +
+    `<i class="f" style="width:${pct(n.FAIL)}%"></i>` +
+    `<i class="b" style="width:${pct(n.BLOCKED)}%"></i>`;
+}
+
+function rowHtml(c) {
+  const s = state[c.id];
+  const r = RESULTS.includes(s.r) ? s.r : "";
+  return `<article class="row" data-id="${c.id}" data-r="${r}">
+    <button class="row-head" type="button" aria-expanded="false">
+      <span class="cid">${esc(c.id)}</span>
+      <span>
+        <span class="cname">${esc(c.name)}${c.new ? '<span class="newflag">New</span>' : ""}</span>
+        <span class="carea">${esc(c.plane)} &middot; ${esc(c.area)}</span>
+      </span>
+      <span class="pri ${esc(c.pri)}">${esc(c.pri)}</span>
+      <span class="state">${r || "Untested"}</span>
+    </button>
+    <div class="row-body">
+      <dl class="pair">
+        <dt>Steps</dt><dd>${esc(c.steps)}</dd>
+        <dt>Expected</dt><dd><strong>${esc(c.expect)}</strong></dd>
+      </dl>
+      <div class="verdict">
+        ${RESULTS.map((v) => `<button type="button" data-v="${v}" aria-pressed="${r === v}">${v[0] + v.slice(1).toLowerCase()}</button>`).join("")}
+        <button type="button" class="clear" data-v="">Clear</button>
+      </div>
+      <textarea placeholder="Notes — what you saw, and where">${esc(s.n)}</textarea>
+    </div>
+  </article>`;
+}
+
+function render() {
+  renderControls();
+  renderSummary();
+  const visible = CASES.filter(matches);
+  if (!visible.length) {
+    el("list").innerHTML = `<p class="empty">No case matches that filter.</p>`;
+    return;
+  }
+  // Grouped by area within plane — the order a tester works in, rather than by ID.
+  const groups = [];
+  for (const c of visible) {
+    const key = c.plane + " / " + c.area;
+    const g = groups.find((x) => x.key === key) || (groups.push({ key, items: [] }), groups[groups.length - 1]);
+    g.items.push(c);
+  }
+  el("list").innerHTML = groups.map((g) =>
+    `<section class="group"><h2>${esc(g.key)}</h2>${g.items.map(rowHtml).join("")}</section>`
+  ).join("");
+}
+
+/* One delegated listener for the whole list — 192 rows do not each need three. */
+el("list").addEventListener("click", (e) => {
+  const row = e.target.closest(".row");
+  if (!row) return;
+  const head = e.target.closest(".row-head");
+  if (head) {
+    const open = row.classList.toggle("open");
+    head.setAttribute("aria-expanded", String(open));
+    return;
+  }
+  const v = e.target.closest(".verdict button");
+  if (v) {
+    const id = row.dataset.id;
+    state[id].r = v.dataset.v;
+    save();
+    row.dataset.r = v.dataset.v;
+    row.querySelector(".state").textContent = v.dataset.v || "Untested";
+    row.querySelectorAll(".verdict button[data-v]").forEach((b) =>
+      b.setAttribute("aria-pressed", String(!!b.dataset.v && b.dataset.v === v.dataset.v)));
+    renderSummary();
+    renderControls();
+  }
+});
+el("list").addEventListener("input", (e) => {
+  if (e.target.tagName !== "TEXTAREA") return;
+  const row = e.target.closest(".row");
+  state[row.dataset.id].n = e.target.value;
+  save();
+});
+
+el("q").addEventListener("input", (e) => { filters.q = e.target.value.trim().toLowerCase(); render(); });
+
+el("expand").addEventListener("click", () => {
+  const rows = [...document.querySelectorAll(".row")];
+  const open = !rows.every((r) => r.classList.contains("open"));
+  rows.forEach((r) => {
+    r.classList.toggle("open", open);
+    r.querySelector(".row-head").setAttribute("aria-expanded", String(open));
+  });
+  el("expand").textContent = open ? "Collapse all" : "Expand all";
+});
+
+el("export").addEventListener("click", () => {
+  const q = (s) => `"${String(s == null ? "" : s).replace(/"/g, '""')}"`;
+  const lines = [["ID","Plane","Area","Test Case","Steps","Expected","Priority","Result","Notes"].join(",")];
+  for (const c of CASES) {
+    const s = state[c.id];
+    lines.push([c.id, c.plane, c.area, c.name, c.steps, c.expect, c.pri, s.r, s.n].map(q).join(","));
+  }
+  // The BOM matters: without it Excel on Windows reads UTF-8 as the ANSI
+  // codepage, which is how the last sheet filled up with mojibake.
+  const blob = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "preckon-qa-results.csv";
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+el("reset").addEventListener("click", () => {
+  if (!confirm("Clear every result and note recorded in this browser, and go back to the sheet as generated?")) return;
+  try { localStorage.removeItem(KEY); } catch {}
+  state = {};
+  for (const c of CASES) state[c.id] = { r: c.result || "", n: c.note || "" };
+  render();
+});
+
+el("theme").addEventListener("click", () => {
+  const now = document.documentElement.getAttribute("data-theme");
+  const dark = now ? now === "dark"
+    : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  document.documentElement.setAttribute("data-theme", dark ? "light" : "dark");
+});
+
+render();
+</script>
+</body>
+</html>
