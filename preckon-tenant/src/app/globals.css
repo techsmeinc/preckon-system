@@ -270,14 +270,23 @@ td.num{font-family:var(--font-mono); color:var(--ink);}
   .nav-toggle{display:grid; width:34px; height:34px; border-radius:9px; border:1px solid var(--hairline); background:var(--surface); color:var(--slate-500); place-items:center; cursor:pointer; flex:none;}
   .nav-toggle:hover{color:var(--ink); border-color:var(--slate-400);}
   .app.nav-collapsed{grid-template-columns:68px 1fr;}
-  .app.nav-collapsed .side-top .wm,
-  .app.nav-collapsed .env,
+  /* What the 68px rail hides. These selectors have to match the sidebar as it
+     is actually written: they were still naming .wm and .env, which the
+     workspace switcher stopped using, so collapsing the nav left the tenant
+     name wrapping four words deep inside a 68px column and spilling out of it.
+     A rule that silently matches nothing is worse than no rule — the feature
+     looks implemented right up until someone uses it. */
+  .app.nav-collapsed .side-top .nm,
+  .app.nav-collapsed .side-new .btn span,
   .app.nav-collapsed .nav .grp,
   .app.nav-collapsed .nav a span,
-  .app.nav-collapsed .side-user .nm,
-  .app.nav-collapsed .side-user .rl,
+  .app.nav-collapsed .side-user > div:not(.avatar),
   .app.nav-collapsed .side-user .out{display:none;}
   .app.nav-collapsed .nav a{justify-content:center;}
+  .app.nav-collapsed .ws-switch{justify-content:center;}
+  /* The button keeps its + glyph and becomes square, rather than keeping the
+     padding of a label that is no longer there. */
+  .app.nav-collapsed .side-new .btn{padding-inline:0; justify-content:center;}
   .app.nav-collapsed .side-top,.app.nav-collapsed .side-user{justify-content:center;}
   .app.nav-collapsed .nav a.active::before{inset-inline-start:0;}
 }
@@ -1042,11 +1051,24 @@ svg,img{max-width:100%;}
   .ced-canvas{border-inline-end:0;}
 }
 
-/* ── a Gantt is wider than any phone ───────────────────────────────────────
-   It scrolls as one piece, so the bars stay under their own week columns. */
+/* ── the work programme on a small screen ──────────────────────────────────
+   The activity grid is seven fixed columns totalling 736px — wider than any
+   phone on its own, and .prog-wrap clips what overflows, so the chart beside
+   it could not be reached at all. The bars already scroll (.prog-track); what
+   was missing was room for them. Resources, % done and cost are the three
+   columns you read at a desk rather than on site, so they stand down first
+   and the activity name takes what is left. */
 @media (max-width:900px){
-  .gantt{overflow-x:auto; -webkit-overflow-scrolling:touch;}
-  .gantt-head,.grow{min-width:640px;}
+  .pc-who,.pc-p,.pc-c{display:none;}
+  .pc-act{width:clamp(132px,38vw,280px);}
+  .pc-d{width:72px;}
+  .pc-n{width:44px;}
+}
+@media (max-width:560px){
+  /* Narrower still: one date is enough to place a bar, and the duration is
+     already written on it. */
+  .pc-d:last-of-type{display:none;}
+  .pc-act{width:clamp(120px,44vw,200px);}
 }
 
 /* ── touch ─────────────────────────────────────────────────────────────────

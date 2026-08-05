@@ -241,8 +241,7 @@
     .app.nav-collapsed .env,
     .app.nav-collapsed .nav .grp,
     .app.nav-collapsed .nav a span,
-    .app.nav-collapsed .side-user .nm,
-    .app.nav-collapsed .side-user .rl,
+    .app.nav-collapsed .side-user > div:not(.avatar),
     .app.nav-collapsed .side-user .out{display:none;}
     .app.nav-collapsed .nav a{justify-content:center;}
     .app.nav-collapsed .side-top,.app.nav-collapsed .side-user{justify-content:center;}
