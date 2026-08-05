@@ -31,7 +31,7 @@ TEMPLATE = r"""<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Preckon — QA checklist</title>
+<title>Preckon — QA Test Checklist</title>
 <style>
 /* ── tokens ───────────────────────────────────────────────────────────────
    The palette is the product's own: the blues are the exact inks the exported
@@ -234,7 +234,7 @@ footer{margin-top:40px; padding-top:18px; border-top:1px solid var(--line);
   <header class="mast">
     <div class="grow">
       <p class="eyebrow">Release verification</p>
-      <h1>Preckon — QA checklist</h1>
+      <h1>Preckon — QA Test Checklist</h1>
       <p>__COUNT__ cases across the Host plane, the Tenant workspace and deployment.
          Results save in this browser as you go; Export CSV writes the sheet back out.</p>
     </div>
@@ -265,6 +265,7 @@ footer{margin-top:40px; padding-top:18px; border-top:1px solid var(--line);
 <script>
 const CASES = __DATA__;
 const KEY = "preckon-qa-v2";
+const KEY_V1 = "preckon-qa-v1";   // the sheet this replaces
 const RESULTS = ["PASS","FAIL","BLOCKED"];
 
 /* Seeded from the sheet, then overlaid with whatever this browser has recorded,
@@ -272,8 +273,16 @@ const RESULTS = ["PASS","FAIL","BLOCKED"];
 let state = {};
 for (const c of CASES) state[c.id] = { r: c.result || "", n: c.note || "" };
 try {
-  const saved = JSON.parse(localStorage.getItem(KEY) || "{}");
-  for (const id in saved) if (state[id]) state[id] = { ...state[id], ...saved[id] };
+  // v1 first, so a tester who had already worked through the previous checklist
+  // in this browser keeps their marks; anything recorded since wins over it.
+  for (const k of [KEY_V1, KEY]) {
+    const saved = JSON.parse(localStorage.getItem(k) || "{}");
+    for (const id in saved) {
+      if (!state[id]) continue;
+      const v = saved[id] || {};
+      state[id] = { r: (v.r || v.result || state[id].r || "").toUpperCase(), n: v.n ?? v.note ?? state[id].n };
+    }
+  }
 } catch { /* corrupt or blocked storage — fall back to the sheet */ }
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} };
 
