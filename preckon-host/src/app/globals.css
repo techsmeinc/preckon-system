@@ -398,8 +398,6 @@
   /* Large desktop / ultrawide: content already fills 100% via .content.
      Cap ultra-wide line length only for the login card (handled above). */
 
-  @media (max-width:1280px){
-  }
   @media (max-width:960px){
     .row.two, .row.two2{grid-template-columns:1fr;}
   }
@@ -499,4 +497,16 @@
     .fsearch{min-width:0; width:100%;}
     .df{flex-wrap:wrap;}
     .df > *{flex:1 1 auto;}
+  }
+
+  /* With viewport-fit=cover the page runs under the status bar and, in
+     landscape, under the notch. */
+  .topbar{padding-top:max(12px,env(safe-area-inset-top));}
+  .content{
+    padding-inline:max(clamp(16px,2vw,28px),env(safe-area-inset-left))
+                   max(clamp(16px,2vw,28px),env(safe-area-inset-right));
+  }
+  @media (max-width:760px){
+    .topbar{padding-top:max(10px,env(safe-area-inset-top));}
+    .content{padding-inline:max(14px,env(safe-area-inset-left)) max(14px,env(safe-area-inset-right));}
   }

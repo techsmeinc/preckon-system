@@ -1,5 +1,20 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
+
+// Next injects width=device-width on its own, but not viewport-fit — and
+// without that `env(safe-area-inset-*)` resolves to 0, so the padding that
+// keeps the sidebar and the Copilot clear of a notch and a home indicator
+// would quietly do nothing. themeColor paints the browser chrome to match the
+// app, so a dark workspace does not sit under a white status bar.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F7F9FB" },
+    { media: "(prefers-color-scheme: dark)", color: "#0A1626" },
+  ],
+};
 
 export const metadata: Metadata = {
   title: "Preckon — Tenant workspace",

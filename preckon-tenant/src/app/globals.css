@@ -1100,3 +1100,16 @@ svg,img{max-width:100%;}
   .ced-foot .btn{flex:1 1 auto;}
   .sch-body{max-height:60dvh;}
 }
+
+/* With viewport-fit=cover the page runs under the status bar and, in
+   landscape, under the notch. The sticky top bar and the content gutter are
+   what would otherwise sit beneath them. */
+.topbar{padding-top:max(12px,env(safe-area-inset-top));}
+.content{
+  padding-inline:max(clamp(16px,2vw,28px),env(safe-area-inset-left))
+                 max(clamp(16px,2vw,28px),env(safe-area-inset-right));
+}
+@media (max-width:760px){
+  .topbar{padding-top:max(10px,env(safe-area-inset-top));}
+  .content{padding-inline:max(14px,env(safe-area-inset-left)) max(14px,env(safe-area-inset-right));}
+}

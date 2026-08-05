@@ -1,5 +1,19 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
+
+// See the tenant layout: viewport-fit is what makes env(safe-area-inset-*)
+// resolve to anything on a notched phone, and themeColor stops a dark console
+// from sitting under a white status bar. The console defaults to dark, so the
+// dark value leads.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0A1626" },
+    { media: "(prefers-color-scheme: light)", color: "#F4F7FB" },
+  ],
+};
 
 export const metadata: Metadata = {
   title: "Preckon · Host Console",

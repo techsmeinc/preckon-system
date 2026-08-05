@@ -85,7 +85,7 @@ export function ProjectCover({ pid, onSaved }: { pid: string; onSaved?: () => vo
         </div>
       </div>
 
-      <div className="frow" style={{ marginTop: 10, display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
+      <div className="frow" style={{ marginTop: 10, display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(190px,1fr))", gap: 12 }}>
         {FIELDS.map((f) => (
           <div className="field" key={String(f.key)}>
             <label htmlFor={`cov-${f.key}`}>{t(f.label as any)}</label>
