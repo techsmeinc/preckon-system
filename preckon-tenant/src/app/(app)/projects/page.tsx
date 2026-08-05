@@ -184,6 +184,8 @@ function ProjectsInner() {
           </div>
         )}
 
+      <ArchivedProjects onRestored={reload} />
+
       <Drawer
         open={open} title={t("newProject.title")} onClose={() => setOpen(false)}
         footer={<><button className="mini" onClick={() => setOpen(false)}>{t("common.cancel")}</button><button className="mini pri" disabled={busy || !name.trim()} onClick={create}>{busy ? t("newProject.creating") : t("newProject.create")}</button></>}
@@ -205,5 +207,90 @@ function ProjectsInner() {
         </div>
       </Drawer>
     </>
+  );
+}
+
+/**
+ * The archived projects, and the way back.
+ *
+ * Archiving told the estimator "its history is kept" and then removed the only
+ * route to that history — the project left the list and no screen anywhere
+ * showed it again. Kept-but-unreachable is indistinguishable from deleted, so
+ * they live here: named, dated, and restorable in one click.
+ *
+ * It renders nothing at all when nothing is archived, so a clean workspace is
+ * not given a permanently empty section to scroll past.
+ */
+function ArchivedProjects({ onRestored }: { onRestored: () => void }) {
+  const { t } = useI18n();
+  const toast = useToast();
+  const canArchive = useCan("project.archive");
+  const { data, loading, reload } = useApi<any[]>("/projects?archived=1", []);
+  const [openList, setOpenList] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const rows = data ?? [];
+
+  if (loading || rows.length === 0) return null;
+
+  async function restore(p: any) {
+    setBusyId(p.id);
+    try {
+      await api.patch(`/projects/${p.id}`, { status: "active" });
+      toast(t("projects.restored"));
+      reload();
+      onRestored();
+    } catch (e: any) {
+      toast(e?.message ?? t("projects.restoreFail"));
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  return (
+    <div className="card sch" style={{ marginTop: 16 }}>
+      <button className="sch-head" onClick={() => setOpenList((v) => !v)} aria-expanded={openList}>
+        <span className="tw-glyph" aria-hidden>{openList ? "▾" : "▸"}</span>
+        <span className="sch-name">{t("projects.archivedTitle")}</span>
+        <span className="sch-meta mono">{rows.length}</span>
+      </button>
+      {openList && (
+        <>
+          <div className="csub" style={{ padding: "0 2px 10px" }}>{t("projects.archivedSub")}</div>
+          <div className="tw">
+            <table className="tbl">
+              <thead>
+                <tr>
+                  <th>{t("projects.colProject")}</th>
+                  <th>{t("projects.colClient")}</th>
+                  <th className="r">{t("projects.archivedOn")}</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((p) => (
+                  <tr key={p.id}>
+                    <td>
+                      <b>{p.name}</b>
+                      {p.code && <div className="csub mono">{p.code}</div>}
+                    </td>
+                    <td>{p.client_name ?? "—"}</td>
+                    <td className="r" style={{ color: "var(--slate-500)", fontSize: 12 }}>
+                      {p.updated_at ? fmtDateLocal(p.updated_at, { day: "numeric", month: "short", year: "numeric" }) : "—"}
+                    </td>
+                    <td className="r">
+                      {canArchive && (
+                        <button className="mini sm" disabled={busyId === p.id} onClick={() => restore(p)}>
+                          {busyId === p.id ? t("common.saving") : t("projects.restore")}
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+    </div>
   );
 }
