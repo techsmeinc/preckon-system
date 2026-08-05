@@ -43,12 +43,18 @@ const Cover = z.object({
   location: z.string().max(255).nullable().optional(),
   submitted_to: z.string().max(255).nullable().optional(),
   ref_no: z.string().max(64).nullable().optional(),
+  // Restoring an archived project is the same write as any other field on it,
+  // so it goes through the same door rather than growing an endpoint.
+  status: z.enum(["active", "archived"]).optional(),
 });
 
 export const PATCH = route<{ pid: string }>(async (req, ctx, { pid }) => {
   requirePermission(ctx, "project.update");
   await requireProject(ctx, pid);
   const body = Cover.parse(await req.json());
+  // Restoring is an archive decision, not a cover-detail edit — whoever may
+  // archive is who may bring one back.
+  if (body.status !== undefined) requirePermission(ctx, "project.archive");
   const cols = Object.keys(body) as Array<keyof typeof body>;
   if (!cols.length) return ok({ id: pid });
 

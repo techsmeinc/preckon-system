@@ -157,7 +157,9 @@ export default function BoqSurface({ pid, stage, artifacts, rows, workflows, run
         proposal={<div className="val">{qty(review?.payload?.quantity)} <small>{unitLabel(review?.payload?.unit)}</small></div>}
         fields={[
           { key: "quantity", label: "boq.fieldQuantity", kind: "number" },
-          { key: "description", label: "boq.fieldDescription" },
+          { key: "unit", label: "boq.fieldUnit" },
+          { key: "description", label: "boq.fieldDescription", kind: "textarea" },
+          { key: "notes", label: "boq.fieldNotes", kind: "textarea" },
         ]}
         onSaved={reload}
       />

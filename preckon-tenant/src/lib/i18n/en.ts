@@ -248,6 +248,9 @@ export const en = {
   "review.tracing": "Tracing…",
   "review.traceFail": "Couldn’t load the trace",
   "review.saveCorrection": "Save correction",
+  "review.correctThis": "Correct this",
+  "review.correctWarn": "This record is already accepted. Saving a correction creates a new version, supersedes this one, and marks everything derived from it stale so it can be re-run.",
+  "review.rejectedNote": "This record was rejected. It carries no quantities and nothing downstream depends on it.",
   "review.acceptAsIs": "Accept as-is",
   "review.decidedNote": "This record has been decided. Editing it creates a new version and re-plans everything derived from it.",
   "review.undecidedNote": "Accept the proposal, or correct it — your correction is logged on the audit chain and supersedes the agent’s version.",
@@ -318,6 +321,8 @@ export const en = {
   "draw.measurementAccepted": "Measurement accepted",
   "draw.fieldQuantity": "Corrected quantity",
   "draw.fieldLocation": "Location",
+  "draw.fieldUnit": "Unit",
+  "draw.fieldMethod": "How it was measured",
   "draw.registerTitle": "Takeoff register",
   "draw.registerSub": "Quantities measured from the drawings — read from the model above, or extracted from an issued sheet. Check the working before you accept.",
   "draw.allSheets": "All sheets",
@@ -488,6 +493,8 @@ export const en = {
   "boq.unclassified": "Unclassified",
   "boq.fieldQuantity": "Corrected quantity",
   "boq.fieldDescription": "Description",
+  "boq.fieldUnit": "Unit",
+  "boq.fieldNotes": "Notes",
 
   "pipe.title": "How this bill was built",
   "pipe.sub": "{specialists} specialists · {checks} completeness checks",
@@ -540,6 +547,7 @@ export const en = {
   "est.rateSource": "Source: {source}",
   "est.noRateSource": "No rate source recorded",
   "est.fieldRate": "Corrected rate (minor units)",
+  "est.fieldSource": "Rate source",
 
   /* ── schedule (PlanLogix) ─────────────────────────────────────────────── */
   "sched.emptyTitle": "Programme not started",
@@ -564,6 +572,7 @@ export const en = {
   "sched.startsAfter": "Starts after {predecessors}",
   "sched.noPredecessors": "No predecessors — this activity can start on day one.",
   "sched.fieldDuration": "Duration (days)",
+  "sched.fieldActivity": "Activity",
   "sched.barTitle": "{name} · day {from}–{to}",
   "sched.unphased": "Unphased",
   "sched.uncovered": "{n} priced line(s) have no activity delivering them — scope with no time allowed.",

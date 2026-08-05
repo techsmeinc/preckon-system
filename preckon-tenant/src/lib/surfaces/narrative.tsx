@@ -193,7 +193,7 @@ export default function NarrativeSurface({ pid, stage, artifacts, rows, workflow
         artifacts={artifacts}
         title={review?.payload?.title ?? ""}
         proposal={<div className="csub">{Number(review?.payload?.word_count ?? 0).toLocaleString()} {t("narrative.wordsShort")}</div>}
-        fields={[{ key: "title", label: "narrative.fieldTitle" }, { key: "body_md", label: "narrative.fieldBody" }]}
+        fields={[{ key: "title", label: "narrative.fieldTitle" }, { key: "body_md", label: "narrative.fieldBody", kind: "textarea" }]}
         onSaved={reload}
       />
     </>

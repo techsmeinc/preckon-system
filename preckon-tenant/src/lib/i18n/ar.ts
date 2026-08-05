@@ -249,6 +249,9 @@ export const ar: Dict = {
   "review.tracing": "جارٍ التتبّع…",
   "review.traceFail": "تعذّر تحميل التتبّع",
   "review.saveCorrection": "حفظ التصحيح",
+  "review.correctThis": "تصحيح هذا",
+  "review.correctWarn": "هذا السجل مقبول بالفعل. حفظ التصحيح يُنشئ نسخة جديدة تحلّ محلّه، ويضع كل ما اشتُقّ منه في حالة «قديم» ليُعاد تشغيله.",
+  "review.rejectedNote": "رُفض هذا السجل. لا يحمل أي كميات ولا يعتمد عليه شيء لاحق.",
   "review.acceptAsIs": "قبول كما هو",
   "review.decidedNote": "تم البتّ في هذا السجل. تعديله ينشئ إصدارًا جديدًا ويعيد تخطيط كل ما اشتُقّ منه.",
   "review.undecidedNote": "اقبل المقترح أو صحّحه — يُسجَّل تصحيحك في سلسلة التدقيق ويحلّ محلّ إصدار الوكيل.",
@@ -319,6 +322,8 @@ export const ar: Dict = {
   "draw.measurementAccepted": "تم قبول القياس",
   "draw.fieldQuantity": "الكمية المصحّحة",
   "draw.fieldLocation": "الموقع",
+  "draw.fieldUnit": "الوحدة",
+  "draw.fieldMethod": "طريقة القياس",
   "draw.registerTitle": "سجل الحصر",
   "draw.registerSub": "الكميات المقاسة من الرسومات — مقروءة من النموذج أعلاه أو مستخرجة من لوحة صادرة. راجع طريقة الحساب قبل القبول.",
   "draw.allSheets": "كل اللوحات",
@@ -489,6 +494,8 @@ export const ar: Dict = {
   "boq.unclassified": "غير مصنّف",
   "boq.fieldQuantity": "الكمية المصحّحة",
   "boq.fieldDescription": "الوصف",
+  "boq.fieldUnit": "الوحدة",
+  "boq.fieldNotes": "ملاحظات",
 
   "pipe.title": "كيف أُعدّت هذه الكشوف",
   "pipe.sub": "{specialists} متخصصًا · {checks} فحص اكتمال",
@@ -541,6 +548,7 @@ export const ar: Dict = {
   "est.rateSource": "المصدر: {source}",
   "est.noRateSource": "لم يُسجَّل مصدر للسعر",
   "est.fieldRate": "السعر المصحّح (بالوحدات الصغرى)",
+  "est.fieldSource": "مصدر السعر",
 
   /* ── schedule (PlanLogix) ─────────────────────────────────────────────── */
   "sched.emptyTitle": "لم يبدأ البرنامج الزمني",
@@ -565,6 +573,7 @@ export const ar: Dict = {
   "sched.startsAfter": "يبدأ بعد {predecessors}",
   "sched.noPredecessors": "لا توجد سوابق — يمكن أن يبدأ هذا النشاط في اليوم الأول.",
   "sched.fieldDuration": "المدة (أيام)",
+  "sched.fieldActivity": "النشاط",
   "sched.barTitle": "{name} · اليوم {from}–{to}",
   "sched.unphased": "بدون مرحلة",
   "sched.uncovered": "{n} بند مسعّر بلا نشاط ينفّذه — نطاق دون وقت مخصّص.",

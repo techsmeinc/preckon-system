@@ -145,8 +145,8 @@ export default function TenderSurface({ pid, stage, artifacts, rows, workflows, 
         }
         fields={
           review?.type_key?.endsWith("tender_summary")
-            ? [{ key: "submission_format", label: "tender.fieldFormat" as const }, { key: "scope_summary", label: "tender.fieldScope" as const }]
-            : [{ key: "rationale", label: "tender.fieldRationale" as const }]
+            ? [{ key: "submission_format", label: "tender.fieldFormat" as const }, { key: "scope_summary", label: "tender.fieldScope" as const, kind: "textarea" as const }]
+            : [{ key: "rationale", label: "tender.fieldRationale" as const, kind: "textarea" as const }]
         }
         onSaved={reload}
       />

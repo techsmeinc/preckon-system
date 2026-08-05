@@ -143,9 +143,16 @@ export default function DrawingsSurface({ pid, stage, artifacts, rows, workflows
                     <td style={{ textTransform: "capitalize" }}>{m.status}</td>
                     <td className="num">
                       {m.status === "confirmed" ? (
-                        <span className="acc">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6"><path d="M5 12l4 4 10-10" /></svg>
-                          {t("draw.measurementAccepted")}
+                        // Accepted is not final. A measurement is the number a
+                        // bill is built on, and the moment somebody finds it
+                        // wrong is usually after it was accepted — so the way
+                        // back in has to be on the row, not nowhere.
+                        <span style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
+                          <span className="acc">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6"><path d="M5 12l4 4 10-10" /></svg>
+                            {t("draw.measurementAccepted")}
+                          </span>
+                          <button className="mini sm" onClick={(e) => { e.stopPropagation(); setReview(m); }}>{t("review.correctThis")}</button>
                         </span>
                       ) : (
                         <span style={{ display: "inline-flex", gap: 6 }} onClick={(e) => e.stopPropagation()}>
@@ -193,7 +200,12 @@ export default function DrawingsSurface({ pid, stage, artifacts, rows, workflows
         artifacts={artifacts}
         title={review ? `${review.payload?.sheet_no ?? ""} · ${review.payload?.item ?? "Measurement"}` : ""}
         proposal={<div className="val">{qty(review?.payload?.quantity)} <small>{unitLabel(review?.payload?.unit)}</small></div>}
-        fields={[{ key: "quantity", label: "draw.fieldQuantity", kind: "number" }, { key: "location", label: "draw.fieldLocation" }]}
+        fields={[
+          { key: "quantity", label: "draw.fieldQuantity", kind: "number" },
+          { key: "unit", label: "draw.fieldUnit" },
+          { key: "location", label: "draw.fieldLocation" },
+          { key: "method", label: "draw.fieldMethod", kind: "textarea" },
+        ]}
         onSaved={reload}
       />
     </>

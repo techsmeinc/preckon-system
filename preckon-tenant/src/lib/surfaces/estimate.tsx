@@ -154,7 +154,10 @@ export default function EstimateSurface({ pid, stage, artifacts, rows, workflows
             </div>
           </>
         }
-        fields={[{ key: "rate_minor", label: "est.fieldRate", kind: "number" }]}
+        fields={[
+          { key: "rate_minor", label: "est.fieldRate", kind: "number" },
+          { key: "rate_source", label: "est.fieldSource" },
+        ]}
         onSaved={reload}
       />
     </>

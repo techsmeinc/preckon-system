@@ -110,7 +110,7 @@ export default function SpecsSurface({ pid, stage, artifacts, rows, workflows, r
             <div style={{ fontSize: 13, color: "var(--slate-600)", marginTop: 10, lineHeight: 1.55 }}>{review?.payload?.text}</div>
           </>
         }
-        fields={[{ key: "title", label: "specs.fieldTitle" }, { key: "text", label: "specs.fieldText" }]}
+        fields={[{ key: "title", label: "specs.fieldTitle" }, { key: "text", label: "specs.fieldText", kind: "textarea" }]}
         onSaved={reload}
       />
     </>

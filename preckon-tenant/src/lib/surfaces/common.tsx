@@ -250,7 +250,7 @@ export function ReviewDrawer({
   /** The headline number/claim the agent is proposing. */
   proposal: React.ReactNode;
   /** Editable payload fields: [key, label, kind]. */
-  fields: { key: string; label: Key; kind?: "number" | "text" }[];
+  fields: { key: string; label: Key; kind?: "number" | "text" | "textarea" }[];
   onSaved: () => void;
 }) {
   const { t } = useI18n();
@@ -258,17 +258,29 @@ export function ReviewDrawer({
   const canConfirm = useCan("artifact.confirm");
   const canEdit = useCan("artifact.edit");
   const [draft, setDraft] = useState<Record<string, string>>({});
+  /** Opened deliberately on an already-confirmed record — see below. */
+  const [correcting, setCorrecting] = useState(false);
 
   useEffect(() => {
     if (!artifact) return;
     const d: Record<string, string> = {};
     for (const f of fields) d[f.key] = artifact.payload?.[f.key] == null ? "" : String(artifact.payload[f.key]);
     setDraft(d);
+    setCorrecting(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [artifact?.id]);
 
   if (!artifact) return null;
-  const decided = artifact.status === "confirmed" || artifact.status === "rejected";
+  const confirmed = artifact.status === "confirmed";
+  const rejected = artifact.status === "rejected";
+
+  // A confirmed record used to be read-only here, which left the estimator with
+  // no way to fix a number they had already accepted — the one correction that
+  // matters most, because by then it is carrying a bill. The store has always
+  // supported it (a new version supersedes and everything derived goes stale);
+  // only this drawer refused. It is now behind a deliberate second click, with
+  // the consequence stated, rather than behind nothing at all.
+  const editable = canEdit && (correcting || (!confirmed && !rejected));
 
   async function save() {
     const payload = { ...artifact.payload };
@@ -286,8 +298,20 @@ export function ReviewDrawer({
       title={title}
       onClose={onClose}
       footer={
-        decided ? (
+        rejected ? (
           <button className="mini" onClick={onClose}>{t("common.close")}</button>
+        ) : confirmed ? (
+          correcting ? (
+            <>
+              <button className="mini" disabled={busy} onClick={() => setCorrecting(false)}>{t("common.cancel")}</button>
+              <button className="mini pri" disabled={busy} onClick={save}>{t("review.saveCorrection")}</button>
+            </>
+          ) : (
+            <>
+              <button className="mini" onClick={onClose}>{t("common.close")}</button>
+              {canEdit && <button className="mini" onClick={() => setCorrecting(true)}>{t("review.correctThis")}</button>}
+            </>
+          )
         ) : (
           <>
             {canEdit && <button className="mini" disabled={busy} onClick={save}>{t("review.saveCorrection")}</button>}
@@ -307,20 +331,39 @@ export function ReviewDrawer({
 
       <SourceTrace pid={pid} artifactId={artifact.id} artifacts={artifacts} />
 
-      {!decided && canEdit && fields.map((f) => (
+      {correcting && (
+        <div className="synth warn" style={{ marginBottom: 12 }}>
+          <span>{t("review.correctWarn")}</span>
+        </div>
+      )}
+
+      {editable && fields.map((f) => (
         <div className="fld" key={f.key}>
-          <label className="fl">{t(f.label)}</label>
-          <input
-            type="text"
-            className={f.kind === "number" ? "mono" : undefined}
-            value={draft[f.key] ?? ""}
-            onChange={(e) => setDraft((d) => ({ ...d, [f.key]: e.target.value }))}
-          />
+          <label className="fl" htmlFor={`rf-${f.key}`}>{t(f.label)}</label>
+          {/* A specification clause or a narrative section is paragraphs, and
+              paragraphs typed into a one-line box cannot be read back while you
+              write them. */}
+          {f.kind === "textarea" ? (
+            <textarea
+              id={`rf-${f.key}`}
+              rows={8}
+              value={draft[f.key] ?? ""}
+              onChange={(e) => setDraft((d) => ({ ...d, [f.key]: e.target.value }))}
+            />
+          ) : (
+            <input
+              id={`rf-${f.key}`}
+              type="text"
+              className={f.kind === "number" ? "mono" : undefined}
+              value={draft[f.key] ?? ""}
+              onChange={(e) => setDraft((d) => ({ ...d, [f.key]: e.target.value }))}
+            />
+          )}
         </div>
       ))}
 
       <div style={{ fontSize: 11.5, color: "var(--slate-500)" }}>
-        {decided ? t("review.decidedNote") : t("review.undecidedNote")}
+        {rejected ? t("review.rejectedNote") : confirmed ? t("review.decidedNote") : t("review.undecidedNote")}
       </div>
     </Drawer>
   );

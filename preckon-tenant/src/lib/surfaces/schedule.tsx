@@ -141,7 +141,10 @@ export default function ScheduleSurface({ pid, stage, artifacts, rows, workflows
             )}
           </>
         }
-        fields={[{ key: "duration_days", label: "sched.fieldDuration", kind: "number" }]}
+        fields={[
+          { key: "activity", label: "sched.fieldActivity" },
+          { key: "duration_days", label: "sched.fieldDuration", kind: "number" },
+        ]}
         onSaved={reload}
       />
     </>

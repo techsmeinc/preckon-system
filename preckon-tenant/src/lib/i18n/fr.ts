@@ -250,6 +250,9 @@ export const fr: Dict = {
   "review.tracing": "Traçage…",
   "review.traceFail": "Impossible de charger la traçabilité",
   "review.saveCorrection": "Enregistrer la correction",
+  "review.correctThis": "Corriger",
+  "review.correctWarn": "Cet enregistrement est déjà accepté. Enregistrer une correction crée une nouvelle version, remplace celle-ci et marque comme obsolète tout ce qui en découle afin de pouvoir le relancer.",
+  "review.rejectedNote": "Cet enregistrement a été rejeté. Il ne porte aucune quantité et rien en aval n’en dépend.",
   "review.acceptAsIs": "Accepter tel quel",
   "review.decidedNote": "Cet enregistrement est tranché. Le modifier crée une nouvelle version et replanifie tout ce qui en découle.",
   "review.undecidedNote": "Acceptez la proposition ou corrigez-la — votre correction est inscrite dans la chaîne d’audit et remplace la version de l’agent.",
@@ -320,6 +323,8 @@ export const fr: Dict = {
   "draw.measurementAccepted": "Mesure acceptée",
   "draw.fieldQuantity": "Quantité corrigée",
   "draw.fieldLocation": "Localisation",
+  "draw.fieldUnit": "Unité",
+  "draw.fieldMethod": "Méthode de mesure",
   "draw.registerTitle": "Registre de métré",
   "draw.registerSub": "Quantités mesurées sur les plans — relevées du modèle ci-dessus ou extraites d’une planche émise. Vérifiez le calcul avant d’accepter.",
   "draw.allSheets": "Toutes les planches",
@@ -490,6 +495,8 @@ export const fr: Dict = {
   "boq.unclassified": "Non classé",
   "boq.fieldQuantity": "Quantité corrigée",
   "boq.fieldDescription": "Désignation",
+  "boq.fieldUnit": "Unité",
+  "boq.fieldNotes": "Notes",
 
   "pipe.title": "Comment ce bordereau a été construit",
   "pipe.sub": "{specialists} spécialistes · {checks} contrôles d’exhaustivité",
@@ -542,6 +549,7 @@ export const fr: Dict = {
   "est.rateSource": "Source : {source}",
   "est.noRateSource": "Aucune source de prix enregistrée",
   "est.fieldRate": "Prix corrigé (unités mineures)",
+  "est.fieldSource": "Source du prix",
 
   /* ── schedule (PlanLogix) ─────────────────────────────────────────────── */
   "sched.emptyTitle": "Planning non démarré",
@@ -566,6 +574,7 @@ export const fr: Dict = {
   "sched.startsAfter": "Démarre après {predecessors}",
   "sched.noPredecessors": "Aucun antécédent — cette tâche peut démarrer au premier jour.",
   "sched.fieldDuration": "Durée (jours)",
+  "sched.fieldActivity": "Activité",
   "sched.barTitle": "{name} · jour {from}–{to}",
   "sched.unphased": "Hors phase",
   "sched.uncovered": "{n} ligne(s) chiffrée(s) sans activité correspondante — du périmètre sans temps alloué.",
