@@ -1299,3 +1299,33 @@ p a,li a,td a,.csub a{min-block-size:0;}
 /* "Nothing changed" is information, not a warning — it should read as calm
    fact beside an answer, while a real edit keeps the amber. */
 .ced-cop-edit.none{background:var(--panel-2); color:var(--slate-500);}
+
+/* ── plan and model side by side ───────────────────────────────────────────
+   Split is the mode worth having: you point at something in the plan and see
+   what it is in the same glance. Below 900px they stack instead — two panes
+   half a phone wide are two panes nobody can read. */
+.ced-canvas.ced-view-split{display:grid; grid-template-columns:1fr 6px 1fr; min-width:0;}
+.ced-canvas.ced-view-split > *{min-width:0;}
+.ced-split-rule{background:var(--hairline);}
+@media (max-width:900px){
+  .ced-canvas.ced-view-split{grid-template-columns:1fr; grid-template-rows:1fr 6px 1fr;}
+}
+
+.isov{position:relative; width:100%; height:100%; overflow:hidden; background:#0d1017;
+  touch-action:none; user-select:none; cursor:grab;}
+.isov:active{cursor:grabbing;}
+.isov-bar{position:absolute; top:8px; inset-inline-end:8px; display:flex; align-items:center; gap:8px;
+  background:rgba(0,0,0,.6); border-radius:8px; padding:5px 8px; backdrop-filter:blur(6px);}
+.isov-bar label{display:inline-flex; align-items:center; gap:5px; font-family:var(--font-mono);
+  font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:#8fa3ad;}
+.isov-bar input{width:74px; font-family:var(--font-mono); font-size:11.5px; color:#e7eef1;
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16);
+  border-radius:6px; padding:3px 6px;}
+.isov-bar .u{text-transform:none; letter-spacing:0;}
+/* The assumption, stated where it cannot be missed. Somebody will otherwise
+   take a height off this picture, and the drawing never carried one. */
+.isov-note{position:absolute; inset-inline:8px; bottom:8px; font-size:10.5px; line-height:1.5;
+  color:#fbbf24; background:rgba(0,0,0,.66); border-radius:7px; padding:6px 9px;
+  backdrop-filter:blur(6px);}
+.isov-hint{position:absolute; top:8px; inset-inline-start:8px; font-family:var(--font-mono);
+  font-size:10.5px; color:#8fa3ad; background:rgba(0,0,0,.6); border-radius:6px; padding:4px 8px;}

@@ -270,7 +270,37 @@ export async function runCadAgent({
 /* ── applying the edits ──────────────────────────────────────────────────── */
 
 import type { DxfModel, Entity } from "./model";
-import { modelBounds, newId } from "./model";
+import { newId, robustBounds } from "./model";
+
+
+/**
+ * How tall a label the assistant adds should be.
+ *
+ * Sized from the drawing's OWN text first: whatever the draughtsman used for a
+ * room tag is by definition the right size for another room tag. Deriving it
+ * from the extents instead is what produced letters tall enough to cross the
+ * building — one stray entity stretches the bounding box across an empty
+ * kilometre and every derived figure goes with it.
+ *
+ * A height the model asks for is honoured but clamped: it has no reliable feel
+ * for scale, and a wrong order of magnitude is unreadable either way.
+ */
+function textHeight(m: DxfModel, asked?: number): number {
+  const heights = m.entities
+    .filter((e): e is Extract<Entity, { kind: "text" }> => e.kind === "text" && e.h > 0)
+    .map((e) => e.h)
+    .sort((a, b) => a - b);
+
+  const b = robustBounds(m);
+  const span = Math.max(b.maxX - b.minX, b.maxY - b.minY, 1);
+  // Median, not mean: a title block at 40x the body size would drag a mean up.
+  const typical = heights.length ? heights[Math.floor(heights.length / 2)] : span * 0.006;
+
+  const lo = typical * 0.25;
+  const hi = typical * 4;
+  if (asked && Number.isFinite(asked) && asked > 0) return Math.min(hi, Math.max(lo, asked));
+  return typical;
+}
 
 /** Apply the agent's operations to the model the editor is holding. */
 export function applyCadOps(m: DxfModel, ops: CadOp[]): { model: DxfModel; added: number; removed: number } {
@@ -298,11 +328,7 @@ export function applyCadOps(m: DxfModel, ops: CadOp[]): { model: DxfModel; added
         break;
       case "add_text": {
         ensure(o.layer, 2);
-        // A default of one drawing unit is invisible on a millimetre sheet and
-        // enormous on one drawn in metres. Size it against the drawing itself.
-        const b = modelBounds(m);
-        const span = Math.max(b.maxX - b.minX, b.maxY - b.minY, 1);
-        push({ kind: "text", layer: o.layer, text: o.text, x: o.x, y: o.y, h: o.h ?? span * 0.012 });
+        push({ kind: "text", layer: o.layer, text: o.text, x: o.x, y: o.y, h: textHeight(m, o.h) });
         break;
       }
       case "delete_layer": {

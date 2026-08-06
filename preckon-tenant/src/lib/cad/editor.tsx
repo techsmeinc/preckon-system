@@ -30,6 +30,8 @@ import {
   ALL_SNAP_MODES, CadViewport, DEFAULT_SNAPS, type CadHandle, type SnapMode, type Tool,
 } from "./viewport";
 import { applyCadOps, type CadMark, type CadOp } from "./agent";
+import { IsoView } from "./isoview";
+import { assumedHeight } from "./iso";
 
 const DRAW: Array<[Tool, string, string]> = [
   ["line", "ed.line", "╱"],
@@ -121,6 +123,10 @@ export function CadEditor({
   const [marks, setMarks] = useState<CadMark[]>([]);
   const [copilot, setCopilot] = useState(true);
   const [layersOpen, setLayersOpen] = useState(false);
+  /* Plan, stood up, or both. Split is the useful one: you point at something in
+     the plan and see what it is in the same glance. */
+  const [view, setView] = useState<"2d" | "3d" | "split">("2d");
+  const [storey, setStorey] = useState<number | null>(null);
   const logRef = useRef<HTMLDivElement>(null);
   // Follow the conversation, the way any chat does — otherwise the answer you
   // just asked for arrives below the fold.
@@ -355,6 +361,20 @@ export function CadEditor({
           <button className="ced-t" onClick={() => vp.current?.zoom(1 / 1.3)}>−</button>
           <button className="ced-t" onClick={() => vp.current?.zoom(1.3)}>+</button>
           <button className="ced-t" onClick={() => vp.current?.fit()}>{t("ed.fit")}</button>
+          <span className="ced-sep" />
+          {/* 2D is where the measuring happens, so it leads and stays the
+              default. The other two are for reading the drawing, not taking
+              quantities off it. */}
+          {([["2d", t("ed.view2d")], ["split", t("ed.viewSplit")], ["3d", t("ed.view3d")]] as const).map(([v, label]) => (
+            <button
+              key={v}
+              className={"ced-t" + (view === v ? " on" : "")}
+              onClick={() => setView(v)}
+              aria-pressed={view === v}
+            >
+              {label}
+            </button>
+          ))}
           <button className={"ced-t" + (full ? " on" : "")} onClick={() => setFull((v) => !v)} aria-pressed={full}>
             {full ? "⤡" : "⤢"} {full ? t("ed.exitFull") : t("ed.full")}
           </button>
@@ -409,7 +429,8 @@ export function CadEditor({
 
       {/* ── canvas + layers ────────────────────────────────────────────── */}
       <div className="ced-body">
-        <div className="ced-canvas">
+        <div className={"ced-canvas ced-view-" + view}>
+          {view !== "3d" && (
           <CadViewport
             ref={vp}
             model={model}
@@ -430,6 +451,19 @@ export function CadEditor({
             onSelectionChange={setSelCount}
             marks={marks}
           />
+          )}
+
+          {view === "split" && <div className="ced-split-rule" aria-hidden />}
+
+          {view !== "2d" && (
+            <IsoView
+              model={model}
+              units={display}
+              wallHeight={storey ?? assumedHeight(model)}
+              onWallHeight={setStorey}
+              hint={t("ed.isoHint")}
+            />
+          )}
         </div>
 
         <aside className="ced-side">
