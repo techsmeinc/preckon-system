@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "migrate": "node scripts/migrate.mjs",
     "seed": "node --import tsx scripts/seed.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
