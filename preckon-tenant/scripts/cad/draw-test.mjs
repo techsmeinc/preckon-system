@@ -40,7 +40,7 @@ const check = (what, ok) => checks.push([what, ok]);
   const r = constrainAngle(B, raw, { polar: true, polarInc: 15 });
   check("polar engages 40 degrees off-axis (was silent)", r?.type === "polar" && near(ang(r.p), 45, 1e-6));
 }
-for (const [deg, want] of [[7, 0], [8, 15], [22, 15], [23, 30], [-40, -45], [172, 180]]) {
+for (const [deg, want] of [[7, 0], [8, 15], [22, 15], [23, 30], [-40, -45], [172, 165], [178, 180]]) {
   const raw = { x: Math.cos((deg * Math.PI) / 180) * 80, y: Math.sin((deg * Math.PI) / 180) * 80 };
   const r = constrainAngle(B, raw, { polar: true, polarInc: 15 });
   const got = ang(r.p);
