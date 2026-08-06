@@ -1242,3 +1242,36 @@ p a,li a,td a,.csub a{min-block-size:0;}
   .bim-studio.is-full .bim-side,.ced.is-full .ced-side{display:none;}
   .bim-studio.is-full .bim-wrap,.ced.is-full .ced-body{grid-template-columns:1fr;}
 }
+
+/* ── the drawing assistant, in the editor's side panel ─────────────────────
+   Above the layer list because it is what you reach for first on an
+   unfamiliar sheet: what is this, how big is it, how many of those are there. */
+.ced-cop{border:1px solid var(--hairline); border-radius:11px; background:var(--panel-2);
+  margin-bottom:14px; overflow:hidden;}
+.ced-cop-h{display:flex; align-items:center; gap:8px; width:100%; padding:9px 11px;
+  background:none; border:0; cursor:pointer; font-family:var(--font-body);
+  font-size:12.5px; font-weight:650; color:var(--ink); text-align:start;}
+.ced-cop-h:hover{background:var(--surface);}
+.ced-cop-h .tw-glyph{color:var(--slate-400); font-size:11px;}
+.ced-cop-n{margin-inline-start:auto; font-size:10px; color:#9D6307; background:var(--amber-tint);
+  border-radius:999px; padding:2px 7px;}
+.ced-cop-intro{margin:0; padding:0 11px 10px; font-size:12px; line-height:1.55; color:var(--slate-500);}
+.ced-cop-log{max-height:34vh; overflow-y:auto; padding:0 11px;}
+.ced-cop-turn{margin-bottom:11px;}
+.ced-cop-turn .q{font-size:11.5px; font-weight:600; color:var(--slate-500); margin-bottom:4px;}
+.ced-cop-turn .q::before{content:"› "; color:var(--brand);}
+.ced-cop-turn .a{font-size:12.5px; line-height:1.6; color:var(--ink); white-space:pre-wrap;}
+/* An edit the assistant made is stated, with the way to undo it, because a
+   drawing that changed without the estimator noticing is the worst outcome. */
+.ced-cop-edit{margin-top:5px; font-size:11px; color:#9D6307; background:var(--amber-tint);
+  border-radius:6px; padding:4px 8px; display:inline-block;}
+.ced-cop-eg{display:flex; flex-direction:column; gap:5px; padding:0 11px 10px;}
+.ced-cop-eg button{font-family:var(--font-body); font-size:11.5px; text-align:start; color:var(--slate-600);
+  background:var(--surface); border:1px solid var(--hairline); border-radius:8px; padding:6px 9px; cursor:pointer;}
+.ced-cop-eg button:hover{border-color:var(--brand); color:var(--ink);}
+.ced-cop-ask{padding:0 11px 11px;}
+.ced-cop-ask textarea{width:100%; resize:vertical; font-family:var(--font-body); font-size:12.5px;
+  color:var(--ink); background:var(--surface); border:1px solid var(--hairline);
+  border-radius:9px; padding:8px 10px;}
+.ced-cop-ask textarea:focus{outline:none; border-color:var(--brand);}
+.ced-cop-acts{display:flex; gap:6px; justify-content:flex-end; margin-top:7px;}

@@ -29,6 +29,7 @@ import {
 import {
   ALL_SNAP_MODES, CadViewport, DEFAULT_SNAPS, type CadHandle, type SnapMode, type Tool,
 } from "./viewport";
+import { applyCadOps, type CadMark, type CadOp } from "./agent";
 
 const DRAW: Array<[Tool, string, string]> = [
   ["line", "ed.line", "╱"],
@@ -109,6 +110,16 @@ export function CadEditor({
      the drawing about half the window. Escape leaves — a full-screen view with
      no visible way out is a trap. */
   const [full, setFull] = useState(false);
+
+  /* The assistant. It reads the sheet as it stands on screen — including markup
+     added a minute ago and not yet saved — because that is the drawing the
+     question is about. Its measurements come back as marks on the canvas, so a
+     figure can be checked rather than believed. */
+  const [ask, setAsk] = useState("");
+  const [asking, setAsking] = useState(false);
+  const [chat, setChat] = useState<Array<{ q: string; a: string; ops: number; removed?: number }>>([]);
+  const [marks, setMarks] = useState<CadMark[]>([]);
+  const [copilot, setCopilot] = useState(true);
   useEffect(() => {
     if (!full) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setFull(false); };
@@ -238,6 +249,36 @@ export function CadEditor({
       toast(e?.message ?? t("common.loadFail"));
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function askAgent() {
+    const q = ask.trim();
+    if (!q || !model || !pid) return;
+    setAsking(true);
+    setMarks([]);
+    try {
+      const r = await api.post<{ answer: string; ops: CadOp[]; marks: CadMark[] }>(
+        `/projects/${pid}/cad/agent`,
+        // The geometry goes with the question. The digest is built server-side:
+        // the measurements are the part that has to be trustworthy, and a number
+        // the client could shape first is a number nobody can rely on.
+        { question: q, filename, model: { insunits: model.insunits, layers: model.layers, entities: model.entities } }
+      );
+      setMarks(r.marks ?? []);
+      let applied = 0, removed = 0;
+      if (r.ops?.length) {
+        const out = applyCadOps(model, r.ops);
+        applied = out.added;
+        removed = out.removed;
+        if (applied || removed) apply(out.model);
+      }
+      setChat((c) => [...c, { q, a: r.answer, ops: applied, removed }]);
+      setAsk("");
+    } catch (e: any) {
+      setChat((c) => [...c, { q, a: e?.message ?? t("common.loadFail"), ops: 0 }]);
+    } finally {
+      setAsking(false);
     }
   }
 
@@ -379,10 +420,78 @@ export function CadEditor({
             onChange={apply}
             onOperationDone={() => setTool("select")}
             onSelectionChange={setSelCount}
+            marks={marks}
           />
         </div>
 
         <aside className="ced-side">
+          {/* The assistant sits above the layer list because it is the thing you
+              reach for first on an unfamiliar sheet: what is this, how big is
+              it, how many of those are there. */}
+          {pid && (
+            <div className="ced-cop">
+              <button className="ced-cop-h" onClick={() => setCopilot((v) => !v)} aria-expanded={copilot}>
+                <span className="tw-glyph" aria-hidden>{copilot ? "▾" : "▸"}</span>
+                <span>{t("ed.copilot")}</span>
+                {marks.length > 0 && <span className="ced-cop-n mono">{marks.length}</span>}
+              </button>
+
+              {copilot && (
+                <>
+                  {chat.length === 0 && <p className="ced-cop-intro">{t("ed.copilotIntro")}</p>}
+
+                  <div className="ced-cop-log">
+                    {chat.map((m, i) => (
+                      <div className="ced-cop-turn" key={i}>
+                        <div className="q">{m.q}</div>
+                        <div className="a">{m.a}</div>
+                        {(m.ops > 0 || (m.removed ?? 0) > 0) && (
+                          <div className="ced-cop-edit">
+                            {m.ops > 0 && t("ed.copilotAdded", { n: m.ops })}
+                            {m.ops > 0 && (m.removed ?? 0) > 0 ? " · " : ""}
+                            {(m.removed ?? 0) > 0 && t("ed.copilotRemoved", { n: m.removed ?? 0 })}
+                            {" · "}{t("ed.copilotUndo")}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {asking && <div className="ced-cop-turn"><div className="a">{t("ed.copilotThinking")}</div></div>}
+                  </div>
+
+                  {/* Starters, because the useful questions are not obvious and
+                      an empty box teaches nobody what this can answer. */}
+                  {chat.length === 0 && (
+                    <div className="ced-cop-eg">
+                      {[t("ed.eg1"), t("ed.eg2"), t("ed.eg3")].map((q) => (
+                        <button key={q} onClick={() => setAsk(q)}>{q}</button>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="ced-cop-ask">
+                    <textarea
+                      rows={2}
+                      value={ask}
+                      onChange={(e) => setAsk(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void askAgent(); } }}
+                      placeholder={t("ed.copilotPlaceholder")}
+                      aria-label={t("ed.copilot")}
+                      disabled={asking}
+                    />
+                    <div className="ced-cop-acts">
+                      {marks.length > 0 && (
+                        <button className="mini sm" onClick={() => setMarks([])}>{t("ed.copilotClear")}</button>
+                      )}
+                      <button className="mini sm pri" onClick={askAgent} disabled={asking || !ask.trim()}>
+                        {asking ? t("ed.copilotThinking") : t("ed.copilotAsk")}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
           <h4>{t("ed.layers")}</h4>
           <input
             className="ced-filter"

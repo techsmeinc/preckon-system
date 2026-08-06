@@ -20,6 +20,7 @@ import {
   hatchSegments, mirrorEntity, modelBounds, newId, robustBounds, rotateEntity,
   scaleEntityAbout, translateEntity, type DxfModel, type Entity,
 } from "./model";
+import type { CadMark } from "./agent";
 
 export type Tool =
   | "select" | "pan" | "line" | "polyline" | "rect" | "circle" | "text"
@@ -92,6 +93,9 @@ interface Props {
   polarInc?: number;
   /** Rendered under the canvas — the status hint the editor shows. */
   onHint?: (hint: string) => void;
+  /** What the assistant measured, drawn over the drawing. This is the whole
+   *  point of the assistant: a figure you can see the origin of. */
+  marks?: CadMark[];
 }
 
 /* ── geometry helpers ────────────────────────────────────────────────────── */
@@ -167,7 +171,7 @@ export const CadViewport = forwardRef<CadHandle, Props>(function CadViewport(
   {
     model, mono = false, units = "", unitFactor = 1, precision = 2, measuring = false,
     fitOn, tool = "select", activeLayer = "0", onChange, onOperationDone, onSelectionChange,
-    osnap = true, snapModes = DEFAULT_SNAPS, ortho = false, polar = false, polarInc = 15, onHint,
+    osnap = true, snapModes = DEFAULT_SNAPS, ortho = false, polar = false, polarInc = 15, onHint, marks = [],
   },
   ref
 ) {
@@ -927,6 +931,54 @@ export const CadViewport = forwardRef<CadHandle, Props>(function CadViewport(
         {previewScreen.map(([a, b], i) => (
           <line key={`p${i}`} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="#6f8cff" strokeWidth={1.4} strokeDasharray="6 3" />
         ))}
+        {/* The assistant's working. Amber so it cannot be mistaken for the
+            drawing, and labelled with a halo so a figure stays readable over
+            dense linework. */}
+        {marks.map((m, i) => {
+          if (m.kind === "dot") {
+            const p = toScreen(m);
+            return (
+              <g key={`m${i}`}>
+                <circle cx={p.x} cy={p.y} r={6} fill="#f59e0b" fillOpacity={0.9} stroke={BG} strokeWidth={1.5} />
+                {m.label && (
+                  <text x={p.x + 10} y={p.y + 4} fill="#fbbf24" fontSize={12} fontFamily="monospace"
+                        stroke={BG} strokeWidth={3} paintOrder="stroke">{m.label}</text>
+                )}
+              </g>
+            );
+          }
+          if (m.kind === "edge") {
+            const a = toScreen({ x: m.x1, y: m.y1 });
+            const b = toScreen({ x: m.x2, y: m.y2 });
+            return (
+              <g key={`m${i}`}>
+                <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="#f59e0b" strokeWidth={3} strokeOpacity={0.85} />
+                <circle cx={a.x} cy={a.y} r={4} fill="#f59e0b" />
+                <circle cx={b.x} cy={b.y} r={4} fill="#f59e0b" />
+                {m.label && (
+                  <text x={(a.x + b.x) / 2} y={(a.y + b.y) / 2 - 8} fill="#fbbf24" fontSize={12}
+                        fontFamily="monospace" textAnchor="middle" stroke={BG} strokeWidth={3} paintOrder="stroke">
+                    {m.label}
+                  </text>
+                )}
+              </g>
+            );
+          }
+          const pts = m.pts.map(toScreen);
+          const cx = pts.reduce((s2, p) => s2 + p.x, 0) / (pts.length || 1);
+          const cy = pts.reduce((s2, p) => s2 + p.y, 0) / (pts.length || 1);
+          return (
+            <g key={`m${i}`}>
+              <polygon points={pts.map((p) => `${p.x},${p.y}`).join(" ")}
+                       fill="#f59e0b" fillOpacity={0.14} stroke="#f59e0b" strokeWidth={2} />
+              {m.label && (
+                <text x={cx} y={cy} fill="#fde68a" fontSize={13} fontFamily="monospace" textAnchor="middle"
+                      stroke={BG} strokeWidth={4} paintOrder="stroke">{m.label}</text>
+              )}
+            </g>
+          );
+        })}
+
         {trackScreen && hoverScreen && (
           <line x1={trackScreen.x} y1={trackScreen.y} x2={hoverScreen.x} y2={hoverScreen.y} stroke="#a3e635" strokeWidth={1} strokeDasharray="4 4" />
         )}
