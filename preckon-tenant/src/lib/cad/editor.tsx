@@ -105,6 +105,17 @@ export function CadEditor({
   const [display, setDisplay] = useState("mm");
   const [precision, setPrecision] = useState(0);
   const [filter, setFilter] = useState("");
+  /* A CAD canvas at 620px with a ribbon above and a layer list beside it gives
+     the drawing about half the window. Escape leaves — a full-screen view with
+     no visible way out is a trap. */
+  const [full, setFull] = useState(false);
+  useEffect(() => {
+    if (!full) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setFull(false); };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, [full]);
 
   /* ── load ────────────────────────────────────────────────────────────── */
   useEffect(() => {
@@ -249,7 +260,7 @@ export function CadEditor({
   }
 
   return (
-    <div className="ced">
+    <div className={"ced" + (full ? " is-full" : "")}>
       {/* ── ribbon ─────────────────────────────────────────────────────── */}
       <div className="ced-rib">
         <div className="ced-grp">
@@ -295,6 +306,9 @@ export function CadEditor({
           <button className="ced-t" onClick={() => vp.current?.zoom(1 / 1.3)}>−</button>
           <button className="ced-t" onClick={() => vp.current?.zoom(1.3)}>+</button>
           <button className="ced-t" onClick={() => vp.current?.fit()}>{t("ed.fit")}</button>
+          <button className={"ced-t" + (full ? " on" : "")} onClick={() => setFull((v) => !v)} aria-pressed={full}>
+            {full ? "⤡" : "⤢"} {full ? t("ed.exitFull") : t("ed.full")}
+          </button>
         </div>
       </div>
 

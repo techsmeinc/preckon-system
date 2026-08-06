@@ -1202,3 +1202,26 @@ p a,li a,td a,.csub a{min-block-size:0;}
    accessibility tree along with the layout. */
 .vh{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
   clip-path:inset(50%); white-space:nowrap; border:0;}
+
+/* ── full-screen canvas ────────────────────────────────────────────────────
+   Both drawing surfaces can take the whole window. Fixed rather than the
+   Fullscreen API: this keeps the app's own chrome — the toolbar, the layer
+   list, the save button — which the browser's fullscreen would hide along with
+   everything else, and it leaves Escape free to mean "come back". */
+.bim-wrap.is-full,.ced.is-full{
+  position:fixed; inset:0; z-index:120; margin:0; border-radius:0;
+  background:var(--surface); display:grid; grid-template-rows:auto 1fr;
+  padding:max(0px,env(safe-area-inset-top)) 0 max(0px,env(safe-area-inset-bottom));
+}
+.bim-wrap.is-full{grid-template-columns:1fr 280px;}
+.bim-wrap.is-full .bim-main{display:flex; flex-direction:column; min-height:0;}
+.bim-wrap.is-full .bim-canvas{flex:1; height:auto; min-height:0;}
+.bim-wrap.is-full .bim-side{overflow:auto;}
+.ced.is-full{grid-template-rows:auto auto 1fr auto;}
+.ced.is-full .ced-body{min-height:0;}
+.ced.is-full .ced-canvas{height:auto; min-height:0;}
+.ced.is-full .ced-side{overflow:auto;}
+@media (max-width:1000px){
+  .bim-wrap.is-full{grid-template-columns:1fr; grid-template-rows:auto 1fr;}
+  .bim-wrap.is-full .bim-side{display:none;}
+}

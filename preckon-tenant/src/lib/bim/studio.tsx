@@ -97,6 +97,18 @@ export function BimStudio({
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  /* A plan is read by getting closer to it. In a 560px panel with a ribbon
+     above and a legend beside it, the drawing gets barely half the window —
+     so it can take the whole one. Escape leaves, because a full-screen view
+     with no visible way out is a trap. */
+  const [full, setFull] = useState(false);
+  useEffect(() => {
+    if (!full) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setFull(false); };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, [full]);
 
   const doc = hist.doc;
   const bounds = useMemo(() => boundsOf(doc), [doc]);
@@ -194,13 +206,21 @@ export function BimStudio({
 
       {err && <div className="auth-err" style={{ marginBottom: 12 }}>{err}</div>}
 
-      <div className="bim-wrap">
+      <div className={"bim-wrap" + (full ? " is-full" : "")}>
         <div className="bim-main">
           <div className="bim-bar">
             <span className="mono" style={{ fontSize: 11, color: "var(--slate-400)" }}>
               {t("bim.elements", { n: visible.length })} · v{baseVersion}{dirty ? " ·" : ""}
             </span>
             <div style={{ marginInlineStart: "auto", display: "flex", gap: 6 }}>
+              <button
+                className="mini sm"
+                onClick={() => setFull((v) => !v)}
+                aria-pressed={full}
+                title={full ? t("bim.exitFull") : t("bim.full")}
+              >
+                {full ? "⤡" : "⤢"} {full ? t("bim.exitFull") : t("bim.full")}
+              </button>
               <button className="mini sm" onClick={() => { setHist(undo); setDirty(true); }} disabled={!hist.past.length}>↶</button>
               <button className="mini sm" onClick={() => { setHist(redo); setDirty(true); }} disabled={!hist.future.length}>↷</button>
               {!readOnly && (
