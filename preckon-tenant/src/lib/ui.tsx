@@ -195,7 +195,10 @@ export function Drawer({ open, title, onClose, children, footer }: {
 }
 
 export function Field({ label, children }: { label: string; children: ReactNode }) {
-  return <div className="fld"><label className="fl">{label}</label>{children}</div>;
+  // Wrapping associates the label with its control implicitly — no ids to
+  // generate, and nothing to fall out of step. As siblings with no htmlFor the
+  // label named nothing, and every field announced itself as blank.
+  return <label className="fld"><span className="fl">{label}</span>{children}</label>;
 }
 
 export function fmtDate(iso: string | null | undefined): string {

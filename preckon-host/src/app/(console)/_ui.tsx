@@ -492,8 +492,20 @@ export function Segmented({
   );
 }
 
-export function Switch({ on, onToggle }: { on: boolean; onToggle: () => void }) {
-  return <div className={"switch" + (on ? " on" : "")} onClick={onToggle} />;
+export function Switch({ on, onToggle, label }: { on: boolean; onToggle: () => void; label?: string }) {
+  // role="switch" carries the on/off state to assistive technology, and a real
+  // <button> is reachable by keyboard. As a <div> with an onClick it was
+  // neither — invisible to Tab, and silent about whether it was on.
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      aria-label={label}
+      className={"switch" + (on ? " on" : "")}
+      onClick={onToggle}
+    />
+  );
 }
 
 export function Field({
@@ -504,9 +516,13 @@ export function Field({
   children: ReactNode;
 }) {
   return (
-    <div className="fld">
-      <label className="fl">{label}</label>
+    // A <label> wrapping its control is associated with it implicitly, so there
+    // are no ids to generate or keep unique. The previous markup put the label
+    // beside the control with no htmlFor, which named nothing at all: a screen
+    // reader announced "edit text, blank" on every filter on this console.
+    <label className="fld">
+      <span className="fl">{label}</span>
       {children}
-    </div>
+    </label>
   );
 }

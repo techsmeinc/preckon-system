@@ -1144,3 +1144,49 @@ svg,img{max-width:100%;}
   .topbar{padding-top:max(10px,env(safe-area-inset-top));}
   .content{padding-inline:max(14px,env(safe-area-inset-left)) max(14px,env(safe-area-inset-right));}
 }
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ACCESSIBILITY — WCAG 2.2 AA
+   ══════════════════════════════════════════════════════════════════════════
+   The colour work is in the tokens above; this is the behaviour half. Written
+   last so it settles the cascade rather than competing with it. */
+
+/* 2.4.1 Bypass Blocks. Every screen begins with the same sidebar and top bar;
+   a keyboard user should not have to walk them to reach the page. Off-screen
+   until focused, then it is the first thing in the tab order. */
+.skip{position:absolute; z-index:200; inset-inline-start:10px; top:-64px;
+  background:var(--surface); color:var(--ink); border:1px solid var(--hairline);
+  border-radius:9px; padding:10px 16px; font-size:13px; font-weight:600;
+  text-decoration:none; box-shadow:0 8px 24px rgba(0,0,0,.18);
+  transition:top .16s ease;}
+.skip:focus{top:10px;}
+
+/* 2.4.7 Focus Visible, and 1.4.11 Non-text Contrast for the indicator itself.
+   :focus-visible rather than :focus, so a mouse click does not leave a ring
+   behind — the indicator means "the keyboard is here". */
+:focus-visible{outline:2px solid var(--teal-ink); outline-offset:2px; border-radius:4px;}
+/* The landmark takes focus from the skip link but should not draw a box round
+   the whole page when it does. */
+#main:focus{outline:none;}
+
+/* 2.4.11 Focus Not Obscured. The top bar is sticky, so tabbing to a row near
+   the top of the viewport scrolls it underneath. */
+a,button,input,select,textarea,summary,[tabindex]{scroll-margin-top:96px; scroll-margin-bottom:32px;}
+
+/* 2.5.8 Target Size (Minimum) — 24x24 CSS pixels for anything you press.
+   The coarse-pointer rules above take the comfortable targets to 38px; this is
+   the floor that applies to a mouse as well. */
+button,[role="button"],a[role="button"],summary,
+input[type="checkbox"],input[type="radio"]{min-block-size:24px;}
+/* An inline link inside a sentence is explicitly excepted by 2.5.8, and giving
+   it a height would break the line box. */
+p a,li a,td a,.csub a{min-block-size:0;}
+
+/* 1.4.12 Text Spacing — no fixed heights on text containers, so a reader's own
+   spacing overrides do not clip anything. */
+.chip,.srcchip,.pill{block-size:auto;}
+
+/* 1.4.13 Content on Hover or Focus: anything that appears on hover stays put
+   long enough to reach, and is dismissable with Escape (handled in the
+   components that own a popover). */

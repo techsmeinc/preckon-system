@@ -390,6 +390,9 @@ export default function ConsoleLayout({ children }: { children: ReactNode }) {
       <ToastProvider>
         <div className={"app on" + (navOpen ? " nav-open" : "") + (collapsed ? " nav-collapsed" : "")}>
           <div className="nav-scrim" onClick={() => setNavOpen(false)} />
+          {/* 2.4.1 Bypass Blocks — first in the tab order, off-screen
+              until focused. */}
+          <a className="skip" href="#main">Skip to main content</a>
           <aside className="side">
             <div className="side-top">
               <svg viewBox="0 0 48 56" width="20" height="24" fill="none" aria-hidden="true">
@@ -466,7 +469,7 @@ export default function ConsoleLayout({ children }: { children: ReactNode }) {
               <Bell />
             </header>
 
-            <div className="content">{children}</div>
+            <main className="content" id="main" tabIndex={-1}>{children}</main>
           </div>
         </div>
       </ToastProvider>
