@@ -92,12 +92,12 @@ export default function DashboardPage() {
         </div>
         <div className="kpi">
           <div className="k"><Icon.clock />{t("dash.dueThisWeek")}</div>
-          <div className="v" style={{ color: totals.soon.length ? "var(--amber)" : undefined }}>{hydrating ? "—" : totals.soon.length}</div>
+          <div className="v" style={{ color: totals.soon.length ? "var(--amber-ink)" : undefined }}>{hydrating ? "—" : totals.soon.length}</div>
           <div className="sub">{totals.soon.length ? totals.soon.map((b) => b.project.name).join(" · ").slice(0, 42) : t("dash.fromDeadlines")}</div>
         </div>
         <div className="kpi">
           <div className="k"><Icon.review />{t("dash.awaitingReview")}</div>
-          <div className="v" style={{ color: totals.pending ? "var(--amber)" : undefined }}>{hydrating ? "—" : totals.pending}</div>
+          <div className="v" style={{ color: totals.pending ? "var(--amber-ink)" : undefined }}>{hydrating ? "—" : totals.pending}</div>
           <div className="sub">{t("dash.needEyes")}</div>
         </div>
         <div className="kpi">
