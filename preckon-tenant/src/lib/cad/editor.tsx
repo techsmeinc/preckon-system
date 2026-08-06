@@ -120,6 +120,14 @@ export function CadEditor({
   const [chat, setChat] = useState<Array<{ q: string; a: string; ops: number; removed?: number }>>([]);
   const [marks, setMarks] = useState<CadMark[]>([]);
   const [copilot, setCopilot] = useState(true);
+  const [layersOpen, setLayersOpen] = useState(false);
+  const logRef = useRef<HTMLDivElement>(null);
+  // Follow the conversation, the way any chat does — otherwise the answer you
+  // just asked for arrives below the fold.
+  useEffect(() => {
+    const el = logRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [chat.length, asking]);
   useEffect(() => {
     if (!full) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setFull(false); };
@@ -440,7 +448,7 @@ export function CadEditor({
                 <>
                   {chat.length === 0 && <p className="ced-cop-intro">{t("ed.copilotIntro")}</p>}
 
-                  <div className="ced-cop-log">
+                  <div className="ced-cop-log" ref={logRef}>
                     {chat.map((m, i) => (
                       <div className="ced-cop-turn" key={i}>
                         <div className="q">{m.q}</div>
@@ -492,36 +500,51 @@ export function CadEditor({
             </div>
           )}
 
-          <h4>{t("ed.layers")}</h4>
-          <input
-            className="ced-filter"
-            value={filter}
-            placeholder={t("ed.layerFilter")}
-            onChange={(e) => setFilter(e.target.value)}
-          />
-          <div className="ced-layeracts">
-            <button className="mini sm" onClick={() => allLayers(true)}>{t("ed.allOn")}</button>
-            <button className="mini sm" onClick={() => allLayers(false)}>{t("ed.allOff")}</button>
-          </div>
-          <div className="ced-layers">
-            {layerList.map((l) => (
-              <div className={"ced-layer" + (l.visible ? "" : " off")} key={l.name}>
-                <button className="eye" onClick={() => toggleLayer(l.name)} aria-label={l.name} title={t("ed.toggleLayer")}>
-                  {l.visible ? "◉" : "○"}
-                </button>
-                <i style={{ background: ACI_CHIP[l.aci] ?? "#374151" }} />
-                {/* Clicking the name selects that layer's geometry — the fastest
-                    way to erase a whole redundant layer or move it as one. */}
-                <button
-                  className="nm"
-                  title={t("ed.selectLayer")}
-                  onClick={() => { pick("select"); vp.current?.selectLayer(l.name); }}
-                >
-                  {l.name}
-                </button>
-                <b className="mono">{counts.get(l.name) ?? 0}</b>
+          {/* Layers moved to the foot and closed by default. It is a reference
+              list you open when you want it; leaving it expanded gave a
+              seventy-layer sheet the whole panel and squeezed the assistant —
+              the thing you actually work with — into four lines. */}
+          <div className={"ced-lay" + (layersOpen ? " on" : "")}>
+            <button className="ced-lay-h" onClick={() => setLayersOpen((v) => !v)} aria-expanded={layersOpen}>
+              <span className="tw-glyph" aria-hidden>{layersOpen ? "▾" : "▸"}</span>
+              <span>{t("ed.layers")}</span>
+              <b className="mono">{model.layers.length}</b>
+            </button>
+
+            {layersOpen && (
+              <div className="ced-lay-body">
+                <input
+                  className="ced-filter"
+                  value={filter}
+                  placeholder={t("ed.layerFilter")}
+                  onChange={(e) => setFilter(e.target.value)}
+                />
+                <div className="ced-layeracts">
+                  <button className="mini sm" onClick={() => allLayers(true)}>{t("ed.allOn")}</button>
+                  <button className="mini sm" onClick={() => allLayers(false)}>{t("ed.allOff")}</button>
+                </div>
+                <div className="ced-layers">
+                  {layerList.map((l) => (
+                    <div className={"ced-layer" + (l.visible ? "" : " off")} key={l.name}>
+                      <button className="eye" onClick={() => toggleLayer(l.name)} aria-label={l.name} title={t("ed.toggleLayer")}>
+                        {l.visible ? "◉" : "○"}
+                      </button>
+                      <i style={{ background: ACI_CHIP[l.aci] ?? "#374151" }} />
+                      {/* Clicking the name selects that layer's geometry — the
+                          fastest way to erase a redundant layer or move it as one. */}
+                      <button
+                        className="nm"
+                        title={t("ed.selectLayer")}
+                        onClick={() => { pick("select"); vp.current?.selectLayer(l.name); }}
+                      >
+                        {l.name}
+                      </button>
+                      <b className="mono">{counts.get(l.name) ?? 0}</b>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
+            )}
           </div>
 
           <div className="ced-stats">
