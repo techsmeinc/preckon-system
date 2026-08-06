@@ -1329,3 +1329,8 @@ p a,li a,td a,.csub a{min-block-size:0;}
   backdrop-filter:blur(6px);}
 .isov-hint{position:absolute; top:8px; inset-inline-start:8px; font-family:var(--font-mono);
   font-size:10.5px; color:#8fa3ad; background:rgba(0,0,0,.6); border-radius:6px; padding:4px 8px;}
+.bim-canvas.bim-view-split{display:grid; grid-template-columns:1fr 6px 1fr; min-width:0;}
+.bim-canvas.bim-view-split > *{min-width:0;}
+@media (max-width:900px){
+  .bim-canvas.bim-view-split{grid-template-columns:1fr; grid-template-rows:1fr 6px 1fr;}
+}

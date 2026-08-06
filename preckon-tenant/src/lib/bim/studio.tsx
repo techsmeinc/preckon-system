@@ -22,6 +22,7 @@ import {
   type BimDocument, type CatalogItem, type Discipline, type Element, type Id,
 } from "./model";
 import { applyCommands, initHistory, redo, run, undo, type Command, type History } from "./commands";
+import { BimIso } from "./iso";
 
 const hex = (c: number) => "#" + c.toString(16).padStart(6, "0");
 
@@ -101,6 +102,9 @@ export function BimStudio({
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  /* Plan, model, or both. Split is what a coordinator wants: place something on
+     the plan and see it stand up beside it. */
+  const [view, setView] = useState<"2d" | "3d" | "split">("2d");
 
   const doc = hist.doc;
   const bounds = useMemo(() => boundsOf(doc), [doc]);
@@ -213,6 +217,12 @@ export function BimStudio({
               >
                 {full ? "⤡" : "⤢"} {full ? t("bim.exitFull") : t("bim.full")}
               </button>
+              {(["2d", "split", "3d"] as const).map((v) => (
+                <button key={v} className={"mini sm" + (view === v ? " pri" : "")} aria-pressed={view === v}
+                        onClick={() => setView(v)}>
+                  {v === "2d" ? t("bim.view2d") : v === "3d" ? t("bim.view3d") : t("bim.viewSplit")}
+                </button>
+              ))}
               <button className="mini sm" onClick={() => { setHist(undo); setDirty(true); }} disabled={!hist.past.length}>↶</button>
               <button className="mini sm" onClick={() => { setHist(redo); setDirty(true); }} disabled={!hist.future.length}>↷</button>
               {!readOnly && (
@@ -225,7 +235,8 @@ export function BimStudio({
 
           {/* 2D plan. Y is flipped so north is up, and every element is wrapped
               so one malformed entity can't blank the whole drawing. */}
-          <div className="bim-canvas">
+          <div className={"bim-canvas bim-view-" + view}>
+            {view !== "3d" && (
             <svg viewBox={vb} preserveAspectRatio="xMidYMid meet">
               <g>
                 {visible.map((e) => {
@@ -234,6 +245,17 @@ export function BimStudio({
                 })}
               </g>
             </svg>
+            )}
+
+            {view === "split" && <div className="ced-split-rule" aria-hidden />}
+
+            {view !== "2d" && (
+              <BimIso
+                doc={doc}
+                hidden={hidden as unknown as Set<string>}
+                colourOf={(e) => CATALOG[e.category]?.color ?? 0x9aa4b2}
+              />
+            )}
           </div>
         </div>
 
