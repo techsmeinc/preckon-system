@@ -547,25 +547,32 @@ export const CadViewport = forwardRef<CadHandle, Props>(function CadViewport(
 
   const resolvePoint = useCallback((raw: Pt): { p: Pt; snapped: boolean; type: SnapMode | "ortho" | "polar" | null } => {
     const base = currentBase();
+    const constrained = !!base && (ortho || polar);
     const sn = resolveSnap(raw, base);
-    if (sn) return { p: sn.p, snapped: true, type: sn.type };
-    if (base && (ortho || polar)) {
+
+    // A PRECISE snap outranks an angle constraint, which is how CAD behaves:
+    // snapping to a real endpoint slightly off-axis is nearly always what was
+    // meant. `nearest` is different — it matches anywhere along any line, so on
+    // a dense sheet it matches constantly, and letting it win meant Ortho never
+    // fired at all. With a constraint active, the constraint beats `nearest`.
+    if (sn && !(constrained && sn.type === "nearest")) return { p: sn.p, snapped: true, type: sn.type };
+
+    if (constrained && base) {
       const dx = raw.x - base.x, dy = raw.y - base.y;
       if (Math.hypot(dx, dy) > 1e-9) {
         if (ortho) {
           const p = Math.abs(dx) >= Math.abs(dy) ? { x: raw.x, y: base.y } : { x: base.x, y: raw.y };
           return { p, snapped: false, type: "ortho" };
         }
+        // Snap to the nearest increment, always. Engaging only within four
+        // degrees of an increment reads as broken: most cursor positions got
+        // nothing and the tracking line never appeared, so Polar looked dead.
+        // On means constrained — turn it off to draw a free angle.
         const inc = ((polarInc || 90) * Math.PI) / 180;
-        const ang = Math.atan2(dy, dx);
-        const snapAng = Math.round(ang / inc) * inc;
-        let diff = Math.abs(ang - snapAng);
-        diff = Math.min(diff, Math.abs(2 * Math.PI - diff));
-        if (diff < (4 * Math.PI) / 180) {
-          const ux = Math.cos(snapAng), uy = Math.sin(snapAng);
-          const t = dx * ux + dy * uy;
-          return { p: { x: base.x + ux * t, y: base.y + uy * t }, snapped: false, type: "polar" };
-        }
+        const snapAng = Math.round(Math.atan2(dy, dx) / inc) * inc;
+        const ux = Math.cos(snapAng), uy = Math.sin(snapAng);
+        const t = dx * ux + dy * uy;
+        return { p: { x: base.x + ux * t, y: base.y + uy * t }, snapped: false, type: "polar" };
       }
     }
     return { p: raw, snapped: false, type: null };
