@@ -412,7 +412,7 @@ export const fr: Dict = {
   "ed.precision": "Décimales",
   "ed.layers": "Calques",
   "ed.copilot": "Interroger ce dessin",
-  "ed.copilotIntro": "Je lis la planche à l’écran — ses calques, ses longueurs, ses contours fermés et ses textes. Demandez-moi de mesurer ou de compter et je marquerai sur le dessin ce que j’ai mesuré.",
+  "ed.copilotIntro": "Je lis la planche à l’écran et je marque ce que je mesure, pour que vous voyiez l’origine de chaque chiffre.",
   "ed.copilotPlaceholder": "Mesurer la dalle… compter les portes… ajouter un mur sur A-WALL…",
   "ed.copilotAsk": "Demander",
   "ed.copilotThinking": "Lecture du dessin…",

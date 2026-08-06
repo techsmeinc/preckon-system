@@ -410,7 +410,7 @@ export const en = {
   "ed.precision": "Decimals",
   "ed.layers": "Layers",
   "ed.copilot": "Ask about this drawing",
-  "ed.copilotIntro": "I read the sheet on screen — its layers, lengths, closed outlines and text. Ask me to measure or count something and I will mark what I measured on the drawing.",
+  "ed.copilotIntro": "I read the sheet on screen and mark what I measure, so you can see where every figure came from.",
   "ed.copilotPlaceholder": "Measure the floor slab… count the doors… add a wall on A-WALL…",
   "ed.copilotAsk": "Ask",
   "ed.copilotThinking": "Reading the drawing…",
