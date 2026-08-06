@@ -156,6 +156,47 @@ function entityInRect(e: Entity, a: Pt, b: Pt): boolean {
   if (e.kind === "poly") return e.pts.some((p) => inside(p.x, p.y));
   return inside(e.x, e.y);
 }
+/**
+ * Ortho and Polar, as geometry.
+ *
+ * Ortho locks to whichever axis the cursor has moved further along. Polar locks
+ * to the nearest multiple of the increment. Both project the cursor ONTO the
+ * locked direction rather than snapping to a fixed distance, so the length is
+ * still the user's — only the angle is taken.
+ */
+export function constrainAngle(
+  base: Pt, raw: Pt, opts: { ortho?: boolean; polar?: boolean; polarInc?: number }
+): { p: Pt; type: "ortho" | "polar" } | null {
+  const dx = raw.x - base.x, dy = raw.y - base.y;
+  if (Math.hypot(dx, dy) <= 1e-9) return null;
+  if (opts.ortho) {
+    return {
+      p: Math.abs(dx) >= Math.abs(dy) ? { x: raw.x, y: base.y } : { x: base.x, y: raw.y },
+      type: "ortho",
+    };
+  }
+  if (opts.polar) {
+    const inc = ((opts.polarInc || 90) * Math.PI) / 180;
+    const snapAng = Math.round(Math.atan2(dy, dx) / inc) * inc;
+    const ux = Math.cos(snapAng), uy = Math.sin(snapAng);
+    const t = dx * ux + dy * uy;
+    return { p: { x: base.x + ux * t, y: base.y + uy * t }, type: "polar" };
+  }
+  return null;
+}
+
+/** Drop coincident points off the tail — a double-click to finish places the
+ *  last point twice, and a zero-length segment has no business in a drawing. */
+export function trimTail(d: Pt[]): Pt[] {
+  const out = [...d];
+  while (out.length >= 2) {
+    const a = out[out.length - 1], b = out[out.length - 2];
+    if (Math.hypot(a.x - b.x, a.y - b.y) > 1e-9) break;
+    out.pop();
+  }
+  return out;
+}
+
 function polygonArea(pts: Pt[]): number {
   let a = 0;
   for (let i = 0; i < pts.length; i++) {
@@ -483,16 +524,26 @@ export const CadViewport = forwardRef<CadHandle, Props>(function CadViewport(
   }, []);
 
   const finishPolyline = useCallback(() => {
-    const d = draftRef.current;
+    const d = trimTail(draftRef.current);
     if (d.length >= 2) addEntities({ kind: "poly", layer: activeLayer, closed: false, pts: d.map((q) => ({ x: q.x, y: q.y })) });
     setDraft([]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [addEntities, activeLayer]);
 
   const finishHatch = useCallback(() => {
-    const d = draftRef.current;
+    const d = trimTail(draftRef.current);
     if (d.length >= 3) addEntities(...hatchToEntities(d));
     setDraft([]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [addEntities, hatchToEntities]);
+
+  /** The one gesture that ends a multi-point command, whatever started it. */
+  const finishDraft = useCallback(() => {
+    const t = toolRef.current;
+    if (t === "polyline") { finishPolyline(); return true; }
+    if (t === "hatch") { finishHatch(); return true; }
+    return false;
+  }, [finishPolyline, finishHatch]);
 
   /* ── snapping ────────────────────────────────────────────────────────── */
   const currentBase = useCallback((): Pt | null => {
@@ -557,23 +608,13 @@ export const CadViewport = forwardRef<CadHandle, Props>(function CadViewport(
     // fired at all. With a constraint active, the constraint beats `nearest`.
     if (sn && !(constrained && sn.type === "nearest")) return { p: sn.p, snapped: true, type: sn.type };
 
+    // Polar snaps to the nearest increment, always. Engaging only within four
+    // degrees of one read as broken: most cursor positions got nothing and the
+    // tracking line never appeared. On means constrained — turn it off to draw
+    // a free angle.
     if (constrained && base) {
-      const dx = raw.x - base.x, dy = raw.y - base.y;
-      if (Math.hypot(dx, dy) > 1e-9) {
-        if (ortho) {
-          const p = Math.abs(dx) >= Math.abs(dy) ? { x: raw.x, y: base.y } : { x: base.x, y: raw.y };
-          return { p, snapped: false, type: "ortho" };
-        }
-        // Snap to the nearest increment, always. Engaging only within four
-        // degrees of an increment reads as broken: most cursor positions got
-        // nothing and the tracking line never appeared, so Polar looked dead.
-        // On means constrained — turn it off to draw a free angle.
-        const inc = ((polarInc || 90) * Math.PI) / 180;
-        const snapAng = Math.round(Math.atan2(dy, dx) / inc) * inc;
-        const ux = Math.cos(snapAng), uy = Math.sin(snapAng);
-        const t = dx * ux + dy * uy;
-        return { p: { x: base.x + ux * t, y: base.y + uy * t }, snapped: false, type: "polar" };
-      }
+      const c = constrainAngle(base, raw, { ortho, polar, polarInc });
+      if (c) return { p: c.p, snapped: false, type: c.type };
     }
     return { p: raw, snapped: false, type: null };
   }, [currentBase, resolveSnap, ortho, polar, polarInc]);
@@ -714,7 +755,11 @@ export const CadViewport = forwardRef<CadHandle, Props>(function CadViewport(
   const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const px = e.clientX - rect.left, py = e.clientY - rect.top;
-    // Middle and right always pan, so the sheet stays navigable in every tool.
+    // Right-click ends the current command, the way it does in AutoCAD — but
+    // only when there is one to end. With nothing in progress it still pans,
+    // so the sheet stays navigable in every tool.
+    if (e.button === 2 && draftRef.current.length && finishDraft()) return;
+    // Middle and right otherwise pan.
     const pan = e.button === 1 || e.button === 2 || (e.button === 0 && tool === "pan");
     if (e.button !== 0 && !pan) return;
     downRef.current = { x: px, y: py, pan, cam: camRef.current };
@@ -888,9 +933,9 @@ export const CadViewport = forwardRef<CadHandle, Props>(function CadViewport(
         : "Click points to measure · Esc clears";
     }
     if (tool === "select") return selection.size ? `${selection.size} selected · Del erases · Esc clears` : "Click to select · drag a window · Shift adds";
-    if (tool === "polyline") return `Click points · Enter finishes${draft.length ? ` · ${draft.length} pts` : ""}`;
+    if (tool === "polyline") return `Click points · double-click, right-click or Enter finishes${draft.length ? ` · ${draft.length} pts` : ""}`;
     if (tool === "dimension") return draft.length < 2 ? "Click the two points to dimension" : "Click to place the dimension line";
-    if (tool === "hatch") return selection.size ? "Click to hatch the selected closed shape" : draft.length ? `Trace a boundary · Enter fills · ${draft.length} pts` : "Trace a boundary · Enter fills · or select a shape first";
+    if (tool === "hatch") return selection.size ? "Click to hatch the selected closed shape" : draft.length ? `Trace a boundary · double-click or Enter fills · ${draft.length} pts` : "Trace a boundary · double-click fills · or select a shape first";
     if (isDraw(tool)) return `Draw ${tool} · Esc cancels`;
     if (isModify(tool)) return selection.size ? (draft.length ? "Click destination" : "Click base point") : "Select something first";
     if (tool === "pan") return "Drag to pan · wheel zooms";
@@ -907,6 +952,7 @@ export const CadViewport = forwardRef<CadHandle, Props>(function CadViewport(
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerLeave={() => { setCursor(null); if (!measuring) setCoords(null); }}
+      onDoubleClick={() => { if (!(draftRef.current.length && finishDraft())) fitNow(); }}
       onContextMenu={(e) => e.preventDefault()}
     >
       <canvas ref={canvasRef} style={{ width: "100%", height: "100%", display: "block" }} />
