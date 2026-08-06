@@ -1296,3 +1296,6 @@ p a,li a,td a,.csub a{min-block-size:0;}
 .ced-lay-body .ced-layers{max-height:none; flex:1 1 auto; min-height:0; margin:0;}
 .ced-lay-body .ced-layeracts{margin:0;}
 .ced-stats{flex:none; padding-top:0;}
+/* "Nothing changed" is information, not a warning — it should read as calm
+   fact beside an answer, while a real edit keeps the amber. */
+.ced-cop-edit.none{background:var(--panel-2); color:var(--slate-500);}

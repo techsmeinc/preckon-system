@@ -453,13 +453,19 @@ export function CadEditor({
                       <div className="ced-cop-turn" key={i}>
                         <div className="q">{m.q}</div>
                         <div className="a">{m.a}</div>
-                        {(m.ops > 0 || (m.removed ?? 0) > 0) && (
+                        {/* Stated on every turn, including when nothing
+                            happened. An answer that describes an edit which was
+                            never applied is indistinguishable from one that
+                            worked, unless the drawing says otherwise. */}
+                        {m.ops > 0 || (m.removed ?? 0) > 0 ? (
                           <div className="ced-cop-edit">
                             {m.ops > 0 && t("ed.copilotAdded", { n: m.ops })}
                             {m.ops > 0 && (m.removed ?? 0) > 0 ? " · " : ""}
                             {(m.removed ?? 0) > 0 && t("ed.copilotRemoved", { n: m.removed ?? 0 })}
                             {" · "}{t("ed.copilotUndo")}
                           </div>
+                        ) : (
+                          <div className="ced-cop-edit none">{t("ed.copilotNoChange")}</div>
                         )}
                       </div>
                     ))}

@@ -420,6 +420,7 @@ export const fr: Dict = {
   "ed.copilotAdded": "{n} ajouté(s) au dessin",
   "ed.copilotRemoved": "{n} supprimé(s)",
   "ed.copilotUndo": "Ctrl+Z pour annuler",
+  "ed.copilotNoChange": "Le dessin n’a pas été modifié",
   "ed.eg1": "Résumer ce dessin",
   "ed.eg2": "Quelle est la plus grande surface, et sur quel calque ?",
   "ed.eg3": "Quelle longueur de tracé sur chaque calque de murs ?",

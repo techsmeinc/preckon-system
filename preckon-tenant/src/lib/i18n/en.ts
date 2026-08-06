@@ -418,6 +418,7 @@ export const en = {
   "ed.copilotAdded": "{n} added to the drawing",
   "ed.copilotRemoved": "{n} removed",
   "ed.copilotUndo": "Ctrl+Z to undo",
+  "ed.copilotNoChange": "The drawing was not changed",
   "ed.eg1": "Summarise this drawing",
   "ed.eg2": "What is the largest floor area, and on which layer?",
   "ed.eg3": "How much linework is on each wall layer?",

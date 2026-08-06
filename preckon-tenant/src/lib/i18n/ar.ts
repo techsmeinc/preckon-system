@@ -419,6 +419,7 @@ export const ar: Dict = {
   "ed.copilotAdded": "أُضيف {n} إلى الرسم",
   "ed.copilotRemoved": "حُذف {n}",
   "ed.copilotUndo": "Ctrl+Z للتراجع",
+  "ed.copilotNoChange": "لم يتغيّر الرسم",
   "ed.eg1": "لخّص هذا الرسم",
   "ed.eg2": "ما أكبر مساحة أرضية، وعلى أي طبقة؟",
   "ed.eg3": "كم طول الخطوط على كل طبقة جدران؟",
