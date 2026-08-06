@@ -73,7 +73,8 @@ When the user asks you to add or remove something, emit operations:
 Coordinates are DRAWING UNITS, in the drawing's own coordinate system — read the extents in the digest and place new work inside them. A wall drawn at the origin of a sheet whose linework sits at x=180000 is invisible.
 Deleting is destructive and the user cannot see what will go until it has gone: name what you are about to delete in your answer, and never delete a layer you were not asked about.
 
-Always call the tool exactly once. Put the prose in "answer".`;
+Always call the tool exactly once. Put the prose in "answer".
+NEVER write the tool call, its parameters or any JSON as ordinary text. If for any reason you cannot call the tool, reply in plain sentences with no markup and no coordinates.`;
 
 const TOOL = {
   name: "respond",
@@ -142,6 +143,51 @@ function sanitise(raw: any, digest: Digest): { ops: CadOp[]; marks: CadMark[] } 
   return { ops: ops.slice(0, 200), marks: marks.slice(0, 60) };
 }
 
+
+/**
+ * Recover an answer from a model that wrote its tool call as prose.
+ *
+ * It happens: instead of a tool_use block the reply arrives as text containing
+ * `<parameter name="marks">[{...}]</parameter>`, or a bare JSON object. Passing
+ * that through put a wall of coordinates in front of the estimator where a
+ * sentence should have been. So the text path salvages what it can — the
+ * answer, and any marks or ops that came with it — and refuses to display the
+ * scaffolding either way.
+ */
+export function recoverFromText(text: string): { answer: string; raw: any } {
+  if (!text) return { answer: "", raw: null };
+  let raw: any = null;
+
+  // The whole reply as one JSON object.
+  const whole = text.trim();
+  if (whole.startsWith("{")) {
+    try { raw = JSON.parse(whole); } catch { /* not clean JSON */ }
+  }
+
+  // XML-shaped tool syntax: pull each named parameter out, then delete it.
+  let prose = text;
+  if (!raw) {
+    const params: Record<string, any> = {};
+    const re = /<parameter\s+name="([^"]+)"\s*>([\s\S]*?)(?:<\/parameter>|$)/g;
+    for (const m of text.matchAll(re)) {
+      const body = m[2].trim();
+      try { params[m[1]] = JSON.parse(body); } catch { params[m[1]] = body; }
+    }
+    if (Object.keys(params).length) raw = params;
+    prose = text.replace(re, " ");
+  }
+
+  let answer = typeof raw?.answer === "string" ? raw.answer : prose;
+  answer = answer
+    .replace(/<\/?(?:function_calls|invoke|parameter|antml:[a-z_]+)[^>]*>/gi, " ")
+    // A leading or trailing JSON blob is scaffolding, not an answer.
+    .replace(/^\s*[[{][\s\S]*?[\]}]\s*$/g, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+  return { answer, raw };
+}
+
 export interface CadAgentArgs {
   question: string;
   digest: Digest;
@@ -170,10 +216,25 @@ export async function runCadAgent({
     const use = (res.content ?? []).find((c: any) => c.type === "tool_use");
     const text = (res.content ?? []).filter((c: any) => c.type === "text").map((c: any) => c.text).join("").trim();
 
-    if (!use) { answer = text || answer; break; }
+    // No tool block: the model wrote the call as prose. Salvage the answer and
+    // any marks it meant to send, and never show the scaffolding.
+    if (!use) {
+      const rec = recoverFromText(text);
+      if (rec.answer) answer = rec.answer;
+      if (rec.raw) {
+        const clean = sanitise(rec.raw, digest);
+        if (clean.ops.length) ops = clean.ops;
+        if (clean.marks.length) marks = clean.marks;
+      }
+      break;
+    }
 
     const input = use.input ?? {};
-    if (typeof input.answer === "string" && input.answer.trim()) answer = input.answer.trim();
+    if (typeof input.answer === "string" && input.answer.trim()) {
+      // Even inside the tool call, `answer` occasionally arrives with the
+      // marks JSON appended. Strip it rather than print it.
+      answer = recoverFromText(input.answer).answer || input.answer.trim();
+    }
     const clean = sanitise(input, digest);
     ops = clean.ops;
     marks = clean.marks;
