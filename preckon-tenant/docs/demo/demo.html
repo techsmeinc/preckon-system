@@ -1,0 +1,1210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Preckon — Demo Runbook</title>
+<style>
+/* ── tokens ────────────────────────────────────────────────────────────────
+   The palette is Preckon's own — the teal the product uses for its primary
+   action, and the deep blue-black it sets type in — because a document about
+   the product should not look like it came from somewhere else. The teal is
+   spent sparingly: on the act rules, the checked state, and nothing else. Warm
+   amber and red are reserved for "watch out" and "if it breaks", so a caution
+   never reads as decoration. */
+:root{
+  --paper:#F7F9F8; --card:#FFFFFF; --sunken:#EFF3F2; --edge:#DDE5E3;
+  --ink:#0B1B2B; --ink-2:#3C4F5C; --ink-3:#6B7F8B;
+  --teal:#15C2A8; --teal-deep:#0E6E62; --teal-soft:#E4F7F3;
+  --amber:#B26A00; --amber-soft:#FDF2E0;
+  --red:#B3261E; --red-soft:#FBE9E7;
+  --shadow:0 1px 2px rgba(11,27,43,.05), 0 10px 30px rgba(11,27,43,.05);
+  --sans:ui-sans-serif,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"Cascadia Mono","Cascadia Code",Consolas,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#08151C; --card:#0F2028; --sunken:#0B1A21; --edge:#1D3640;
+    --ink:#E6EFF1; --ink-2:#A6BCC4; --ink-3:#78929C;
+    --teal:#3EDCC2; --teal-deep:#7FE8D5; --teal-soft:#0E2C2B;
+    --amber:#E0A85A; --amber-soft:#2A2110;
+    --red:#F0837B; --red-soft:#2B1614;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.32);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#08151C; --card:#0F2028; --sunken:#0B1A21; --edge:#1D3640;
+  --ink:#E6EFF1; --ink-2:#A6BCC4; --ink-3:#78929C;
+  --teal:#3EDCC2; --teal-deep:#7FE8D5; --teal-soft:#0E2C2B;
+  --amber:#E0A85A; --amber-soft:#2A2110;
+  --red:#F0837B; --red-soft:#2B1614;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.32);
+}
+:root[data-theme="light"]{
+  --paper:#F7F9F8; --card:#FFFFFF; --sunken:#EFF3F2; --edge:#DDE5E3;
+  --ink:#0B1B2B; --ink-2:#3C4F5C; --ink-3:#6B7F8B;
+  --teal:#15C2A8; --teal-deep:#0E6E62; --teal-soft:#E4F7F3;
+  --amber:#B26A00; --amber-soft:#FDF2E0;
+  --red:#B3261E; --red-soft:#FBE9E7;
+  --shadow:0 1px 2px rgba(11,27,43,.05), 0 10px 30px rgba(11,27,43,.05);
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--paper); color:var(--ink); font-family:var(--sans);
+  font-size:16px; line-height:1.62; -webkit-font-smoothing:antialiased;}
+.wrap{max-width:860px; margin:0 auto; padding:0 22px 110px;}
+p{margin:0 0 14px; max-width:68ch;}
+a{color:var(--teal-deep);}
+code,kbd,.mono{font-family:var(--mono); font-size:.88em;}
+kbd{background:var(--sunken); border:1px solid var(--edge); border-bottom-width:2px;
+  border-radius:5px; padding:1px 6px; white-space:nowrap;}
+code{background:var(--sunken); border-radius:5px; padding:1px 6px;}
+
+/* ── masthead ─────────────────────────────────────────────────────────── */
+.mast{padding:46px 0 10px;}
+.eyebrow{font-family:var(--mono); font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--teal-deep); margin:0 0 10px;}
+.mast h1{margin:0; font-size:clamp(30px,5vw,42px); line-height:1.08; letter-spacing:-.025em;
+  font-weight:660; text-wrap:balance;}
+.mast .lede{margin-top:14px; font-size:18px; color:var(--ink-2); max-width:60ch;}
+.meta{display:flex; gap:8px; flex-wrap:wrap; margin:20px 0 8px;}
+.meta span{font-family:var(--mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+  background:var(--sunken); border:1px solid var(--edge); border-radius:999px; padding:5px 11px;
+  color:var(--ink-3);}
+
+/* ── sticky act nav ───────────────────────────────────────────────────── */
+.tocbar{position:sticky; top:0; z-index:30; background:var(--paper);
+  background:color-mix(in srgb,var(--paper) 90%,transparent); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--edge); margin-bottom:8px;
+  padding:10px 0; display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+.tocbar a{font-size:12.5px; font-weight:600; color:var(--ink-2); text-decoration:none;
+  border:1px solid var(--edge); border-radius:999px; padding:6px 12px; white-space:nowrap;}
+.tocbar a:hover{border-color:var(--ink-3); color:var(--ink);}
+.tocbar .grow{margin-inline-start:auto; display:flex; gap:8px;}
+button.act{font-family:var(--sans); font-size:12.5px; font-weight:600; cursor:pointer;
+  background:var(--card); color:var(--ink); border:1px solid var(--edge); border-radius:9px;
+  padding:7px 13px;}
+button.act:hover{border-color:var(--ink-3);}
+button.act.pri{background:var(--teal); border-color:var(--teal); color:#052620;}
+:root[data-theme="dark"] button.act.pri{color:#04211C;}
+button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{
+  outline:2px solid var(--teal-deep); outline-offset:2px;}
+
+/* ── acts ─────────────────────────────────────────────────────────────── */
+.act-head{margin:52px 0 6px; padding-top:22px; border-top:2px solid var(--teal);}
+.act-head .no{font-family:var(--mono); font-size:11px; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--teal-deep);}
+.act-head h2{margin:6px 0 0; font-size:clamp(23px,3.4vw,29px); line-height:1.18;
+  letter-spacing:-.02em; font-weight:640; text-wrap:balance;}
+.act-head .sub{margin-top:8px; color:var(--ink-2);}
+h3{margin:34px 0 10px; font-size:19px; letter-spacing:-.01em; font-weight:620; text-wrap:balance;}
+h4{margin:22px 0 8px; font-size:15px; font-weight:640;}
+
+/* ── a demo step ───────────────────────────────────────────────────────
+   Numbered because a demo genuinely is a sequence — the order is the
+   information. Each step separates the three things a presenter confuses
+   under pressure: what you do, what they see, and what you say while it
+   happens. */
+.step{background:var(--card); border:1px solid var(--edge); border-radius:14px;
+  box-shadow:var(--shadow); margin:12px 0; overflow:hidden;}
+.step-top{display:grid; grid-template-columns:auto 1fr auto; gap:14px; align-items:start;
+  padding:15px 17px;}
+.tick{appearance:none; width:22px; height:22px; margin:2px 0 0; flex:none; cursor:pointer;
+  border:1.5px solid var(--ink-3); border-radius:7px; background:var(--card); position:relative;}
+.tick:checked{background:var(--teal); border-color:var(--teal);}
+.tick:checked::after{content:""; position:absolute; inset:0;
+  background:no-repeat center/13px url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23052620' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12l4.5 4.5L19 7'/></svg>");}
+.step-n{font-family:var(--mono); font-size:11px; color:var(--ink-3); padding-top:4px;}
+.step h5{margin:0 0 4px; font-size:16px; font-weight:620; line-height:1.35;}
+.step .do{margin:0; color:var(--ink-2);}
+.step:has(.tick:checked){opacity:.62;}
+.step:has(.tick:checked) h5{text-decoration:line-through; text-decoration-color:var(--ink-3);}
+
+.detail{padding:0 17px 15px;}
+.detail dl{display:grid; grid-template-columns:92px 1fr; gap:5px 14px; margin:2px 0 0;
+  font-size:14.5px;}
+.detail dt{font-family:var(--mono); font-size:10px; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--ink-3); padding-top:4px;}
+.detail dd{margin:0; color:var(--ink-2);}
+.detail dd.say{color:var(--ink); font-style:italic;}
+@media (max-width:640px){ .detail dl{grid-template-columns:1fr;} .detail dt{padding-top:9px;} }
+
+/* ── screenshot slot ──────────────────────────────────────────────────── */
+.shot{margin:12px 17px 16px; border:1.5px dashed var(--edge); border-radius:12px;
+  background:var(--sunken); padding:14px; text-align:center;}
+.shot.filled{border-style:solid; background:var(--card); padding:8px;}
+.shot img{display:block; width:100%; height:auto; border-radius:8px; border:1px solid var(--edge);}
+.shot .sid{font-family:var(--mono); font-size:10px; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--teal-deep);}
+.shot .what{font-size:13.5px; color:var(--ink-2); margin:5px 0 10px; max-width:56ch;
+  margin-inline:auto;}
+.shot .cap{font-size:12.5px; color:var(--ink-3); margin-top:8px; text-align:start;}
+.shot-tools{display:flex; gap:7px; justify-content:center; flex-wrap:wrap; margin-top:8px;}
+.shot-tools button{font-size:12px; padding:6px 11px;}
+
+/* ── callouts ─────────────────────────────────────────────────────────── */
+.note,.warn,.fail{border-radius:12px; padding:13px 16px; margin:16px 0;
+  border:1px solid var(--edge); background:var(--sunken);}
+.note{border-inline-start:3px solid var(--teal);}
+.warn{border-inline-start:3px solid var(--amber); background:var(--amber-soft); border-color:var(--amber-soft);}
+.fail{border-inline-start:3px solid var(--red); background:var(--red-soft); border-color:var(--red-soft);}
+.note p,.warn p,.fail p{margin:0; font-size:14.5px; max-width:none;}
+.note p + p,.warn p + p,.fail p + p{margin-top:8px;}
+.lbl{font-family:var(--mono); font-size:10px; letter-spacing:.13em; text-transform:uppercase;
+  display:block; margin-bottom:5px;}
+.note .lbl{color:var(--teal-deep);} .warn .lbl{color:var(--amber);} .fail .lbl{color:var(--red);}
+
+/* ── prompt cards ─────────────────────────────────────────────────────── */
+.prompts{display:grid; gap:8px; margin:12px 0 20px;}
+.prompt{background:var(--card); border:1px solid var(--edge); border-radius:11px;
+  padding:12px 15px; display:grid; grid-template-columns:1fr auto; gap:12px; align-items:center;}
+.prompt q{font-family:var(--mono); font-size:13.5px; color:var(--ink); quotes:none;}
+.prompt q::before,.prompt q::after{content:"";}
+.prompt .why{grid-column:1/-1; font-size:13px; color:var(--ink-3); margin-top:2px;}
+.copy{font-size:11px; padding:5px 10px; white-space:nowrap;}
+
+/* ── tables ───────────────────────────────────────────────────────────── */
+.tw{overflow-x:auto; border:1px solid var(--edge); border-radius:12px; margin:14px 0;}
+table{width:100%; border-collapse:collapse; font-size:14px; min-width:520px;}
+th,td{text-align:start; padding:10px 14px; border-bottom:1px solid var(--edge);
+  vertical-align:top;}
+th{font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-3); background:var(--sunken);}
+tr:last-child td{border-bottom:0;}
+td.mono{font-family:var(--mono); font-size:12.5px;}
+
+ul,ol{margin:0 0 14px; padding-inline-start:22px; max-width:68ch;}
+li{margin-bottom:5px;}
+
+footer{margin-top:56px; padding-top:20px; border-top:1px solid var(--edge);
+  font-size:13px; color:var(--ink-3);}
+
+@media print{
+  .tocbar,.shot-tools,button.act{display:none !important;}
+  body{background:#fff; font-size:11pt;}
+  .step,.note,.warn,.fail,.prompt{break-inside:avoid; box-shadow:none;}
+  .act-head{break-before:page;}
+  .shot:not(.filled){display:none;}
+}
+@media (prefers-reduced-motion:no-preference){ .step{transition:opacity .15s ease;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="mast">
+  <p class="eyebrow">Demonstration runbook</p>
+  <h1>Preckon, shown in thirty minutes</h1>
+  <p class="lede">Two planes, one story: the console a platform operator runs the business from,
+    and the workspace a contractor actually estimates in — ending with a drawing built from
+    nothing and a priced bill that can name where every number came from.</p>
+  <div class="meta">
+    <span>~30 minutes</span><span>2 presenters or 1</span><span>Live, not slides</span>
+    <span id="progress">0 of 0 steps</span>
+  </div>
+</header>
+
+<nav class="tocbar">
+  <a href="#prep">Before you start</a>
+  <a href="#act1">1 · Host</a>
+  <a href="#act2">2 · Workspace</a>
+  <a href="#act3">3 · Drawings</a>
+  <a href="#act4">4 · Bill &amp; programme</a>
+  <a href="#prompts">Prompts</a>
+  <a href="#recover">If it breaks</a>
+  <span class="grow">
+    <button class="act" id="theme" type="button">Theme</button>
+    <button class="act" id="reset" type="button">Reset ticks</button>
+    <button class="act pri" id="export" type="button">Export document</button>
+  </span>
+</nav>
+
+<p>Everything below is done live in the product. Slides are not used, because the single
+  most persuasive thing about Preckon is that the numbers on screen can be traced back to a
+  page of a tender or a layer of a drawing — and a screenshot cannot be interrogated.</p>
+
+<p>The runbook is written so that one person can present it alone. Each step separates the
+  three things that get muddled under pressure: <strong>what you do</strong>,
+  <strong>what they should see</strong>, and <strong>what you say</strong> while it happens.
+  Tick the steps as you rehearse; the ticks are saved in this browser.</p>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<section id="prep">
+<div class="act-head">
+  <span class="no">Act zero</span>
+  <h2>Before you start</h2>
+  <p class="sub">Fifteen minutes the day before, five minutes on the day. Every item here is
+    something that has gone wrong in a real demo.</p>
+</div>
+
+<h3>The day before</h3>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="p1"><span class="step-n">P1</span>
+    <div><h5><label for="p1">Both planes answer over HTTPS</label></h5>
+      <p class="do">Open the host console and the tenant workspace in two tabs and sign in to each.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>Why</dt><dd>A certificate warning in front of a client is unrecoverable — you will spend
+      the next five minutes explaining TLS instead of estimating.</dd>
+  </dl></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="p2"><span class="step-n">P2</span>
+    <div><h5><label for="p2">One project already finished, one deliberately empty</label></h5>
+      <p class="do">Have a project whose chain has been run all the way to Procurement, and a
+        second, brand-new project with nothing in it.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>Why</dt><dd>The finished one is what you <em>show</em>; the empty one is what you
+      <em>build</em>. Trying to do both in one project means either waiting on an agent in
+      silence, or having nothing to demonstrate depth with.</dd>
+    <dt>Name it</dt><dd>Something plainly generic — <span class="mono">Clinic Extension —
+      Phase 2</span> reads as a real job without being anyone's real job.</dd>
+  </dl></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="p3"><span class="step-n">P3</span>
+    <div><h5><label for="p3">The finished project has real documents in it</label></h5>
+      <p class="do">A tender PDF, a specification, and a drawing set of at least three
+        <span class="mono">.dwg</span> or <span class="mono">.dxf</span> sheets.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>Why</dt><dd>Every claim you make about traceability is only as good as the document it
+      traces to. An empty document set turns the whole demo into an assertion.</dd>
+  </dl></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="p4"><span class="step-n">P4</span>
+    <div><h5><label for="p4">The worker has its model key</label></h5>
+      <p class="do">Confirm the worker container has <span class="mono">ANTHROPIC_API_KEY</span>
+        set, and that the app container does not.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>Why</dt><dd>Without it every agent step fails, and the live-build half of the demo has
+      nothing to run. The second half of that sentence is worth saying out loud to a
+      security-minded audience — the key lives only where the work happens.</dd>
+  </dl></div>
+</div>
+
+<h3>On the day</h3>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="p5"><span class="step-n">P5</span>
+    <div><h5><label for="p5">Clean the browser</label></h5>
+      <p class="do">One window. Zoom at 100%. Bookmarks bar hidden. Downloads folder emptied.
+        Notifications off.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>Why</dt><dd>The downloads one matters more than it sounds: you will export two Excel
+      files, and the client needs to see them arrive.</dd>
+  </dl></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="p6"><span class="step-n">P6</span>
+    <div><h5><label for="p6">Excel is installed and already open once</label></h5>
+      <p class="do">Open any spreadsheet and close it, so the first real open is instant.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>Why</dt><dd>Excel's cold start is thirty seconds of dead air at the emotional peak of
+      the demo.</dd>
+  </dl></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="p7"><span class="step-n">P7</span>
+    <div><h5><label for="p7">Decide who you are talking to</label></h5>
+      <p class="do">If they buy software, lead with Act 1. If they estimate buildings, skip
+        straight to Act 2 and come back to the console only if asked.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>Why</dt><dd>Estimators do not care how tenants are provisioned, and platform buyers do
+      not care about blockwork. Ten minutes spent on the wrong plane is the most common way
+      this demo fails.</dd>
+  </dl></div>
+</div>
+
+<div class="warn">
+  <span class="lbl">Watch out</span>
+  <p>Do not demonstrate on a project whose name, client or drawings belong to a real customer.
+    Everything on screen is readable by whoever is in the room, and a competitor's bill of
+    quantities on a projector is a conversation you cannot take back.</p>
+</div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<section id="act1">
+<div class="act-head">
+  <span class="no">Act one · 6 minutes</span>
+  <h2>The console: running Preckon as a business</h2>
+  <p class="sub">For the person buying the platform, not the person using it. Skip this act
+    entirely for a contractor audience.</p>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="h1"><span class="step-n">1</span>
+    <div><h5><label for="h1">Sign in to the host console</label></h5>
+      <p class="do">Open the host URL and sign in as the platform operator.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>An overview: how many tenants, recurring revenue by currency, what
+      needs attention, and a live activity feed.</dd>
+    <dt>You say</dt><dd class="say">"This is the side your customers never see. One console,
+      every workspace, and the numbers are read from the same database the workspaces write
+      to — nothing here is a report that has to be refreshed."</dd>
+  </dl></div>
+  <div class="shot" data-shot="H-01" data-what="Host Overview immediately after sign-in, with the KPI tiles and the activity feed visible."></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="h2"><span class="step-n">2</span>
+    <div><h5><label for="h2">Open Tenants and click into one</label></h5>
+      <p class="do">Show the list, then open a tenant's drawer.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>Every customer organisation with edition, status, region and seats;
+      the drawer adds real usage against its entitlements.</dd>
+    <dt>You say</dt><dd class="say">"Usage is measured, not estimated. If a workspace is over
+      its seats you find out here, before they do."</dd>
+  </dl></div>
+  <div class="shot" data-shot="H-02" data-what="The tenant drawer open, showing usage against entitlements."></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="h3"><span class="step-n">3</span>
+    <div><h5><label for="h3">Create a tenant, live</label></h5>
+      <p class="do">New tenant → a name, a subdomain, an owner email, an edition → Create.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>The workspace is provisioned there and then, and you are handed the
+      owner's credentials and a link straight into it.</dd>
+    <dt>You say</dt><dd class="say">"That is onboarding. Not a ticket, not a migration — a
+      customer can be working in about the time it took me to type their name."</dd>
+    <dt>Careful</dt><dd>Use an obviously disposable name. You are creating a real tenant.</dd>
+  </dl></div>
+  <div class="shot" data-shot="H-03" data-what="The confirmation panel after creating a tenant, with the owner credentials and the Open-workspace link."></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="h4"><span class="step-n">4</span>
+    <div><h5><label for="h4">Editions, features and pricing</label></h5>
+      <p class="do">Open Editions, show the feature matrix, then Pricing.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>Which modules each edition unlocks, and what each edition costs
+      monthly and annually.</dd>
+    <dt>You say</dt><dd class="say">"Packaging is data, not code. Moving a feature between
+      editions is a toggle here, and every workspace picks it up immediately."</dd>
+  </dl></div>
+  <div class="shot" data-shot="H-04" data-what="The editions x features matrix."></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="h5"><span class="step-n">5</span>
+    <div><h5><label for="h5">Observability, then verify the audit chain</label></h5>
+      <p class="do">Show queue depth and worker heartbeats, then Audit → Verify audit chain.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>Live queue and worker health, model success rates and latency; then a
+      hash-chain verification that reports intact.</dd>
+    <dt>You say</dt><dd class="say">"Every action in every workspace is hashed into a chain.
+      If a record were altered behind the application's back, this check is where it would
+      show up. That is the difference between a log and evidence."</dd>
+  </dl></div>
+  <div class="shot" data-shot="H-05" data-what="The audit chain verification result."></div>
+</div>
+
+<div class="note">
+  <span class="lbl">The point of act one</span>
+  <p>Say it in one line before you move on: <em>"One console, any number of contractors,
+    and the operator can see health, usage and money without touching a customer's data."</em></p>
+</div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<section id="act2">
+<div class="act-head">
+  <span class="no">Act two · 8 minutes</span>
+  <h2>The workspace: from a tender to a scope</h2>
+  <p class="sub">Switch to the tenant URL and sign in as the contractor's owner. From here on,
+    everything is what an estimator does on a Tuesday.</p>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="t1"><span class="step-n">6</span>
+    <div><h5><label for="t1">Open the dashboard</label></h5>
+      <p class="do">Sign in and let them read it for a moment before you speak.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>A greeting by name, active bids, deadlines, and — the important one —
+      "Needs your review".</dd>
+    <dt>You say</dt><dd class="say">"Preckon's rule is one sentence: agents propose, humans
+      dispose. Nothing an agent produces becomes a fact until somebody here accepts it. This
+      panel is that queue."</dd>
+  </dl></div>
+  <div class="shot" data-shot="T-01" data-what="The tenant dashboard with the 'Needs your review' panel populated."></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="t2"><span class="step-n">7</span>
+    <div><h5><label for="t2">Open the finished project and show the chain</label></h5>
+      <p class="do">Projects → the completed job. Point at the chain-progress strip.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>Documents → Tender → Drawings → Specs → BOQ → Estimate → Schedule →
+      Technical Narrative → Procurement, each with its own status.</dd>
+    <dt>You say</dt><dd class="say">"That is a bid, in order. Each stage reads what the ones
+      before it produced. Nothing skips ahead, and nothing runs on a guess."</dd>
+  </dl></div>
+  <div class="shot" data-shot="T-02" data-what="The project overview with the full chain-progress strip and per-stage status."></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="t3"><span class="step-n">8</span>
+    <div><h5><label for="t3">Upload a tender document, live</label></h5>
+      <p class="do">Switch to the <em>empty</em> project → Documents → drop in a tender PDF.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>The file is ingested, typed, and its page text extracted — not just
+      stored.</dd>
+    <dt>You say</dt><dd class="say">"It is being read, not filed. In a moment the agents will
+      quote it back at us with a page number."</dd>
+  </dl></div>
+  <div class="shot" data-shot="T-03" data-what="The Documents tab immediately after the upload, showing the ingested file with its type and status."></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="t4"><span class="step-n">9</span>
+    <div><h5><label for="t4">Run TenderLogix and let them watch it work</label></h5>
+      <p class="do">Open the Tender stage and run it. Do not fill the silence with apology —
+        use it.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>A run with a step timeline that pauses at a gate.</dd>
+    <dt>You say</dt><dd class="say">"It takes real time because it is really reading. And
+      notice it has stopped — that is a gate. The chain will not carry on past a decision that
+      is mine to make."</dd>
+    <dt>Then</dt><dd>Accept the scope summary and watch the stage go green.</dd>
+  </dl></div>
+  <div class="shot" data-shot="T-04" data-what="The Tender stage showing a proposal awaiting acceptance, with its confidence and source."></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="t5"><span class="step-n">10</span>
+    <div><h5><label for="t5">Open a proposal and correct it</label></h5>
+      <p class="do">Click into any proposed record, change a value, and save the correction.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>The source it came from, then a new version superseding the old one,
+      and a message saying how many downstream records were marked stale.</dd>
+    <dt>You say</dt><dd class="say">"I have just disagreed with the machine. It kept its
+      version, recorded mine on the audit chain, and told me exactly what now needs
+      re-running. That is what estimating software has always been missing — not the
+      correction, the consequences of it."</dd>
+  </dl></div>
+  <div class="shot" data-shot="T-05" data-what="The review drawer with 'Where this came from' expanded, mid-correction."></div>
+</div>
+
+<div class="note">
+  <span class="lbl">If someone asks about accuracy</span>
+  <p>This is the moment to answer it, and the answer is not "it is very accurate". It is:
+    <em>"Every proposal carries a confidence and a source, anything doubtful is flagged for
+    review rather than quietly used, and you can correct any of it at any point — including
+    after you have already accepted it."</em></p>
+</div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<section id="act3">
+<div class="act-head">
+  <span class="no">Act three · 9 minutes</span>
+  <h2>Drawings: reading them, correcting them, and building one from nothing</h2>
+  <p class="sub">The part nobody expects. Give it the time it deserves — this is where a
+    room of estimators stops being polite and starts asking real questions.</p>
+</div>
+
+<h3>What the parser actually read</h3>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="d1"><span class="step-n">11</span>
+    <div><h5><label for="d1">Open Drawings on the finished project</label></h5>
+      <p class="do">Pick a sheet from the dropdown and let it render.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>The drawing itself, with units, footprint, block counts and per-layer
+      lengths beside it. Schedules found on the sheet are folded below it.</dd>
+    <dt>You say</dt><dd class="say">"This is not a preview. These are the exact facts the
+      agents were given — the layer a length was run off, the block that was counted. When
+      somebody questions a quantity later, this is where the answer is."</dd>
+    <dt>Do</dt><dd>Zoom into a detail with the wheel, so they see it is the real drawing.</dd>
+  </dl></div>
+  <div class="shot" data-shot="T-06" data-what="The Issued drawings panel: the rendered sheet with the measured facts panel beside it."></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="d2"><span class="step-n">12</span>
+    <div><h5><label for="d2">Open a schedule the parser lifted off the sheet</label></h5>
+      <p class="do">Expand one of the folded tables — a finishes or door schedule.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>The schedule as a table, named after itself, with the CAD layer it
+      came from beside it.</dd>
+    <dt>You say</dt><dd class="say">"That table was drawn as loose text on a layer. It has been
+      read back into rows, so a finishes schedule can price a finishes bill."</dd>
+  </dl></div>
+</div>
+
+<h3>Marking up an issued drawing</h3>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="d3"><span class="step-n">13</span>
+    <div><h5><label for="d3">Open the drawing editor</label></h5>
+      <p class="do">Press <strong>Edit &amp; mark up</strong> on the sheet, or go to
+        <strong>Tools → Drawing editor</strong>.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>A model-space canvas with the drawing's real geometry, its real layer
+      list, and a CAD toolbar.</dd>
+    <dt>You say</dt><dd class="say">"This is not an image viewer with a pen on top. Those are
+      the drawing's own lines, on its own layers, at its own coordinates."</dd>
+  </dl></div>
+  <div class="shot" data-shot="T-07" data-what="The drawing editor with an issued sheet loaded, ribbon and layer panel visible."></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="d4"><span class="step-n">14</span>
+    <div><h5><label for="d4">Prove the snapping is real</label></h5>
+      <p class="do">Set <span class="mono">UNITS</span> to mm and
+        <span class="mono">DECIMALS</span> to 0. Press <kbd>F3</kbd> for object snap and
+        <kbd>F8</kbd> for ortho. Start a line and hover a wall end, then a midpoint, then a
+        crossing.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>A different green marker for each snap — a square for an endpoint, a
+      triangle for a midpoint, a cross for an intersection — with the name beside the cursor.</dd>
+    <dt>You say</dt><dd class="say">"Anyone who has drafted will recognise those. Endpoint,
+      midpoint, intersection, perpendicular. F3, F8, F10 do what they have always done."</dd>
+    <dt>Why it lands</dt><dd>Nothing else you show today will earn as much credibility with a
+      technical audience as an endpoint snap behaving correctly.</dd>
+  </dl></div>
+  <div class="shot" data-shot="T-08" data-what="Close crop of the canvas with a snap marker and its label visible at the cursor."></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="d5"><span class="step-n">15</span>
+    <div><h5><label for="d5">Dimension something, then hatch something</label></h5>
+      <p class="do">Dimension → click two wall faces → click to place the line. Then select a
+        closed room outline → Hatch.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>A proper aligned dimension with architectural ticks and the measured
+      value in millimetres; then a 45° hatch filling the room.</dd>
+    <dt>You say</dt><dd class="say">"The value is measured off the geometry, not typed. And
+      both of these go onto their own layers, so the recipient can switch our markup off."</dd>
+  </dl></div>
+  <div class="shot" data-shot="T-09" data-what="A placed dimension and a hatched area on the sheet."></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="d6"><span class="step-n">16</span>
+    <div><h5><label for="d6">Measure a room and read the area aloud</label></h5>
+      <p class="do">Measure → click round the inside of a room → note the running total and
+        the enclosed area at the bottom-left.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>Segment lengths on each leg, a running total, and an area once three
+      points are down. Change <span class="mono">UNITS</span> to m and it all converts.</dd>
+    <dt>You say</dt><dd class="say">"Take-off, on the issued drawing, in the unit you think in."</dd>
+  </dl></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="d7"><span class="step-n">17</span>
+    <div><h5><label for="d7">Save it back to the project</label></h5>
+      <p class="do">Press <strong>Save to project</strong>. Then go back to Drawings and open
+        the sheet dropdown.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>A new drawing in the set, sitting next to the original — the markup as
+      its own revision.</dd>
+    <dt>You say</dt><dd class="say">"The issued drawing is untouched. It has to be — it is what
+      a signed-off quantity was measured from. Our markup arrives as a revision beside it, and
+      the parser reads that one too."</dd>
+  </dl></div>
+  <div class="shot" data-shot="T-10" data-what="The sheet dropdown showing the original sheet and the saved markup revision beneath it."></div>
+</div>
+
+<div class="warn">
+  <span class="lbl">Say this before anyone asks it</span>
+  <p>The editor is single-player. Your markup lives in your browser until you press
+    <strong>Save to project</strong> — there is no live cursor and no lock, so two people
+    editing the same sheet produce two revisions rather than one merged drawing. Volunteer
+    that; being asked and hedging is far worse than saying it plainly.</p>
+</div>
+
+<h3>Building a drawing from nothing</h3>
+
+<p>This is the sequence to use when there is no drawing at all — a client describing a
+  building over a phone call. Do it in <strong>BIM Studio</strong> on the Drawings stage of the
+  empty project.</p>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="d8"><span class="step-n">18</span>
+    <div><h5><label for="d8">Describe the building in one sentence</label></h5>
+      <p class="do">Type the prompt below into the BIM assistant and press Draw.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>Prompt</dt><dd class="mono">Draw a 12 by 8 metre single-storey clinic with a central
+      corridor, then add doors and windows</dd>
+    <dt>They see</dt><dd>Closed external walls appear on the plan, two corridor partitions,
+      and doors and windows hosted in the walls — each counted in the legend.</dd>
+    <dt>You say</dt><dd class="say">"It has not drawn a picture of a building. It has placed
+      building elements — that wall knows it is a wall, and it knows its length."</dd>
+  </dl></div>
+  <div class="shot" data-shot="T-11" data-what="BIM Studio after the prompt: the plan with walls, partitions, doors and windows, and the legend counts."></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="d9"><span class="step-n">19</span>
+    <div><h5><label for="d9">Add a second discipline, and show it staying in its lane</label></h5>
+      <p class="do">Choose the <strong>Electrical</strong> specialist and ask for lighting.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>Prompt</dt><dd class="mono">Add lighting to the corridor and both consulting rooms</dd>
+    <dt>They see</dt><dd>Only electrical elements are added. The walls are untouched.</dd>
+    <dt>You say</dt><dd class="say">"The electrical specialist cannot move a wall or clear the
+      model. Each discipline is scoped, which is how you let several of them work without
+      anyone standing on anyone."</dd>
+  </dl></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="d10"><span class="step-n">20</span>
+    <div><h5><label for="d10">Draw one element by hand</label></h5>
+      <p class="do">Pick <strong>Wall</strong> from the catalogue and place a partition
+        yourself. Then <kbd>Ctrl</kbd>+<kbd>Z</kbd> and put it back.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>You say</dt><dd class="say">"Everything the assistant can do, you can do — and the
+      reverse. They are the same commands underneath, which is why undo works across both."</dd>
+  </dl></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="d11"><span class="step-n">21</span>
+    <div><h5><label for="d11">Measure the model into the bill</label></h5>
+      <p class="do">Press <strong>Measure into BOQ</strong>, then scroll to the takeoff
+        register underneath.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>One measurement per item, with quantity, unit, location and the method
+      it was derived by — recorded as a human entry, so no review is needed.</dd>
+    <dt>You say</dt><dd class="say">"That is the join. A model becomes quantities, quantities
+      become a bill, and every line can still say which element it came from. Fifteen minutes
+      ago this building did not exist."</dd>
+  </dl></div>
+  <div class="shot" data-shot="T-12" data-what="The takeoff register listing measurements produced by 'Measure into BOQ', with the Method column readable."></div>
+</div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<section id="act4">
+<div class="act-head">
+  <span class="no">Act four · 7 minutes</span>
+  <h2>The bill, the programme, and the paperwork</h2>
+  <p class="sub">Back on the finished project. This is the half the commercial people in the
+    room have been waiting for.</p>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="b1"><span class="step-n">22</span>
+    <div><h5><label for="b1">Open the BOQ and follow one line home</label></h5>
+      <p class="do">Pick any priced line and click through to where its quantity came from.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>Items grouped by division with normalised units; the trace runs back
+      to a measurement, and from there to a drawing layer or a document page.</dd>
+    <dt>You say</dt><dd class="say">"Pick a line. Any line. This is the question every
+      estimator gets asked in a post-tender meeting, and it is normally answered from
+      memory."</dd>
+    <dt>Do</dt><dd>Genuinely let <em>them</em> choose the line.</dd>
+  </dl></div>
+  <div class="shot" data-shot="T-13" data-what="A BOQ line's trace, showing the chain back to its source measurement."></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="b2"><span class="step-n">23</span>
+    <div><h5><label for="b2">Show the estimate and where the rates came from</label></h5>
+      <p class="do">Open Estimate and point at the rate source on a line.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>Rate × quantity = amount on every line, and each rate labelled with
+      whether it came from the rate book, history, or a person.</dd>
+    <dt>You say</dt><dd class="say">"A rate that came from your own rate book says so. A rate
+      somebody typed says that too. There is no third category where a number just appears."</dd>
+  </dl></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="b3"><span class="step-n">24</span>
+    <div><h5><label for="b3">Export the priced bill to Excel</label></h5>
+      <p class="do">BOQ → Export Excel → open it.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>A submission-format workbook: a cover sheet with the letterhead and
+      the submission details, one sheet per division, and a summary that foots to a grand
+      total.</dd>
+    <dt>You say</dt><dd class="say">"That is the format you submit in, not an export you then
+      spend a day reformatting. Unpriced items are marked 'to be priced' rather than
+      zeroed — a provisional total that says it is provisional."</dd>
+    <dt>Do</dt><dd>Scroll a division sheet so they see the headings stay and the bill moves.</dd>
+  </dl></div>
+  <div class="shot" data-shot="T-14" data-what="The exported BOQ workbook open in Excel, on the Cover sheet with the letterhead."></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="b4"><span class="step-n">25</span>
+    <div><h5><label for="b4">Show the programme and export it too</label></h5>
+      <p class="do">Schedule → point at a driving quantity → Export Excel → open it.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>Activities whose durations follow from the quantities, a critical path,
+      and an Excel Gantt with month and week headers, coloured phase bars and milestone
+      diamonds.</dd>
+    <dt>You say</dt><dd class="say">"The programme is not drawn by feel. That duration exists
+      because of that quantity and that output rate — change the quantity and this goes
+      stale and tells you so."</dd>
+  </dl></div>
+  <div class="shot" data-shot="T-15" data-what="The exported work programme in Excel, showing the coloured Gantt with month and week header rows."></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="b5"><span class="step-n">26</span>
+    <div><h5><label for="b5">Generate a section of the technical narrative</label></h5>
+      <p class="do">Technical Narrative → Generate on one section only.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>A written method statement section drawn from this project's own
+      records — and the other six sections untouched.</dd>
+    <dt>You say</dt><dd class="say">"The part of a submission that always gets written at
+      midnight. Section by section, so you can accept one and rewrite another."</dd>
+  </dl></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="b6"><span class="step-n">27</span>
+    <div><h5><label for="b6">Ask the Copilot something you did not plan</label></h5>
+      <p class="do">Open Copilot inside the project and ask one of the questions from the next
+        section — ideally one the client suggests.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>An answer with its sources listed, drawn from this project's confirmed
+      records only.</dd>
+    <dt>You say</dt><dd class="say">"It answers from this bid's records and cites them. Ask it
+      about another project's numbers and it cannot see them — that is not a policy, it is the
+      query."</dd>
+  </dl></div>
+  <div class="shot" data-shot="T-16" data-what="A Copilot answer with its source chips expanded."></div>
+</div>
+
+<div class="step">
+  <div class="step-top">
+    <input class="tick" type="checkbox" id="b7"><span class="step-n">28</span>
+    <div><h5><label for="b7">Close on the audit chain</label></h5>
+      <p class="do">Trace → Verify audit chain. Then switch the language to Arabic and leave it
+        there for a beat.</p></div>
+  </div>
+  <div class="detail"><dl>
+    <dt>They see</dt><dd>The chain verifies intact; then the whole workspace flips to Arabic and
+      right-to-left, with the numbers still readable.</dd>
+    <dt>You say</dt><dd class="say">"Everything you have watched me do is on that chain. And if
+      half your team works in Arabic, it is the same workspace — not a translated copy of it."</dd>
+  </dl></div>
+  <div class="shot" data-shot="T-17" data-what="The workspace in Arabic, right-to-left, on a data-heavy screen such as the BOQ."></div>
+</div>
+
+<div class="note">
+  <span class="lbl">The closing line</span>
+  <p><em>"Every number you have seen today can name where it came from — a page of a tender,
+    a layer of a drawing, or a person who typed it. That is the whole product. The rest is
+    speed."</em></p>
+</div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<section id="prompts">
+<div class="act-head">
+  <span class="no">Appendix A</span>
+  <h2>Prompts worth using</h2>
+  <p class="sub">Generic enough for any audience, specific enough to produce a real answer.
+    Read them aloud as you type — a client watching you type their own question is worth more
+    than any answer.</p>
+</div>
+
+<h3>Copilot, inside a project</h3>
+<div class="prompts">
+  <div class="prompt"><q>What is waiting on my decision in this bid?</q>
+    <button class="act copy" type="button">Copy</button>
+    <span class="why">Best opener — it answers from the review queue, so it is always true and always different.</span></div>
+  <div class="prompt"><q>Where did the concrete quantities come from?</q>
+    <button class="act copy" type="button">Copy</button>
+    <span class="why">Produces citations. The point of the whole demo, asked as a question.</span></div>
+  <div class="prompt"><q>Which proposals have low confidence, and why?</q>
+    <button class="act copy" type="button">Copy</button>
+    <span class="why">Shows the system volunteering its own weak spots.</span></div>
+  <div class="prompt"><q>Summarise the submission requirements and the deadline.</q>
+    <button class="act copy" type="button">Copy</button>
+    <span class="why">Reads straight from the tender document — good directly after an upload.</span></div>
+  <div class="prompt"><q>How much of the bill is still unpriced?</q>
+    <button class="act copy" type="button">Copy</button>
+    <span class="why">Pairs with the "to be priced" cells in the Excel export.</span></div>
+  <div class="prompt"><q>What does the specification say about blockwork?</q>
+    <button class="act copy" type="button">Copy</button>
+    <span class="why">Traces to a clause and a page. Swap "blockwork" for whatever the spec covers.</span></div>
+</div>
+
+<h3>BIM assistant, building from nothing</h3>
+<div class="prompts">
+  <div class="prompt"><q>Draw a 12 by 8 metre single-storey clinic with a central corridor, then add doors and windows</q>
+    <button class="act copy" type="button">Copy</button>
+    <span class="why">The reliable opener. Small enough to draw quickly, real enough to price.</span></div>
+  <div class="prompt"><q>Add a 3 metre wide reception at the north end</q>
+    <button class="act copy" type="button">Copy</button>
+    <span class="why">Shows it modifying an existing model rather than starting again.</span></div>
+  <div class="prompt"><q>Add lighting to the corridor and both consulting rooms</q>
+    <button class="act copy" type="button">Copy</button>
+    <span class="why">Choose the Electrical specialist first — the scoping is the point.</span></div>
+  <div class="prompt"><q>Add sanitary fittings to the two toilets</q>
+    <button class="act copy" type="button">Copy</button>
+    <span class="why">Plumbing specialist. A second discipline lands the "they stay in their lane" claim.</span></div>
+  <div class="prompt"><q>Make the external walls 200mm blockwork</q>
+    <button class="act copy" type="button">Copy</button>
+    <span class="why">A specification change, not a geometry one — and it moves the quantities.</span></div>
+</div>
+
+<h3>Questions to invite from the room</h3>
+<p>Ask for these explicitly. A demo where the client drives is a demo they believe.</p>
+<ul>
+  <li><em>"Pick any line in that bill and I will show you where the number came from."</em></li>
+  <li><em>"Give me a building — any size, any use — and I will draw it now."</em></li>
+  <li><em>"Tell me a quantity you think it should have got wrong."</em></li>
+</ul>
+
+<div class="warn">
+  <span class="lbl">Do not promise</span>
+  <p>Two things are not built, and guessing in the room will cost you the deal later:
+    <strong>live multi-user editing of a drawing</strong> (markup is per-person until saved),
+    and <strong>automatic re-measurement</strong> when a model changes (re-measuring currently
+    adds records rather than superseding them). If asked, say what is true and move on.</p>
+</div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<section id="recover">
+<div class="act-head">
+  <span class="no">Appendix B</span>
+  <h2>If it breaks</h2>
+  <p class="sub">Every line here is recoverable if you say it calmly and keep moving. Rehearse
+    them; the worst outcome is not the failure, it is the silence after it.</p>
+</div>
+
+<div class="tw">
+<table>
+<thead><tr><th>What happens</th><th>What you do</th><th>What you say</th></tr></thead>
+<tbody>
+<tr><td>An agent run is slow</td><td>Leave it running and talk about the gate model</td>
+  <td><em>"It is reading the document rather than pattern-matching it — that is the trade."</em></td></tr>
+<tr><td>An agent run fails outright</td><td>Switch to the finished project and show the result it produced earlier</td>
+  <td><em>"Let me show you the output rather than the wait."</em></td></tr>
+<tr><td>A drawing will not render</td><td>Press Download DXF, or open it in the drawing editor, which parses independently</td>
+  <td><em>"The sheet failed to draw; the measurements are already read — here they are."</em></td></tr>
+<tr><td>A .dwg will not open from disk in the editor</td><td>Upload it to the project first</td>
+  <td><em>"DWG conversion runs server-side, so it goes through the project."</em></td></tr>
+<tr><td>The Excel export looks wrong</td><td>Check whether Excel opened an older download of the same name</td>
+  <td>Nothing — fix it silently and carry on.</td></tr>
+<tr><td>A quantity is visibly wrong</td><td>Correct it live and show the stale cascade</td>
+  <td><em>"Good — this is exactly the case the product is built around."</em></td></tr>
+<tr><td>Someone asks about a feature that does not exist</td><td>Say so, note it, move on</td>
+  <td><em>"Not today. Tell me what it would let you do and I will find out where it sits."</em></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="fail">
+  <span class="lbl">The one unrecoverable mistake</span>
+  <p>Claiming something works when it does not. This audience will test it within a week of
+    buying, and the recovery cost is the relationship — not the feature.</p>
+</div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<section id="shots">
+<div class="act-head">
+  <span class="no">Appendix C</span>
+  <h2>Screenshots to capture</h2>
+  <p class="sub">Every slot in this document, in one list. Capture them once on a clean
+    workspace and this becomes a leave-behind rather than a script.</p>
+</div>
+
+<p>Attach an image to any slot above using its <strong>Attach</strong> button. Images are
+  scaled down and kept in this browser only. When they are all in place, press
+  <strong>Export document</strong> in the bar at the top — that writes one self-contained
+  HTML file with the pictures embedded, which you can email or host.</p>
+
+<div class="note">
+  <span class="lbl">Capture settings</span>
+  <p>Browser at 100% zoom, window at 1600px wide or more, bookmarks bar hidden, and the same
+    light or dark theme throughout. Crop to the content — a screenshot with your taskbar in it
+    reads as a work-in-progress.</p>
+</div>
+
+<div class="tw" id="shotlist"></div>
+</section>
+
+<footer>
+  <p>Preckon demonstration runbook · rehearse it twice, then stop reading it ·
+    <span id="stamp"></span></p>
+</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var TICKS = "preckon-demo-ticks";
+  var SHOTS = "preckon-demo-shots";
+  var MAX_W = 1400, QUALITY = 0.72, BUDGET = 4.2e6;
+
+  function read(key) { try { return JSON.parse(localStorage.getItem(key) || "{}"); } catch (e) { return {}; } }
+  function write(key, v) {
+    try { localStorage.setItem(key, JSON.stringify(v)); return true; }
+    catch (e) { alert("This browser cannot store any more images. Export the document, or remove a screenshot first."); return false; }
+  }
+
+  /* ── ticks ─────────────────────────────────────────────────────────── */
+  var ticks = read(TICKS);
+  var boxes = Array.prototype.slice.call(document.querySelectorAll(".tick"));
+  function paintProgress() {
+    var done = boxes.filter(function (b) { return b.checked; }).length;
+    document.getElementById("progress").textContent = done + " of " + boxes.length + " steps";
+  }
+  boxes.forEach(function (b) {
+    b.checked = !!ticks[b.id];
+    b.addEventListener("change", function () {
+      ticks[b.id] = b.checked;
+      write(TICKS, ticks);
+      paintProgress();
+    });
+  });
+  paintProgress();
+
+  document.getElementById("reset").addEventListener("click", function () {
+    if (!confirm("Clear every tick? Attached screenshots are kept.")) return;
+    ticks = {};
+    localStorage.removeItem(TICKS);
+    boxes.forEach(function (b) { b.checked = false; });
+    paintProgress();
+  });
+
+  /* ── screenshots ───────────────────────────────────────────────────── */
+  var shots = read(SHOTS);
+  var slots = Array.prototype.slice.call(document.querySelectorAll(".shot"));
+
+  /* Downscale before storing: a raw 4K PNG is several megabytes and three of
+     them fill the browser's whole quota. 1400px wide is more than any of these
+     pictures needs to be read on a laptop. */
+  function shrink(file, done) {
+    var reader = new FileReader();
+    reader.onload = function () {
+      var img = new Image();
+      img.onload = function () {
+        var scale = Math.min(1, MAX_W / img.width);
+        var c = document.createElement("canvas");
+        c.width = Math.round(img.width * scale);
+        c.height = Math.round(img.height * scale);
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        done(c.toDataURL("image/jpeg", QUALITY));
+      };
+      img.onerror = function () { alert("That file could not be read as an image."); };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function used() {
+    var n = 0;
+    for (var k in shots) n += shots[k].length;
+    return n;
+  }
+
+  function paintSlot(slot) {
+    var id = slot.dataset.shot, what = slot.dataset.what, data = shots[id];
+    slot.classList.toggle("filled", !!data);
+    slot.innerHTML = "";
+    if (data) {
+      var img = document.createElement("img");
+      img.src = data;
+      img.alt = what;
+      slot.appendChild(img);
+      var cap = document.createElement("div");
+      cap.className = "cap";
+      cap.innerHTML = "<span class='sid'>" + id + "</span> — " + what;
+      slot.appendChild(cap);
+    } else {
+      var sid = document.createElement("div");
+      sid.className = "sid";
+      sid.textContent = "Screenshot " + id;
+      var w = document.createElement("p");
+      w.className = "what";
+      w.textContent = what;
+      slot.appendChild(sid);
+      slot.appendChild(w);
+    }
+    var tools = document.createElement("div");
+    tools.className = "shot-tools";
+    var pick = document.createElement("button");
+    pick.className = "act copy";
+    pick.type = "button";
+    pick.textContent = data ? "Replace" : "Attach";
+    pick.addEventListener("click", function () { input.click(); });
+    var input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.hidden = true;
+    input.addEventListener("change", function () {
+      var f = input.files && input.files[0];
+      input.value = "";
+      if (!f) return;
+      shrink(f, function (dataUrl) {
+        if (used() + dataUrl.length > BUDGET) {
+          alert("Storing this would exceed what the browser allows. Export the document first, then carry on.");
+          return;
+        }
+        var prev = shots[id];
+        shots[id] = dataUrl;
+        if (!write(SHOTS, shots)) { if (prev) shots[id] = prev; else delete shots[id]; return; }
+        paintSlot(slot);
+        paintList();
+      });
+    });
+    tools.appendChild(pick);
+    tools.appendChild(input);
+    if (data) {
+      var rm = document.createElement("button");
+      rm.className = "act copy";
+      rm.type = "button";
+      rm.textContent = "Remove";
+      rm.addEventListener("click", function () {
+        delete shots[id];
+        write(SHOTS, shots);
+        paintSlot(slot);
+        paintList();
+      });
+      tools.appendChild(rm);
+    }
+    slot.appendChild(tools);
+  }
+  slots.forEach(paintSlot);
+
+  function paintList() {
+    var rows = slots.map(function (s) {
+      var id = s.dataset.shot;
+      return "<tr><td class='mono'>" + id + "</td><td>" + s.dataset.what + "</td><td>" +
+             (shots[id] ? "attached" : "—") + "</td></tr>";
+    }).join("");
+    document.getElementById("shotlist").innerHTML =
+      "<table><thead><tr><th>Slot</th><th>What to capture</th><th>Status</th></tr></thead><tbody>" +
+      rows + "</tbody></table>";
+  }
+  paintList();
+
+  /* ── copy a prompt ─────────────────────────────────────────────────── */
+  document.querySelectorAll(".prompt .copy").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var q = b.parentElement.querySelector("q").textContent;
+      navigator.clipboard.writeText(q).then(function () {
+        var was = b.textContent;
+        b.textContent = "Copied";
+        setTimeout(function () { b.textContent = was; }, 1200);
+      });
+    });
+  });
+
+  /* ── export ────────────────────────────────────────────────────────── */
+  /* Bakes the current ticks and images into the markup and drops the script,
+     so what leaves here is a document rather than an application. */
+  document.getElementById("export").addEventListener("click", function () {
+    var clone = document.documentElement.cloneNode(true);
+    clone.querySelectorAll("script").forEach(function (s) { s.remove(); });
+    clone.querySelectorAll(".tocbar .grow, .shot-tools, .prompt .copy").forEach(function (n) { n.remove(); });
+    Array.prototype.forEach.call(clone.querySelectorAll(".tick"), function (box, i) {
+      if (boxes[i] && boxes[i].checked) box.setAttribute("checked", "checked");
+      box.setAttribute("disabled", "disabled");
+    });
+    var blob = new Blob(["<!doctype html>\n" + clone.outerHTML], { type: "text/html;charset=utf-8" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "preckon-demo.html";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  /* ── theme ─────────────────────────────────────────────────────────── */
+  document.getElementById("theme").addEventListener("click", function () {
+    var now = document.documentElement.getAttribute("data-theme");
+    var dark = now ? now === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.setAttribute("data-theme", dark ? "light" : "dark");
+  });
+
+  document.getElementById("stamp").textContent =
+    boxes.length + " steps · " + slots.length + " screenshot slots";
+})();
+</script>
+</body>
+</html>
