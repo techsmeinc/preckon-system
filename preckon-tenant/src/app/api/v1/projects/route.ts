@@ -18,12 +18,12 @@ export const GET = route(async (req, ctx) => {
   const test = archived ? "= 'archived'" : "<> 'archived'";
   const rows = ctx.permissions.has("project.read_all")
     ? await query(
-        `SELECT id, name, code, client_name, status, lifecycle_key, lifecycle_state, created_at, updated_at
+        `SELECT id, name, code, client_name, status, lifecycle_key, lifecycle_state, created_at, updated_at, due_date
            FROM project WHERE tenant_id = ? AND status ${test} ORDER BY created_at DESC`,
         [ctx.tenantId]
       )
     : await query(
-        `SELECT p.id, p.name, p.code, p.client_name, p.status, p.lifecycle_key, p.lifecycle_state, p.created_at, p.updated_at
+        `SELECT p.id, p.name, p.code, p.client_name, p.status, p.lifecycle_key, p.lifecycle_state, p.created_at, p.updated_at, p.due_date
            FROM project p JOIN project_member m ON m.project_id = p.id
           WHERE p.tenant_id = ? AND m.user_id = ? AND p.status ${test} ORDER BY p.created_at DESC`,
         [ctx.tenantId, ctx.user.id]

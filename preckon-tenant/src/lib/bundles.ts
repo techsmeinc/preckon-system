@@ -93,7 +93,10 @@ export function useProjectBundles(limit = 8) {
         value: costs.length
           ? { minor: costs.reduce((n, a) => n + Number(a.payload?.amount_minor ?? 0), 0), ccy: costs[0].payload?.currency ?? "" }
           : null,
-        deadline: (tender?.payload?.submission_deadline as string) ?? null,
+        // The project's own date wins. It is what somebody typed after an
+        // addendum moved the date, and the tender's stated deadline is only
+        // what the document said when it was read.
+        deadline: (p.due_date as string | null) ?? (tender?.payload?.submission_deadline as string) ?? null,
         hydrated: true,
       };
       setBundles((prev) => (prev ? prev.map((b, j) => (j === i ? full : b)) : prev));

@@ -120,12 +120,31 @@ export default function DocumentsPage({ params }: { params: Promise<{ pid: strin
           </div>
           <table style={{ marginTop: 8 }}>
             <thead>
-              <tr><th>{t("docs.colFile")}</th><th>{t("docs.colClassified")}</th><th className="r">{t("docs.colPages")}</th><th className="r">{t("docs.colSize")}</th><th>{t("common.status")}</th><th className="r">{t("docs.colUploaded")}</th></tr>
+              <tr><th>{t("docs.colFile")}</th><th>{t("docs.colClassified")}</th><th className="r">{t("docs.colPages")}</th><th className="r">{t("docs.colSize")}</th><th>{t("common.status")}</th><th className="r">{t("docs.colUploaded")}</th>
+                {canEdit && <th><span className="vh">Actions</span></th>}</tr>
             </thead>
             <tbody>
               {list.map((f) => {
                 const d = docFor(f.id);
-                return (
+                /* Uploaded into the wrong project, or superseded by a revision. Deleting
+     takes the extracted page text with it — leaving that behind would mean an
+     agent still quoting a document nobody can see. */
+  async function removeFile(f: any) {
+    if (!window.confirm(t("docs.deleteConfirm", { name: f.filename }))) return;
+    setBusy(true);
+    try {
+      await api.del(`/projects/${pid}/files/${f.id}`);
+      toast(t("docs.deleted"));
+      files.reload();
+      reload();
+    } catch (e: any) {
+      toast(e?.message ?? t("docs.deleteFail"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
                   <tr key={f.id}>
                     <td>
                       <div className="t-name">{f.filename}</div>
@@ -148,6 +167,21 @@ export default function DocumentsPage({ params }: { params: Promise<{ pid: strin
                     <td className="r num">{f.size_bytes ? (f.size_bytes / 1024).toFixed(0) + " KB" : "—"}</td>
                     <td><StatusChip status={f.status} /></td>
                     <td className="r mono" style={{ fontSize: 11 }}>{fmtDateLocal(f.created_at, { dateStyle: "medium", timeStyle: "short" })}</td>
+                    {canEdit && (
+                      <td className="r" style={{ width: 44 }}>
+                        <button
+                          className="mini sm"
+                          title={t("docs.delete")}
+                          aria-label={t("docs.delete")}
+                          disabled={busy}
+                          onClick={() => removeFile(f)}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                            <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6M10 11v6M14 11v6" />
+                          </svg>
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 );
               })}

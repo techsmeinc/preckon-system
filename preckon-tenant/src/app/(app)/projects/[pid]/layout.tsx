@@ -91,6 +91,15 @@ export default function ProjectLayout({ children, params }: { children: React.Re
             </Link>
           );
         })}
+
+        {/* Submission closes the chain, after Procurement. It is not a module:
+            there is no agent to run and nothing to derive — the bonds and
+            certificates are chased, not computed. A stage that could never be
+            run would sit at "pending" for ever, so it is a register instead. */}
+        <span className="sep" aria-hidden />
+        <Link href={`${base}/submission`} className={on(`${base}/submission`) ? "on" : ""}>
+          {t("tab.submission")}
+        </Link>
       </nav>
 
       {children}

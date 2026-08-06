@@ -14,6 +14,7 @@ import { useI18n } from "@/lib/i18n";
 
 interface Cover {
   ref_no?: string | null;
+  due_date?: string | null;
   code?: string | null;
   name?: string | null;
   location?: string | null;
@@ -21,13 +22,16 @@ interface Cover {
   submitted_to?: string | null;
 }
 
-const FIELDS: Array<{ key: keyof Cover; label: string; placeholder: string }> = [
+const FIELDS: Array<{ key: keyof Cover; label: string; placeholder: string; kind?: "date" }> = [
   { key: "ref_no", label: "cover.refNo", placeholder: "QO/17/26" },
   { key: "code", label: "cover.number", placeholder: "17" },
   { key: "name", label: "cover.name", placeholder: "Spark" },
   { key: "location", label: "cover.location", placeholder: "Salmiya, Kuwait" },
   { key: "client_name", label: "cover.client", placeholder: "AIGCC Group" },
   { key: "submitted_to", label: "cover.submittedTo", placeholder: "Consultant / Client" },
+  // A date, not text: the projects list sorts and counts on it, and a typed
+  // "14th Aug" cannot be counted.
+  { key: "due_date", label: "cover.due", placeholder: "", kind: "date" },
 ];
 
 export function ProjectCover({ pid, onSaved }: { pid: string; onSaved?: () => void }) {
@@ -45,6 +49,8 @@ export function ProjectCover({ pid, onSaved }: { pid: string; onSaved?: () => vo
         ref_no: p?.ref_no ?? "", code: p?.code ?? "", name: p?.name ?? "",
         location: p?.location ?? "", client_name: p?.client_name ?? "",
         submitted_to: p?.submitted_to ?? "",
+        // The API returns a full timestamp; the input wants a plain date.
+        due_date: p?.due_date ? String(p.due_date).slice(0, 10) : "",
       });
     }).catch(() => {});
     return () => { live = false; };
@@ -53,7 +59,7 @@ export function ProjectCover({ pid, onSaved }: { pid: string; onSaved?: () => vo
   async function save() {
     setBusy(true);
     try {
-      await api.patch(`/projects/${pid}`, v);
+      await api.patch(`/projects/${pid}`, { ...v, due_date: v.due_date ? v.due_date : null });
       setDirty(false);
       toast(t("cover.saved"));
       onSaved?.();
@@ -91,7 +97,7 @@ export function ProjectCover({ pid, onSaved }: { pid: string; onSaved?: () => vo
             <label htmlFor={`cov-${f.key}`}>{t(f.label as any)}</label>
             <input
               id={`cov-${f.key}`}
-              type="text"
+              type={f.kind === "date" ? "date" : "text"}
               value={String(v[f.key] ?? "")}
               placeholder={f.placeholder}
               disabled={!canEdit}

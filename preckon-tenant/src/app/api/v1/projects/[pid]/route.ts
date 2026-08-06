@@ -9,7 +9,7 @@ export const GET = route<{ pid: string }>(async (_req, ctx, { pid }) => {
   requirePermission(ctx, "project.read");
   await requireProject(ctx, pid);
   const project = await queryOne(
-    "SELECT id, name, code, client_name, location, submitted_to, ref_no, status, lifecycle_key, lifecycle_state, lifecycle_state_at, created_at FROM project WHERE id = ? AND tenant_id = ?",
+    "SELECT id, name, code, client_name, location, submitted_to, ref_no, status, lifecycle_key, lifecycle_state, lifecycle_state_at, created_at, due_date, submission FROM project WHERE id = ? AND tenant_id = ?",
     [pid, ctx.tenantId]
   );
   return ok(project);
@@ -43,6 +43,11 @@ const Cover = z.object({
   location: z.string().max(255).nullable().optional(),
   submitted_to: z.string().max(255).nullable().optional(),
   ref_no: z.string().max(64).nullable().optional(),
+  // The date the team is actually working to. The tender document's own
+  // deadline is what TenderLogix read; an addendum or an extension moves it,
+  // and until now there was nowhere to say so.
+  due_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  submission: z.record(z.unknown()).nullable().optional(),
   // Restoring an archived project is the same write as any other field on it,
   // so it goes through the same door rather than growing an endpoint.
   status: z.enum(["active", "archived"]).optional(),
@@ -62,12 +67,19 @@ export const PATCH = route<{ pid: string }>(async (req, ctx, { pid }) => {
     await query(
       `UPDATE project SET ${cols.map((c) => "`" + c + "` = ?").join(", ")}, updated_at = NOW(3)
         WHERE id = ? AND tenant_id = ?`,
-      [...cols.map((c) => body[c] ?? null), pid, ctx.tenantId]
+      // The register is a JSON column; everything else is scalar. Serialising
+      // it here rather than relying on the driver keeps the intent visible.
+      [...cols.map((c) => (c === "submission" && body[c] ? JSON.stringify(body[c]) : (body[c] ?? null))), pid, ctx.tenantId]
     );
-    audit({ action: "project.update", targetKind: "project", targetId: pid, projectId: pid, summary: body });
+    // The register is long and changes on every tick; the audit records that it
+    // changed and how far along it is, not a copy of the whole checklist.
+    const summary = body.submission
+      ? { ...body, submission: `${(body.submission as any)?.items?.length ?? 0} items` }
+      : body;
+    audit({ action: "project.update", targetKind: "project", targetId: pid, projectId: pid, summary });
   });
   const project = await queryOne(
-    "SELECT id, name, code, client_name, location, submitted_to, ref_no FROM project WHERE id = ? AND tenant_id = ?",
+    "SELECT id, name, code, client_name, location, submitted_to, ref_no, due_date, submission FROM project WHERE id = ? AND tenant_id = ?",
     [pid, ctx.tenantId]
   );
   return ok(project);
