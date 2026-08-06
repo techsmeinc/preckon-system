@@ -82,7 +82,7 @@ export default function FeaturesPage() {
     <>
       <div className="page-head">
         <div>
-          <h2>Features</h2>
+          <h1>Features</h1>
           <p>The catalog editions draw from. Each feature is a flag or a limit an edition can switch on.</p>
         </div>
         {canWrite && (

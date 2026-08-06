@@ -103,7 +103,7 @@ export default function NotificationsPage() {
     <>
       <div className="page-head">
         <div>
-          <h2>Notifications</h2>
+          <h1>Notifications</h1>
           <p>Your inbox, and announcements sent to tenants.</p>
         </div>
         {canSend && (

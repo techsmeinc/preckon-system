@@ -96,7 +96,7 @@ export default function OverviewPage() {
     <>
       <div className="page-head">
         <div>
-          <h2>Platform overview</h2>
+          <h1>Platform overview</h1>
           <p>How Preckon is doing across every tenant.</p>
         </div>
         {/* Time-range filter intentionally omitted until the summary endpoints

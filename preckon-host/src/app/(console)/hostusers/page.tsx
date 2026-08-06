@@ -86,7 +86,7 @@ export default function HostUsersPage() {
     <>
       <div className="page-head">
         <div>
-          <h2>Host users &amp; roles</h2>
+          <h1>Host users &amp; roles</h1>
           <p>Your internal staff and what each role can do.</p>
         </div>
         {canManageUsers && (

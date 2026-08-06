@@ -100,7 +100,7 @@ export default function PricingPage() {
     <>
       <div className="page-head">
         <div>
-          <h2>Pricing</h2>
+          <h1>Pricing</h1>
           <p>Real numbers per edition — plan price plus usage rates. Set here; the tenant app and site read from it.</p>
         </div>
         <div className="range">

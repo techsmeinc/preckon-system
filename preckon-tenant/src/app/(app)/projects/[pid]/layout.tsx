@@ -63,7 +63,7 @@ export default function ProjectLayout({ children, params }: { children: React.Re
 
       <div className="pw-head">
         <div>
-          <h2>{project.name}</h2>
+          <h1>{project.name}</h1>
           <div className="pw-meta">
             {project.client_name && <span className="mc">{project.client_name}</span>}
             {project.code && <span className="mc">{project.code}</span>}

@@ -116,7 +116,7 @@ export default function SettingsPage() {
     <>
       <div className="page-head">
         <div>
-          <h2>Host settings</h2>
+          <h1>Host settings</h1>
           <p>Global configuration for the whole platform.</p>
         </div>
       </div>

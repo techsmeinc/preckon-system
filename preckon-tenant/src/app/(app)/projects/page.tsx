@@ -105,7 +105,7 @@ function ProjectsInner() {
   return (
     <>
       <div className="page-head">
-        <div><h2>{t("projects.title")}</h2><p>{t("projects.sub")}</p></div>
+        <div><h1>{t("projects.title")}</h1><p>{t("projects.sub")}</p></div>
         {canCreate && <button className="mini pri" onClick={() => setOpen(true)}><Icon.add /> {t("shell.newProject")}</button>}
       </div>
 
@@ -138,7 +138,7 @@ function ProjectsInner() {
               <thead>
                 <tr>
                   <th>{t("projects.colProject")}</th><th>{t("projects.colClient")}</th><th>{t("projects.colStage")}</th><th>{t("projects.colProgress")}</th>
-                  <th className="r">{t("projects.colValue")}</th><th className="r">{t("projects.colDue")}</th><th>{t("common.status")}</th>{canArchive && <th />}
+                  <th className="r">{t("projects.colValue")}</th><th className="r">{t("projects.colDue")}</th><th>{t("common.status")}</th>{canArchive && <th><span className="vh">Actions</span></th>}
                 </tr>
               </thead>
               <tbody>
@@ -263,7 +263,7 @@ function ArchivedProjects({ onRestored }: { onRestored: () => void }) {
                   <th>{t("projects.colProject")}</th>
                   <th>{t("projects.colClient")}</th>
                   <th className="r">{t("projects.archivedOn")}</th>
-                  <th />
+                  <th><span className="vh">Actions</span></th>
                 </tr>
               </thead>
               <tbody>

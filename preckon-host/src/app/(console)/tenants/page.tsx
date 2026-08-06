@@ -144,7 +144,7 @@ export default function TenantsPage() {
     <>
       <div className="page-head">
         <div>
-          <h2>Tenants</h2>
+          <h1>Tenants</h1>
           <p>Every customer org — edition, status, usage and health. Open one to impersonate or manage.</p>
         </div>
         {canCreate && (

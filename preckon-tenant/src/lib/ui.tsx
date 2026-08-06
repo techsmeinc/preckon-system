@@ -145,10 +145,14 @@ export function ErrorBox({ message, onRetry }: { message: string; onRetry?: () =
 export function EmptyState({ title, sub, action }: { title: string; sub?: string; action?: ReactNode }) {
   return (
     <div className="placeholder">
-      <div className="pic">
+      {/* Decorative: it repeats the heading below it, so it is hidden rather
+          than announced twice. */}
+      <div className="pic" aria-hidden="true">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M4 7h16M4 12h16M4 17h10" /></svg>
       </div>
-      <h3>{title}</h3>
+      {/* h2, not h3: this sits directly under the page's h1, and a skipped
+          level reads to a screen reader as a missing section. */}
+      <h2>{title}</h2>
       {sub && <p>{sub}</p>}
       {action && <div style={{ marginTop: 18 }}>{action}</div>}
     </div>

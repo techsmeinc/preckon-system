@@ -107,7 +107,7 @@ export default function ObservabilityPage() {
     <>
       <div className="page-head">
         <div>
-          <h2>Observability</h2>
+          <h1>Observability</h1>
           <p>Platform health, job throughput and AI provider status.</p>
         </div>
         <span className="live-chip">

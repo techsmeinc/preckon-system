@@ -49,7 +49,7 @@ export default function LibraryPage() {
   return (
     <>
       <div className="page-head">
-        <div><h2>{t("library.title")}</h2><p>{t("library.sub")}</p></div>
+        <div><h1>{t("library.title")}</h1><p>{t("library.sub")}</p></div>
         {canManage && <button className="mini pri" onClick={openNew}><Icon.add /> {t("library.addEntry")}</button>}
       </div>
 

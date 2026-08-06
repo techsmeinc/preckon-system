@@ -78,7 +78,7 @@ export default function ProcurementSurface({ pid, stage, artifacts, rows, workfl
         </div>
         <table style={{ marginTop: 8 }}>
           <thead>
-            <tr><th>{t("proc.colPackage")}</th><th>{t("proc.colTrade")}</th><th className="r">{t("proc.colLines")}</th><th className="r">{t("projects.colValue")}</th><th className="r">{t("proc.colLead")}</th><th className="r">{t("common.status")}</th><th /></tr>
+            <tr><th>{t("proc.colPackage")}</th><th>{t("proc.colTrade")}</th><th className="r">{t("proc.colLines")}</th><th className="r">{t("projects.colValue")}</th><th className="r">{t("proc.colLead")}</th><th className="r">{t("common.status")}</th><th><span className="vh">Actions</span></th></tr>
           </thead>
           <tbody>
             {rows.map((p) => (

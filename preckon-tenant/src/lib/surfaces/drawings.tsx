@@ -118,7 +118,7 @@ export default function DrawingsSurface({ pid, stage, artifacts, rows, workflows
                 <th className="num">{t("draw.measurement")}</th>
                 <th className="num">{t("draw.confidence")}</th>
                 <th>{t("common.status")}</th>
-                <th />
+                <th><span className="vh">Actions</span></th>
               </tr>
             </thead>
             <tbody>

@@ -25,7 +25,9 @@ const NAV: { group: Key; items: { href: string; label: Key; icon: IconName }[] }
     { href: "/projects", label: "nav.projects", icon: "projects" },
   ] },
   { group: "nav.tools", items: [
-    { href: "/drawings", label: "nav.drawings", icon: "drawings" },
+    // The drawing editor is reached from a drawing — Drawings -> Edit & mark up
+    // — rather than from the rail, where it invited people to open an editor
+    // with nothing in it. The route still works and the deep link still lands.
     { href: "/library", label: "nav.library", icon: "library" },
   ] },
   // Admin is role-gated (blueprint §1) — see ADMIN_PERMS below.
@@ -173,7 +175,7 @@ function AppShell({
                   </button>
                 </div>
 
-                <nav className="nav">
+                <nav className="nav" aria-label={t("nav.workspace")}>
                   {NAV.filter((g) => g.group !== "nav.manage" || canAdmin).map((g) => (
                     <div key={g.group}>
                       <div className="grp">{t(g.group)}</div>
@@ -197,7 +199,7 @@ function AppShell({
                 </nav>
 
                 <div style={{ padding: "0 10px 8px" }}>
-                  <nav className="nav" style={{ padding: 0, flex: "none" }}>
+                  <nav className="nav" aria-label={t("nav.manage")} style={{ padding: 0, flex: "none" }}>
                     <Link href="/settings" className={pathname.startsWith("/settings") ? "active" : ""}>
                       <Icon.settings /><span>{t("nav.settings")}</span>
                     </Link>
@@ -243,7 +245,11 @@ function AppShell({
                       <span className="lbl">{t("common.search")}</span>
                       <span className="keys">⌘K</span>
                     </button>
-                    <button className="cop-btn" onClick={openCopilot}>
+                    {/* The label span is hidden below 760px to save room, which
+                        takes the button's only accessible name with it — at phone
+                        width this announced as "button". The aria-label survives
+                        the media query. */}
+                    <button className="cop-btn" onClick={openCopilot} aria-label={t("nav.copilot")}>
                       <Icon.copilot /><span>{t("nav.copilot")}</span>
                     </button>
                     <button className="tb-btn" onClick={toggleTheme} title={t("shell.toggleTheme")} aria-label={t("shell.toggleTheme")}>

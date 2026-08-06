@@ -142,7 +142,7 @@ export default function AuditPage() {
     <>
       <div className="page-head">
         <div>
-          <h2>Audit log</h2>
+          <h1>Audit log</h1>
           <p>Every host action, append-only and tamper-evident.</p>
         </div>
         <div style={{ display: "flex", gap: 8 }}>

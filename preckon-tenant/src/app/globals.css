@@ -130,7 +130,7 @@ a{color:inherit; text-decoration:none;}
 
 .content{padding:clamp(16px,2vw,28px); max-width:100%; width:100%;}
 .page-head{display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:20px; flex-wrap:wrap;}
-.page-head h2{font-family:var(--font-display); font-weight:600; font-size:22px; color:var(--ink); margin:0; letter-spacing:-.02em;}
+.page-head h1,.page-head h2{font-family:var(--font-display); font-weight:600; font-size:22px; color:var(--ink); margin:0; letter-spacing:-.02em;}
 .page-head p{margin:5px 0 0; font-size:13px; color:var(--slate-500);}
 
 /* KPI */
@@ -185,7 +185,7 @@ td.num{font-family:var(--font-mono); color:var(--ink);}
 /* placeholder / empty / error */
 .placeholder{background:var(--surface); border:1px dashed var(--hairline); border-radius:16px; padding:56px 32px; text-align:center;}
 .placeholder .pic{width:56px; height:56px; border-radius:14px; background:var(--teal-tint); color:var(--teal-ink); display:grid; place-items:center; margin:0 auto 18px;}
-.placeholder h3{font-family:var(--font-display); font-weight:600; font-size:20px; color:var(--ink); margin:0 0 8px; letter-spacing:-.01em;}
+.placeholder h2,.placeholder h3{font-family:var(--font-display); font-weight:600; font-size:20px; color:var(--ink); margin:0 0 8px; letter-spacing:-.01em;}
 .placeholder p{font-size:13.5px; color:var(--slate-500); max-width:52ch; margin:0 auto;}
 .placeholder .next{display:inline-flex; align-items:center; gap:8px; margin-top:20px; font-family:var(--font-mono); font-size:11px; color:var(--teal-ink); border:1px solid var(--teal); background:var(--teal-tint); border-radius:999px; padding:7px 14px;}
 
@@ -319,7 +319,7 @@ td.num{font-family:var(--font-mono); color:var(--ink);}
 @media (max-width:760px){
   .content{padding:16px 14px;}
   .topbar{padding:10px 14px; gap:10px;}
-  .page-head h2{font-size:19px;}
+  .page-head h1,.page-head h2{font-size:19px;}
   table{min-width:480px;}          /* keep columns legible; card scrolls */
   .two-col{grid-template-columns:1fr!important;}
   .drawer{width:100vw; max-width:100vw;}
@@ -626,9 +626,11 @@ input[type=color]{width:46px; height:34px; border:1px solid var(--hairline); bor
   font-family:'Noto Sans Arabic','Segoe UI',Tahoma,'Inter',system-ui,sans-serif;
 }
 [lang="ar"] body{line-height:1.6;}
+[lang="ar"] .page-head h1,
 [lang="ar"] .page-head h2,
 [lang="ar"] .card h3,
 [lang="ar"] .pw-head h2,
+[lang="ar"] .placeholder h2,
 [lang="ar"] .placeholder h3,
 [lang="ar"] .drawer .dh h3,
 [lang="ar"] .crumb{font-family:'Noto Sans Arabic','Segoe UI',Tahoma,var(--font-display),sans-serif;}
@@ -1193,3 +1195,10 @@ p a,li a,td a,.csub a{min-block-size:0;}
 /* 1.4.13 Content on Hover or Focus: anything that appears on hover stays put
    long enough to reach, and is dismissable with Escape (handled in the
    components that own a popover). */
+
+/* A column of row actions needs a heading for the table to be navigable, but
+   the heading would be noise on screen — the icons say what they do. Clipped
+   to a pixel rather than display:none, which would take it out of the
+   accessibility tree along with the layout. */
+.vh{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+  clip-path:inset(50%); white-space:nowrap; border:0;}

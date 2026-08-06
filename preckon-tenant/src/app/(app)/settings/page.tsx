@@ -20,7 +20,7 @@ export default function SettingsPage() {
   return (
     <>
       <div className="page-head">
-        <div><h2>{t("settings.title")}</h2><p>{t("settings.sub")}</p></div>
+        <div><h1>{t("settings.title")}</h1><p>{t("settings.sub")}</p></div>
       </div>
       <nav className="pw-tabs">
         {TABS.map((x) => (

@@ -23,7 +23,7 @@ export default function AdminPage() {
   return (
     <>
       <div className="page-head">
-        <div><h2>{t("admin.title")}</h2><p>{t("admin.sub")}</p></div>
+        <div><h1>{t("admin.title")}</h1><p>{t("admin.sub")}</p></div>
       </div>
       <nav className="pw-tabs">
         {TABS.map((x) => (

@@ -79,7 +79,7 @@ export default function SubscriptionsPage() {
     <>
       <div className="page-head">
         <div>
-          <h2>Subscriptions &amp; billing</h2>
+          <h1>Subscriptions &amp; billing</h1>
           <p>Plans, invoices and revenue across every tenant.</p>
         </div>
       </div>

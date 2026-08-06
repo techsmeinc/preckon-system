@@ -71,7 +71,7 @@ export default function EditionsPage() {
     <>
       <div className="page-head">
         <div>
-          <h2>Editions</h2>
+          <h1>Editions</h1>
           <p>The plans tenants can be on. Pick what each includes, then price it.</p>
         </div>
         {canWrite && (

@@ -73,7 +73,7 @@ export default function DashboardPage() {
     <>
       <div className="page-head">
         <div>
-          <h2>{firstName ? t("dash.greeting", { greeting: t(greetingKey), name: cap(firstName) }) : t(greetingKey)}</h2>
+          <h1>{firstName ? t("dash.greeting", { greeting: t(greetingKey), name: cap(firstName) }) : t(greetingKey)}</h1>
           <p>
             {hydrating ? t("dash.reading")
               : totals.pending === 0
