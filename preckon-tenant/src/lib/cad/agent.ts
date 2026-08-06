@@ -204,7 +204,7 @@ export async function runCadAgent({
 /* ── applying the edits ──────────────────────────────────────────────────── */
 
 import type { DxfModel, Entity } from "./model";
-import { newId } from "./model";
+import { modelBounds, newId } from "./model";
 
 /** Apply the agent's operations to the model the editor is holding. */
 export function applyCadOps(m: DxfModel, ops: CadOp[]): { model: DxfModel; added: number; removed: number } {
@@ -232,8 +232,11 @@ export function applyCadOps(m: DxfModel, ops: CadOp[]): { model: DxfModel; added
         break;
       case "add_text": {
         ensure(o.layer, 2);
-        const span = Math.max(m.entities.length ? 1 : 1, 1);
-        push({ kind: "text", layer: o.layer, text: o.text, x: o.x, y: o.y, h: o.h ?? span });
+        // A default of one drawing unit is invisible on a millimetre sheet and
+        // enormous on one drawn in metres. Size it against the drawing itself.
+        const b = modelBounds(m);
+        const span = Math.max(b.maxX - b.minX, b.maxY - b.minY, 1);
+        push({ kind: "text", layer: o.layer, text: o.text, x: o.x, y: o.y, h: o.h ?? span * 0.012 });
         break;
       }
       case "delete_layer": {

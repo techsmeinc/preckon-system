@@ -136,9 +136,15 @@ export function digest(m: DxfModel, opts: { maxRegions?: number; maxRuns?: numbe
     facts.set(e.layer, f);
     f.entities++;
 
+    // A layer that is switched off is not part of the drawing on screen. It is
+    // still counted, so "what is on this sheet" stays truthful, but it does not
+    // set the extents or win "longest run" — a superseded 99 m setting-out line
+    // on a hidden layer would otherwise describe the whole drawing.
+    const shown = !hidden.has(e.layer);
+
     if (e.kind === "text") {
       f.texts++;
-      grow({ x: e.x, y: e.y });
+      if (shown) grow({ x: e.x, y: e.y });
       const t = e.text.trim();
       if (t) textCount.set(t, (textCount.get(t) ?? 0) + 1);
       continue;
@@ -152,6 +158,7 @@ export function digest(m: DxfModel, opts: { maxRegions?: number; maxRuns?: numbe
       f.totalLength += d;
       if (d > longest) longest = d;
       if (d > f.longestRun) f.longestRun = d;
+      if (!shown) continue;
       grow(a); grow(b);
       // Straight runs are candidate walls and grids. Only the meaningful ones
       // are kept — a drawing has thousands of two-millimetre segments in its
@@ -166,7 +173,7 @@ export function digest(m: DxfModel, opts: { maxRegions?: number; maxRuns?: numbe
       if (area > f.largestArea) f.largestArea = area;
       let per = 0;
       for (const [a, b] of segments(e)) per += dist(a, b);
-      regions.push({ id: `g${++idc}`, layer: e.layer, area, perimeter: per, centroid: centroidOf(e.pts), pts: e.pts });
+      if (shown) regions.push({ id: `g${++idc}`, layer: e.layer, area, perimeter: per, centroid: centroidOf(e.pts), pts: e.pts });
     }
   }
 
@@ -176,7 +183,7 @@ export function digest(m: DxfModel, opts: { maxRegions?: number; maxRuns?: numbe
   runs.sort((a, b) => b.length - a.length);
 
   const layers = [...facts.values()].sort((a, b) => b.entities - a.entities);
-  if (layers.some((l) => l.totalArea > l.largestArea * 3 && l.closedCount > 4)) {
+  if (layers.some((l) => l.closedCount >= 3 && l.totalArea > l.largestArea * 1.5)) {
     warnings.push("On some layers the closed outlines overlap heavily, so their summed area is much larger than the biggest one. Use the largest outline for a floor area, not the total.");
   }
 
