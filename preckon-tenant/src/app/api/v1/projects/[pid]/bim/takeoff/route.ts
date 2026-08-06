@@ -77,3 +77,46 @@ export const POST = route<{ pid: string }>(async (_req, ctx, { pid }) => {
 
   return ok(result, 201);
 });
+
+
+// DELETE /projects/{pid}/bim/takeoff — take the measurements back out.
+//
+// Measuring a model is one click and produces a hundred records; until now
+// there was no click that undid it. Somebody trying the button to see what it
+// did was left with a register full of quantities they did not want and no way
+// to clear it.
+//
+// Superseded, not deleted, for the same reason the re-run supersedes: the audit
+// chain is append-only, and anything already derived from these measurements
+// stays traceable to what produced it. They leave the register; they do not
+// leave the record.
+export const DELETE = route<{ pid: string }>(async (_req, ctx, { pid }) => {
+  requirePermission(ctx, "artifact.edit");
+  await requireProject(ctx, pid);
+
+  const removed = await useCase(actorFromCtx(ctx), async (_conn, audit) => {
+    const existing = await listArtifacts({ tenantId: ctx.tenantId, projectId: pid, typeKey: "drawing_measurement" });
+    // Only what the model produced. A measurement an agent read off a PDF, or
+    // one somebody typed, is not this button's business.
+    const mine = existing.filter(
+      (a) => a.status !== "superseded" && typeof a.payload?.method === "string" && a.payload.method.includes("BIM model")
+    );
+    if (!mine.length) return 0;
+
+    await query(
+      `UPDATE artifact SET status = 'superseded', updated_at = NOW(3)
+        WHERE tenant_id = ? AND id IN (${mine.map(() => "?").join(",")})`,
+      [ctx.tenantId, ...mine.map((a) => a.id)]
+    );
+    audit({
+      action: "bim.takeoff.clear",
+      targetKind: "bim_document",
+      targetId: pid,
+      projectId: pid,
+      summary: { superseded: mine.length },
+    });
+    return mine.length;
+  });
+
+  return ok({ superseded: removed });
+});

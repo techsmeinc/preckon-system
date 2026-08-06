@@ -966,6 +966,10 @@ export const en = {
   "bim.disc.general": "General",
 
   "bim.takeoff": "Measure into BOQ",
+  "bim.clearTakeoff": "Remove takeoff",
+  "bim.clearConfirm": "Remove every measurement this model produced? They leave the takeoff register; the audit record of them is kept, and anything derived from them is marked stale.",
+  "bim.cleared": "{n} measurements removed from the register",
+  "bim.clearNone": "This model has no measurements in the register",
   "bim.measuring": "Measuring…",
   "bim.takeoffDone": "{n} measurements sent to the chain",
   "bim.takeoffFail": "Couldn’t measure the model",

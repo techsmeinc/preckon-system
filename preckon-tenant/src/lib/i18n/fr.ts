@@ -968,6 +968,10 @@ export const fr: Dict = {
   "bim.disc.general": "Général",
 
   "bim.takeoff": "Métrer vers le DQE",
+  "bim.clearTakeoff": "Retirer les métrés",
+  "bim.clearConfirm": "Retirer tous les métrés produits par ce modèle ? Ils quittent le registre ; leur trace d’audit est conservée et tout ce qui en découle est marqué obsolète.",
+  "bim.cleared": "{n} métrés retirés du registre",
+  "bim.clearNone": "Ce modèle n’a aucun métré dans le registre",
   "bim.measuring": "Métré en cours…",
   "bim.takeoffDone": "{n} métrés transmis à la chaîne",
   "bim.takeoffFail": "Métré du modèle impossible",

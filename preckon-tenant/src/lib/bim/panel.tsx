@@ -79,6 +79,20 @@ export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: 
     return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
   }, [full]);
 
+  /* Take the model's measurements back out of the register. Superseded rather
+     than deleted, so anything already derived from them stays traceable. */
+  async function clearTakeoff() {
+    if (!window.confirm(t("bim.clearConfirm"))) return;
+    setMeasuring(true);
+    try {
+      const r = await api.del<{ superseded: number }>(`/projects/${pid}/bim/takeoff`);
+      toast(r.superseded ? t("bim.cleared", { n: r.superseded }) : t("bim.clearNone"));
+      onMeasured?.();
+    } catch (e: any) {
+      toast(e?.message ?? t("bim.takeoffFail"), "bad");
+    } finally { setMeasuring(false); }
+  }
+
   if (loading) return <Skeleton rows={6} />;
   if (error) return <ErrorBox message={error} onRetry={reload} />;
 
@@ -87,9 +101,16 @@ export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: 
       <div className="chead">
         <div><h3>{t("bim.studio")}</h3><div className="csub">{t("bim.studioSub")}</div></div>
         {canEdit && (
-          <button className="mini sm" onClick={measure} disabled={measuring}>
-            {measuring ? t("bim.measuring") : t("bim.takeoff")}
-          </button>
+          <div style={{ display: "flex", gap: 6 }}>
+            {/* Measuring is one click that writes a hundred records. The click
+                that undoes it belongs next to it, not in a support email. */}
+            <button className="mini sm" onClick={clearTakeoff} disabled={measuring}>
+              {t("bim.clearTakeoff")}
+            </button>
+            <button className="mini sm" onClick={measure} disabled={measuring}>
+              {measuring ? t("bim.measuring") : t("bim.takeoff")}
+            </button>
+          </div>
         )}
       </div>
       {canEdit && (
