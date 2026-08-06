@@ -2,7 +2,7 @@
 // The BIM Studio panel as it appears on the Drawings stage: loads the project's
 // model, hands it to the Studio, and saves it back with optimistic concurrency.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "@/lib/apiclient";
 import { useApi, useCan, useToast, Skeleton, ErrorBox } from "@/lib/ui";
 import { useI18n, type Key } from "@/lib/i18n";
@@ -20,6 +20,7 @@ export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: 
   const [savedOnce, setSavedOnce] = useState(false);
 
   const [measuring, setMeasuring] = useState(false);
+  const [full, setFull] = useState(false);
   const [instruction, setInstruction] = useState("");
   const [specialist, setSpecialist] = useState("all");
   const [drawing, setDrawing] = useState(false);
@@ -65,11 +66,24 @@ export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: 
     } finally { setMeasuring(false); }
   }
 
+  /* Full screen belongs here rather than inside the canvas: the thing an
+     estimator needs room for is the whole studio — the discipline ribbon, the
+     catalogue they place from, and the instruction box — not just the drawing
+     they are placing into. A canvas alone at full size can be read and not
+     edited. Escape leaves, so there is always a way back out. */
+  useEffect(() => {
+    if (!full) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setFull(false); };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, [full]);
+
   if (loading) return <Skeleton rows={6} />;
   if (error) return <ErrorBox message={error} onRetry={reload} />;
 
   return (
-    <div className="card" style={{ marginBottom: 16 }}>
+    <div className={"card bim-studio" + (full ? " is-full" : "")} style={full ? undefined : { marginBottom: 16 }}>
       <div className="chead">
         <div><h3>{t("bim.studio")}</h3><div className="csub">{t("bim.studioSub")}</div></div>
         {canEdit && (
@@ -105,6 +119,8 @@ export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: 
         version={data?.version ?? 0}
         onSave={save}
         readOnly={!canEdit}
+        full={full}
+        onToggleFull={() => setFull((v) => !v)}
         t={(k, vars) => t(k as Key, vars)}
       />
     </div>
