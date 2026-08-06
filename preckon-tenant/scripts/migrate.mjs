@@ -13,6 +13,13 @@
 //
 //   node scripts/migrate.mjs            apply everything
 //   node scripts/migrate.mjs --dry      list what would run
+//
+// WHERE THIS WORKS: anywhere mysql2 is installed and DATABASE_URL is set — a
+// dev machine, or the host plane, whose image copies scripts/ and db/ in. It
+// does NOT work inside the tenant's runtime container: that image ships only
+// .next/standalone, so there is no scripts/ directory and no npm script to
+// run. On a tenant server use scripts/migrate.sh, which needs nothing but the
+// database container and the .sql files.
 import fs from "node:fs";
 import path from "node:path";
 import mysql from "mysql2/promise";
