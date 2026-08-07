@@ -48,7 +48,7 @@ export default function StandardsPage({ params }: { params: Promise<{ pid: strin
 
       {/* Tier precedence resolver */}
       <div className="card" style={{ marginBottom: 16 }}>
-        <div className="chead"><h3>Tier precedence</h3>
+        <div className="chead"><h2>Tier precedence</h2>
           <span style={{ display: "flex", gap: 6, alignItems: "center" }}>
             <span className="csub">resolve for</span>
             <select value={subject} onChange={(e) => setSubject(e.target.value)} style={{ width: "auto", padding: "5px 8px", fontSize: 12 }}>
@@ -81,7 +81,7 @@ export default function StandardsPage({ params }: { params: Promise<{ pid: strin
 
       {/* Rules by tier */}
       <div className="card" style={{ marginBottom: 16 }}>
-        <div className="chead"><h3>Rule library</h3><span className="mono" style={{ fontSize: 11, color: "var(--slate-400)" }}>{(rules.data?.rules ?? []).length} rules</span></div>
+        <div className="chead"><h2>Rule library</h2><span className="mono" style={{ fontSize: 11, color: "var(--slate-400)" }}>{(rules.data?.rules ?? []).length} rules</span></div>
         {rules.loading ? <Skeleton rows={3} /> : (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {TIER_ORDER.filter((t) => byTier.has(t)).map((t) => (
@@ -103,7 +103,7 @@ export default function StandardsPage({ params }: { params: Promise<{ pid: strin
 
       {/* Violations */}
       <div className="card">
-        <div className="chead"><h3>Validation findings</h3><span className={"chip plain " + (vios.length ? "warn" : "active")}>{vios.length} open</span></div>
+        <div className="chead"><h2>Validation findings</h2><span className={"chip plain " + (vios.length ? "warn" : "active")}>{vios.length} open</span></div>
         {violations.loading ? <Skeleton rows={2} /> : vios.length === 0 ? (
           <EmptyState title="No violations" sub="Run “Validate project” after confirming some artifacts to check them against the mandatory rules." />
         ) : (

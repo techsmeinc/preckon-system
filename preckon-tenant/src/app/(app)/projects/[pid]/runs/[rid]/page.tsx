@@ -41,7 +41,7 @@ export default function RunDetailPage({ params }: { params: Promise<{ pid: strin
       </div>
 
       <div className="card" style={{ marginBottom: 16 }}>
-        <div className="chead"><h3>Step timeline</h3><span className="mono" style={{ fontSize: 11, color: "var(--slate-400)" }}>ordered · fully traceable</span></div>
+        <div className="chead"><h2>Step timeline</h2><span className="mono" style={{ fontSize: 11, color: "var(--slate-400)" }}>ordered · fully traceable</span></div>
         <div className="tl">
           {parents.map((s: any) => (
             <div key={s.id}>
@@ -64,7 +64,7 @@ export default function RunDetailPage({ params }: { params: Promise<{ pid: strin
       </div>
 
       <div className="card">
-        <div className="chead"><h3>Colleague proposals</h3><span className="mono" style={{ fontSize: 11, color: "var(--slate-400)" }}>{deviations.length}</span></div>
+        <div className="chead"><h2>Colleague proposals</h2><span className="mono" style={{ fontSize: 11, color: "var(--slate-400)" }}>{deviations.length}</span></div>
         {deviations.length === 0 ? <p className="csub" style={{ margin: 0 }}>No deviations. Run a Copilot sweep to have a colleague cross-check this run.</p> : (
           <div className="tl">
             {deviations.map((d: any) => (

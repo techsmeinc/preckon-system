@@ -274,7 +274,7 @@ export function ProgrammeGantt({
     <div className="card wprog">
       <div className="chead">
         <div>
-          <h3>{t("prog.title")}</h3>
+          <h2>{t("prog.title")}</h2>
           <div className="csub">{t("prog.sub")}</div>
         </div>
         <div className="prog-actions">

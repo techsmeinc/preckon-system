@@ -50,7 +50,7 @@ export default function ProjectOverviewPage({ params }: { params: Promise<{ pid:
       <div className="card" style={{ marginBottom: 16 }}>
         <div className="chead">
           <div>
-            <h3>{t("project.chainProgress")}</h3>
+            <h2>{t("project.chainProgress")}</h2>
             <div className="csub">{t("project.chainProgressSub")}</div>
           </div>
           <span className="mono" style={{ fontSize: 11, color: "var(--slate-400)" }}>{t("project.percentComplete", { n: chainProgress(stages) })}</span>
@@ -79,7 +79,7 @@ export default function ProjectOverviewPage({ params }: { params: Promise<{ pid:
 
       <div className="row two">
         <div className="card">
-          <h3>{t("project.attention")}</h3>
+          <h2>{t("project.attention")}</h2>
           <div className="csub">{t("project.attentionSub")}</div>
           {attention.length === 0 ? (
             <p className="csub" style={{ margin: 0 }}>{t("project.nothingWaiting")}</p>
@@ -103,7 +103,7 @@ export default function ProjectOverviewPage({ params }: { params: Promise<{ pid:
         </div>
 
         <div className="card">
-          <h3>{t("project.details")}</h3>
+          <h2>{t("project.details")}</h2>
           <div className="csub">{t("project.detailsSub")}</div>
           <div className="trow-lbl" style={{ borderTop: 0 }}>{t("project.client")} <b>{project.client_name ?? "—"}</b></div>
           <div className="trow-lbl">{t("project.code")} <b className="mono">{project.code ?? "—"}</b></div>
@@ -130,7 +130,7 @@ export default function ProjectOverviewPage({ params }: { params: Promise<{ pid:
       <div className="card" style={{ marginBottom: 16, borderColor: auto ? "var(--brand)" : undefined }}>
         <div className="chead">
           <div>
-            <h3>{t("project.autopilot")} {auto && <span className="chip running" style={{ marginInlineStart: 8 }}>{t("project.autopilotRunning")}</span>}</h3>
+            <h2>{t("project.autopilot")} {auto && <span className="chip running" style={{ marginInlineStart: 8 }}>{t("project.autopilotRunning")}</span>}</h2>
             <div className="csub">{t("project.autopilotSub")}</div>
           </div>
           <span className="mono" style={{ fontSize: 11, color: "var(--slate-400)" }}>{pv ? t("project.autopilotProgress", { done: pv.completed, total: pv.total }) : ""}</span>
@@ -159,7 +159,7 @@ export default function ProjectOverviewPage({ params }: { params: Promise<{ pid:
       {project.lifecycle_key && (
         <div className="card">
           <div className="chead">
-            <div><h3>{t("project.pursuit")}</h3><div className="csub">{t("project.pursuitSub")}</div></div>
+            <div><h2>{t("project.pursuit")}</h2><div className="csub">{t("project.pursuitSub")}</div></div>
             <span className="mono" style={{ fontSize: 11, color: "var(--slate-400)" }}>{project.lifecycle_key}</span>
           </div>
           <div className="stepper">

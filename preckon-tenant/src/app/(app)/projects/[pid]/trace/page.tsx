@@ -33,7 +33,7 @@ export default function TracePage({ params }: { params: Promise<{ pid: string }>
       </div>
       <div className="row two">
         <div className="card">
-          <div className="chead"><h3>Artifact graph</h3><span className="mono" style={{ fontSize: 11, color: "var(--slate-400)" }}>{rows.length}</span></div>
+          <div className="chead"><h2>Artifact graph</h2><span className="mono" style={{ fontSize: 11, color: "var(--slate-400)" }}>{rows.length}</span></div>
           {artifacts.loading ? <Skeleton rows={5} /> : rows.length === 0 ? <p className="csub" style={{ margin: 0 }}>No artifacts yet — run a workflow first.</p> : (
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {[...grouped.entries()].map(([type, list]) => (
@@ -56,7 +56,7 @@ export default function TracePage({ params }: { params: Promise<{ pid: string }>
           )}
         </div>
         <div className="card">
-          <div className="chead"><h3>Lineage</h3></div>
+          <div className="chead"><h2>Lineage</h2></div>
           {!sel ? <p className="csub" style={{ margin: 0 }}>Select an artifact to trace it.</p> : <TraceDetail pid={pid} id={sel} />}
         </div>
       </div>

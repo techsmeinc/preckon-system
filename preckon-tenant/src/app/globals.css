@@ -145,7 +145,7 @@ a{color:inherit; text-decoration:none;}
 .row.two{grid-template-columns:1.5fr 1fr;}
 @media(max-width:980px){ .row.two{grid-template-columns:1fr;} }
 .card{background:var(--surface); border:1px solid var(--hairline); border-radius:14px; padding:18px;}
-.card h3{font-family:var(--font-display); font-weight:600; font-size:14.5px; color:var(--ink); margin:0 0 2px;}
+.card h2,.card h3{font-family:var(--font-display); font-weight:600; font-size:14.5px; color:var(--ink); margin:0 0 2px;}
 .card .csub{font-size:11.5px; color:var(--slate-500); margin:0 0 16px;}
 .card .chead{display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:12px;}
 .card .chead a,.card .chead button.link{font-size:11.5px; color:var(--teal-ink); font-weight:600; background:none; border:0; cursor:pointer;}
@@ -195,7 +195,7 @@ td.num{font-family:var(--font-mono); color:var(--ink);}
 .drawer{position:fixed; top:0; inset-inline-end:0; height:100vh; width:452px; max-width:94vw; background:var(--surface); border-inline-start:1px solid var(--hairline); z-index:91; transform:translateX(100%); transition:transform .26s cubic-bezier(.4,0,.2,1); display:flex; flex-direction:column;}
 .drawer-overlay.on .drawer{transform:none;}
 .drawer .dh{display:flex; align-items:center; justify-content:space-between; padding:18px 20px; border-bottom:1px solid var(--hairline);}
-.drawer .dh h3{font-family:var(--font-display); font-weight:600; font-size:16px; color:var(--ink); margin:0;}
+.drawer .dh h2,.drawer .dh h3{font-family:var(--font-display); font-weight:600; font-size:16px; color:var(--ink); margin:0;}
 .drawer .dh .x{cursor:pointer; color:var(--slate-400); padding:4px; border-radius:6px; display:grid; place-items:center; background:none; border:0;} .drawer .dh .x:hover{color:var(--ink); background:var(--panel-2);}
 .drawer .db{flex:1; overflow-y:auto; padding:20px;}
 .drawer .df{display:flex; gap:10px; padding:16px 20px; border-top:1px solid var(--hairline);}
@@ -628,10 +628,12 @@ input[type=color]{width:46px; height:34px; border:1px solid var(--hairline); bor
 [lang="ar"] body{line-height:1.6;}
 [lang="ar"] .page-head h1,
 [lang="ar"] .page-head h2,
+[lang="ar"] .card h2,
 [lang="ar"] .card h3,
 [lang="ar"] .pw-head h2,
 [lang="ar"] .placeholder h2,
 [lang="ar"] .placeholder h3,
+[lang="ar"] .drawer .dh h2,
 [lang="ar"] .drawer .dh h3,
 [lang="ar"] .crumb{font-family:'Noto Sans Arabic','Segoe UI',Tahoma,var(--font-display),sans-serif;}
 /* Figures stay in the mono face: a bill of quantities is read against drawings
@@ -1334,3 +1336,8 @@ p a,li a,td a,.csub a{min-block-size:0;}
 @media (max-width:900px){
   .bim-canvas.bim-view-split{grid-template-columns:1fr; grid-template-rows:1fr 6px 1fr;}
 }
+/* The Copilot item in the sidebar is a <button> rather than an <a>, because it
+   opens a panel instead of going anywhere. It still has to look like its
+   neighbours. */
+.nav .navbtn{display:flex; align-items:center; gap:10px; width:100%; font-family:inherit;
+  font-size:inherit; color:inherit; background:none; border:0; text-align:start; cursor:pointer;}

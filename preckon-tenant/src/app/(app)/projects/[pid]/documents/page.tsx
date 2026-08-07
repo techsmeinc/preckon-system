@@ -97,13 +97,13 @@ export default function DocumentsPage({ params }: { params: Promise<{ pid: strin
       {files.loading ? <Skeleton rows={3} /> : list.length === 0 ? (
         <div className="placeholder">
           <div className="pic"><Icon.upload /></div>
-          <h3>{t("docs.noneTitle")}</h3>
+          <h2>{t("docs.noneTitle")}</h2>
           <p>{t("docs.noneSub")}</p>
         </div>
       ) : (
         <div className="card" style={{ padding: "14px 18px" }}>
           <div className="chead">
-            <div><h3>{t("docs.setTitle")}</h3><div className="csub">{t("docs.setSub", { files: list.length, docs: docs.length })}</div></div>
+            <div><h2>{t("docs.setTitle")}</h2><div className="csub">{t("docs.setSub", { files: list.length, docs: docs.length })}</div></div>
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
               {canRun && classifyAvailable && unclassified > 0 && (
                 <button

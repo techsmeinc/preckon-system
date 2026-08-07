@@ -80,7 +80,7 @@ export default function LibraryPage() {
           visible.map(([col, entries]) => (
             <div className="card" key={col} style={{ marginBottom: 16 }}>
               <div className="chead">
-                <div><h3>{label(col)}</h3><div className="csub">{t("library.entryCount", { n: entries.length })}</div></div>
+                <div><h2>{label(col)}</h2><div className="csub">{t("library.entryCount", { n: entries.length })}</div></div>
               </div>
               <table>
                 <thead><tr><th>{t("library.colKey")}</th><th>{t("library.colDetails")}</th><th className="r">{t("library.colVersion")}</th>{canManage && <th></th>}</tr></thead>

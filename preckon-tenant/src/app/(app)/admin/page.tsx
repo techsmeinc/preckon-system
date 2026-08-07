@@ -81,7 +81,7 @@ function Branding() {
   return (
     <div className="row two">
       <div className="card">
-        <h3>{t("admin.brandColour")}</h3>
+        <h2>{t("admin.brandColour")}</h2>
         <div className="csub">{t("admin.brandColourSub")}</div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8 }}>
@@ -117,7 +117,7 @@ function Branding() {
       </div>
 
       <div className="card">
-        <h3>{t("admin.workspaceName")}</h3>
+        <h2>{t("admin.workspaceName")}</h2>
         <div className="csub">{t("admin.workspaceNameSub")}</div>
         <div className="fld" style={{ marginTop: 8 }}>
           <label className="fl">{t("admin.name")}</label>
@@ -171,7 +171,7 @@ function Plan() {
     <>
       <div className="row two">
         <div className="card">
-          <h3>{t("admin.plan")}</h3>
+          <h2>{t("admin.plan")}</h2>
           <div className="csub">{t("admin.planSub")}</div>
           <div className="brand-prev" style={{ justifyContent: "space-between" }}>
             <div>
@@ -192,7 +192,7 @@ function Plan() {
         </div>
 
         <div className="card">
-          <h3>{t("admin.usage")}</h3>
+          <h2>{t("admin.usage")}</h2>
           <div className="csub">{t("admin.usageSub")}</div>
           {loading ? <Skeleton rows={3} /> : (
             <>
@@ -209,7 +209,7 @@ function Plan() {
       </div>
 
       <div className="card">
-        <div className="chead"><div><h3>{t("admin.capabilities")}</h3><div className="csub">{t("admin.capabilitiesSub")}</div></div></div>
+        <div className="chead"><div><h2>{t("admin.capabilities")}</h2><div className="csub">{t("admin.capabilitiesSub")}</div></div></div>
         {ent.loading ? <Skeleton rows={3} /> : Object.keys(features).length === 0 ? (
           <p className="csub" style={{ margin: 0 }}>{t("admin.noFlags")}</p>
         ) : (

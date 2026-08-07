@@ -257,7 +257,7 @@ export function CopilotDrawer({
     <div className={"drawer-overlay" + (open ? " on" : "")} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <aside className="drawer cop" role="dialog" aria-modal="true" aria-label={t("copilot.title")}>
         <div className="dh">
-          <h3>{t("copilot.title")}</h3>
+          <h2>{t("copilot.title")}</h2>
           <button className="x" onClick={onClose} aria-label={t("common.close")}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 6l12 12M18 6 6 18" /></svg>
           </button>

@@ -81,7 +81,7 @@ export default function BoqSurface({ pid, stage, artifacts, rows, workflows, run
       <div className="card" style={{ padding: "14px 18px" }}>
         <div className="chead">
           <div>
-            <h3>{t("boq.title")}</h3>
+            <h2>{t("boq.title")}</h2>
             <div className="csub">{t("boq.titleSub")}</div>
           </div>
           <div style={{ display: "flex", gap: 8 }}>

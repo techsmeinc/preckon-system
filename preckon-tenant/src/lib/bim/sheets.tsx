@@ -148,7 +148,7 @@ export function ParsedSheets({ pid }: { pid: string }) {
     <div className="card" style={{ marginBottom: 16 }}>
       <div className="chead">
         <div>
-          <h3>{t("cad.title")}</h3>
+          <h2>{t("cad.title")}</h2>
           <div className="csub">{t("cad.sub")}</div>
         </div>
         <div className="cad-pick">
@@ -275,7 +275,7 @@ function Schedules({ schedules }: { schedules: Schedule[] }) {
     <div className="card sch" style={{ marginTop: 12 }}>
       <div className="chead">
         <div>
-          <h3>{t("cad.schedules")}</h3>
+          <h2>{t("cad.schedules")}</h2>
           <div className="csub">{t("cad.schedulesSub", { n: schedules.length })}</div>
         </div>
       </div>
@@ -362,7 +362,7 @@ function Notes({ notes }: { notes: string[] }) {
     <div className="card" style={{ marginTop: 12, padding: "14px 18px" }}>
       <div className="chead" style={{ marginBottom: 8 }}>
         <div>
-          <h3>{t("cad.notes")}</h3>
+          <h2>{t("cad.notes")}</h2>
           <div className="csub">{t("cad.notesSub")}</div>
         </div>
         {real.length > 12 && (

@@ -121,7 +121,7 @@ export default function SubmissionPage() {
           <div className="card" key={g} style={{ marginBottom: 14 }}>
             <div className="chead">
               <div>
-                <h3>{GROUP_LABEL[g]}</h3>
+                <h2>{GROUP_LABEL[g]}</h2>
                 <div className="csub">
                   {t("sub.groupSub", {
                     n: items.filter((i) => i.state === "pending").length,
@@ -195,7 +195,7 @@ export default function SubmissionPage() {
         <div className="card" style={{ padding: "14px 18px" }}>
           <div className="chead">
             <div>
-              <h3>{t("sub.addTitle")}</h3>
+              <h2>{t("sub.addTitle")}</h2>
               <div className="csub">{t("sub.addSub")}</div>
             </div>
           </div>

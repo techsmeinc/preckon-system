@@ -78,7 +78,7 @@ export function ProjectCover({ pid, onSaved }: { pid: string; onSaved?: () => vo
     <div className="card" style={{ padding: "14px 18px", marginTop: 14 }}>
       <div className="chead">
         <div>
-          <h3>{t("cover.title")}</h3>
+          <h2>{t("cover.title")}</h2>
           <div className="csub">{t("cover.sub")}</div>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>

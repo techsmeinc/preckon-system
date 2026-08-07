@@ -75,7 +75,7 @@ export default function EstimateSurface({ pid, stage, artifacts, rows, workflows
       <div className="row est">
         <div className="card" style={{ padding: "14px 18px" }}>
           <div className="chead">
-            <div><h3>{t("est.pricedBill")}</h3><div className="csub">{t("est.pricedBillSub")}</div></div>
+            <div><h2>{t("est.pricedBill")}</h2><div className="csub">{t("est.pricedBillSub")}</div></div>
             {pending.length > 0 && <span className="chip pending">{t("est.toConfirm", { n: pending.length })}</span>}
           </div>
           <table style={{ marginTop: 8 }}>
@@ -105,7 +105,7 @@ export default function EstimateSurface({ pid, stage, artifacts, rows, workflows
         </div>
 
         <div className="card">
-          <h3>{t("est.buildup")}</h3>
+          <h2>{t("est.buildup")}</h2>
           <div className="csub">{t("est.buildupSub")}</div>
           <div style={{ marginTop: 8 }}>
             <div className="bd-row first">{t("est.directWorks")} <b>{money(direct, ccy)}</b></div>

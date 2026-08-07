@@ -99,7 +99,7 @@ export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: 
   return (
     <div className={"card bim-studio" + (full ? " is-full" : "")} style={full ? undefined : { marginBottom: 16 }}>
       <div className="chead">
-        <div><h3>{t("bim.studio")}</h3><div className="csub">{t("bim.studioSub")}</div></div>
+        <div><h2>{t("bim.studio")}</h2><div className="csub">{t("bim.studioSub")}</div></div>
         {canEdit && (
           <div style={{ display: "flex", gap: 6 }}>
             {/* Measuring is one click that writes a hundred records. The click

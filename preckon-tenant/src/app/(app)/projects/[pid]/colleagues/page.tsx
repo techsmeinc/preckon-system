@@ -56,7 +56,7 @@ function ColleaguePanel({ pid, persona }: { pid: string; persona: any }) {
   return (
     <div className="row two">
       <div className="card" style={{ display: "flex", flexDirection: "column" }}>
-        <div className="chead"><h3>💬 {persona.label}</h3><span className="mono" style={{ fontSize: 10.5, color: "var(--slate-400)" }}>{(persona.deviations ?? []).join(" · ") || "all deviations"}</span></div>
+        <div className="chead"><h2>💬 {persona.label}</h2><span className="mono" style={{ fontSize: 10.5, color: "var(--slate-400)" }}>{(persona.deviations ?? []).join(" · ") || "all deviations"}</span></div>
         <div className="chat">
           {messages.map((m) => <div key={m.id} className={"bubble " + m.role}>{m.content}</div>)}
           {thinking && <div className="bubble assistant"><span className="spin" /> thinking…</div>}
@@ -68,7 +68,7 @@ function ColleaguePanel({ pid, persona }: { pid: string; persona: any }) {
         </div>
       </div>
       <div className="card">
-        <div className="chead"><h3>{persona.label}&apos;s lens</h3><span className="mono" style={{ fontSize: 10.5, color: "var(--slate-400)" }}>{(lens.data ?? []).length} in scope</span></div>
+        <div className="chead"><h2>{persona.label}&apos;s lens</h2><span className="mono" style={{ fontSize: 10.5, color: "var(--slate-400)" }}>{(lens.data ?? []).length} in scope</span></div>
         <p className="csub" style={{ marginTop: -6 }}>Pending proposals within this colleague&apos;s scope.</p>
         {lens.loading ? <Skeleton rows={2} /> : (lens.data ?? []).length === 0 ? <p className="csub" style={{ margin: 0 }}>Nothing in this colleague&apos;s scope right now.</p> : (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>

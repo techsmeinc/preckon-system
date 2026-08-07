@@ -179,11 +179,14 @@ function AppShell({
                   {NAV.filter((g) => g.group !== "nav.manage" || canAdmin).map((g) => (
                     <div key={g.group}>
                       <div className="grp">{t(g.group)}</div>
+                      {/* A real button. As an anchor with no href it was not a
+                          link, and role="button" on top of that is the ARIA
+                          misuse Lighthouse flags — as well as needing its own
+                          keyboard handler to do what a button does for free. */}
                       {g.group === "nav.tools" && (
-                        <a onClick={openCopilot} role="button" tabIndex={0}
-                           onKeyDown={(e) => { if (e.key === "Enter") openCopilot(); }}>
+                        <button type="button" className="navbtn" onClick={openCopilot}>
                           <Icon.copilot /><span>{t("nav.copilot")}</span>
-                        </a>
+                        </button>
                       )}
                       {g.items.map((it) => {
                         const active = pathname === it.href || pathname.startsWith(it.href + "/");

@@ -119,7 +119,7 @@ export default function NarrativeSurface({ pid, stage, artifacts, rows, workflow
       <div className="card" style={{ padding: "14px 18px" }}>
         <div className="chead">
           <div>
-            <h3>{t("narrative.title")}</h3>
+            <h2>{t("narrative.title")}</h2>
             <div className="csub">{t("narrative.titleSub")}</div>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
@@ -139,12 +139,16 @@ export default function NarrativeSurface({ pid, stage, artifacts, rows, workflow
             const empty = !a || !(Number(a.payload?.word_count) > 0);
             return (
               <div key={s.key} style={{ borderTop: i ? "1px solid var(--line)" : 0 }}>
-                <div
-                  role="button"
-                  tabIndex={0}
+                {/* A button, not a div wearing role="button". It gets the
+                    keyboard, the focus ring and the announcement for free, and
+                    aria-expanded says whether the section is open — which the
+                    div never did. */}
+                <button
+                  type="button"
+                  aria-expanded={isOpen}
                   onClick={() => setOpen(isOpen ? null : s.key)}
-                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setOpen(isOpen ? null : s.key); }}
-                  style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 2px", cursor: "pointer" }}
+                  style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 2px", cursor: "pointer",
+                           width: "100%", background: "none", border: 0, textAlign: "start", font: "inherit", color: "inherit" }}
                 >
                   <span className="mono" style={{ color: "var(--slate-500)", fontSize: 11 }}>{String(i + 1).padStart(2, "0")}</span>
                   <span style={{ flex: 1, minWidth: 0 }}>
@@ -164,7 +168,7 @@ export default function NarrativeSurface({ pid, stage, artifacts, rows, workflow
                     </button>
                   )}
                   {a && <StatusCell a={a} onReview={setReview} />}
-                </div>
+                </button>
 
                 {isOpen && a && !empty && (
                   <div style={{ padding: "4px 2px 18px" }}>

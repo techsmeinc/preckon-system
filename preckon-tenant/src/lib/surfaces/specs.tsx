@@ -71,7 +71,7 @@ export default function SpecsSurface({ pid, stage, artifacts, rows, workflows, r
 
       <div className="card" style={{ padding: "14px 18px" }}>
         <div className="chead">
-          <div><h3>{t("specs.title")}</h3><div className="csub">{t("specs.titleSub")}</div></div>
+          <div><h2>{t("specs.title")}</h2><div className="csub">{t("specs.titleSub")}</div></div>
         </div>
         <table style={{ marginTop: 8 }}>
           <thead><tr><th>{t("specs.colClause")}</th><th>{t("specs.colTitle")}</th><th>{t("specs.colStandards")}</th><th className="r">{t("common.status")}</th></tr></thead>

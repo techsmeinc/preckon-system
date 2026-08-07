@@ -63,7 +63,7 @@ export default function TenderSurface({ pid, stage, artifacts, rows, workflows, 
       <div className="row two">
         <div className="card" style={{ padding: "14px 18px" }}>
           <div className="chead">
-            <div><h3>{t("tender.register")}</h3><div className="csub">{t("tender.registerSub")}</div></div>
+            <div><h2>{t("tender.register")}</h2><div className="csub">{t("tender.registerSub")}</div></div>
           </div>
           {requirements.length === 0 ? (
             <p className="csub" style={{ margin: 0 }}>{t("tender.noRequirements")}</p>
@@ -84,7 +84,7 @@ export default function TenderSurface({ pid, stage, artifacts, rows, workflows, 
         </div>
 
         <div className="card">
-          <h3>{t("tender.keyFacts")}</h3>
+          <h2>{t("tender.keyFacts")}</h2>
           <div className="csub">{t("tender.keyFactsSub")}</div>
           <div className="trow-lbl" style={{ borderTop: 0 }}>{t("tender.project")} <b>{latest?.payload?.project_name ?? "—"}</b></div>
           <div className="trow-lbl">{t("tender.clientName")} <b>{latest?.payload?.client ?? "—"}</b></div>
@@ -98,7 +98,7 @@ export default function TenderSurface({ pid, stage, artifacts, rows, workflows, 
 
       {(decisions.length > 0 || proposals.length > 0 || approvals.length > 0) && (
         <div className="card" style={{ padding: "14px 18px" }}>
-          <div className="chead"><div><h3>{t("tender.decisions")}</h3><div className="csub">{t("tender.decisionsSub")}</div></div></div>
+          <div className="chead"><div><h2>{t("tender.decisions")}</h2><div className="csub">{t("tender.decisionsSub")}</div></div></div>
           <table style={{ marginTop: 8 }}>
             <thead><tr><th>{t("tender.colRecord")}</th><th>{t("tender.colDetail")}</th><th className="r">{t("projects.colValue")}</th><th className="r">{t("common.status")}</th></tr></thead>
             <tbody>

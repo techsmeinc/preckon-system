@@ -83,7 +83,7 @@ export default function DrawingsSurface({ pid, stage, artifacts, rows, workflows
       <div className="card">
         <div className="chead">
           <div>
-            <h3>{t("draw.registerTitle")}</h3>
+            <h2>{t("draw.registerTitle")}</h2>
             <div className="csub">{t("draw.registerSub")}</div>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>

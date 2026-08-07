@@ -110,7 +110,7 @@ export default function DashboardPage() {
       <div className="row two">
         <div className="card">
           <div className="chead">
-            <div><h3>{t("dash.needsReview")}</h3><div className="csub">{t("dash.needsReviewSub")}</div></div>
+            <div><h2>{t("dash.needsReview")}</h2><div className="csub">{t("dash.needsReviewSub")}</div></div>
             <Link className="rowbtn" href="/projects">{t("dash.allProjects")}</Link>
           </div>
           {hydrating && queue.length === 0 ? <Skeleton rows={4} /> : queue.length === 0 ? (
@@ -140,7 +140,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="card">
-          <h3>{t("dash.deadlines")}</h3>
+          <h2>{t("dash.deadlines")}</h2>
           <div className="csub">{t("dash.deadlinesSub")}</div>
           {hydrating && deadlines.length === 0 ? <Skeleton rows={3} /> : deadlines.length === 0 ? (
             <p className="csub" style={{ margin: 0 }}>{t("dash.noDeadlines")}</p>
@@ -168,7 +168,7 @@ export default function DashboardPage() {
 
       <div className="card" style={{ marginBottom: 16 }}>
         <div className="chead">
-          <div><h3>{t("dash.yourProjects")}</h3><div className="csub">{t("dash.yourProjectsSub")}</div></div>
+          <div><h2>{t("dash.yourProjects")}</h2><div className="csub">{t("dash.yourProjectsSub")}</div></div>
           <Link className="rowbtn" href="/projects">{t("dash.viewAll")}</Link>
         </div>
         {loading ? <Skeleton rows={4} /> : projectList.length === 0 ? (
@@ -211,7 +211,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="card">
-        <h3>{t("dash.recentActivity")}</h3>
+        <h2>{t("dash.recentActivity")}</h2>
         <div className="csub">{canAudit ? t("dash.activityAudit") : t("dash.activityPlain")}</div>
         {hydrating && feed.length === 0 ? <Skeleton rows={4} /> : feed.length === 0 ? (
           <p className="csub" style={{ margin: 0 }}>{t("dash.noActivity")}</p>

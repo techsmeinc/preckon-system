@@ -136,7 +136,7 @@ export function ErrorBox({ message, onRetry }: { message: string; onRetry?: () =
       <div className="pic" style={{ background: "var(--red-tint)", color: "var(--red)" }}>
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="9" /><path d="M12 8v5M12 16v.5" /></svg>
       </div>
-      <h3>{t("common.loadFail")}</h3>
+      <h2>{t("common.loadFail")}</h2>
       <p>{message}</p>
       {onRetry && <button className="mini" style={{ marginTop: 18 }} onClick={onRetry}>{t("common.retry")}</button>}
     </div>
@@ -164,7 +164,7 @@ export function Placeholder({ title, sub, phase }: { title: string; sub?: string
       <div className="pic">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 9h18" /></svg>
       </div>
-      <h3>{title}</h3>
+      <h2>{title}</h2>
       {sub && <p>{sub}</p>}
       {phase && <span className="next">Arrives in {phase}</span>}
     </div>
@@ -186,7 +186,7 @@ export function Drawer({ open, title, onClose, children, footer }: {
     <div className={"drawer-overlay" + (open ? " on" : "")} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <aside className="drawer" role="dialog" aria-modal="true">
         <div className="dh">
-          <h3>{title}</h3>
+          <h2>{title}</h2>
           <button className="x" onClick={onClose} aria-label={t("common.close")}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 6l12 12M18 6 6 18" /></svg>
           </button>

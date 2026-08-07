@@ -47,7 +47,7 @@ export default function GenericSurface({ pid, stage, artifacts, rows, workflows,
 
       {[...byType.entries()].map(([type, list]) => (
         <div className="card" key={type} style={{ padding: "14px 18px", marginBottom: 16 }}>
-          <div className="chead"><div><h3>{typeLabel(type, t)}</h3><div className="csub">{t("generic.recordCount", { n: list.length })}</div></div></div>
+          <div className="chead"><div><h2>{typeLabel(type, t)}</h2><div className="csub">{t("generic.recordCount", { n: list.length })}</div></div></div>
           <table style={{ marginTop: 8 }}>
             <thead><tr><th>{t("generic.colRecord")}</th><th className="r">{t("common.status")}</th></tr></thead>
             <tbody>

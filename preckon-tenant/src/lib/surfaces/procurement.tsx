@@ -73,7 +73,7 @@ export default function ProcurementSurface({ pid, stage, artifacts, rows, workfl
 
       <div className="card" style={{ padding: "14px 18px" }}>
         <div className="chead">
-          <div><h3>{t("proc.title")}</h3><div className="csub">{t("proc.titleSub")}</div></div>
+          <div><h2>{t("proc.title")}</h2><div className="csub">{t("proc.titleSub")}</div></div>
           {pending.length > 0 && <span className="chip pending">{t("est.toConfirm", { n: pending.length })}</span>}
         </div>
         <table style={{ marginTop: 8 }}>

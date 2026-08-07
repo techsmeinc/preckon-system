@@ -50,7 +50,7 @@ export default function TeamAdmin() {
 
       <div className="card" style={{ marginBottom: 16 }}>
         <div className="chead">
-          <div><h3>{t("admin.people")}</h3><div className="csub">{t("admin.peopleSub", { n: (users.data ?? []).length })}</div></div>
+          <div><h2>{t("admin.people")}</h2><div className="csub">{t("admin.peopleSub", { n: (users.data ?? []).length })}</div></div>
           {canManage && <button className="mini sm pri" onClick={() => setAddUser(true)}><Icon.add /> {t("admin.invite")}</button>}
         </div>
         {users.loading ? <Skeleton rows={3} /> : users.error ? <EmptyState title={t("team.loadFail")} sub={users.error} /> : (
@@ -82,7 +82,7 @@ export default function TeamAdmin() {
       </div>
 
       <div className="card">
-        <div className="chead"><h3>{t("team.roles")}</h3>{canManage && <button className="mini sm pri" onClick={() => setRoleDrawer({ mode: "new" })}><Icon.add /> {t("team.newRole")}</button>}</div>
+        <div className="chead"><h2>{t("team.roles")}</h2>{canManage && <button className="mini sm pri" onClick={() => setRoleDrawer({ mode: "new" })}><Icon.add /> {t("team.newRole")}</button>}</div>
         {roles.loading ? <Skeleton rows={3} /> : (
           <table>
             <thead><tr><th>{t("team.colRoleName")}</th><th>{t("team.colKey")}</th><th>{t("team.colTier")}</th><th className="r">{t("team.colPerms")}</th>{canManage && <th></th>}</tr></thead>

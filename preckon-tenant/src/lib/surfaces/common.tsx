@@ -153,7 +153,7 @@ export function StageEmpty({ title, sub }: { title: string; sub: string }) {
   return (
     <div className="placeholder">
       <div className="pic"><Icon.clock /></div>
-      <h3>{title}</h3>
+      <h2>{title}</h2>
       <p>{sub}</p>
     </div>
   );

@@ -48,7 +48,7 @@ export default function ModuleWorkspace({ params }: { params: Promise<{ pid: str
         <div className="pic">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="4" y="10" width="16" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg>
         </div>
-        <h3>{t("stage.notLicensed")}</h3>
+        <h2>{t("stage.notLicensed")}</h2>
         <p>{t("stage.notLicensedSub", { key })}</p>
         <div style={{ marginTop: 18 }}><Link className="mini" href="/admin">{t("stage.seePlan")}</Link></div>
       </div>

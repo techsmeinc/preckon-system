@@ -57,7 +57,7 @@ export function BoqPipeline({ pid }: { pid: string }) {
     <div className="card boqpipe" style={{ marginBottom: 16 }}>
       <div className="chead">
         <div>
-          <h3>{t("pipe.title")}</h3>
+          <h2>{t("pipe.title")}</h2>
           <div className="csub">
             {roster.projectType ? `${roster.projectType} · ` : ""}
             {t("pipe.sub", { specialists: specialists.length, checks: verdicts.length })}

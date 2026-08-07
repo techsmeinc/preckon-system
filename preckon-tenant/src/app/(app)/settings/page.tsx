@@ -41,7 +41,7 @@ function Profile() {
   return (
     <div className="row two">
       <div className="card">
-        <h3>{t("settings.profile")}</h3>
+        <h2>{t("settings.profile")}</h2>
         <div className="csub">{t("settings.profileSub")}</div>
         <div className="brand-prev">
           <div className="avatar" style={{ width: 48, height: 48, fontSize: 16 }}>{initials}</div>
@@ -59,7 +59,7 @@ function Profile() {
       </div>
 
       <div className="card">
-        <h3>{t("settings.canDo")}</h3>
+        <h2>{t("settings.canDo")}</h2>
         <div className="csub">{t("settings.canDoSub")}</div>
         {!me ? <Skeleton rows={3} /> : (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
@@ -99,7 +99,7 @@ function Notifications() {
 
   return (
     <div className="card" style={{ maxWidth: 620 }}>
-      <h3>{t("settings.notifs")}</h3>
+      <h2>{t("settings.notifs")}</h2>
       <div className="csub">{t("settings.notifsSub")}</div>
       {NOTIF_ROWS.map((r) => (
         <div className="set-row" key={r.key}>
@@ -139,7 +139,7 @@ function Preferences() {
 
   return (
     <div className="card" style={{ maxWidth: 620 }}>
-      <h3>{t("settings.prefs")}</h3>
+      <h2>{t("settings.prefs")}</h2>
       <div className="csub">{t("settings.prefsSub")}</div>
 
       {/* Language is per-person; leaving it on the workspace default means a new
