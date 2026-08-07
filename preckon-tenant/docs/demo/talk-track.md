@@ -60,6 +60,108 @@ stage tabs with the cursor as you list them, slowly enough to read.
 
 ---
 
+## 1b · The project page — 3 minutes
+
+Show this on the **finished** project, not the one you just created. It is the
+screen a bid manager lives on, and it only makes sense with work in it.
+
+Scroll from the top, slowly. There are five things on it and each answers a
+different question.
+
+### Chain progress
+
+> "First: where is this bid. Every stage, in order, with its own status.
+> Green is done, amber is waiting on a person, blue is running. One glance
+> and you know whether this bid is moving or stuck."
+
+### Needs your attention
+
+> "Second, and this is the one people actually use: where is it waiting on a
+> human.
+>
+> Not 'here are some notifications' — these are the specific decisions
+> holding this bid up, named by the stage that raised them and by how many.
+> Every one of them opens straight to the thing that needs deciding."
+
+**How:** Point at the counts as you say it. `119 proposals` on a bill is a real
+number, and it lands better than any adjective.
+
+### Behind the chain
+
+> "Third — and this is for whoever gets asked the awkward questions.
+>
+> Runs is every execution and how long it took. Trace is the graph: what
+> produced what. Standards is your own rules checked against this bid.
+> Colleagues are the specialists you can put a question to.
+>
+> You will not open these every day. You will be very glad they exist the
+> week after you win."
+
+### Submission cover
+
+> "Fourth, the boring one that saves an afternoon.
+>
+> Reference number, project number, location, client, who it goes to, and
+> the deadline. Type them once here and they print on the header of every
+> bill and every programme you export. Nobody retypes them into Excel after
+> each download, and nobody's export goes out with the last job's reference
+> on it.
+>
+> Note the deadline especially. The software reads a date out of the tender,
+> but an addendum moves it and a client grants extensions — so this one is
+> yours, and it is the one the portfolio list counts down to."
+
+### Autopilot
+
+This is the strongest thing on the page. Do not rush it.
+
+> "Fifth. Everything I have shown you so far had a human accepting each
+> stage. This is what happens when you do not want to.
+>
+> Autopilot runs every stage in order, accepts the proposals, and carries
+> the bid end to end without stopping. You can watch it move along that
+> row — each of those is a workflow, and it ticks them off as it goes."
+
+**Then, before anyone asks it:**
+
+> "And you are right to raise an eyebrow at that, because I have spent
+> twenty minutes telling you a human decides everything.
+>
+> Two things. It needs the permission to confirm — if you are not allowed to
+> accept a proposal by hand, you are not allowed to set this running. And
+> starting it, stopping it and finishing it are all on the audit chain
+> against your name. So this is not the software deciding it does not need
+> you. It is a record that you delegated, and who delegated it.
+>
+> What it is for is the first pass. Twelve tenders land on a Monday and you
+> need to know which three are worth an estimator's week. Run them all
+> through, read the numbers, then go back and do the real review on the ones
+> you are actually bidding. Everything it accepted is still traceable and
+> still correctable — it did not become unquestionable by being fast."
+
+**How:** This is the objection-handling moment of the whole demo. Raise the
+objection yourself before they do. A demo where the presenter names the
+uncomfortable thing first is one they trust afterwards.
+
+### Bid pursuit
+
+> "And underneath, the commercial lifecycle — Received, Qualifying,
+> Bidding, No Bid, Approving, Submitted, Clarifying.
+>
+> This is not a project-management board somebody has to remember to drag a
+> card across. It advances on what you confirm. Accept the tender summary
+> and this bid moves from Received to Qualifying, because that is what
+> qualifying means.
+>
+> And at the bottom: Next step. It tells you the single next thing that
+> moves this bid forward, with the button that does it.
+>
+> If somebody asked me what this product is for, in one screen, it is that
+> line."
+
+**How:** End the page here and click **Go to review** — it takes you straight
+into the next section of the demo, which is the point of it.
+
 ## 2 · Upload the tender — 1 minute
 
 **Do:** Documents → drag in a tender PDF and a drawing set.
