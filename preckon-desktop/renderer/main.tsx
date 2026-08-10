@@ -30,6 +30,8 @@ function Workstation() {
   const [tool, setTool] = useState<Tool>("editor");
   const [drawing, setDrawing] = useState<Opened | null>(null);
   const [doc, setDoc] = useState<BimDocument>(() => emptyDocument());
+  const [modelName, setModelName] = useState("model.json");
+  const [studioKey, setStudioKey] = useState(0);
   const [studioFull, setStudioFull] = useState(false);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
@@ -67,13 +69,46 @@ function Workstation() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  /* The studio has nowhere to save to, so it saves nowhere and says so. Its
-     Download button is the real exit. Returning the same version keeps the
-     component's optimistic-concurrency check happy without inventing one. */
+  /* The studio's Save writes to this machine.
+     There is no workspace to save into, so the file IS the save — the same way
+     the drawing editor's Download DXF is. Returning the same version keeps the
+     component's optimistic-concurrency check satisfied without inventing a
+     revision history that nothing here would honour. */
   const saveDoc = useCallback(async (next: BimDocument, base: number) => {
     setDoc(next);
-    setNote("Saved in this session. Use Download to write it to your disk — there is no workspace here.");
+    const b = bridge();
+    if (!b) { setNote("Nowhere to save — this page needs the Preckon desktop app."); return base; }
+    const where = await b.saveAs(modelName, JSON.stringify(next, null, 2));
+    if (where) {
+      // Both separators: a Windows path comes back with backslashes.
+      setModelName(where.split(/[\\/]/).pop() ?? modelName);
+      setNote(`Saved to ${where}`);
+    }
     return base;
+  }, [modelName]);
+
+  /* Open a model saved earlier. Validated before it is handed to the studio: a
+     JSON file the user picked is not necessarily a model, and a bad one would
+     otherwise crash the canvas rather than say so. */
+  const openModel = useCallback(async () => {
+    const b = bridge();
+    if (!b) return;
+    const res = await b.openModel();
+    if (!res) return;
+    if (res.error) { setNote(res.error); return; }
+    try {
+      const parsed = JSON.parse(res.text ?? "");
+      if (!parsed || typeof parsed !== "object" || !parsed.elements || !parsed.order) {
+        throw new Error("not a Preckon model");
+      }
+      setDoc(parsed as BimDocument);
+      setModelName(res.name);
+      setStudioKey((k) => k + 1);      // the studio holds history — remount on a new doc
+      setTool("studio");
+      setNote(null);
+    } catch (e: any) {
+      setNote(`That file is not a Preckon model (${e?.message ?? e}).`);
+    }
   }, []);
 
   return (
@@ -106,10 +141,19 @@ function Workstation() {
           </nav>
 
           <div className="ws-actions">
-            {drawing && <span className="ws-file" title={drawing.name}>{drawing.name}</span>}
-            <button className="btn btn-primary" onClick={open} disabled={busy}>
-              {busy ? "Opening…" : "Open drawing"}
-            </button>
+            {tool === "editor" ? (
+              <>
+                {drawing && <span className="ws-file" title={drawing.name}>{drawing.name}</span>}
+                <button className="btn btn-primary" onClick={open} disabled={busy}>
+                  {busy ? "Opening…" : "Open drawing"}
+                </button>
+              </>
+            ) : (
+              <>
+                <span className="ws-file" title={modelName}>{modelName}</span>
+                <button className="btn btn-ghost" onClick={openModel}>Open model</button>
+              </>
+            )}
           </div>
         </header>
 
@@ -139,6 +183,7 @@ function Workstation() {
             )
           ) : (
             <BimStudio
+              key={studioKey}
               initialDoc={doc}
               version={0}
               onSave={saveDoc}

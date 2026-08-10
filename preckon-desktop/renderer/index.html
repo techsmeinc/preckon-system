@@ -2,9 +2,12 @@
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8" />
-  <!-- No remote origins at all: this page is loaded from disk and must stay
-       that way. A CAD tool that phones home is a CAD tool that stops working
-       on a site with no signal, which is the whole reason this build exists. -->
+  <!-- No remote origins at all: a CAD tool that phones home is a CAD tool that
+       stops working on a site with no signal, which is the whole reason this
+       build exists. 'self' is app://preckon — see the scheme registration in
+       main.js. It has to be a registered standard scheme rather than file://,
+       because a file:// page has an opaque origin that 'self' never matches,
+       and the result is a blank window with everything silently refused. -->
   <meta http-equiv="Content-Security-Policy"
         content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />

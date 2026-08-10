@@ -20,6 +20,11 @@ contextBridge.exposeInMainWorld("preckon", {
    *  Accepts .dwg, which the browser build cannot: it is converted here. */
   openDrawing: () => ipcRenderer.invoke("preckon:open-drawing"),
 
+  /** Write text to a file the user names, and read one back. BIM Studio's only
+   *  way in and out of this machine — the drawing editor has its own. */
+  saveAs: (defaultName, text) => ipcRenderer.invoke("preckon:save-as", defaultName, text),
+  openModel: () => ipcRenderer.invoke("preckon:open-model"),
+
   /** Where the DWG converter is, and whether the user chose it themselves. */
   converter: () => ipcRenderer.invoke("preckon:converter"),
   chooseConverter: () => ipcRenderer.invoke("preckon:choose-converter"),
