@@ -22,6 +22,7 @@ import DxfParser from "dxf-parser";
 import { api } from "@/lib/apiclient";
 import { useCan, useToast } from "@/lib/ui";
 import { useI18n } from "@/lib/i18n";
+import { cachedText } from "@/lib/desktop";
 import {
   nativeUnit, parseToModel, serializeModel, unitFactor as unitFactorOf, withIds,
   UNIT_OPTIONS, type DxfModel,
@@ -91,8 +92,10 @@ function fetchDxf(pid: string, fid: string): Promise<string> {
   if (hit !== undefined) return Promise.resolve(hit);
   const running = dxfInflight.get(fid);
   if (running) return running;
-  const p = fetch(`/api/v1/projects/${pid}/files/${fid}/dxf`, { credentials: "include" })
-    .then(async (r) => { if (!r.ok) throw new Error(`${r.status}`); return r.text(); })
+  /* On the desktop this is read off this machine after the first time — a
+     converted .dwg is several megabytes and its bytes never change, so the
+     download happens once and then never again, including across restarts. */
+  const p = cachedText(`dxf:${fid}`, `/api/v1/projects/${pid}/files/${fid}/dxf`)
     .then((text) => {
       dxfCache.set(fid, text);
       while (dxfCache.size > DXF_CACHE_MAX) dxfCache.delete(dxfCache.keys().next().value as string);

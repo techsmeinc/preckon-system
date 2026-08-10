@@ -486,6 +486,7 @@ export const en = {
   "studio.drawing": "Drawing",
   "studio.noDrawings": "No drawings uploaded",
   "studio.openLocal": "Open a .dxf",
+  "studio.openLocalDesktop": "Open a drawing (.dwg or .dxf)",
   "studio.dwgLocal": "A .dwg has to be uploaded to a project first — the converter runs on the server. Upload it under the project's Documents, then pick it here.",
   "studio.emptyTitle": "Pick a drawing to edit",
   "studio.emptySub": "Choose a project and one of its sheets, or open a .dxf from your computer.",

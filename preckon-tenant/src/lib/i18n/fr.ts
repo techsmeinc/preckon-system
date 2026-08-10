@@ -488,6 +488,7 @@ export const fr: Dict = {
   "studio.drawing": "Dessin",
   "studio.noDrawings": "Aucun dessin importé",
   "studio.openLocal": "Ouvrir un .dxf",
+  "studio.openLocalDesktop": "Ouvrir un dessin (.dwg ou .dxf)",
   "studio.dwgLocal": "Un .dwg doit d’abord être importé dans un projet — la conversion s’exécute sur le serveur. Importez-le dans les Documents du projet, puis choisissez-le ici.",
   "studio.emptyTitle": "Choisissez un dessin à modifier",
   "studio.emptySub": "Choisissez un projet et l’une de ses planches, ou ouvrez un .dxf depuis votre ordinateur.",

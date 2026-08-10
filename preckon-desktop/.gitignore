@@ -1,0 +1,6 @@
+node_modules/
+dist/
+# ODA binaries are NOT committed: redistributing them requires a current ODA
+# membership. See README. The app works without them.
+vendor/oda/*
+!vendor/oda/.gitkeep

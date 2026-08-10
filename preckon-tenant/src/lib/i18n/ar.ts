@@ -487,6 +487,7 @@ export const ar: Dict = {
   "studio.drawing": "الرسم",
   "studio.noDrawings": "لا توجد رسومات مرفوعة",
   "studio.openLocal": "فتح ملف ‎.dxf",
+  "studio.openLocalDesktop": "افتح رسمًا (.dwg أو .dxf)",
   "studio.dwgLocal": "يجب رفع ملف ‎.dwg إلى مشروع أولًا، لأن التحويل يجري على الخادم. ارفعه ضمن مستندات المشروع ثم اختره هنا.",
   "studio.emptyTitle": "اختر رسمًا للتحرير",
   "studio.emptySub": "اختر مشروعًا وإحدى لوحاته، أو افتح ملف ‎.dxf من جهازك.",

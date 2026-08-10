@@ -20,6 +20,7 @@ import { useApi, Skeleton } from "@/lib/ui";
 import { api } from "@/lib/apiclient";
 import { useI18n } from "@/lib/i18n";
 import Link from "next/link";
+import { cachedText } from "@/lib/desktop";
 
 interface CadLayerView {
   layer: string;
@@ -84,8 +85,7 @@ function fetchSheet(pid: string, fid: string): Promise<string> {
   if (cached) return Promise.resolve(cached);
   const running = inflight.get(fid);
   if (running) return running;
-  const p = fetch(`/api/v1/projects/${pid}/files/${fid}/cad/svg`, { credentials: "include" })
-    .then((r) => (r.ok ? r.text() : Promise.reject(new Error(String(r.status)))))
+  const p = cachedText(`sheet:${fid}`, `/api/v1/projects/${pid}/files/${fid}/cad/svg`)
     .then((text) => { sheetCache.set(fid, text); return text; })
     .finally(() => { inflight.delete(fid); });
   inflight.set(fid, p);
