@@ -1,0 +1,35 @@
+{
+  "name": "preckon-desktop",
+  "productName": "Preckon",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Preckon drawing workstation — opens and converts drawings on your own machine.",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "start:local": "PRECKON_URL=http://localhost:3100 electron .",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.preckon.desktop",
+    "productName": "Preckon",
+    "files": ["src/**/*"],
+    "extraResources": [
+      {
+        "//": "The ODA File Converter. Redistributing it requires an ODA membership — see README. Absent, the app asks each user to point at their own installation instead of failing.",
+        "from": "vendor/oda",
+        "to": "oda",
+        "filter": ["**/*"]
+      }
+    ],
+    "win": { "target": ["nsis"] },
+    "mac": { "target": ["dmg"], "category": "public.app-category.productivity" },
+    "linux": { "target": ["AppImage"] }
+  }
+}
