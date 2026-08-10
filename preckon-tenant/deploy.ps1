@@ -54,7 +54,11 @@ echo "==> Bundle on server: `$actual bytes"
 if [ "`$actual" -ne $size ]; then echo "SIZE MISMATCH — expected $size. Aborting."; exit 1; fi
 
 echo "==> Unpacking"
-tar xzf /tmp/preckon-tenant.tgz -C /opt
+# Windows tar records file attributes as a SCHILY.fflags header GNU tar does not
+# know, and warns about it once per file — two hundred lines of noise that hide
+# anything real. Silenced where supported, kept where it is not.
+tar xzf /tmp/preckon-tenant.tgz -C /opt --warning=no-unknown-keyword 2>/dev/null \
+  || tar xzf /tmp/preckon-tenant.tgz -C /opt
 cd /opt/preckon-tenant
 
 echo "==> Migrations"

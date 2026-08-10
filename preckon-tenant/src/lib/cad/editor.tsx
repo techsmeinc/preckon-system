@@ -69,6 +69,40 @@ function download(text: string, filename: string) {
   URL.revokeObjectURL(url);
 }
 
+/**
+ * The drawing's DXF, fetched once per session.
+ *
+ * The server keeps the converted file now, so a repeat open is a fast read
+ * rather than another ODA conversion — but it is still a round trip carrying
+ * the whole drawing, and an estimator comparing two sheets flips between them
+ * constantly. Held here, the second open of a drawing costs nothing.
+ *
+ * Only three, because a DXF is a large string and the point is the drawing you
+ * just came from, not a session-long history. Text rather than a parsed model
+ * on purpose: a model is edited in place by whoever holds it, and handing the
+ * same one to a later open would carry somebody's markup into it.
+ */
+const DXF_CACHE_MAX = 3;
+const dxfCache = new Map<string, string>();
+const dxfInflight = new Map<string, Promise<string>>();
+
+function fetchDxf(pid: string, fid: string): Promise<string> {
+  const hit = dxfCache.get(fid);
+  if (hit !== undefined) return Promise.resolve(hit);
+  const running = dxfInflight.get(fid);
+  if (running) return running;
+  const p = fetch(`/api/v1/projects/${pid}/files/${fid}/dxf`, { credentials: "include" })
+    .then(async (r) => { if (!r.ok) throw new Error(`${r.status}`); return r.text(); })
+    .then((text) => {
+      dxfCache.set(fid, text);
+      while (dxfCache.size > DXF_CACHE_MAX) dxfCache.delete(dxfCache.keys().next().value as string);
+      return text;
+    })
+    .finally(() => { dxfInflight.delete(fid); });
+  dxfInflight.set(fid, p);
+  return p;
+}
+
 export function CadEditor({
   pid, fid, filename, dxfText, onClose, onSaved,
 }: {
@@ -164,7 +198,7 @@ export function CadEditor({
     // to care which format was uploaded.
     const load = dxfText !== undefined
       ? Promise.resolve().then(() => take(dxfText))
-      : fetchDxf(pid, fid).then(take);
+      : fetchDxf(pid ?? "", fid ?? "").then(take);
 
     load
       .catch((e) => { if (live) setError(e?.message === "empty" ? t("ed.noGeometry") : t("ed.loadFail")); })

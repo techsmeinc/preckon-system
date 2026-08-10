@@ -38,14 +38,18 @@ for f in "$DIR"/*.sql; do
     echo "  would run  $name"
     continue
   fi
-  # 2>&1 with the password warning filtered: it is printed on every single
-  # invocation and drowns the output that matters.
+  # The status tested here must be mysql's. It used to be the status of a
+  # `| grep -v` filtering the password warning — and grep exits 1 when it
+  # filters EVERYTHING, which is exactly what happens when a migration succeeds
+  # silently. So every clean migration was reported as FAILED, with an empty
+  # reason because the filter had eaten the only line there was. Capture first,
+  # filter second.
   if out=$(docker compose exec -T "$SERVICE" \
-        mysql -u"$USER" -p"$PASS" "$NAME" < "$f" 2>&1 | grep -v "Using a password on the command line"); then
+        mysql -u"$USER" -p"$PASS" "$NAME" < "$f" 2>&1); then
     echo "  ok         $name"
   else
     echo "  FAILED     $name"
-    echo "$out" | sed 's/^/             /'
+    echo "$out" | grep -v "Using a password on the command line" | sed 's/^/             /'
     # A half-migrated schema is worse than an unmigrated one.
     echo
     echo "Stopped. Fix that migration and run again — they are all re-runnable."
