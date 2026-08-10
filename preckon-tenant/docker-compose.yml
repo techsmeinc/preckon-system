@@ -95,11 +95,18 @@ services:
       CAD_URL: http://cad:7400
       CORE_URL: http://app:3000
       FILE_STORAGE_DIR: /app/.uploads
+      # Desktop installers, served by /desktop. On a volume rather than in the
+      # image: they are ~100 MB each and change on their own cadence, so baking
+      # them in would put a hundred-megabyte layer into every deploy of a
+      # one-line fix. Publishing a new build is a copy into this volume — no
+      # rebuild, no restart.
+      DESKTOP_DOWNLOAD_DIR: /app/.downloads
       # Sign-in attempts per minute. Raise only to run the e2e suite, which signs
       # in once per test; leave at the default on anything reachable publicly.
       AUTH_SIGNIN_MAX: ${AUTH_SIGNIN_MAX:-3}
     volumes:
       - uploads:/app/.uploads
+      - downloads:/app/.downloads
     ports:
       - "3100:3000"
 
@@ -128,3 +135,4 @@ services:
 volumes:
   db_data:
   uploads:
+  downloads:

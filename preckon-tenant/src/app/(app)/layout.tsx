@@ -29,6 +29,10 @@ const NAV: { group: Key; items: { href: string; label: Key; icon: IconName }[] }
     // — rather than from the rail, where it invited people to open an editor
     // with nothing in it. The route still works and the deep link still lands.
     { href: "/library", label: "nav.library", icon: "library" },
+    // Findable, not promoted. Somebody who never opens a .dwg has no reason to
+    // install anything, so this sits at the end of Tools rather than shouting
+    // from a banner on every screen.
+    { href: "/desktop", label: "nav.desktop", icon: "desktop" },
   ] },
   // Admin is role-gated (blueprint §1) — see ADMIN_PERMS below.
   { group: "nav.manage", items: [

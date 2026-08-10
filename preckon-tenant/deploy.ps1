@@ -70,6 +70,12 @@ docker compose up -d --build app cad
 echo "==> Running image"
 docker compose images app
 
+# The volume the desktop installers are served from. Created here so the very
+# first deploy after this change has somewhere to put them — an app that cannot
+# stat its download directory just reports no builds, but the directory has to
+# exist before publish.ps1 can copy into it.
+docker compose exec -T app sh -c 'mkdir -p /app/.downloads' 2>/dev/null || true
+
 # How big the sheets actually are. This decides whether the remaining wait is
 # the network (a big SVG) or was the database all along (a small one).
 echo "==> Sheet sizes"

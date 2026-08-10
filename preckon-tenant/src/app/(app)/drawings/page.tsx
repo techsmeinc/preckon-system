@@ -13,6 +13,7 @@
 // offered — the editor just no longer lives inside it.
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useApi, EmptyState } from "@/lib/ui";
 import { Icon } from "@/lib/icons";
 import { useI18n } from "@/lib/i18n";
@@ -147,6 +148,16 @@ Point Preckon at the converter now?`)) {
             <Icon.upload /> {isDesktop ? t("studio.openLocalDesktop") : t("studio.openLocal")}
           </button>
         </div>
+
+        {/* Offered at the one moment it is wanted: standing in front of the
+            .dwg the browser cannot open. Everywhere else it would be an advert.
+            Hidden in the desktop app, where it is already true. */}
+        {!isDesktop && (
+          <p className="csub" style={{ margin: "10px 0 0", display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+            <span>{t("studio.getDesktop")}</span>
+            <Link href="/desktop">{t("studio.getDesktopCta")}</Link>
+          </p>
+        )}
       </div>
 
       {local ? (

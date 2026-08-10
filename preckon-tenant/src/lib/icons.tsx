@@ -23,6 +23,7 @@ export const Icon = {
   copilot: () => <S><path d="M12 2a4 4 0 0 1 4 4v1a4 4 0 0 1 0 8 4 4 0 0 1-8 0 4 4 0 0 1 0-8V6a4 4 0 0 1 4-4Z" /></S>,
   search: () => <S><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></S>,
   bell: () => <S><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.7 21a2 2 0 0 1-3.4 0" /></S>,
+  desktop: () => <S><rect x="2.5" y="4" width="19" height="12" rx="1.5" /><path d="M8 20h8M12 16v4" /></S>,
   admin: () => <S><circle cx="9" cy="8" r="3" /><path d="M3 20v-1a5 5 0 0 1 10 0v1" /><path d="M16 3.1a3 3 0 0 1 0 5.8M21 20v-1a5 5 0 0 0-3.5-4.8" /></S>,
   arrow: () => <S><path d="M5 12h14M13 6l6 6-6 6" /></S>,
   globe: () => <S><circle cx="12" cy="12" r="9" /><path d="M3 12h18" /><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18" /></S>,
