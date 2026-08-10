@@ -459,20 +459,52 @@ td.num{font-family:var(--font-mono); color:var(--ink);}
 .sd{width:6px; height:6px; border-radius:50%; flex:none;}
 .sd.done{background:var(--brand);} .sd.review{background:var(--amber);} .sd.processing{background:var(--blue);} .sd.pending{background:var(--slate-300);}
 
+/* ── the chain strip ───────────────────────────────────────────────────────
+   Eight stages, each a node with its name and status stacked under it.
+
+   The name and the status were inline spans, so `margin-top` did nothing and
+   the two ran together on screen: "TenderPROCESSING", "DrawingsNEEDS REVIEW".
+   They are blocks now. The name reserves two lines so every status sits on the
+   same baseline whether its stage is called "BOQ" or "Technical Narrative" —
+   otherwise one long name drops its own status half a line and the row looks
+   broken.
+
+   And the status is no longer shouted. The strings are already sentence case;
+   uppercasing them in a 9px mono face was what made eight of them read as
+   noise. Sentence case, in the colour of the state they describe, so the row
+   can be read at a glance instead of word by word. */
 .chain{display:flex; align-items:flex-start; justify-content:space-between; position:relative;}
-.chain .step{flex:1; text-align:center; position:relative; cursor:pointer; background:none; border:0; padding:0; font-family:var(--font-body); min-width:64px;}
-.chain .step::before{content:""; position:absolute; top:18px; inset-inline-start:-50%; width:100%; height:2px; background:var(--hairline); z-index:0;}
+.chain .step{flex:1 1 0; min-width:88px; text-align:center; position:relative; cursor:pointer;
+  background:none; border:0; padding:6px 3px 4px; font-family:var(--font-body);
+  border-radius:12px; transition:background .12s ease;}
+.chain .step:hover{background:var(--panel-2);}
+/* The connector runs from the middle of the previous node to this one; 6px of
+   padding moved the node down, so the line follows it. */
+.chain .step::before{content:""; position:absolute; top:25px; inset-inline-start:-50%; width:100%;
+  height:2px; background:var(--hairline); z-index:0;}
 .chain .step:first-child::before{display:none;}
 .chain .step.done::before,.chain .step.review::before,.chain .step.processing::before{background:var(--brand);}
-.chain .node{position:relative; z-index:1; width:38px; height:38px; border-radius:50%; margin:0 auto 8px; display:grid; place-items:center;
-  background:var(--surface); border:2px solid var(--hairline); color:var(--slate-400); font-family:var(--font-mono); font-weight:600; font-size:13px;}
+.chain .node{position:relative; z-index:1; width:38px; height:38px; border-radius:50%; margin:0 auto 9px;
+  display:grid; place-items:center; border:2px solid var(--hairline); background:var(--surface);
+  color:var(--slate-400);}
 .chain .step.done .node{border-color:var(--brand); background:var(--brand); color:#06131d;}
 .chain .step.review .node{border-color:var(--amber); background:var(--amber-tint); color:var(--amber-ink);}
 .chain .step.processing .node{border-color:var(--blue); background:var(--blue-tint); color:var(--blue-ink);}
-.chain .step .sl{font-size:11.5px; font-weight:600; color:var(--ink);}
-.chain .step .ss{font-family:var(--font-mono); font-size:9px; color:var(--slate-400); margin-top:2px; text-transform:uppercase; letter-spacing:.04em;}
+.chain .step .sl{display:block; font-size:12px; font-weight:600; color:var(--ink); line-height:1.3;
+  min-height:2.6em; text-wrap:balance;}
+.chain .step .ss{display:block; font-size:10.5px; font-weight:600; line-height:1.35; margin-top:3px;
+  color:var(--slate-500);}
+.chain .step.done .ss{color:var(--teal-ink);}
+.chain .step.review .ss{color:var(--amber-ink);}
+.chain .step.processing .ss{color:var(--blue-ink);}
 .chain .step:hover .node{border-color:var(--teal-press);}
-@media(max-width:760px){ .chain{overflow-x:auto; gap:4px;} .chain .step{min-width:78px;} }
+.chain .step:focus-visible{outline:2px solid var(--teal-ink); outline-offset:2px;}
+/* Eight stages will not fit on a phone at a readable size, so the row scrolls
+   rather than shrinking each one into an abbreviation. */
+@media(max-width:900px){
+  .chain{overflow-x:auto; gap:2px; padding-bottom:4px; -webkit-overflow-scrolling:touch;}
+  .chain .step{flex:0 0 auto; min-width:96px;}
+}
 
 .dropzone{border:1.5px dashed var(--hairline); border-radius:12px; padding:26px; text-align:center; color:var(--slate-500);
   cursor:pointer; margin-bottom:16px; background:var(--panel-2); width:100%; font-family:var(--font-body); font-size:13px;}
