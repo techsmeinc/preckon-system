@@ -36,14 +36,38 @@ try {
     Write-Host "          the ODA File Converter installed. Bundling it needs an ODA membership." -ForegroundColor Yellow
   }
 
+  # Three levels, because the first one needs a Windows privilege most machines
+  # do not grant. The NSIS installer pulls in the winCodeSign toolchain, whose
+  # archive contains macOS symlinks — and creating a symlink on Windows requires
+  # Administrator or Developer Mode, so 7-Zip fails to unpack it and the build
+  # dies AFTER the app itself has been built perfectly well.
+  #
+  # So: try the installer; fall back to a zip, which needs none of that
+  # toolchain; and if even that trips, zip the packaged folder by hand. All
+  # three produce something a user can run. Only the first is an installer.
   Write-Host "==> Building the installer" -ForegroundColor Cyan
   npm run dist:win
-  if ($LASTEXITCODE -ne 0) { throw "electron-builder failed" }
+  if ($LASTEXITCODE -ne 0) {
+    Write-Host "    The installer step failed — most likely the symlink privilege." -ForegroundColor Yellow
+    Write-Host "    Falling back to a portable zip, which does not need it." -ForegroundColor Yellow
+    Write-Host "    For a real installer, re-run this from an Administrator PowerShell." -ForegroundColor Yellow
+    npm run dist:win:zip
+  }
+
+  # Last resort: the app was packaged before the failure, so zip that directly.
+  $unpacked = Join-Path $Here "dist\win-unpacked"
+  $anything = Get-ChildItem (Join-Path $Here "dist") -File -ErrorAction SilentlyContinue |
+    Where-Object { $_.Extension -in ".exe", ".zip", ".dmg", ".AppImage", ".deb" }
+  if (-not $anything -and (Test-Path (Join-Path $unpacked "Preckon.exe"))) {
+    Write-Host "    Packaging dist\win-unpacked by hand." -ForegroundColor Yellow
+    $ver = (Get-Content (Join-Path $Here "package.json") | ConvertFrom-Json).version
+    Compress-Archive -Path "$unpacked\*" -DestinationPath (Join-Path $Here "dist\Preckon-$ver-win.zip") -Force
+  }
 } finally { Pop-Location }
 
 $installers = Get-ChildItem (Join-Path $Here "dist") -File |
-  Where-Object { $_.Extension -in ".exe", ".dmg", ".AppImage", ".deb" }
-if (-not $installers) { throw "No installer was produced in dist\." }
+  Where-Object { $_.Extension -in ".exe", ".zip", ".dmg", ".AppImage", ".deb" }
+if (-not $installers) { throw "Nothing shippable was produced in dist\." }
 
 foreach ($i in $installers) { Write-Host ("    {0}  {1:N0} bytes" -f $i.Name, $i.Length) }
 
