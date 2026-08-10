@@ -1,15 +1,27 @@
 import { route, ok, immutableFor } from "@/lib/http";
 import { requirePermission, requireProject } from "@/lib/context";
-import { queryOne } from "@/lib/db";
+import { execute, queryOne } from "@/lib/db";
 import { errNotFound } from "@/lib/errors";
 import { footprint, metricLayers, isCadFile, type CadSummary } from "@/lib/cad";
 
 // GET /projects/{pid}/files/{fid}/cad — what the parser read out of a drawing.
 //
-// Returns the measured facts already converted to metres, plus the rendered
-// sheet. This is the same material the agents are given, which is the point:
-// an estimator reviewing a quantity should be able to see exactly the evidence
-// the agent had, not a prettier summary of it.
+// Returns the measured facts already converted to metres. This is the same
+// material the agents are given, which is the point: an estimator reviewing a
+// quantity should be able to see exactly the evidence the agent had, not a
+// prettier summary of it.
+//
+// The rendered sheet is NOT here — it comes from ./svg. It is megabytes on a
+// real drawing, and putting it in this JSON meant the measured facts (units,
+// layers, block counts, the things somebody opened the panel to read) could not
+// paint until the whole picture had downloaded and been JSON-parsed.
+//
+// Neither is the full summary read. See rebuild() below.
+
+/** Bump when buildView starts producing a different shape — every stored view
+ *  older than this is rebuilt on its next read. Without it a deploy would go on
+ *  serving yesterday's shape from the cache forever. */
+const VIEW_VERSION = 1;
 
 export const GET = route<{ pid: string; fid: string }>(async (_req, ctx, { pid, fid }) => {
   requirePermission(ctx, "artifact.read");
@@ -17,18 +29,21 @@ export const GET = route<{ pid: string; fid: string }>(async (_req, ctx, { pid, 
 
   const row = await queryOne<{
     filename: string;
-    summary: any;
+    view_json: any;
+    view_version: number;
     has_svg: number;
     units: string | null;
     warnings: any;
     render_error: string | null;
     rendered_at: Date | null;
   }>(
-    // Note what is NOT selected: c.svg. Reading the column to ask whether it is
-    // null pulled several megabytes across the database connection on every
-    // sheet open — the same cost this route was changed to avoid, just moved
-    // one hop earlier. The server asks the question in SQL instead.
-    `SELECT f.filename, c.summary, c.svg IS NOT NULL AS has_svg,
+    // Note what is NOT selected: neither c.svg nor c.summary. Reading either one
+    // to derive a few kilobytes pulled megabytes across the database connection
+    // on every sheet open — the same cost this route exists to avoid, just moved
+    // one hop earlier. The trimmed view is read instead, and the summary is
+    // touched only by the single request that has to rebuild it.
+    `SELECT f.filename, c.view_json, c.view_version,
+            c.svg IS NOT NULL AS has_svg,
             c.units, c.warnings, c.render_error, c.rendered_at
        FROM cad_extraction c
        JOIN file f ON f.id = c.file_id
@@ -63,35 +78,16 @@ export const GET = route<{ pid: string; fid: string }>(async (_req, ctx, { pid, 
     }, 200, immutableFor(120));
   }
 
-  const summary: CadSummary = typeof row.summary === "string" ? JSON.parse(row.summary) : row.summary;
-  const warnings = typeof row.warnings === "string" ? JSON.parse(row.warnings) : row.warnings;
+  const stored = typeof row.view_json === "string" ? JSON.parse(row.view_json) : row.view_json;
+  const view = stored && row.view_version === VIEW_VERSION
+    ? stored
+    : await rebuild(ctx.tenantId, fid);
 
   return ok({
     filename: row.filename,
     units: row.units,
-    sheets: summary.sheets ?? [],
-    titleBlock: summary.titleBlockFields ?? {},
-    footprint: footprint(summary),
-    // Annotation layers are dropped: a note box or title border is not a
-    // quantity, and listing them invites someone to price one.
-    layers: metricLayers(summary).filter((l) => !l.annotation && (l.runLength_m || l.largestArea_m2 || l.inserts)),
-    blocks: Object.entries(summary.blockInstanceCounts ?? {})
-      .map(([name, agg]) => ({ name, total: agg.total, byLayer: agg.byLayer, attributes: agg.sampleAttributes }))
-      .sort((a, b) => b.total - a.total),
-    // Capped at the source. A plan whose room labels were read as a table
-    // returns hundreds of rows that nothing displays and nobody reads.
-    schedules: (summary.schedules ?? []).slice(0, 20).map((sc: any) => ({
-      ...sc,
-      rows: (sc.rows ?? []).slice(0, 80),
-      totalRows: (sc.rows ?? []).length,
-    })),
-    notes: [...new Set((summary.textAnnotations ?? []).map((t) => t.text.trim()).filter(Boolean))].slice(0, 80),
-    warnings: warnings ?? [],
-    // The rendered sheet is fetched separately. It is megabytes on a real
-    // drawing, and putting it in this JSON meant the measured facts — units,
-    // layers, block counts, the things an estimator came to read — could not
-    // paint until the whole picture had downloaded and been JSON-parsed. The
-    // panel now renders immediately and the drawing arrives after it.
+    ...view,
+    warnings: (typeof row.warnings === "string" ? JSON.parse(row.warnings) : row.warnings) ?? [],
     hasSvg: !!row.has_svg,
     parseError: null,
     renderError: row.render_error,
@@ -99,5 +95,60 @@ export const GET = route<{ pid: string; fid: string }>(async (_req, ctx, { pid, 
     // now, silently) from "we tried and it failed" (say why, offer a retry).
     // Without it every visit would re-run a render that is known to fail.
     renderAttempted: row.rendered_at != null,
-  }, 200, immutableFor(300, `${fid}-${row.rendered_at?.getTime() ?? 0}`));
+  }, 200, immutableFor(300, `${fid}-${row.rendered_at?.getTime() ?? 0}-v${VIEW_VERSION}`));
 });
+
+/**
+ * Read the full summary once, cut it down to what the panel shows, and keep the
+ * result so no later reader pays for it again.
+ *
+ * Runs on the first open after an upload, and again whenever VIEW_VERSION
+ * changes. The stored view is a cache, never a source of truth: it is derived
+ * entirely from `summary`, it can be dropped at any time, and a failed write
+ * costs nothing more than the next reader rebuilding it too.
+ */
+async function rebuild(tenantId: string, fid: string) {
+  const row = await queryOne<{ summary: any }>(
+    "SELECT summary FROM cad_extraction WHERE tenant_id = ? AND file_id = ?",
+    [tenantId, fid]
+  );
+  const summary: CadSummary = typeof row?.summary === "string" ? JSON.parse(row.summary) : row?.summary;
+  const view = buildView(summary ?? ({} as CadSummary));
+  await execute(
+    "UPDATE cad_extraction SET view_json = ?, view_version = ? WHERE tenant_id = ? AND file_id = ?",
+    [JSON.stringify(view), VIEW_VERSION, tenantId, fid]
+  ).catch(() => { /* a cache that would not save is still a correct answer */ });
+  return view;
+}
+
+/**
+ * Everything the Drawings panel reads, and nothing else.
+ *
+ * Every list is capped, because the panel renders only the first handful of
+ * each and an uncapped one is how a plan whose room labels were read as a table
+ * came back carrying four hundred rows that nothing displayed and nobody read.
+ */
+function buildView(summary: CadSummary) {
+  return {
+    sheets: summary.sheets ?? [],
+    titleBlock: summary.titleBlockFields ?? {},
+    footprint: footprint(summary),
+    // Annotation layers are dropped: a note box or title border is not a
+    // quantity, and listing them invites someone to price one.
+    layers: metricLayers(summary)
+      .filter((l) => !l.annotation && (l.runLength_m || l.largestArea_m2 || l.inserts))
+      .slice(0, 40),
+    // byLayer and the attribute samples are gone. Nothing displayed them — the
+    // agents that do use them read the summary directly, not this route.
+    blocks: Object.entries(summary.blockInstanceCounts ?? {})
+      .map(([name, agg]) => ({ name, total: agg.total }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 60),
+    schedules: (summary.schedules ?? []).slice(0, 20).map((sc: any) => ({
+      ...sc,
+      rows: (sc.rows ?? []).slice(0, 80),
+      totalRows: (sc.rows ?? []).length,
+    })),
+    notes: [...new Set((summary.textAnnotations ?? []).map((t) => t.text.trim()).filter(Boolean))].slice(0, 80),
+  };
+}
