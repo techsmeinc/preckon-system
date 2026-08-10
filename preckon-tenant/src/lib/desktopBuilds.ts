@@ -24,6 +24,8 @@ export interface Build {
   size: number;
   /** From the filename, which is where electron-builder puts it. */
   version: string | null;
+  /** True for a zip: unzip and run Preckon.exe, rather than an installer. */
+  portable: boolean;
   updated: string;
 }
 
@@ -34,8 +36,20 @@ function classify(name: string): Platform | null {
   if (/\.exe$/i.test(name)) return "windows";
   if (/\.dmg$/i.test(name)) return "mac";
   if (/\.(AppImage|deb)$/i.test(name)) return "linux";
+  // A zip is a PORTABLE build — unzip and run, no installer. It exists because
+  // the NSIS installer needs a Windows symlink privilege that a normal account
+  // does not have, so on plenty of build machines this is what comes out.
+  // The platform is in the filename, which is electron-builder's convention.
+  if (/\.zip$/i.test(name)) {
+    if (/mac|darwin|osx/i.test(name)) return "mac";
+    if (/linux/i.test(name)) return "linux";
+    return "windows";
+  }
   return null;
 }
+
+/** Installers are run; portable builds are unzipped. Worth saying which. */
+export const isPortable = (file: string) => /\.zip$/i.test(file);
 
 const versionOf = (name: string) => /(\d+\.\d+\.\d+)/.exec(name)?.[1] ?? null;
 
@@ -58,6 +72,7 @@ export async function listBuilds(): Promise<Build[]> {
       platform,
       size: stat.size,
       version: versionOf(name),
+      portable: isPortable(name),
       updated: stat.mtime.toISOString(),
     });
   }

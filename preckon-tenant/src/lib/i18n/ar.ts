@@ -406,6 +406,8 @@ export const ar: Dict = {
   "desktop.size": "الحجم",
   "desktop.download": "تنزيل",
   "desktop.thisMachine": "هذا الجهاز",
+  "desktop.portable": "محمول — فُكّ الضغط وشغّل Preckon.exe",
+  "desktop.installer": "مثبّت",
   "desktop.alreadyHere": "أنت بالفعل داخل تطبيق سطح المكتب — تُفتح ملفات .dwg مباشرة من قرصك عبر محرّر الرسومات.",
   "desktop.noneTitle": "لم يُنشر أي إصدار لسطح المكتب بعد",
   "desktop.noneSub": "ستظهر المثبّتات هنا فور نشرها لمساحة العمل هذه. ولا شيء عليك فعله في الأثناء — فنسخة المتصفح كاملة الوظائف.",

@@ -407,6 +407,8 @@ export const fr: Dict = {
   "desktop.size": "Taille",
   "desktop.download": "Télécharger",
   "desktop.thisMachine": "Cette machine",
+  "desktop.portable": "Portable — décompressez et lancez Preckon.exe",
+  "desktop.installer": "Programme d’installation",
   "desktop.alreadyHere": "Vous êtes déjà dans l’application de bureau — les .dwg s’ouvrent directement depuis votre disque via l’éditeur de dessin.",
   "desktop.noneTitle": "Aucune version de bureau publiée",
   "desktop.noneSub": "Les installateurs apparaîtront ici dès leur publication. Rien à faire en attendant : la version navigateur est complète.",

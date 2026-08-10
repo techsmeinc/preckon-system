@@ -14,7 +14,7 @@ import { desktop } from "@/lib/desktop";
 
 type Platform = "windows" | "mac" | "linux";
 interface Build {
-  file: string; platform: Platform; size: number; version: string | null; updated: string;
+  file: string; platform: Platform; size: number; version: string | null; portable: boolean; updated: string;
 }
 
 const LABEL: Record<Platform, string> = { windows: "Windows", mac: "macOS", linux: "Linux" };
@@ -103,7 +103,10 @@ export default function DesktopPage() {
                   <tr key={b.file}>
                     <td>
                       <b>{LABEL[b.platform]}</b>
-                      {b.platform === mine && <div className="csub">{t("desktop.thisMachine")}</div>}
+                      <div className="csub">
+                        {b.platform === mine ? `${t("desktop.thisMachine")} · ` : ""}
+                        {b.portable ? t("desktop.portable") : t("desktop.installer")}
+                      </div>
                     </td>
                     <td className="mono">{b.version ?? "—"}</td>
                     <td className="num mono">{mb(b.size)}</td>

@@ -405,6 +405,8 @@ export const en = {
   "desktop.size": "Size",
   "desktop.download": "Download",
   "desktop.thisMachine": "This machine",
+  "desktop.portable": "Portable — unzip and run Preckon.exe",
+  "desktop.installer": "Installer",
   "desktop.alreadyHere": "You are already in the desktop app — .dwg files open straight off your disk from the Drawing editor.",
   "desktop.noneTitle": "No desktop build published yet",
   "desktop.noneSub": "Installers appear here as soon as one is published to this workspace. Nothing to do in the meantime — the browser version is fully functional.",
