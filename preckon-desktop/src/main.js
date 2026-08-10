@@ -17,13 +17,17 @@
 // through it; a browser without it behaves exactly as it does today.
 
 const { app, BrowserWindow, dialog, ipcMain, shell, Menu } = require("electron");
+const { pathToFileURL } = require("node:url");
 const { promises: fs } = require("node:fs");
 const path = require("node:path");
 const { findConverter, toDxf } = require("./oda");
 const { DrawingCache } = require("./cache");
 
-const SERVER = process.env.PRECKON_URL ?? "https://app.preckon.com";
-const ORIGIN = new URL(SERVER).origin;
+// Loaded from disk. There is no server, no origin and no session — this build
+// is the drawing editor and BIM Studio, and both are geometry running on the
+// machine in front of you. Nothing here needs a network to work, which is the
+// entire point: a site office with no signal is where drawings get marked up.
+const PAGE = path.join(__dirname, "..", "renderer", "index.html");
 
 const settingsFile = () => path.join(app.getPath("userData"), "settings.json");
 const readSettings = async () => {
@@ -38,7 +42,7 @@ function createWindow() {
     width: 1440,
     height: 900,
     backgroundColor: "#0b1220",
-    title: "Preckon",
+    title: "Preckon Workstation",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       // The window loads a remote origin and the preload can touch the disk, so
@@ -52,23 +56,20 @@ function createWindow() {
     },
   });
 
-  // Anything that is not the workspace opens in the real browser. A link to a
-  // supplier's site must never load inside a window that has a preload bridge
-  // to this machine's disk attached to it.
-  win.webContents.setWindowOpenHandler(({ url }) => {
-    if (new URL(url).origin !== ORIGIN) { void shell.openExternal(url); return { action: "deny" }; }
-    return { action: "allow" };
-  });
+  // This window renders one local page and never navigates. Any link goes to
+  // the real browser — a window holding a bridge to this machine's disk must
+  // never be pointed at somebody else's HTML.
+  win.webContents.setWindowOpenHandler(({ url }) => { void shell.openExternal(url); return { action: "deny" }; });
   win.webContents.on("will-navigate", (e, url) => {
-    if (new URL(url).origin !== ORIGIN) { e.preventDefault(); void shell.openExternal(url); }
+    if (url !== pathToFileURL(PAGE).href) { e.preventDefault(); void shell.openExternal(url); }
   });
 
-  void win.loadURL(SERVER);
+  void win.loadFile(PAGE);
   return win;
 }
 
 app.whenReady().then(async () => {
-  cache = new DrawingCache(path.join(app.getPath("userData"), "drawings", encodeURIComponent(ORIGIN)));
+  cache = new DrawingCache(path.join(app.getPath("userData"), "drawings"));
 
   /* ── what the page is allowed to ask this machine to do ────────────────── */
 

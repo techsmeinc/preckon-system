@@ -9,7 +9,7 @@
 // build has no language switcher, and shipping two unreachable dictionaries in
 // an installer is weight for nothing. Adding them later is an import.
 
-import en from "@tenant/lib/i18n/en";
+import { en } from "@tenant/lib/i18n/en";
 
 type Vars = Record<string, string | number>;
 

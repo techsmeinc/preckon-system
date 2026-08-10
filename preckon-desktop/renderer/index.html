@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <!-- No remote origins at all: this page is loaded from disk and must stay
+       that way. A CAD tool that phones home is a CAD tool that stops working
+       on a site with no signal, which is the whole reason this build exists. -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Preckon Workstation</title>
+  <link rel="stylesheet" href="./dist/app.css" />
+</head>
+<body>
+  <div id="root"></div>
+  <script src="./dist/main.js"></script>
+</body>
+</html>

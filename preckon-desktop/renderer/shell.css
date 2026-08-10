@@ -1,0 +1,68 @@
+/* The workstation shell — the bar, the two tabs, the empty state.
+   Everything below the bar is the workspace's own CSS, because the tools are
+   the workspace's own components. */
+
+.ws { display: flex; flex-direction: column; height: 100dvh; background: var(--bg, #0b1220); }
+
+.ws-bar {
+  display: flex; align-items: center; gap: 18px;
+  padding: 10px 16px; border-bottom: 1px solid var(--line, #1e293b);
+  background: var(--panel, #0f172a); flex: none;
+}
+.ws-brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.ws-mark {
+  width: 30px; height: 30px; border-radius: 8px; flex: none;
+  background: var(--accent, #10b981); color: #04120c;
+  display: grid; place-items: center; font-weight: 700;
+}
+.ws-brand b { display: block; font-size: 13px; color: var(--ink, #e2e8f0); }
+.ws-brand small { display: block; font-size: 11px; color: var(--slate-500, #94a3b8); }
+
+.ws-tabs { display: flex; gap: 4px; }
+.ws-tabs button {
+  padding: 7px 14px; border-radius: 8px; border: 1px solid transparent;
+  background: transparent; color: var(--slate-500, #94a3b8);
+  font: inherit; font-size: 13px; cursor: pointer;
+}
+.ws-tabs button:hover { color: var(--ink, #e2e8f0); }
+.ws-tabs button.on {
+  background: var(--panel-2, #1e293b); color: var(--ink, #e2e8f0);
+  border-color: var(--line, #334155);
+}
+.ws-tabs button:focus-visible { outline: 2px solid var(--accent, #10b981); outline-offset: 2px; }
+
+.ws-actions { margin-inline-start: auto; display: flex; align-items: center; gap: 12px; }
+/* A drawing name is routinely 60 characters and must not push the button off
+   the bar. Truncated, with the whole thing in the tooltip. */
+.ws-file {
+  max-width: 34ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: 12px; color: var(--slate-500, #94a3b8);
+}
+
+.ws-note {
+  padding: 9px 16px; font-size: 12.5px; line-height: 1.5;
+  background: var(--panel-2, #1e293b); color: var(--ink, #e2e8f0);
+  border-bottom: 1px solid var(--line, #334155);
+}
+
+/* The tools own everything below the bar — a CAD canvas wants the window. */
+.ws-body { flex: 1; min-height: 0; overflow: auto; padding: 14px; }
+
+.ws-empty {
+  height: 100%; display: flex; flex-direction: column; gap: 10px;
+  align-items: center; justify-content: center; text-align: center; padding: 32px;
+}
+.ws-empty h2 { margin: 0; font-size: 19px; color: var(--ink, #e2e8f0); }
+.ws-empty p { margin: 0; max-width: 46ch; line-height: 1.6; color: var(--slate-500, #94a3b8); }
+.ws-empty .btn { margin-top: 8px; }
+.ws-hint { font-size: 11px; opacity: 0.7; }
+
+.ws-toast {
+  position: fixed; inset-block-end: 18px; inset-inline-start: 50%;
+  transform: translateX(-50%); z-index: 50;
+  padding: 10px 16px; border-radius: 10px; max-width: 70ch;
+  background: var(--panel-2, #1e293b); color: var(--ink, #e2e8f0);
+  border: 1px solid var(--line, #334155); box-shadow: 0 10px 30px rgb(0 0 0 / 0.4);
+  font-size: 13px; line-height: 1.5;
+}
+.ws-toast.bad { border-color: #b91c1c; }
