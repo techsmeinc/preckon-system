@@ -16,7 +16,7 @@
 // one set of bugs. The app notices `window.preckon` and routes file work
 // through it; a browser without it behaves exactly as it does today.
 
-const { app, BrowserWindow, dialog, ipcMain, net, protocol, shell, Menu } = require("electron");
+const { app, BrowserWindow, dialog, ipcMain, net, protocol, session, shell, Menu } = require("electron");
 const { pathToFileURL } = require("node:url");
 const { promises: fs } = require("node:fs");
 const path = require("node:path");
@@ -41,6 +41,29 @@ const PAGE = "app://preckon/index.html";
 protocol.registerSchemesAsPrivileged([
   { scheme: "app", privileges: { standard: true, secure: true, supportFetchAPI: true } },
 ]);
+
+/* ── the workspace ───────────────────────────────────────────────────────────
+ *
+ * The workstation is useful with no network at all — open a file, mark it up,
+ * save it. But an estimator's drawings are IN a project, and so is everything
+ * that makes the two tools worth using: the sheet list, save-back, the takeoff,
+ * and both assistants. So it signs in to the same workspace the web app uses.
+ *
+ * Every request goes through THIS process, never the renderer. Three reasons,
+ * and they all matter:
+ *
+ *   - The renderer's origin is app://preckon. Fetching a different origin from
+ *     there is a cross-origin request the tenant API sends no CORS headers for,
+ *     and its session cookie would not be attached anyway.
+ *   - Doing it here means the page's Content-Security-Policy can keep saying
+ *     connect-src 'self'. The renderer genuinely cannot reach the network, so a
+ *     compromised page cannot exfiltrate a drawing.
+ *   - The cookie lives in a partition owned by the main process, out of reach
+ *     of anything running in the page.
+ */
+const DEFAULT_SERVER = "https://app.preckon.com";
+const PARTITION = "persist:preckon-workspace";
+const workspaceSession = () => session.fromPartition(PARTITION);
 
 const settingsFile = () => path.join(app.getPath("userData"), "settings.json");
 const readSettings = async () => {
@@ -143,6 +166,134 @@ app.whenReady().then(async () => {
      save path is the workspace, which does not exist here, so a morning's
      modelling lived in a browser tab until it was closed. A tool you cannot
      save from is not a tool. */
+  /* One call for the whole API. The renderer hands it the same method and path
+     the web app uses, so the components calling it are unmodified. */
+  ipcMain.handle("preckon:api", async (_e, method, apiPath, body) => {
+    const base = (await readSettings()).server ?? DEFAULT_SERVER;
+    const url = `${base}/api/v1${apiPath}`;
+    try {
+      const res = await net.fetch(url, {
+        method: String(method ?? "GET").toUpperCase(),
+        session: workspaceSession(),
+        useSessionCookies: true,          // without this the session cookie is not sent
+        headers: body === undefined
+          ? { accept: "application/json" }
+          : { accept: "application/json", "content-type": "application/json" },
+        body: body === undefined ? undefined : JSON.stringify(body),
+      });
+      if (res.status === 204) return { ok: true, data: null };
+      const text = await res.text();
+      let json = null;
+      try { json = text ? JSON.parse(text) : null; } catch { /* not JSON */ }
+      if (!res.ok) {
+        return {
+          ok: false,
+          status: res.status,
+          code: json?.error?.code ?? "error",
+          // 401 is the one the renderer acts on: it means "sign in", not "broken".
+          message: json?.error?.message ?? `Request failed (${res.status})`,
+        };
+      }
+      return { ok: true, data: json };
+    } catch (e) {
+      return { ok: false, status: 0, code: "offline", message: `Cannot reach ${base} — ${e?.message ?? e}` };
+    }
+  });
+
+  /* A raw body, not JSON.
+     The drawing endpoints return DXF and SVG as text, and the JSON client above
+     would choke on both. Split out rather than made clever, because the
+     difference between "parse this" and "hand it over" is exactly the sort of
+     thing that turns into a silent mis-parse later. The path arrives with its
+     /api/v1 prefix already on it, the way the components write it. */
+  ipcMain.handle("preckon:api-text", async (_e, apiPath) => {
+    const base = (await readSettings()).server ?? DEFAULT_SERVER;
+    try {
+      const res = await net.fetch(`${base}${apiPath}`, {
+        session: workspaceSession(),
+        useSessionCookies: true,
+      });
+      const text = await res.text();
+      return res.ok
+        ? { ok: true, text }
+        : { ok: false, status: res.status, message: `Request failed (${res.status})` };
+    } catch (e) {
+      return { ok: false, status: 0, message: `Cannot reach ${base} — ${e?.message ?? e}` };
+    }
+  });
+
+  /* Save a drawing back into a project.
+     Multipart is built here rather than in the page: a File object cannot cross
+     the IPC boundary, but the drawing's text can, and text is all a DXF is. */
+  ipcMain.handle("preckon:upload", async (_e, apiPath, filename, text, mime) => {
+    const base = (await readSettings()).server ?? DEFAULT_SERVER;
+    try {
+      const form = new FormData();
+      form.append("file", new Blob([String(text ?? "")], { type: mime || "application/octet-stream" }), String(filename));
+      const res = await net.fetch(`${base}/api/v1${apiPath}`, {
+        method: "POST",
+        session: workspaceSession(),
+        useSessionCookies: true,
+        body: form,
+      });
+      const body = await res.text();
+      let json = null;
+      try { json = body ? JSON.parse(body) : null; } catch { /* not JSON */ }
+      if (!res.ok) {
+        return { ok: false, status: res.status, code: json?.error?.code ?? "error",
+                 message: json?.error?.message ?? `Upload failed (${res.status})` };
+      }
+      return { ok: true, data: json };
+    } catch (e) {
+      return { ok: false, status: 0, code: "offline", message: `Cannot reach ${base} — ${e?.message ?? e}` };
+    }
+  });
+
+  /* Sign in by letting the workspace do it.
+     A window at the real login page, in the same cookie partition the API calls
+     use. Preckon's own form, its own rate limiting, its own password rules —
+     and this app never sees or stores a password. */
+  ipcMain.handle("preckon:sign-in", async () => {
+    const base = (await readSettings()).server ?? DEFAULT_SERVER;
+    return new Promise((resolve) => {
+      const win = new BrowserWindow({
+        width: 520, height: 680, title: "Sign in to Preckon",
+        webPreferences: { partition: PARTITION, contextIsolation: true, nodeIntegration: false },
+      });
+      let done = false;
+      const finish = (ok) => {
+        if (done) return;
+        done = true;
+        resolve(ok);
+        if (!win.isDestroyed()) win.close();
+      };
+      // Signed in when the workspace stops showing the login page.
+      win.webContents.on("did-navigate", (_e, url) => {
+        if (!/\/login/.test(new URL(url).pathname)) finish(true);
+      });
+      win.webContents.on("did-navigate-in-page", (_e, url) => {
+        if (!/\/login/.test(new URL(url).pathname)) finish(true);
+      });
+      win.on("closed", () => { done || resolve(false); done = true; });
+      void win.loadURL(`${base}/login`);
+    });
+  });
+
+  ipcMain.handle("preckon:sign-out", async () => {
+    await workspaceSession().clearStorageData({ storages: ["cookies"] });
+  });
+
+  ipcMain.handle("preckon:server", async (_e, next) => {
+    const s = await readSettings();
+    if (typeof next === "string" && next.trim()) {
+      // Changing workspace must not carry the old one's session across.
+      await workspaceSession().clearStorageData({ storages: ["cookies"] });
+      await writeSettings({ ...s, server: next.trim().replace(/\/+$/, "") });
+      return next.trim();
+    }
+    return s.server ?? DEFAULT_SERVER;
+  });
+
   ipcMain.handle("preckon:save-as", async (_e, defaultName, text) => {
     const { canceled, filePath } = await dialog.showSaveDialog({
       title: "Save",

@@ -25,6 +25,19 @@ contextBridge.exposeInMainWorld("preckon", {
   saveAs: (defaultName, text) => ipcRenderer.invoke("preckon:save-as", defaultName, text),
   openModel: () => ipcRenderer.invoke("preckon:open-model"),
 
+  /* The workspace, reached through the main process. The renderer never touches
+     the network itself — see the note in main.js — so the page's CSP can keep
+     forbidding it outright while these still work. */
+  workspace: {
+    request: (method, path, body) => ipcRenderer.invoke("preckon:api", method, path, body),
+    upload: (path, filename, text, mime) => ipcRenderer.invoke("preckon:upload", path, filename, text, mime),
+    /** Raw body — the drawing endpoints return DXF and SVG, not JSON. */
+    text: (path) => ipcRenderer.invoke("preckon:api-text", path),
+    signIn: () => ipcRenderer.invoke("preckon:sign-in"),
+    signOut: () => ipcRenderer.invoke("preckon:sign-out"),
+    server: (next) => ipcRenderer.invoke("preckon:server", next),
+  },
+
   /** Where the DWG converter is, and whether the user chose it themselves. */
   converter: () => ipcRenderer.invoke("preckon:converter"),
   chooseConverter: () => ipcRenderer.invoke("preckon:choose-converter"),

@@ -34,6 +34,11 @@ interface Bridge {
     stats(): Promise<{ bytes: number }>;
     clear(): Promise<void>;
   };
+  /** Present in the standalone workstation, where the page cannot reach the
+   *  network itself and every request is made by the main process. */
+  workspace?: {
+    text(path: string): Promise<{ ok: boolean; text?: string; status?: number; message?: string }>;
+  };
 }
 
 /** The bridge, or null in a browser. Never throws — callers branch on null. */
@@ -61,9 +66,24 @@ export async function cachedText(key: string, url: string): Promise<string> {
     const hit = await d.cache.get(key).catch(() => null);
     if (hit != null) return hit;
   }
-  const res = await fetch(url, { credentials: "include" });
-  if (!res.ok) throw new Error(String(res.status));
-  const text = await res.text();
+  /* Two ways to ask, and the difference is not cosmetic.
+     In a browser this is an ordinary fetch. In the standalone workstation the
+     page is served from app:// with a CSP that forbids reaching the network at
+     all, so a fetch here resolves against the app's own origin and 404s — the
+     drawing then reports itself as "could not be opened for editing", which is
+     a lie about the drawing. There, the main process makes the request. */
+  let text: string;
+  if (d?.workspace?.text) {
+    // Called on its object, not detached: the bridge is a plain object across
+    // contextBridge and there is no reason to risk how a stray `this` behaves.
+    const res = await d.workspace.text(url);
+    if (!res.ok) throw new Error(res.message ?? String(res.status ?? "request failed"));
+    text = res.text ?? "";
+  } else {
+    const res = await fetch(url, { credentials: "include" });
+    if (!res.ok) throw new Error(String(res.status));
+    text = await res.text();
+  }
   // Stored after the fact and never awaited for correctness: a cache that
   // would not write is a slower app, not a broken one.
   if (d) void d.cache.set(key, text).catch(() => { /* out of disk, most likely */ });

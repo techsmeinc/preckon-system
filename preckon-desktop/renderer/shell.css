@@ -66,3 +66,23 @@
   font-size: 13px; line-height: 1.5;
 }
 .ws-toast.bad { border-color: #b91c1c; }
+
+/* Project and drawing pickers. Inline in the bar rather than in a panel: they
+   are how you get to a sheet, so they belong on the way in, not behind a menu. */
+.ws-pick { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.ws-pick > span {
+  font-size: 11px; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--slate-500, #94a3b8); white-space: nowrap;
+}
+.ws-pick select {
+  max-width: 26ch; padding: 6px 9px; border-radius: 8px;
+  background: var(--panel-2, #1e293b); color: var(--ink, #e2e8f0);
+  border: 1px solid var(--line, #334155); font: inherit; font-size: 12.5px;
+}
+.ws-pick select:disabled { opacity: .55; }
+.ws-pick select:focus-visible { outline: 2px solid var(--accent, #10b981); outline-offset: 1px; }
+
+/* The bar carries a lot now — brand, tabs, two pickers, three buttons. Let it
+   wrap on a narrow window rather than pushing the sign-in button off the edge. */
+.ws-bar { flex-wrap: wrap; row-gap: 8px; }
+.ws-note .mini { margin-inline-start: 6px; }
