@@ -20,7 +20,7 @@ import { dxfOf, isCadFile } from "@/lib/cad";
 
 const STORAGE_DIR = process.env.FILE_STORAGE_DIR ?? "./.uploads";
 
-export const GET = route<{ pid: string; fid: string }>(async (_req, ctx, { pid, fid }) => {
+export const GET = route<{ pid: string; fid: string }>(async (req, ctx, { pid, fid }) => {
   requirePermission(ctx, "artifact.read");
   await requireProject(ctx, pid);
 
@@ -30,6 +30,14 @@ export const GET = route<{ pid: string; fid: string }>(async (_req, ctx, { pid, 
   );
   if (!row) throw errNotFound("file");
   if (!isCadFile(row.filename)) throw errBadRequest("this file is not a drawing");
+
+  // An uploaded file never changes: a revised drawing is a new upload with a new
+  // id. So the id IS the version, and the second open of a sheet — the one that
+  // otherwise pays for a .dwg→.dxf conversion all over again — is a 304.
+  const etag = `"dxf-${fid}"`;
+  if (req.headers.get("if-none-match") === etag) {
+    return new Response(null, { status: 304, headers: { etag, "cache-control": CACHE } });
+  }
 
   const out = await dxfOf(path.join(STORAGE_DIR, row.storage_key), row.filename);
   if ("error" in out) throw errBadRequest(out.error);
@@ -42,7 +50,11 @@ export const GET = route<{ pid: string; fid: string }>(async (_req, ctx, { pid, 
       // and '&', any of which would truncate a bare filename= value.
       "content-disposition": `attachment; filename="${name.replace(/["\\]/g, "_")}"`,
       "content-length": String(out.bytes.length),
-      "cache-control": "private, no-store",
+      "cache-control": CACHE,
+      etag,
     },
   });
 });
+
+/** Private, because a drawing is tenant data and must not sit in a shared proxy. */
+const CACHE = "private, max-age=86400, stale-while-revalidate=604800";

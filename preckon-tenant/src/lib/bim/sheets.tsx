@@ -50,6 +50,48 @@ interface CadView {
 
 const isDrawing = (name: string) => /\.(dxf|dwg)$/i.test(name ?? "");
 
+/* ── keeping a sheet once it has been looked at ──────────────────────────────
+ *
+ * A drawing set is read by moving up and down the dropdown — 03, back to 01,
+ * on to 04 — and every one of those moves used to be a fresh download of a
+ * multi-megabyte sheet. The server now caches hard, but a browser cache can be
+ * evicted mid-session and a private response is not always kept, so the sheets
+ * already seen are held here too. Second look at a sheet is then not fast, it
+ * is free: the markup is already in memory and paints on the same frame.
+ *
+ * Bounded, because a thirteen-sheet set of dense plans is real memory. Oldest
+ * first — the sheet you came from is the one you are most likely to go back to.
+ * Keyed by file id, which never changes for a given upload.
+ */
+const SHEET_CACHE_MAX = 6;
+const sheetCache = {
+  m: new Map<string, string>(),
+  has(fid: string) { return this.m.has(fid); },
+  get(fid: string) { return this.m.get(fid); },
+  set(fid: string, svg: string) {
+    this.m.delete(fid);              // re-insert so it counts as most recent
+    this.m.set(fid, svg);
+    while (this.m.size > SHEET_CACHE_MAX) this.m.delete(this.m.keys().next().value as string);
+  },
+};
+
+/** In-flight requests are shared: opening a sheet the prefetcher is already
+ *  fetching should join that request, not start a second one. */
+const inflight = new Map<string, Promise<string>>();
+
+function fetchSheet(pid: string, fid: string): Promise<string> {
+  const cached = sheetCache.get(fid);
+  if (cached) return Promise.resolve(cached);
+  const running = inflight.get(fid);
+  if (running) return running;
+  const p = fetch(`/api/v1/projects/${pid}/files/${fid}/cad/svg`, { credentials: "include" })
+    .then((r) => (r.ok ? r.text() : Promise.reject(new Error(String(r.status)))))
+    .then((text) => { sheetCache.set(fid, text); return text; })
+    .finally(() => { inflight.delete(fid); });
+  inflight.set(fid, p);
+  return p;
+}
+
 type Schedule = CadView["schedules"][number];
 
 /** Order-preserving de-duplication — a repeated note is noise, not emphasis. */
@@ -144,6 +186,10 @@ export function ParsedSheets({ pid }: { pid: string }) {
   if (files.loading || drawings.length === 0) return null;
   const active = drawings.some((f) => f.id === open) ? (open as string) : drawings[0].id;
   const index = drawings.findIndex((f) => f.id === active);
+  // Sets are read in order, so the next sheet and the one behind it are the two
+  // most likely next clicks. Fetching them while this one is being looked at
+  // makes the move to either of them instant instead of a wait.
+  const neighbours = [drawings[index + 1]?.id, drawings[index - 1]?.id].filter(Boolean) as string[];
 
   return (
     <div className="card" style={{ marginBottom: 16 }}>
@@ -160,9 +206,16 @@ export function ParsedSheets({ pid }: { pid: string }) {
             onChange={(e) => setOpen(e.target.value)}
             aria-label={t("cad.sheet")}
           >
+            {/* Every uploaded drawing is listed, including one that is still
+                being read or could not be read at all — a sheet missing from
+                the picker reads as a lost file. The state is on the option so
+                the reason is visible before it is opened rather than after. */}
             {drawings.map((f) => (
               <option key={f.id} value={f.id}>
                 {f.filename}
+                {f.cad_layers == null
+                  ? ` — ${f.status === "processing" ? t("cad.optReading") : t("cad.optUnread")}`
+                  : ""}
               </option>
             ))}
           </select>
@@ -172,14 +225,27 @@ export function ParsedSheets({ pid }: { pid: string }) {
         </div>
       </div>
 
-      <SheetDetail key={active} pid={pid} fid={active} />
+      <SheetDetail key={active} pid={pid} fid={active} neighbours={neighbours} />
     </div>
   );
 }
 
-function SheetDetail({ pid, fid }: { pid: string; fid: string }) {
+function SheetDetail({ pid, fid, neighbours = [] }: { pid: string; fid: string; neighbours?: string[] }) {
   const { t } = useI18n();
   const { data, loading, error } = useApi<CadView>(`/projects/${pid}/files/${fid}/cad`);
+
+  // Warm the sheets either side, but only once this one has painted — a
+  // prefetch that competes with the drawing the estimator is actually waiting
+  // for makes the visible sheet slower, which is the opposite of the point.
+  const ready = !loading && !!data;
+  useEffect(() => {
+    if (!ready) return;
+    const id = window.setTimeout(() => {
+      for (const n of neighbours) void fetchSheet(pid, n).catch(() => { /* prefetch is best-effort */ });
+    }, 400);
+    return () => window.clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready, pid, neighbours.join(",")]);
 
   if (loading) return <Skeleton rows={4} />;
   if (error || !data) return <div className="csub">{error ?? t("common.loadFail")}</div>;
@@ -403,22 +469,23 @@ const clampZoom = (z: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z));
  */
 function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadView }) {
   const { t } = useI18n();
-  const [svg, setSvg] = useState<string | null>(null);
+  const [svg, setSvg] = useState<string | null>(() => sheetCache.get(fid) ?? null);
   const [err, setErr] = useState<string | null>(view.renderError);
   const [rendering, setRendering] = useState(false);
+  const [fetching, setFetching] = useState(view.hasSvg && !sheetCache.has(fid));
 
   /* The sheet arrives after the facts rather than inside them. It is megabytes
      on a real drawing, and carrying it in the same JSON meant the units, the
      layers and the block counts could not paint until the whole picture had
-     downloaded. Cached hard by the server, so a sheet opened twice is instant
-     the second time. */
+     downloaded. */
   useEffect(() => {
-    if (!view.hasSvg) return;
+    if (!view.hasSvg || sheetCache.has(fid)) return;
     let live = true;
-    fetch(`/api/v1/projects/${pid}/files/${fid}/cad/svg`, { credentials: "include" })
-      .then((r) => (r.ok ? r.text() : Promise.reject(new Error(String(r.status)))))
+    setFetching(true);
+    fetchSheet(pid, fid)
       .then((text) => { if (live) setSvg(text); })
-      .catch(() => { if (live) setErr((e) => e ?? t("cad.noRenderWhy")); });
+      .catch(() => { if (live) setErr((e) => e ?? t("cad.noRenderWhy")); })
+      .finally(() => { if (live) setFetching(false); });
     return () => { live = false; };
   }, [pid, fid, view.hasSvg, t]);
   const [z, setZ] = useState(1);
@@ -432,6 +499,7 @@ function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadVi
       const r = await api.post<{ svg: string | null; error: string | null }>(
         `/projects/${pid}/files/${fid}/cad/render`
       );
+      if (r.svg) sheetCache.set(fid, r.svg);
       setSvg(r.svg);
       setErr(r.error);
     } catch (e: any) {
@@ -550,10 +618,10 @@ function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadVi
         </div>
       ) : (
         <div className="cad-empty">
-          {rendering ? (
+          {rendering || fetching ? (
             <>
               <div className="sk" style={{ width: 180 }} />
-              <p className="csub">{t("cad.rendering")}</p>
+              <p className="csub">{rendering ? t("cad.rendering") : t("cad.loadingSheet")}</p>
             </>
           ) : (
             <>

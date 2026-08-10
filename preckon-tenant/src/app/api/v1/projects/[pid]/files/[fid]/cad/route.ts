@@ -18,13 +18,18 @@ export const GET = route<{ pid: string; fid: string }>(async (_req, ctx, { pid, 
   const row = await queryOne<{
     filename: string;
     summary: any;
-    svg: string | null;
+    has_svg: number;
     units: string | null;
     warnings: any;
     render_error: string | null;
     rendered_at: Date | null;
   }>(
-    `SELECT f.filename, c.summary, c.svg, c.units, c.warnings, c.render_error, c.rendered_at
+    // Note what is NOT selected: c.svg. Reading the column to ask whether it is
+    // null pulled several megabytes across the database connection on every
+    // sheet open — the same cost this route was changed to avoid, just moved
+    // one hop earlier. The server asks the question in SQL instead.
+    `SELECT f.filename, c.summary, c.svg IS NOT NULL AS has_svg,
+            c.units, c.warnings, c.render_error, c.rendered_at
        FROM cad_extraction c
        JOIN file f ON f.id = c.file_id
       WHERE c.tenant_id = ? AND c.project_id = ? AND c.file_id = ?`,
@@ -51,7 +56,7 @@ export const GET = route<{ pid: string; fid: string }>(async (_req, ctx, { pid, 
       filename: file.filename,
       units: null, sheets: [], titleBlock: {}, footprint: null,
       layers: [], blocks: [], schedules: [], notes: [], warnings: [],
-      svg: null,
+      hasSvg: false,
       parseError: m?.[1] ?? "This drawing could not be read by the parser.",
       renderError: null,
       renderAttempted: true,
@@ -87,7 +92,7 @@ export const GET = route<{ pid: string; fid: string }>(async (_req, ctx, { pid, 
     // layers, block counts, the things an estimator came to read — could not
     // paint until the whole picture had downloaded and been JSON-parsed. The
     // panel now renders immediately and the drawing arrives after it.
-    hasSvg: row.svg != null,
+    hasSvg: !!row.has_svg,
     parseError: null,
     renderError: row.render_error,
     // Lets the viewer distinguish "nobody has tried to draw this yet" (render it
