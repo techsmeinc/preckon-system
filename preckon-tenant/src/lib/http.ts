@@ -37,6 +37,23 @@ export function serviceRoute<T = unknown>(
   };
 }
 
-export function ok(data: unknown, status = 200): NextResponse {
-  return NextResponse.json(data, { status });
+export function ok(data: unknown, status = 200, headers?: HeadersInit): NextResponse {
+  return NextResponse.json(data, { status, headers });
+}
+
+/**
+ * Cache headers for something derived from a file that never changes.
+ *
+ * A drawing's parsed reading and its rendered sheet are a pure function of
+ * bytes that were uploaded once. Re-fetching them on every visit costs the
+ * estimator seconds per sheet on a thirteen-sheet set, for a payload that is
+ * byte-identical every time. `private` because it is one tenant's drawing and
+ * has no business in a shared cache.
+ */
+export function immutableFor(seconds: number, tag?: string): HeadersInit {
+  const h: Record<string, string> = {
+    "cache-control": `private, max-age=${seconds}, stale-while-revalidate=${seconds * 4}`,
+  };
+  if (tag) h.etag = `"${tag}"`;
+  return h;
 }

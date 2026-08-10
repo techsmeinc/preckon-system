@@ -38,7 +38,8 @@ interface CadView {
   schedules: Array<{ layer: string; header: string[]; rows: string[][] }>;
   notes: string[];
   warnings: string[];
-  svg: string | null;
+  /** The sheet is fetched separately — see SheetCanvas. */
+  hasSvg: boolean;
   /** Set when the parser itself could not read the file — nothing was measured. */
   parseError: string | null;
   /** Set when the drawing measured fine but the sheet would not draw. */
@@ -402,9 +403,24 @@ const clampZoom = (z: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z));
  */
 function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadView }) {
   const { t } = useI18n();
-  const [svg, setSvg] = useState<string | null>(view.svg);
+  const [svg, setSvg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(view.renderError);
   const [rendering, setRendering] = useState(false);
+
+  /* The sheet arrives after the facts rather than inside them. It is megabytes
+     on a real drawing, and carrying it in the same JSON meant the units, the
+     layers and the block counts could not paint until the whole picture had
+     downloaded. Cached hard by the server, so a sheet opened twice is instant
+     the second time. */
+  useEffect(() => {
+    if (!view.hasSvg) return;
+    let live = true;
+    fetch(`/api/v1/projects/${pid}/files/${fid}/cad/svg`, { credentials: "include" })
+      .then((r) => (r.ok ? r.text() : Promise.reject(new Error(String(r.status)))))
+      .then((text) => { if (live) setSvg(text); })
+      .catch(() => { if (live) setErr((e) => e ?? t("cad.noRenderWhy")); });
+    return () => { live = false; };
+  }, [pid, fid, view.hasSvg, t]);
   const [z, setZ] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const viewportRef = useRef<HTMLDivElement | null>(null);
@@ -429,8 +445,8 @@ function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadVi
   // known to have failed on every visit would burn a slow sidecar call each time
   // to reach the same answer; that retry is the estimator's to ask for.
   useEffect(() => {
-    if (!view.svg && !view.renderAttempted && !view.parseError) void render();
-  }, [view.svg, view.renderAttempted, view.parseError, render]);
+    if (!view.hasSvg && !view.renderAttempted && !view.parseError) void render();
+  }, [view.hasSvg, view.renderAttempted, view.parseError, render]);
 
   const fit = useCallback(() => {
     setZ(1);

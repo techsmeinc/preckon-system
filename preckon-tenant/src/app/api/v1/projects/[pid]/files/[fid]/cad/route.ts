@@ -1,4 +1,4 @@
-import { route, ok } from "@/lib/http";
+import { route, ok, immutableFor } from "@/lib/http";
 import { requirePermission, requireProject } from "@/lib/context";
 import { queryOne } from "@/lib/db";
 import { errNotFound } from "@/lib/errors";
@@ -55,7 +55,7 @@ export const GET = route<{ pid: string; fid: string }>(async (_req, ctx, { pid, 
       parseError: m?.[1] ?? "This drawing could not be read by the parser.",
       renderError: null,
       renderAttempted: true,
-    });
+    }, 200, immutableFor(120));
   }
 
   const summary: CadSummary = typeof row.summary === "string" ? JSON.parse(row.summary) : row.summary;
@@ -73,15 +73,26 @@ export const GET = route<{ pid: string; fid: string }>(async (_req, ctx, { pid, 
     blocks: Object.entries(summary.blockInstanceCounts ?? {})
       .map(([name, agg]) => ({ name, total: agg.total, byLayer: agg.byLayer, attributes: agg.sampleAttributes }))
       .sort((a, b) => b.total - a.total),
-    schedules: summary.schedules ?? [],
+    // Capped at the source. A plan whose room labels were read as a table
+    // returns hundreds of rows that nothing displays and nobody reads.
+    schedules: (summary.schedules ?? []).slice(0, 20).map((sc: any) => ({
+      ...sc,
+      rows: (sc.rows ?? []).slice(0, 80),
+      totalRows: (sc.rows ?? []).length,
+    })),
     notes: [...new Set((summary.textAnnotations ?? []).map((t) => t.text.trim()).filter(Boolean))].slice(0, 80),
     warnings: warnings ?? [],
-    svg: row.svg,
+    // The rendered sheet is fetched separately. It is megabytes on a real
+    // drawing, and putting it in this JSON meant the measured facts — units,
+    // layers, block counts, the things an estimator came to read — could not
+    // paint until the whole picture had downloaded and been JSON-parsed. The
+    // panel now renders immediately and the drawing arrives after it.
+    hasSvg: row.svg != null,
     parseError: null,
     renderError: row.render_error,
     // Lets the viewer distinguish "nobody has tried to draw this yet" (render it
     // now, silently) from "we tried and it failed" (say why, offer a retry).
     // Without it every visit would re-run a render that is known to fail.
     renderAttempted: row.rendered_at != null,
-  });
+  }, 200, immutableFor(300, `${fid}-${row.rendered_at?.getTime() ?? 0}`));
 });
