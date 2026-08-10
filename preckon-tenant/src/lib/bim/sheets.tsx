@@ -15,7 +15,7 @@
 // number, not by hunting a wall of text. Sheets are ordered by name so the set
 // reads 01, 02, 03 — the order it was issued in — and the first opens by default.
 
-import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type CSSProperties } from "react";
 import { useApi, Skeleton } from "@/lib/ui";
 import { api } from "@/lib/apiclient";
 import { useI18n } from "@/lib/i18n";
@@ -652,7 +652,7 @@ function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadVi
   const sheetStyle = {
     transform: `translate(${pan.x}px, ${pan.y}px) scale(${z})`,
     ["--cad-z" as any]: z,
-  } as React.CSSProperties;
+  } as CSSProperties;
 
   const dxfHref = `/api/v1/projects/${pid}/files/${fid}/dxf`;
   const dxfName = view.filename?.replace(/\.[^.]+$/, "") + ".dxf";
