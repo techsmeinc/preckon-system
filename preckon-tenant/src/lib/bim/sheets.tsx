@@ -92,6 +92,25 @@ function fetchSheet(pid: string, fid: string): Promise<string> {
   return p;
 }
 
+/* The measured facts are small — a few kilobytes — but small is not free when
+ * every move in the dropdown remounts the panel and pays for another round
+ * trip. Held the same way as the sheets, so going back to a sheet costs
+ * nothing at all and going forward to a warmed one costs nothing either. */
+const viewCache = new Map<string, CadView>();
+const viewInflight = new Map<string, Promise<CadView>>();
+
+function fetchView(pid: string, fid: string): Promise<CadView> {
+  const cached = viewCache.get(fid);
+  if (cached) return Promise.resolve(cached);
+  const running = viewInflight.get(fid);
+  if (running) return running;
+  const p = api.get<CadView>(`/projects/${pid}/files/${fid}/cad`)
+    .then((v) => { viewCache.set(fid, v); return v; })
+    .finally(() => { viewInflight.delete(fid); });
+  viewInflight.set(fid, p);
+  return p;
+}
+
 type Schedule = CadView["schedules"][number];
 
 /** Order-preserving de-duplication — a repeated note is noise, not emphasis. */
@@ -232,23 +251,39 @@ export function ParsedSheets({ pid }: { pid: string }) {
 
 function SheetDetail({ pid, fid, neighbours = [] }: { pid: string; fid: string; neighbours?: string[] }) {
   const { t } = useI18n();
-  const { data, loading, error } = useApi<CadView>(`/projects/${pid}/files/${fid}/cad`);
+  // Seeded from the cache, so a sheet that has already been looked at — or one
+  // the prefetcher warmed while you were reading its neighbour — arrives with
+  // no loading state at all.
+  const [data, setData] = useState<CadView | null>(() => viewCache.get(fid) ?? null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (viewCache.has(fid)) { setData(viewCache.get(fid)!); return; }
+    let live = true;
+    fetchView(pid, fid)
+      .then((v) => { if (live) setData(v); })
+      .catch((e: any) => { if (live) setError(e?.message ?? t("common.loadFail")); });
+    return () => { live = false; };
+  }, [pid, fid, t]);
 
   // Warm the sheets either side, but only once this one has painted — a
   // prefetch that competes with the drawing the estimator is actually waiting
   // for makes the visible sheet slower, which is the opposite of the point.
-  const ready = !loading && !!data;
+  const ready = !!data;
   useEffect(() => {
     if (!ready) return;
     const id = window.setTimeout(() => {
-      for (const n of neighbours) void fetchSheet(pid, n).catch(() => { /* prefetch is best-effort */ });
+      for (const n of neighbours) {
+        void fetchView(pid, n).catch(() => { /* prefetch is best-effort */ });
+        void fetchSheet(pid, n).catch(() => { /* ditto */ });
+      }
     }, 400);
     return () => window.clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, pid, neighbours.join(",")]);
 
-  if (loading) return <Skeleton rows={4} />;
-  if (error || !data) return <div className="csub">{error ?? t("common.loadFail")}</div>;
+  if (error) return <div className="csub">{error}</div>;
+  if (!data) return <Skeleton rows={4} />;
 
   return (
     <>

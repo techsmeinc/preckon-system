@@ -23,33 +23,59 @@ import { footprint, metricLayers, isCadFile, type CadSummary } from "@/lib/cad";
  *  serving yesterday's shape from the cache forever. */
 const VIEW_VERSION = 1;
 
+interface Row {
+  filename: string;
+  view_json: any;
+  view_version: number;
+  has_svg: number;
+  units: string | null;
+  warnings: any;
+  render_error: string | null;
+  rendered_at: Date | null;
+}
+
+const COMMON = `c.svg IS NOT NULL AS has_svg,
+            c.units, c.warnings, c.render_error, c.rendered_at
+       FROM cad_extraction c
+       JOIN file f ON f.id = c.file_id
+      WHERE c.tenant_id = ? AND c.project_id = ? AND c.file_id = ?`;
+
+const SQL_CACHED = `SELECT f.filename, c.view_json, c.view_version, ${COMMON}`;
+/** Same answer without the cache columns, for the window between a deploy and
+ *  its migration. NULL/0 sends every read down the rebuild path, which is what
+ *  the old code did on every read anyway — slow, but correct. */
+const SQL_PLAIN = `SELECT f.filename, NULL AS view_json, 0 AS view_version, ${COMMON}`;
+
+const isMissingColumn = (e: any) =>
+  e?.code === "ER_BAD_FIELD_ERROR" || /unknown column/i.test(String(e?.message ?? ""));
+
+/** Set once the columns are known to be absent, so the failing statement is
+ *  tried once per process rather than once per sheet open. */
+let cacheColumnsMissing = false;
+
 export const GET = route<{ pid: string; fid: string }>(async (_req, ctx, { pid, fid }) => {
   requirePermission(ctx, "artifact.read");
   await requireProject(ctx, pid);
 
-  const row = await queryOne<{
-    filename: string;
-    view_json: any;
-    view_version: number;
-    has_svg: number;
-    units: string | null;
-    warnings: any;
-    render_error: string | null;
-    rendered_at: Date | null;
-  }>(
-    // Note what is NOT selected: neither c.svg nor c.summary. Reading either one
-    // to derive a few kilobytes pulled megabytes across the database connection
-    // on every sheet open — the same cost this route exists to avoid, just moved
-    // one hop earlier. The trimmed view is read instead, and the summary is
-    // touched only by the single request that has to rebuild it.
-    `SELECT f.filename, c.view_json, c.view_version,
-            c.svg IS NOT NULL AS has_svg,
-            c.units, c.warnings, c.render_error, c.rendered_at
-       FROM cad_extraction c
-       JOIN file f ON f.id = c.file_id
-      WHERE c.tenant_id = ? AND c.project_id = ? AND c.file_id = ?`,
-    [ctx.tenantId, pid, fid]
-  );
+  // Note what is NOT selected: neither c.svg nor c.summary. Reading either one
+  // to derive a few kilobytes pulled megabytes across the database connection on
+  // every sheet open — the same cost this route exists to avoid, just moved one
+  // hop earlier. The trimmed view is read instead, and the summary is touched
+  // only by the single request that has to rebuild it.
+  //
+  // The cache columns are asked for optionally. Migration 013 adds them, but a
+  // deploy that builds the image before running the SQL would otherwise take the
+  // whole Drawings panel down with "Unknown column" until somebody noticed — a
+  // caching change is not worth an outage, so a missing column just means no
+  // cache this time round.
+  const args = [ctx.tenantId, pid, fid];
+  const row = cacheColumnsMissing
+    ? await queryOne<Row>(SQL_PLAIN, args)
+    : await queryOne<Row>(SQL_CACHED, args).catch((e: any) => {
+        if (!isMissingColumn(e)) throw e;
+        cacheColumnsMissing = true;
+        return queryOne<Row>(SQL_PLAIN, args);
+      });
 
   // A drawing the parser could not read has no extraction row at all. 404 was
   // technically right and practically useless: the file IS in the project, the
@@ -83,6 +109,7 @@ export const GET = route<{ pid: string; fid: string }>(async (_req, ctx, { pid, 
     ? stored
     : await rebuild(ctx.tenantId, fid);
 
+
   return ok({
     filename: row.filename,
     units: row.units,
@@ -114,6 +141,7 @@ async function rebuild(tenantId: string, fid: string) {
   );
   const summary: CadSummary = typeof row?.summary === "string" ? JSON.parse(row.summary) : row?.summary;
   const view = buildView(summary ?? ({} as CadSummary));
+  if (cacheColumnsMissing) return view;
   await query(
     "UPDATE cad_extraction SET view_json = ?, view_version = ? WHERE tenant_id = ? AND file_id = ?",
     [JSON.stringify(view), VIEW_VERSION, tenantId, fid]

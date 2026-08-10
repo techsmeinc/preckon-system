@@ -164,9 +164,7 @@ export function CadEditor({
     // to care which format was uploaded.
     const load = dxfText !== undefined
       ? Promise.resolve().then(() => take(dxfText))
-      : fetch(`/api/v1/projects/${pid}/files/${fid}/dxf`, { credentials: "include" })
-          .then(async (r) => { if (!r.ok) throw new Error(`${r.status}`); return r.text(); })
-          .then(take);
+      : fetchDxf(pid, fid).then(take);
 
     load
       .catch((e) => { if (live) setError(e?.message === "empty" ? t("ed.noGeometry") : t("ed.loadFail")); })
