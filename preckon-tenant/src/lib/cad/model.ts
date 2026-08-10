@@ -10,10 +10,17 @@
 // Pure: no DOM, no network. The viewport draws it, the editor mutates it, and
 // `serializeModel` writes an R12 DXF that AutoCAD, BricsCAD and LibreCAD all open.
 
+/**
+ * `handle` is the entity's DXF handle in the file it was read from, and it is
+ * how a save avoids rewriting the drawing. An entity that still carries one is
+ * untouched, so the original record is reproduced verbatim; an entity without
+ * one is new or edited, so it is written out fresh. Every transform below drops
+ * it deliberately — see stripHandle. See ./roundtrip for the rest.
+ */
 export type Entity =
-  | { kind: "line"; layer: string; x1: number; y1: number; x2: number; y2: number; id?: string }
-  | { kind: "poly"; layer: string; pts: { x: number; y: number }[]; closed: boolean; id?: string }
-  | { kind: "text"; layer: string; text: string; x: number; y: number; h: number; id?: string };
+  | { kind: "line"; layer: string; x1: number; y1: number; x2: number; y2: number; id?: string; handle?: string }
+  | { kind: "poly"; layer: string; pts: { x: number; y: number }[]; closed: boolean; id?: string; handle?: string }
+  | { kind: "text"; layer: string; text: string; x: number; y: number; h: number; id?: string; handle?: string };
 
 export interface ModelLayer {
   name: string;
@@ -67,6 +74,20 @@ export const rotateEntity = (e: Entity, cx: number, cy: number, ang: number): En
     y: cy + (x - cx) * s + (y - cy) * c,
   }));
 };
+
+/**
+ * Forget where an entity came from.
+ *
+ * Called by every transform, because a moved line is no longer the line in the
+ * file. Keeping the handle would make the save reproduce the ORIGINAL record
+ * and silently discard the move — the edit would vanish on reload, which is
+ * worse than an edit that fails.
+ */
+export function stripHandle(e: Entity): Entity {
+  if (!e.handle) return e;
+  const { handle: _drop, ...rest } = e as Entity & { handle?: string };
+  return rest as Entity;
+}
 
 export function scaleEntityAbout(e: Entity, cx: number, cy: number, f: number): Entity {
   const out = mapEntityPoints(e, (x, y) => ({ x: cx + (x - cx) * f, y: cy + (y - cy) * f }));
@@ -143,6 +164,13 @@ type RawDxf = {
   header?: Record<string, unknown>;
 } | null;
 
+/** The entity's handle, when the parser gave us one. R12 files carry none, and
+ *  ./roundtrip falls back accordingly. */
+const hnd = (e: Record<string, unknown>) => {
+  const h = e.handle;
+  return typeof h === "string" ? h : typeof h === "number" ? h.toString(16).toUpperCase() : undefined;
+};
+
 export function parseToModel(dxf: RawDxf): DxfModel {
   const entities: Entity[] = [];
   const layerNames = new Set<string>();
@@ -158,7 +186,7 @@ export function parseToModel(dxf: RawDxf): DxfModel {
     if (type === "LINE") {
       const v = (e.vertices as { x: number; y: number }[]) ?? [];
       if (v.length >= 2 && fin2(v[0]) && fin2(v[1])) {
-        entities.push({ kind: "line", layer, x1: num(v[0].x), y1: num(v[0].y), x2: num(v[1].x), y2: num(v[1].y) });
+        entities.push({ kind: "line", layer, handle: hnd(e), x1: num(v[0].x), y1: num(v[0].y), x2: num(v[1].x), y2: num(v[1].y) });
       }
     } else if (type === "LWPOLYLINE" || type === "POLYLINE") {
       const v = (e.vertices as { x: number; y: number; z?: number }[]) ?? [];
@@ -171,7 +199,7 @@ export function parseToModel(dxf: RawDxf): DxfModel {
       );
       if (v.length >= 2 && v.length <= 800 && !is3d && !mesh && v.every(fin2)) {
         entities.push({
-          kind: "poly", layer, closed: Boolean(e.closed ?? e.shape),
+          kind: "poly", layer, handle: hnd(e), closed: Boolean(e.closed ?? e.shape),
           pts: v.map((p) => ({ x: num(p.x), y: num(p.y) })),
         });
       }
@@ -193,7 +221,7 @@ export function parseToModel(dxf: RawDxf): DxfModel {
       const sp = (e.startPoint ?? e.position) as { x: number; y: number } | undefined;
       const t = cleanText(String(e.text ?? ""));
       if (sp && fin2(sp) && t) {
-        entities.push({ kind: "text", layer, text: t, x: num(sp.x), y: num(sp.y), h: num(e.textHeight ?? e.height, 0) });
+        entities.push({ kind: "text", layer, handle: hnd(e), text: t, x: num(sp.x), y: num(sp.y), h: num(e.textHeight ?? e.height, 0) });
       }
     }
   }
