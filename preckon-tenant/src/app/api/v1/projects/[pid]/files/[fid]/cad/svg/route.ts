@@ -112,6 +112,14 @@ function withSelfContainedStrokes(svg: string): string {
   if (svg.includes("data-preckon-strokes")) return svg;
   const open = svg.indexOf(">");
   if (open < 0 || !/^\s*<svg[\s>]/i.test(svg)) return svg;
-  const style = `<style data-preckon-strokes>svg [class]{vector-effect:non-scaling-stroke;stroke-width:1.1}</style>`;
+  // Every attribute is quoted, and the CSS carries no <, > or & — because an
+  // SVG behind an <img> is parsed as STRICT XML, not as HTML. A bare attribute
+  // like `data-preckon-strokes` is legal in HTML and a fatal parse error in
+  // XML, and a fatal parse error means the browser renders nothing at all: no
+  // drawing, no error, just the alt text.
+  const style =
+    `<style type="text/css" data-preckon-strokes="1">` +
+    `svg [class]{vector-effect:non-scaling-stroke;stroke-width:1.1}` +
+    `</style>`;
   return svg.slice(0, open + 1) + style + svg.slice(open + 1);
 }

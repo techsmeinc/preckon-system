@@ -201,6 +201,31 @@ export function ParsedSheets({ pid }: { pid: string }) {
     .filter((f) => f.cad_layers != null || isDrawing(f.filename))
     .sort(bySheetName);
   const [open, setOpen] = useState<string | null>(null);
+  const [redrawing, setRedrawing] = useState<{ done: number; total: number } | null>(null);
+
+  /* Draw every sheet in the set again.
+   *
+   * The renderer used to accept anything under 70 MB as a good sheet, so a set
+   * uploaded before that was fixed sits in the database at ~9 MB each — heavy
+   * however well it is cached. This walks the set once and redraws each under
+   * the current ceiling. One at a time on purpose: each one runs the CAD
+   * sidecar, and thirteen at once would queue behind each other anyway while
+   * making the workspace unusable for everyone else on it. */
+  const redrawAll = useCallback(async (ids: string[]) => {
+    setRedrawing({ done: 0, total: ids.length });
+    for (let i = 0; i < ids.length; i++) {
+      try {
+        const r = await api.post<{ svg: string | null }>(`/projects/${pid}/files/${ids[i]}/cad/render`);
+        if (r.svg) sheetCache.set(ids[i], r.svg);
+      } catch { /* one sheet that will not draw must not stop the other twelve */ }
+      setRedrawing({ done: i + 1, total: ids.length });
+    }
+    setRedrawing(null);
+    // Everything downstream keyed off the old render; drop it all rather than
+    // show a mix of sheets from before and after.
+    viewCache.clear();
+    window.location.reload();
+  }, [pid]);
 
   if (files.loading || drawings.length === 0) return null;
   const active = drawings.some((f) => f.id === open) ? (open as string) : drawings[0].id;
@@ -241,6 +266,18 @@ export function ParsedSheets({ pid }: { pid: string }) {
           <span className="cad-count mono">
             {index + 1}/{drawings.length}
           </span>
+          {drawings.length > 1 && (
+            <button
+              className="mini sm"
+              disabled={!!redrawing}
+              onClick={() => redrawAll(drawings.map((f) => f.id))}
+              title={t("cad.redrawAllWhy")}
+            >
+              {redrawing
+                ? t("cad.redrawingN", { done: redrawing.done, total: redrawing.total })
+                : t("cad.redrawAll")}
+            </button>
+          )}
         </div>
       </div>
 
@@ -513,6 +550,9 @@ function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadVi
      need it — see wantsDetail below. */
   const [inline, setInline] = useState<string | null>(() => sheetCache.get(fid) ?? null);
   const [painted, setPainted] = useState(false);
+  /* Set when the browser could not decode the sheet as an image, which forces
+     the inline path regardless of zoom. */
+  const [imgFailed, setImgFailed] = useState(false);
   const [z, setZ] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const viewportRef = useRef<HTMLDivElement | null>(null);
@@ -603,7 +643,7 @@ function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadVi
   // Pointed at by the <img>. Cached hard and gzipped by the route, so the
   // browser's own image cache serves a sheet reopened later with no request.
   const svgUrl = `/api/v1/projects/${pid}/files/${fid}/cad/svg`;
-  const showInline = wantsDetail && !!inline;
+  const showInline = !!inline && (wantsDetail || imgFailed);
 
   const dxfHref = `/api/v1/projects/${pid}/files/${fid}/dxf`;
   const dxfName = view.filename?.replace(/\.[^.]+$/, "") + ".dxf";
@@ -678,7 +718,10 @@ function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadVi
                 src={svgUrl}
                 alt={t("cad.sheetAlt", { name: view.filename })}
                 onLoad={() => setPainted(true)}
-                onError={() => setErr((e) => e ?? t("cad.noRenderWhy"))}
+                /* If the image cannot be decoded, fall back to the markup
+                   rather than leaving a broken-image icon: the inline path is
+                   slower but it is the one that has always worked. */
+                onError={() => { setImgFailed(true); void fetchSheet(pid, fid).then(setInline).catch(() => setErr((e) => e ?? t("cad.noRenderWhy"))); }}
                 draggable={false}
               />
             )}
