@@ -1,6 +1,6 @@
 import { route, ok, immutableFor } from "@/lib/http";
 import { requirePermission, requireProject } from "@/lib/context";
-import { execute, queryOne } from "@/lib/db";
+import { query, queryOne } from "@/lib/db";
 import { errNotFound } from "@/lib/errors";
 import { footprint, metricLayers, isCadFile, type CadSummary } from "@/lib/cad";
 
@@ -114,7 +114,7 @@ async function rebuild(tenantId: string, fid: string) {
   );
   const summary: CadSummary = typeof row?.summary === "string" ? JSON.parse(row.summary) : row?.summary;
   const view = buildView(summary ?? ({} as CadSummary));
-  await execute(
+  await query(
     "UPDATE cad_extraction SET view_json = ?, view_version = ? WHERE tenant_id = ? AND file_id = ?",
     [JSON.stringify(view), VIEW_VERSION, tenantId, fid]
   ).catch(() => { /* a cache that would not save is still a correct answer */ });
