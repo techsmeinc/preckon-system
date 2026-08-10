@@ -17,11 +17,14 @@ behaves exactly as it does today, from the same build.
 
 ## Running it
 
-```bash
+```powershell
 cd preckon-desktop
 npm install
-npm start                 # against https://app.preckon.com
-PRECKON_URL=http://localhost:3100 npm start   # against a local tenant
+npm start                                     # against https://app.preckon.com
+
+# against a local tenant instead — PowerShell has no inline env-var prefix,
+# so this is two statements, not the `VAR=x cmd` form you would use in bash
+$env:PRECKON_URL = "http://localhost:3100"; npm start
 ```
 
 ## DWG — read this before shipping a build

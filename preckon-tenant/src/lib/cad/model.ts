@@ -54,14 +54,19 @@ export function withIds(m: DxfModel): DxfModel {
 interface Pt2 { x: number; y: number }
 
 export function mapEntityPoints(e: Entity, fn: (x: number, y: number) => Pt2): Entity {
-  if (e.kind === "line") {
-    const a = fn(e.x1, e.y1);
-    const b = fn(e.x2, e.y2);
-    return { ...e, x1: a.x, y1: a.y, x2: b.x, y2: b.y };
+  // The handle is dropped HERE, once, because every move, copy, rotate, scale
+  // and mirror comes through this function. Doing it per-transform would work
+  // until somebody adds the sixth one and forgets — and that failure is silent:
+  // the edit looks right on screen and is gone after a save and a reload.
+  const src = stripHandle(e);
+  if (src.kind === "line") {
+    const a = fn(src.x1, src.y1);
+    const b = fn(src.x2, src.y2);
+    return { ...src, x1: a.x, y1: a.y, x2: b.x, y2: b.y };
   }
-  if (e.kind === "poly") return { ...e, pts: e.pts.map((p) => fn(p.x, p.y)) };
-  const p = fn(e.x, e.y);
-  return { ...e, x: p.x, y: p.y };
+  if (src.kind === "poly") return { ...src, pts: src.pts.map((p) => fn(p.x, p.y)) };
+  const p = fn(src.x, src.y);
+  return { ...src, x: p.x, y: p.y };
 }
 
 export const translateEntity = (e: Entity, dx: number, dy: number): Entity =>
@@ -306,7 +311,24 @@ export function serializeModel(m: DxfModel): string {
     out.push("0", "LAYER", "2", l.name, "70", l.visible ? "0" : "1", "62", `${l.visible ? l.aci : -Math.abs(l.aci)}`, "6", "CONTINUOUS");
   }
   out.push("0", "ENDTAB", "0", "ENDSEC", "0", "SECTION", "2", "ENTITIES");
-  for (const e of m.entities) {
+  const body = entityBody(m.entities);
+  if (body) out.push(body);
+  out.push("0", "ENDSEC", "0", "EOF");
+  return out.join("\n");
+}
+
+/**
+ * Just the entity records — no header, no tables, no terminator.
+ *
+ * Split out so a save can APPEND newly drawn entities to the original file
+ * instead of replacing it with one rebuilt from the three kinds this model
+ * understands. That difference is a marked-up drawing versus a tracing of one.
+ * See ./roundtrip.
+ */
+export function entityBody(entities: Entity[]): string {
+  const out: string[] = [];
+  const f = (n: number) => (Math.round(n * 1e6) / 1e6).toString();
+  for (const e of entities) {
     if (e.kind === "line") {
       out.push("0", "LINE", "8", e.layer, "10", f(e.x1), "20", f(e.y1), "11", f(e.x2), "21", f(e.y2));
     } else if (e.kind === "poly") {
@@ -317,7 +339,6 @@ export function serializeModel(m: DxfModel): string {
       out.push("0", "TEXT", "8", e.layer, "10", f(e.x), "20", f(e.y), "40", f(e.h || 0.25), "1", e.text.replace(/[\n\r]/g, " "), "7", "STANDARD");
     }
   }
-  out.push("0", "ENDSEC", "0", "EOF");
   return out.join("\n");
 }
 

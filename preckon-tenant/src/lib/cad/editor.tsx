@@ -24,13 +24,14 @@ import { useCan, useToast } from "@/lib/ui";
 import { useI18n } from "@/lib/i18n";
 import { cachedText } from "@/lib/desktop";
 import {
-  nativeUnit, parseToModel, serializeModel, unitFactor as unitFactorOf, withIds,
+  entityBody, nativeUnit, parseToModel, serializeModel, unitFactor as unitFactorOf, withIds,
   UNIT_OPTIONS, type DxfModel,
 } from "./model";
 import {
   ALL_SNAP_MODES, CadViewport, DEFAULT_SNAPS, type CadHandle, type SnapMode, type Tool,
 } from "./viewport";
 import { applyCadOps, type CadMark, type CadOp } from "./agent";
+import { saveOver } from "./roundtrip";
 import { IsoView } from "./isoview";
 import { assumedHeight } from "./iso";
 
@@ -125,6 +126,11 @@ export function CadEditor({
   const vp = useRef<CadHandle>(null);
 
   const [model, setModel] = useState<DxfModel | null>(null);
+  /* The drawing exactly as it arrived. Saving re-emits THIS, with only the
+     entities that were edited replaced — so the blocks, hatches, dimensions and
+     splines the model cannot read survive a markup untouched. Without it, Save
+     wrote a tracing of the parts we understood and threw the rest away. */
+  const sourceRef = useRef<string | null>(null);
   const [past, setPast] = useState<DxfModel[]>([]);
   const [future, setFuture] = useState<DxfModel[]>([]);
   const [loading, setLoading] = useState(true);
@@ -188,6 +194,7 @@ export function CadEditor({
 
     const take = (text: string) => {
       if (!live) return;
+      sourceRef.current = text;
       const raw = parseToModel(new DxfParser().parseSync(text) as any);
       if (!raw.entities.length) throw new Error("empty");
       const m = withIds(raw);
@@ -208,6 +215,14 @@ export function CadEditor({
       .finally(() => { if (live) setLoading(false); });
     return () => { live = false; };
   }, [pid, fid, dxfText, t]);
+
+  /* The bytes both exits write. Preserves the original file where there is one,
+     so a markup keeps the drawing's blocks, hatches and dimensions rather than
+     replacing the sheet with a tracing of the parts this model understands. */
+  const outputDxf = useCallback(
+    (m: DxfModel) => saveOver(sourceRef.current, m, () => serializeModel(m), (es) => entityBody(es as any)),
+    []
+  );
 
   /* ── history ─────────────────────────────────────────────────────────── */
   const apply = useCallback((next: DxfModel) => {
@@ -282,14 +297,14 @@ export function CadEditor({
   const base = filename.replace(/\.[^.]+$/, "");
   function doDownload() {
     if (!model) return;
-    download(serializeModel(model), `${base}-markup.dxf`);
+    download(outputDxf(model), `${base}-markup.dxf`);
   }
   async function doSave() {
     if (!model || !pid) return;
     setSaving(true);
     try {
       const name = `${base}-markup.dxf`;
-      const file = new File([serializeModel(model)], name, { type: "application/dxf" });
+      const file = new File([outputDxf(model)], name, { type: "application/dxf" });
       await api.upload(`/projects/${pid}/files`, file);
       setDirty(false);
       toast(t("ed.saved"));

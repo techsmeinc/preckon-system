@@ -166,3 +166,39 @@ export function maxHandle(index: DxfIndex): number {
   }
   return max;
 }
+
+/**
+ * Save an edited model back over the drawing it came from.
+ *
+ * Entities that still carry a handle were never touched, so their original
+ * records are reproduced verbatim — along with every INSERT, HATCH, DIMENSION,
+ * SPLINE and ELLIPSE the model never saw. Entities without one are new or
+ * edited, and are appended. Anything in the file whose handle no longer appears
+ * in the model was deleted, and is dropped.
+ *
+ * Falls back to a fresh R12 file when there is nothing to preserve — a drawing
+ * created from scratch, or a source we could not index. The caller does not
+ * need to know which happened; both are a valid DXF.
+ */
+export function saveOver(
+  source: string | null,
+  model: { entities: Array<{ handle?: string }> },
+  freshFile: () => string,
+  newEntities: (es: Array<{ handle?: string }>) => string,
+): string {
+  const index = source ? indexDxf(source) : null;
+  if (!index) return freshFile();
+
+  const kept = new Set<string>();
+  const added: Array<{ handle?: string }> = [];
+  for (const e of model.entities) {
+    if (e.handle) kept.add(e.handle);
+    else added.push(e);
+  }
+
+  const drop = new Set<string>();
+  for (const c of index.chunks) if (c.handle && !kept.has(c.handle)) drop.add(c.handle);
+
+  const body = newEntities(added);
+  return rewriteDxf(index, drop, body ? body + "\n" : "");
+}
