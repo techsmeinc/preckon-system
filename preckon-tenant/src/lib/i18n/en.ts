@@ -385,6 +385,8 @@ export const en = {
   "cad.optReading": "being read",
   "cad.optUnread": "not read",
   "cad.loadingSheet": "Loading the sheet…",
+  "cad.redraw": "Redraw",
+  "cad.sheetAlt": "Drawing sheet {name}",
   "cad.retryRender": "Draw it again",
   "cad.unreadable": "This drawing could not be read",
   "cad.noRender": "This drawing measured cleanly but the sheet would not draw.",

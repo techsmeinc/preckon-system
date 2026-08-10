@@ -504,25 +504,15 @@ const clampZoom = (z: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z));
  */
 function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadView }) {
   const { t } = useI18n();
-  const [svg, setSvg] = useState<string | null>(() => sheetCache.get(fid) ?? null);
   const [err, setErr] = useState<string | null>(view.renderError);
   const [rendering, setRendering] = useState(false);
-  const [fetching, setFetching] = useState(view.hasSvg && !sheetCache.has(fid));
-
-  /* The sheet arrives after the facts rather than inside them. It is megabytes
-     on a real drawing, and carrying it in the same JSON meant the units, the
-     layers and the block counts could not paint until the whole picture had
-     downloaded. */
-  useEffect(() => {
-    if (!view.hasSvg || sheetCache.has(fid)) return;
-    let live = true;
-    setFetching(true);
-    fetchSheet(pid, fid)
-      .then((text) => { if (live) setSvg(text); })
-      .catch(() => { if (live) setErr((e) => e ?? t("cad.noRenderWhy")); })
-      .finally(() => { if (live) setFetching(false); });
-    return () => { live = false; };
-  }, [pid, fid, view.hasSvg, t]);
+  /* Whether a sheet exists to show at all — from the reading, or from a render
+     the estimator just asked for. */
+  const [available, setAvailable] = useState(view.hasSvg);
+  /* The sheet as real markup. Loaded only when somebody zooms in far enough to
+     need it — see wantsDetail below. */
+  const [inline, setInline] = useState<string | null>(() => sheetCache.get(fid) ?? null);
+  const [painted, setPainted] = useState(false);
   const [z, setZ] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const viewportRef = useRef<HTMLDivElement | null>(null);
@@ -534,8 +524,7 @@ function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadVi
       const r = await api.post<{ svg: string | null; error: string | null }>(
         `/projects/${pid}/files/${fid}/cad/render`
       );
-      if (r.svg) sheetCache.set(fid, r.svg);
-      setSvg(r.svg);
+      if (r.svg) { sheetCache.set(fid, r.svg); setInline(r.svg); setAvailable(true); }
       setErr(r.error);
     } catch (e: any) {
       setErr(e?.message ?? t("common.loadFail"));
@@ -551,6 +540,20 @@ function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadVi
     if (!view.hasSvg && !view.renderAttempted && !view.parseError) void render();
   }, [view.hasSvg, view.renderAttempted, view.parseError, render]);
 
+  /* Past this zoom a scaled image starts to blur, and the real markup is worth
+     what it costs to build. Below it — which is where a sheet is opened, looked
+     at and closed — the browser never sees a single SVG node. */
+  const DETAIL_AT = 2;
+  const wantsDetail = z > DETAIL_AT;
+  useEffect(() => {
+    if (!wantsDetail || inline || !available) return;
+    let live = true;
+    fetchSheet(pid, fid)
+      .then((text) => { if (live) setInline(text); })
+      .catch(() => { /* the image is still on screen; leave it there */ });
+    return () => { live = false; };
+  }, [wantsDetail, inline, available, pid, fid]);
+
   const fit = useCallback(() => {
     setZ(1);
     setPan({ x: 0, y: 0 });
@@ -561,7 +564,7 @@ function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadVi
   // looking at back across the panel after every notch.
   useEffect(() => {
     const el = viewportRef.current;
-    if (!el || !svg) return;
+    if (!el || !available) return;
     const onWheel = (e: WheelEvent) => {
       if (!e.ctrlKey && Math.abs(e.deltaY) < 1) return;
       e.preventDefault();
@@ -579,7 +582,7 @@ function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadVi
     // scrolls the page out from under the drawing otherwise.
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
-  }, [svg]);
+  }, [available]);
 
   const onPointerDown = (e: ReactPointerEvent) => {
     if (e.button !== 0) return;
@@ -597,6 +600,11 @@ function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadVi
     try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch { /* already released */ }
   };
 
+  // Pointed at by the <img>. Cached hard and gzipped by the route, so the
+  // browser's own image cache serves a sheet reopened later with no request.
+  const svgUrl = `/api/v1/projects/${pid}/files/${fid}/cad/svg`;
+  const showInline = wantsDetail && !!inline;
+
   const dxfHref = `/api/v1/projects/${pid}/files/${fid}/dxf`;
   const dxfName = view.filename?.replace(/\.[^.]+$/, "") + ".dxf";
 
@@ -605,12 +613,19 @@ function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadVi
       <div className="bim-bar cad-bar">
         <b className="cad-name" title={view.filename}>{view.filename}</b>
         <div className="cad-tools">
-          {svg && (
+          {available && (
             <>
               <button className="btn btn-ghost" onClick={() => setZ((p) => clampZoom(p / 1.3))} aria-label={t("cad.zoomOut")}>−</button>
               <span className="cad-zoom mono">{Math.round(z * 100)}%</span>
               <button className="btn btn-ghost" onClick={() => setZ((p) => clampZoom(p * 1.3))} aria-label={t("cad.zoomIn")}>+</button>
               <button className="btn btn-ghost" onClick={fit}>{t("cad.fit")}</button>
+              {/* Sheets drawn before the renderer had a sane size ceiling are
+                  still 9 MB in the database. This draws one again under the
+                  current limit, which trades a hatch fill for a sheet that
+                  opens in about a second. */}
+              <button className="btn btn-ghost" onClick={render} disabled={rendering}>
+                {rendering ? t("cad.rendering") : t("cad.redraw")}
+              </button>
             </>
           )}
           {/* DXF, not the original: a .dwg opens in AutoCAD and nothing else,
@@ -626,7 +641,7 @@ function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadVi
         </div>
       </div>
 
-      {svg ? (
+      {available ? (
         <div
           ref={viewportRef}
           className="cad-view"
@@ -645,18 +660,39 @@ function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadVi
               // stay one hairline wide at every zoom.
               ["--cad-z" as any]: z,
             }}
-            // The renderer emits a standalone, self-contained SVG — no scripts,
-            // no external refs — so it is safe to inline and needed to make it
-            // scale to the panel.
-            dangerouslySetInnerHTML={{ __html: svg }}
-          />
+            {...(showInline
+              // The renderer emits a standalone, self-contained SVG — no
+              // scripts, no external refs — so it is safe to inline, and
+              // inlining is what lets the stroke width follow the zoom.
+              ? { dangerouslySetInnerHTML: { __html: inline as string } }
+              : {})}
+          >
+            {/* An <img>, until somebody zooms in far enough to need better.
+                These sheets average 9 MB and reach 37 MB of markup; inlining
+                that builds a DOM of a million nodes and matches CSS against
+                every one of them, which is the freeze. As an image the browser
+                decodes it on its own thread, keeps no nodes, and the panel is
+                usable while it arrives. */}
+            {!showInline && (
+              <img
+                src={svgUrl}
+                alt={t("cad.sheetAlt", { name: view.filename })}
+                onLoad={() => setPainted(true)}
+                onError={() => setErr((e) => e ?? t("cad.noRenderWhy"))}
+                draggable={false}
+              />
+            )}
+          </div>
+          {!showInline && !painted && (
+            <div className="cad-loading csub">{t("cad.loadingSheet")}</div>
+          )}
         </div>
       ) : (
         <div className="cad-empty">
-          {rendering || fetching ? (
+          {rendering ? (
             <>
               <div className="sk" style={{ width: 180 }} />
-              <p className="csub">{rendering ? t("cad.rendering") : t("cad.loadingSheet")}</p>
+              <p className="csub">{t("cad.rendering")}</p>
             </>
           ) : (
             <>

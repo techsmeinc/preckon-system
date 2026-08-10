@@ -709,9 +709,22 @@ def to_dxf_path(path: str) -> str:
     return _convert_dwg_to_dxf(path)
 
 
-# A few pathological drawings render to hundreds of MB (dense hatches) that
-# would OOM the browser. Past this we degrade the pass rather than emit it.
-_SVG_SIZE_LIMIT = 70_000_000
+# Past this we degrade the pass rather than emit it.
+#
+# This was 70 MB, which is not a limit — it is a promise that nothing will crash.
+# A real set rendered to 9 MB on average and 37 MB at worst, every one of them
+# "within limits" and every one of them unusable: at a megabyte a second that is
+# nine seconds of download before the viewer can begin, and inlining markup that
+# size builds a DOM of a million nodes.
+#
+# 8 MB is the number a sheet can actually be read at — roughly a second on a
+# modest connection once gzipped, since path data compresses about tenfold.
+# Beyond it the hatch fill goes first, which costs a preview almost nothing: the
+# outlines it sits inside carry what the estimator reads.
+#
+# Sheets already stored are unaffected — this only bounds what the next render
+# produces. Re-render an existing one from the viewer to bring it down.
+_SVG_SIZE_LIMIT = 8_000_000
 
 # Entity types ezdxf's renderer mishandles: MULTILEADER content is drawn as the
 # literal class name ("AcDbMLeader") splattered over the drawing, and proxy

@@ -781,7 +781,15 @@ input[type=color]{width:46px; height:34px; border:1px solid var(--hairline); bor
    fitted rather than one of them overflowing. */
 .cad-sheet{background:#fff; border-radius:8px; padding:8px; width:100%; height:100%;
   transform-origin:center center; will-change:transform;}
-.cad-sheet svg{width:100%; height:100%; max-width:100%; max-height:100%; display:block;}
+.cad-sheet svg,.cad-sheet img{width:100%; height:100%; max-width:100%; max-height:100%; display:block;}
+/* The fitted sheet is an <img> — see SheetCanvas. object-fit keeps the plan's
+   aspect ratio inside the panel the way the SVG's own viewBox would, and the
+   drag-to-pan gesture must not be hijacked by the browser's image drag. */
+.cad-sheet img{object-fit:contain; -webkit-user-drag:none; user-select:none;}
+/* Said over the panel rather than instead of it: at 9 MB a sheet arrives
+   progressively, and replacing the whole viewport with a spinner hides a
+   drawing that is already half painted. */
+.cad-loading{position:absolute; inset:auto 0 10px 0; text-align:center; pointer-events:none;}
 
 /* Nothing to draw. Says WHY and offers the two ways out — draw it again, or
    take the DXF away and open it in a CAD application. */

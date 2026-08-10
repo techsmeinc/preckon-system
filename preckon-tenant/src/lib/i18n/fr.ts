@@ -387,6 +387,8 @@ export const fr: Dict = {
   "cad.optReading": "en cours de lecture",
   "cad.optUnread": "non lue",
   "cad.loadingSheet": "Chargement de la planche…",
+  "cad.redraw": "Redessiner",
+  "cad.sheetAlt": "Planche de dessin {name}",
   "cad.retryRender": "Tracer à nouveau",
   "cad.unreadable": "Ce plan n’a pas pu être lu",
   "cad.noRender": "Ce plan a été mesuré correctement mais la planche n’a pas pu être tracée.",

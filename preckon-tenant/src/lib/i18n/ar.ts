@@ -386,6 +386,8 @@ export const ar: Dict = {
   "cad.optReading": "قيد القراءة",
   "cad.optUnread": "لم تُقرأ",
   "cad.loadingSheet": "جارٍ تحميل اللوحة…",
+  "cad.redraw": "إعادة الرسم",
+  "cad.sheetAlt": "لوحة الرسم {name}",
   "cad.retryRender": "أعد الرسم",
   "cad.unreadable": "تعذّرت قراءة هذا الرسم",
   "cad.noRender": "تم قياس الرسم بنجاح لكن تعذّر رسم اللوحة.",

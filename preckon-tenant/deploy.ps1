@@ -64,8 +64,8 @@ cd /opt/preckon-tenant
 echo "==> Migrations"
 sh scripts/migrate.sh
 
-echo "==> Building"
-docker compose up -d --build app
+echo "==> Building (app + cad sidecar)"
+docker compose up -d --build app cad
 
 echo "==> Running image"
 docker compose images app
