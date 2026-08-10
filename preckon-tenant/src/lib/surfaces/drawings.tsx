@@ -17,6 +17,7 @@ import { useCan } from "@/lib/ui";
 import { useI18n } from "@/lib/i18n";
 import { BimStudioPanel } from "@/lib/bim/panel";
 import { ParsedSheets } from "@/lib/bim/sheets";
+import { Boundary } from "@/lib/boundary";
 import {
   ReviewDrawer, StageEmpty, StageHeader, pendingOf, useArtifactActions, type SurfaceProps,
 } from "./common";
@@ -62,8 +63,8 @@ export default function DrawingsSurface({ pid, stage, artifacts, rows, workflows
     return (
       <>
         <StageHeader stage={stage} workflows={workflows} runs={runs} pid={pid} reload={reload} />
-        <ParsedSheets pid={pid} />
-        <BimStudioPanel pid={pid} onMeasured={reload} />
+        <Boundary name="Issued drawings"><ParsedSheets pid={pid} /></Boundary>
+        <Boundary name="BIM Studio"><BimStudioPanel pid={pid} onMeasured={reload} /></Boundary>
         <StageEmpty title={t("draw.emptyTitle")} sub={t("draw.emptySub")} />
       </>
     );
@@ -76,9 +77,9 @@ export default function DrawingsSurface({ pid, stage, artifacts, rows, workflows
         right={highConf.length > 1 ? <button className="mini sm" disabled={busy} onClick={() => confirmMany(highConf)}>{t("stage.acceptAll")}</button> : undefined}
       />
 
-      <ParsedSheets pid={pid} />
+      <Boundary name="Issued drawings"><ParsedSheets pid={pid} /></Boundary>
 
-      <BimStudioPanel pid={pid} onMeasured={reload} />
+      <Boundary name="BIM Studio"><BimStudioPanel pid={pid} onMeasured={reload} /></Boundary>
 
       <div className="card">
         <div className="chead">

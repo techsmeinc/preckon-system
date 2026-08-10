@@ -645,6 +645,15 @@ function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadVi
   const svgUrl = `/api/v1/projects/${pid}/files/${fid}/cad/svg`;
   const showInline = !!inline && (wantsDetail || imgFailed);
 
+  // Pan and zoom live on the wrapper, so both shapes below wear the same one.
+  // --cad-z is read back by the stroke-width rule: a CSS transform scales the
+  // linework with everything else, so the stroke is divided out to stay one
+  // hairline wide at every zoom.
+  const sheetStyle = {
+    transform: `translate(${pan.x}px, ${pan.y}px) scale(${z})`,
+    ["--cad-z" as any]: z,
+  } as React.CSSProperties;
+
   const dxfHref = `/api/v1/projects/${pid}/files/${fid}/dxf`;
   const dxfName = view.filename?.replace(/\.[^.]+$/, "") + ".dxf";
 
@@ -691,41 +700,37 @@ function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadVi
           onPointerCancel={endDrag}
           onDoubleClick={fit}
         >
-          <div
-            className="cad-sheet"
-            style={{
-              transform: `translate(${pan.x}px, ${pan.y}px) scale(${z})`,
-              // Read back by the stroke-width rule: a CSS transform scales the
-              // linework with everything else, so the stroke is divided out to
-              // stay one hairline wide at every zoom.
-              ["--cad-z" as any]: z,
-            }}
-            {...(showInline
+          {/* Two shapes on purpose, never one with both. React throws
+              outright if an element is given children AND
+              dangerouslySetInnerHTML — and `{false}` from a short-circuited
+              child counts as children, so a single div that switched between
+              the two crashed the whole stage the moment it switched. */}
+          {showInline ? (
+            <div
+              className="cad-sheet"
+              style={sheetStyle}
               // The renderer emits a standalone, self-contained SVG — no
               // scripts, no external refs — so it is safe to inline, and
               // inlining is what lets the stroke width follow the zoom.
-              ? { dangerouslySetInnerHTML: { __html: inline as string } }
-              : {})}
-          >
-            {/* An <img>, until somebody zooms in far enough to need better.
-                These sheets average 9 MB and reach 37 MB of markup; inlining
-                that builds a DOM of a million nodes and matches CSS against
-                every one of them, which is the freeze. As an image the browser
-                decodes it on its own thread, keeps no nodes, and the panel is
-                usable while it arrives. */}
-            {!showInline && (
+              dangerouslySetInnerHTML={{ __html: inline as string }}
+            />
+          ) : (
+            <div className="cad-sheet" style={sheetStyle}>
+              {/* An <img>, until somebody zooms in far enough to need better.
+                  These sheets average 9 MB and reach 37 MB of markup; inlining
+                  that builds a DOM of a million nodes and matches CSS against
+                  every one of them, which is the freeze. As an image the
+                  browser decodes it on its own thread, keeps no nodes, and the
+                  panel is usable while it arrives. */}
               <img
                 src={svgUrl}
                 alt={t("cad.sheetAlt", { name: view.filename })}
                 onLoad={() => setPainted(true)}
-                /* If the image cannot be decoded, fall back to the markup
-                   rather than leaving a broken-image icon: the inline path is
-                   slower but it is the one that has always worked. */
                 onError={() => { setImgFailed(true); void fetchSheet(pid, fid).then(setInline).catch(() => setErr((e) => e ?? t("cad.noRenderWhy"))); }}
                 draggable={false}
               />
-            )}
-          </div>
+            </div>
+          )}
           {!showInline && !painted && (
             <div className="cad-loading csub">{t("cad.loadingSheet")}</div>
           )}
