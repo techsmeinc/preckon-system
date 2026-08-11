@@ -5,6 +5,7 @@
 // the trust boundary (worker has no store access) is unchanged.
 
 import { PROMPTS, hasPrompt, supervisorPrompt, outlinePrompt, sectionPrompt, designerPrompt, verifierPrompt } from "./prompts.mjs";
+import { projectToolbox } from "./project-tools.mjs";
 import { createCadToolbox, buildExtractionDigest, knownNames } from "./cad-tools.mjs";
 import { runAgenticLoop } from "./agentic-loop.mjs";
 import { runVisionPass, visionBlock } from "./vision.mjs";
@@ -64,12 +65,23 @@ async function withClaude(env, base, template) {
   const model = MODEL_FOR_TIER[env.tier] ?? MODEL_FOR_TIER.deep;
 
   if (template.supervisor) {
-    const { system, user, maxTokens } = supervisorPrompt(env, personaName(env.job_type));
-    const text = await callAnthropic(model, system, user, maxTokens);
+    const toolbox = projectToolbox(env);
+    const { system, user, maxTokens } = supervisorPrompt(env, personaName(env.job_type), !!toolbox);
+
+    /* With tools, the Copilot looks things up instead of being handed a
+       truncated pile. Six iterations is enough for "overview → find the
+       records → read one" and short of an assistant that browses the project
+       for a minute before answering a one-line question.
+       Without them — a workspace-level question with no project — it answers
+       from the inline records exactly as it always did. */
+    const text = toolbox
+      ? (await runAgenticLoop({ model, system, user, toolbox, maxTokens, iterCap: 6 })).content
+      : await callAnthropic(model, system, user, maxTokens);
+
     return {
       ...base,
       status: "succeeded",
-      message: { role: "assistant", content: text.trim(), referenced_artifact_ids: ids(env) },
+      message: { role: "assistant", content: String(text ?? "").trim(), referenced_artifact_ids: ids(env) },
       deviations: template.deviations ?? [],
     };
   }
