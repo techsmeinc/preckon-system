@@ -46,6 +46,32 @@ function filesBlock(env) {
 }
 
 /** The upstream artifacts this stage consumes, as compact JSON. */
+/**
+ * What this workspace has corrected before.
+ *
+ * Core matches these against the records actually in front of the agent, so the
+ * block is a handful of lines rather than a rate book. `times_seen` is the
+ * signal that matters: a correction a human has made four times is how this
+ * contractor works, and one made once may have been a remote site with a lorry
+ * surcharge. Told to the model plainly so it can weigh them itself rather than
+ * treating every past edit as law.
+ */
+function lessonsBlock(env) {
+  const rows = env.inputs?.params?.lessons ?? [];
+  if (!rows.length) return "";
+  const lines = rows.slice(0, 40).map((l) => {
+    const from = l.was_value ? `proposed "${l.was_value}" -> ` : "";
+    const weight = l.times_seen > 1 ? ` (corrected ${l.times_seen} times)` : " (corrected once)";
+    return `- ${l.about ?? "record"} "${l.subject}": ${l.field} ${from}"${l.now_value}"${weight}`;
+  });
+  return `
+
+WHAT THIS WORKSPACE HAS CORRECTED BEFORE:
+${lines.join("
+")}
+These are this contractor's own past decisions on the same subjects, not rules from outside. Follow one where it plainly applies and say so in the field that records your basis. Ignore one that does not fit THIS project and price it properly instead - a correction made once may have been a one-off, and repeating it blindly is worse than not having it.`;
+}
+
 function recordsBlock(env, budget = 40_000) {
   const arts = env.inputs?.artifacts ?? [];
   if (!arts.length) return "(no upstream records)";
@@ -276,6 +302,7 @@ ${recordsBlock(env, 50_000)}
 
 RATE BOOK (the tenant's library — prefer these):
 ${JSON.stringify(env.inputs?.params?.rate_book ?? []).slice(0, 20_000)}
+${lessonsBlock(env)}
 
 ${cadFacts(env)}
 

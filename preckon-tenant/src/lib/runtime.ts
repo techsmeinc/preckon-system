@@ -2,6 +2,7 @@ import type { AgentContext } from "./abi";
 import { emitArtifact } from "./abi";
 import { appendAudit, type AuditActor, type AuditSpec } from "./audit";
 import { query, queryOne, tx } from "./db";
+import { lessonsFor, subjectsOf } from "./learning";
 import { errNotFound } from "./errors";
 import { newId } from "./ids";
 import { enqueueJob, recordJobResult, type JobInputArtifact, type JobResult } from "./jobs";
@@ -429,6 +430,35 @@ async function buildAgentParams(
             }));
             params.cad_extractions_trimmed = true;
           }
+        }
+      }
+    }
+
+    /* What this workspace has been corrected on before.
+       Matched against the records actually in front of this agent, never
+       dumped: handing over everything ever learned would be thousands of tokens
+       of preference about work this project does not contain. A handful of
+       matched lines is cheaper than the review cycle it prevents. */
+    {
+      // The subjects come from the project's OWN records — a cost line is looked
+      // up by the BOQ code it will price, and that code is already sitting in
+      // this project's bill. One query, and a subject that matches no lesson
+      // simply returns none.
+      const here = await query<{ payload: any }>(
+        `SELECT payload FROM artifact
+          WHERE tenant_id = ? AND project_id = ? AND status <> 'superseded'
+          ORDER BY created_at DESC LIMIT 400`,
+        [tenantId, projectId]
+      );
+      for (const produced of agent.produces) {
+        const subjects = subjectsOf(produced, here);
+        if (!subjects.length) continue;
+        const lessons = await lessonsFor(tenantId, produced, subjects);
+        if (lessons.length) {
+          params.lessons = [
+            ...((params.lessons as any[]) ?? []),
+            ...lessons.map((l) => ({ ...l, about: produced.split(".").pop() })),
+          ];
         }
       }
     }

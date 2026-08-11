@@ -3,6 +3,7 @@ import { query, queryOne } from "./db";
 import { errNotFound, errSchema, errStale } from "./errors";
 import { newId } from "./ids";
 import { validatePayload } from "./validate";
+import { captureCorrections } from "./learning";
 
 // ── The artifact store (§2). One shared, versioned graph per project. All DB
 // access goes through query()/queryOne(), which join the ambient transaction
@@ -389,6 +390,13 @@ export async function editArtifact(
     },
     audit
   );
+
+  /* The workspace takes a note of what was changed.
+     This is the only place that holds both the agent's proposal and the human's
+     correction, so it is the only place the difference between them can be
+     learned. Not awaited for correctness — an edit that succeeded must never be
+     reported as failed because a lesson could not be written. */
+  void captureCorrections(tenantId, a.project_id, a.type_key, a.payload, newPayload, userId);
 
   await query(
     "UPDATE artifact SET status = 'superseded', updated_at = NOW(3) WHERE tenant_id = ? AND id = ?",
