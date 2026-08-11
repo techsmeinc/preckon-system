@@ -105,6 +105,11 @@ export default function LibraryPage() {
           ))
         )}
 
+      {/* Below the curated collections, because it is the same idea arrived at
+          from the other end: entries somebody wrote down on purpose, and
+          entries the workspace worked out from being corrected. */}
+      <LearnedLessons />
+
       {edit && <EntryDrawer edit={edit} setEdit={setEdit} collections={collections} onDone={() => { setEdit(null); reload(); }} toast={toast} />}
     </>
   );
@@ -134,9 +139,7 @@ function EntryDrawer({ edit, setEdit, collections, onDone, toast }: any) {
 
   return (
     <Drawer open title={edit.mode === "new" ? "Add library entry" : "Edit entry"} onClose={() => setEdit(null)}
-      footer={<><button className="mini" onClick={() => setEdit(null)}>Cancel</button><button className="mini pri" disabled={busy || !edit.collection.trim()} onClick={submit}>{busy ? "Saving…" : edit.mode === "new" ? "Add entry" : "Save"}</button>
-      <LearnedLessons />
-    </>}>
+      footer={<><button className="mini" onClick={() => setEdit(null)}>Cancel</button><button className="mini pri" disabled={busy || !edit.collection.trim()} onClick={submit}>{busy ? "Saving…" : edit.mode === "new" ? "Add entry" : "Save"}</button></>}>
       <Field label="Collection">
         <input list="lib-collections" value={edit.collection} disabled={edit.mode === "edit"} onChange={(e) => set({ collection: e.target.value })} placeholder="e.g. rate_book, glossary, policy" />
         <datalist id="lib-collections">{[...new Set([...collections, ...SUGGESTED])].map((c: string) => <option key={c} value={c} />)}</datalist>

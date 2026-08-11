@@ -34,12 +34,15 @@ export const PATCH = route(async (req, ctx) => {
   // Changing what the agents learn is a library-level act, not an everyday one.
   requirePermission(ctx, "library.manage");
   const { id, status } = Patch.parse(await req.json());
-  const res = await query(
+  // Retired rather than deleted on purpose - see the migration. A lesson that
+  // turned out to be wrong is worth being able to look back at.
+  const res = (await query(
     "UPDATE learned_lesson SET status = ?, updated_at = NOW(3) WHERE tenant_id = ? AND id = ?",
     [status, ctx.tenantId, id]
-  );
-  // Retired rather than deleted on purpose — see the migration. A lesson that
-  // turned out to be wrong is worth being able to look back at.
-  if (!res) throw errBadRequest("No such lesson");
+  )) as unknown as { affectedRows?: number };
+  // An UPDATE returns a result header, not rows, so the object itself is always
+  // truthy - checking it would have accepted any id at all and reported success
+  // for a lesson that was never touched.
+  if (!res?.affectedRows) throw errBadRequest("No such lesson");
   return ok({ id, status });
 });
