@@ -1,4 +1,4 @@
-# Build the desktop installers and publish them to the workspace.
+﻿# Build the desktop installers and publish them to the workspace.
 #
 #   powershell -ExecutionPolicy Bypass -File preckon-desktop\publish.ps1
 #

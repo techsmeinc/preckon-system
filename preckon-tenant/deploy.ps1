@@ -1,4 +1,4 @@
-# Deploy the tenant plane to the VPS — one command, run on Windows.
+﻿# Deploy the tenant plane to the VPS  -  one command, run on Windows.
 #
 #   powershell -ExecutionPolicy Bypass -File c:\Users\IKIO\Downloads\New\Preckon-system\preckon-tenant\deploy.ps1
 #
@@ -6,7 +6,7 @@
 # run on Windows and the deploy half on the server, and pasting the whole block
 # into an SSH session silently produces a 45-byte empty tarball, scp's THAT over
 # the good one, and then every `docker compose up --build` reports success with
-# every layer CACHED — a deploy that looks perfect and ships nothing.
+# every layer CACHED  -  a deploy that looks perfect and ships nothing.
 #
 # So: this refuses to run anywhere but Windows, and it checks the size of what
 # arrived before it builds anything.
@@ -20,7 +20,7 @@ if ($IsLinux -or $IsMacOS) {
 }
 
 $Server  = "root@74.208.182.201"
-$Root    = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)  # …\Preckon-system
+$Root    = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)  # ...\Preckon-system
 $Bundle  = Join-Path $Root "preckon-tenant.tgz"
 
 Write-Host "==> Packaging from $Root" -ForegroundColor Cyan
@@ -51,11 +51,11 @@ set -eu
 cd /tmp
 actual=`$(stat -c %s /tmp/preckon-tenant.tgz)
 echo "==> Bundle on server: `$actual bytes"
-if [ "`$actual" -ne $size ]; then echo "SIZE MISMATCH — expected $size. Aborting."; exit 1; fi
+if [ "`$actual" -ne $size ]; then echo "SIZE MISMATCH  -  expected $size. Aborting."; exit 1; fi
 
 echo "==> Unpacking"
 # Windows tar records file attributes as a SCHILY.fflags header GNU tar does not
-# know, and warns about it once per file — two hundred lines of noise that hide
+# know, and warns about it once per file  -  two hundred lines of noise that hide
 # anything real. Silenced where supported, kept where it is not.
 tar xzf /tmp/preckon-tenant.tgz -C /opt --warning=no-unknown-keyword 2>/dev/null \
   || tar xzf /tmp/preckon-tenant.tgz -C /opt
@@ -66,7 +66,7 @@ sh scripts/migrate.sh
 
 # The WORKER is in this list, and leaving it out is how a deploy lands cleanly
 # and changes nothing. Every prompt, every agent and every tool lives in
-# worker/src and is baked into that image — so a change to how the Copilot
+# worker/src and is baked into that image  -  so a change to how the Copilot
 # thinks or how the bill is priced ships only when the worker is rebuilt. The
 # app can look perfectly deployed while still running last week's agents.
 echo "==> Building (app + worker + cad sidecar)"
@@ -76,7 +76,7 @@ echo "==> Running images"
 docker compose images app worker cad
 
 # The volume the desktop installers are served from. Created here so the very
-# first deploy after this change has somewhere to put them — an app that cannot
+# first deploy after this change has somewhere to put them  -  an app that cannot
 # stat its download directory just reports no builds, but the directory has to
 # exist before publish.ps1 can copy into it.
 docker compose exec -T app sh -c 'mkdir -p /app/.downloads' 2>/dev/null || true
