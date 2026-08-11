@@ -19,6 +19,7 @@ import { Icon } from "@/lib/icons";
 import { useI18n } from "@/lib/i18n";
 import { CadEditor } from "@/lib/cad/editor";
 import { desktop } from "@/lib/desktop";
+import { GetDesktop } from "@/lib/desktopLink";
 
 interface ProjectLite { id: string; name: string }
 interface FileLite { id: string; filename: string; cad_layers: number | null }
@@ -152,12 +153,7 @@ Point Preckon at the converter now?`)) {
         {/* Offered at the one moment it is wanted: standing in front of the
             .dwg the browser cannot open. Everywhere else it would be an advert.
             Hidden in the desktop app, where it is already true. */}
-        {!isDesktop && (
-          <p className="csub" style={{ margin: "10px 0 0", display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-            <span>{t("studio.getDesktop")}</span>
-            <Link href="/desktop">{t("studio.getDesktopCta")}</Link>
-          </p>
-        )}
+        <GetDesktop variant="note" />
       </div>
 
       {local ? (

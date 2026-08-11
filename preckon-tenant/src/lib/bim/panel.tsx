@@ -9,6 +9,7 @@ import { useI18n, type Key } from "@/lib/i18n";
 import { BimStudio } from "./studio";
 import { emptyDocument, type BimDocument } from "./model";
 import { SPECIALIST_LIST } from "./agents";
+import { GetDesktop } from "@/lib/desktopLink";
 
 interface Loaded { doc: BimDocument; version: number }
 
@@ -100,8 +101,11 @@ export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: 
     <div className={"card bim-studio" + (full ? " is-full" : "")} style={full ? undefined : { marginBottom: 16 }}>
       <div className="chead">
         <div><h2>{t("bim.studio")}</h2><div className="csub">{t("bim.studioSub")}</div></div>
+        <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+          {/* The workstation runs this exact panel, so it hides itself there. */}
+          <GetDesktop />
         {canEdit && (
-          <div style={{ display: "flex", gap: 6 }}>
+          <>
             {/* Measuring is one click that writes a hundred records. The click
                 that undoes it belongs next to it, not in a support email. */}
             <button className="mini sm" onClick={clearTakeoff} disabled={measuring}>
@@ -110,8 +114,9 @@ export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: 
             <button className="mini sm" onClick={measure} disabled={measuring}>
               {measuring ? t("bim.measuring") : t("bim.takeoff")}
             </button>
-          </div>
+          </>
         )}
+        </div>
       </div>
       {canEdit && (
         <div className="bim-ask">

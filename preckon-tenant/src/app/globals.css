@@ -1389,3 +1389,18 @@ p a,li a,td a,.csub a{min-block-size:0;}
    button-specific part. */
 .nav .navbtn{width:100%; background:none; border:0; text-align:start; font-family:var(--font-body);}
 .nav .navbtn span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+
+/* ── "Get the desktop app" ──────────────────────────────────────────────────
+   Offered in BIM Studio and the Drawing editor only — the two tools the
+   workstation actually contains. Styled as a quiet sibling of the buttons
+   beside it: findable by anyone looking for it, ignorable by everyone else. */
+.dsk-btn{display:inline-flex; align-items:center; gap:6px; text-decoration:none;}
+.dsk-btn svg{flex:none; opacity:.85;}
+.dsk-note{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:10px 0 0;}
+.dsk-note .btn{display:inline-flex; align-items:center; gap:6px;}
+/* On a phone the sentence and the button stack, and a button that has become
+   full-width reads as the primary action on the screen, which it is not. */
+@media (max-width:560px){
+  .dsk-note{gap:6px;}
+  .dsk-note .btn{align-self:flex-start;}
+}

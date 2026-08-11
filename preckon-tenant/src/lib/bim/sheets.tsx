@@ -21,6 +21,7 @@ import { api } from "@/lib/apiclient";
 import { useI18n } from "@/lib/i18n";
 import Link from "next/link";
 import { cachedText } from "@/lib/desktop";
+import { GetDesktop } from "@/lib/desktopLink";
 
 interface CadLayerView {
   layer: string;
@@ -680,6 +681,10 @@ function SheetCanvas({ pid, fid, view }: { pid: string; fid: string; view: CadVi
           {/* DXF, not the original: a .dwg opens in AutoCAD and nothing else,
               and these are the exact bytes the quantities were measured from. */}
           <a className="btn btn-ghost" href={dxfHref} download={dxfName}>{t("cad.downloadDxf")}</a>
+          {/* Beside Download DXF on purpose: somebody reaching for the DXF is
+              usually about to open it in a CAD application, and this is the one
+              that already knows about the project it came from. */}
+          <GetDesktop />
           {/* The editor is a workspace tool, not a panel inside this card —
               drawing needs the width, and an estimator opens it for drawings
               that are not on this stage at all. This just arrives there with
