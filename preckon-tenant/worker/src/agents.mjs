@@ -115,6 +115,11 @@ async function withClaude(env, base, template) {
   const text = await callAnthropic(model, system, user, maxTokens);
   const parsed = extractJson(text);
   let outputs = Array.isArray(parsed) ? parsed : parsed?.outputs;
+  /* One currency for the whole bill, stated once at the top of the response
+     rather than repeated on every line. Three letters x 200 lines is output
+     nobody reads and the estimator cannot mix currencies in one bill anyway. */
+  const batchCurrency =
+    !Array.isArray(parsed) && typeof parsed?.currency === "string" ? parsed.currency.trim().toUpperCase() : null;
 
   // An empty or unparseable response must not silently become a fabricated
   // stub result — the chain would look like it worked and the numbers would be
@@ -123,7 +128,7 @@ async function withClaude(env, base, template) {
     throw new Error(`no usable outputs from ${env.job_type} (${text.length} chars returned)`);
   }
 
-  outputs = postProcess(env, outputs);
+  outputs = postProcess(env, outputs, batchCurrency);
   for (const o of outputs) {
     if (!o.provenance || !o.provenance.length) o.provenance = ids(env);
     if (o.confidence == null) o.confidence = CONF;
@@ -395,7 +400,7 @@ function auditCitations(outputs, extractions) {
   return outputs;
 }
 
-function postProcess(env, outputs) {
+function postProcess(env, outputs, batchCurrency = null) {
   const boqQty = new Map();
   for (const a of env.inputs?.artifacts ?? []) {
     if (String(a.type).endsWith("boq_line") && a.payload?.code != null) {
@@ -427,17 +432,27 @@ function postProcess(env, outputs) {
     if (kind === "drawing_measurement") p.unit = normalizeMeasurementUnit(p.unit);
 
     if (kind === "cost_line") {
-      // The identity has to hold. A model that mis-multiplies produces a bill
-      // that looks right and prices wrong, which is worse than an obvious gap.
+      /* The amount is COMPUTED here, not asked for.
+         It always was — this code overwrote whatever the model returned
+         whenever the quantity was known, so a bill of 200 lines was paying for
+         200 multiplications that were then discarded, and taking a confidence
+         penalty on the ones it got wrong. The prompt now asks for the rate and
+         nothing else, and the identity holds by construction rather than by
+         asking the model to check its own arithmetic.
+         Currency likewise: one per bill, stated once, instead of the same three
+         letters repeated on every line. */
       const qty = boqQty.get(String(p.boq_code));
       const rate = Number(p.rate_minor);
       if (Number.isFinite(rate) && Number.isFinite(qty) && qty > 0) {
-        const expected = Math.round(rate * qty);
-        if (Number(p.amount_minor) !== expected) {
-          p.amount_minor = expected;
-          o.confidence = 0.7;   // arithmetic was corrected — worth a human's eye
-        }
+        p.amount_minor = Math.round(rate * qty);
+      } else {
+        // No quantity to multiply by means this line was priced against a BOQ
+        // code that does not exist. Zero and a low confidence, so it shows up
+        // as needing a look rather than disappearing into a total.
+        p.amount_minor = 0;
+        o.confidence = 0.4;
       }
+      if (!p.currency && batchCurrency) p.currency = batchCurrency;
     }
 
     if (kind === "schedule_activity") {
@@ -474,6 +489,31 @@ function postProcess(env, outputs) {
   return outputs;
 }
 
+
+/**
+ * Mark a system prompt as cacheable.
+ *
+ * The stage briefs here are long and identical across calls — HOUSE_RULES, the
+ * estimating knowledge, the exemplar bills, the rate book. The BOQ roster alone
+ * re-sends all of it once per specialist per turn, and every one of those was
+ * being charged and re-read from scratch.
+ *
+ * A cache breakpoint on the system block means the first call pays for it and
+ * the rest of the run reads it back. Nothing about the answer changes; the same
+ * bytes are sent, and the model sees exactly the same prompt.
+ *
+ * Below the threshold it is not worth a breakpoint — short prompts do not reach
+ * the minimum cacheable length, and the marker would just be noise in the
+ * request. Returned as a plain string in that case, which is what the API
+ * expects anyway.
+ */
+const CACHEABLE_CHARS = 4000;
+function cacheableSystem(system) {
+  const text = typeof system === "string" ? system : String(system ?? "");
+  if (text.length < CACHEABLE_CHARS) return text;
+  return [{ type: "text", text, cache_control: { type: "ephemeral" } }];
+}
+
 async function callAnthropic(model, system, userText, maxTokens) {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -482,7 +522,12 @@ async function callAnthropic(model, system, userText, maxTokens) {
       "anthropic-version": "2023-06-01",
       "content-type": "application/json",
     },
-    body: JSON.stringify({ model, max_tokens: maxTokens, system, messages: [{ role: "user", content: userText }] }),
+    body: JSON.stringify({
+      model,
+      max_tokens: maxTokens,
+      system: cacheableSystem(system),
+      messages: [{ role: "user", content: userText }],
+    }),
   });
   if (!res.ok) throw new Error(`anthropic ${res.status}: ${(await res.text()).slice(0, 200)}`);
   const data = await res.json();

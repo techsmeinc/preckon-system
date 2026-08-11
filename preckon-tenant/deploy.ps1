@@ -64,11 +64,16 @@ cd /opt/preckon-tenant
 echo "==> Migrations"
 sh scripts/migrate.sh
 
-echo "==> Building (app + cad sidecar)"
-docker compose up -d --build app cad
+# The WORKER is in this list, and leaving it out is how a deploy lands cleanly
+# and changes nothing. Every prompt, every agent and every tool lives in
+# worker/src and is baked into that image — so a change to how the Copilot
+# thinks or how the bill is priced ships only when the worker is rebuilt. The
+# app can look perfectly deployed while still running last week's agents.
+echo "==> Building (app + worker + cad sidecar)"
+docker compose up -d --build app worker cad
 
-echo "==> Running image"
-docker compose images app
+echo "==> Running images"
+docker compose images app worker cad
 
 # The volume the desktop installers are served from. Created here so the very
 # first deploy after this change has somewhere to put them — an app that cannot

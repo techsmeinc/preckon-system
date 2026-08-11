@@ -23,6 +23,7 @@
   "build": {
     "appId": "com.preckon.desktop",
     "productName": "Preckon",
+    "artifactName": "${productName}-Setup-${version}-${arch}.${ext}",
     "files": [
       "src/**/*",
       "renderer/index.html",

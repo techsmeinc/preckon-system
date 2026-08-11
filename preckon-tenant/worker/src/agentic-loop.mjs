@@ -35,6 +35,31 @@ async function post(body) {
   return res.json();
 }
 
+
+/**
+ * Mark a system prompt as cacheable.
+ *
+ * The stage briefs here are long and identical across calls — HOUSE_RULES, the
+ * estimating knowledge, the exemplar bills, the rate book. The BOQ roster alone
+ * re-sends all of it once per specialist per turn, and every one of those was
+ * being charged and re-read from scratch.
+ *
+ * A cache breakpoint on the system block means the first call pays for it and
+ * the rest of the run reads it back. Nothing about the answer changes; the same
+ * bytes are sent, and the model sees exactly the same prompt.
+ *
+ * Below the threshold it is not worth a breakpoint — short prompts do not reach
+ * the minimum cacheable length, and the marker would just be noise in the
+ * request. Returned as a plain string in that case, which is what the API
+ * expects anyway.
+ */
+const CACHEABLE_CHARS = 4000;
+function cacheableSystem(system) {
+  const text = typeof system === "string" ? system : String(system ?? "");
+  if (text.length < CACHEABLE_CHARS) return text;
+  return [{ type: "text", text, cache_control: { type: "ephemeral" } }];
+}
+
 const textOf = (content) =>
   (content ?? [])
     .filter((b) => b.type === "text")
@@ -62,7 +87,9 @@ export async function runAgenticLoop({
     const response = await post({
       model,
       max_tokens: maxTokens,
-      system,
+      // Cached: the loop re-sends this brief on every iteration, and a six-turn
+      // tool conversation was paying for the same thousands of tokens six times.
+      system: cacheableSystem(system),
       messages,
       tools: toolbox.toolDefinitions,
     });

@@ -262,10 +262,11 @@ ${QUANTITY_RULES}`,
     maxTokens: 6000,
     system: `You are an estimator pricing a bill of quantities.
 ${HOUSE_RULES}
-Return {"outputs":[{"type":"cost_line","payload":{
-  "boq_code":"the BOQ line's code, exactly","rate_minor":integer,"amount_minor":integer,
-  "currency":"ISO 4217","rate_source":"Library|Historical|Manual","rate_book_ref":"the library entry key, if you used one"}}]}
-Price EVERY boq_line in the records. amount_minor must equal round(rate_minor x quantity) — arithmetic errors are the fastest way to lose a bid, so check each one.
+Return {"currency":"ISO 4217 for the whole bill","outputs":[{"type":"cost_line","payload":{
+  "boq_code":"the BOQ line's code, exactly","rate_minor":integer,
+  "rate_source":"Library|Historical|Manual","rate_book_ref":"the library entry key, if you used one"}}]}
+Price EVERY boq_line in the records.
+Do NOT return an amount. The system multiplies your rate by the quantity it already holds, so the arithmetic is exact and you do not spend a single token on it — give the RATE and get it right. State the currency once, at the top; a bill is priced in one currency.
 Use a RATE_BOOK entry when one matches the work (rate_source "Library", rate_book_ref its key). Where none matches, build a rate from first principles for this market and mark it "Manual" — then say what it is composed of in rate_book_ref, e.g. "material+labour+plant, built up".
 Keep one currency across the bill; take it from the rate book or the tender.`,
     user: `${projectBlock(env)}
