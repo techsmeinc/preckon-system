@@ -12,11 +12,14 @@ import {
 } from "./common";
 import { unitLabel } from "./drawings";
 import { useI18n } from "@/lib/i18n";
+import { useCan, useToast } from "@/lib/ui";
+import { api } from "@/lib/apiclient";
 
 export default function BoqSurface({ pid, stage, artifacts, rows, workflows, runs, reload }: SurfaceProps) {
   const { t } = useI18n();
   const [review, setReview] = useState<any | null>(null);
   const { confirmMany, busy } = useArtifactActions(pid, reload);
+  const canEdit = useCan("artifact.edit");
   const { pending, highConf } = pendingOf(rows);
   // Lines whose stated CAD source could not be found in the parsed drawings.
   // Surfaced as its own count because it is a different question from "has a
@@ -122,7 +125,13 @@ export default function BoqSurface({ pid, stage, artifacts, rows, workflows, run
                       <td className="t-name" style={{ fontWeight: 500 }}>{l.payload?.description ?? "—"}</td>
                       <td className="num">{unitLabel(l.payload?.unit)}</td>
                       <td className="num r">{qty(l.payload?.quantity)}</td>
-                      <td className="num r">{c ? money(c.payload?.rate_minor, "") : "—"}</td>
+                      <RateCell
+                        pid={pid}
+                        code={String(l.payload?.code ?? "")}
+                        cost={c}
+                        canEdit={canEdit}
+                        onSaved={reload}
+                      />
                       <td className="num r">{c ? money(c.payload?.amount_minor, c.payload?.currency) : "—"}</td>
                       <td style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
                         {l.payload?.measured_from && (
@@ -164,5 +173,82 @@ export default function BoqSurface({ pid, stage, artifacts, rows, workflows, run
         onSaved={reload}
       />
     </>
+  );
+}
+
+/**
+ * The rate, typed straight into the bill.
+ *
+ * Rates used to arrive only from the estimate stage, so a line the agents had
+ * not priced showed a dash and there was nothing anyone could do about it — not
+ * even an estimator who knew the number. Here it is a cell you click.
+ *
+ * The AMOUNT is deliberately not editable and not computed here. The server
+ * multiplies the rate by the quantity it holds, which is the same rule the
+ * pricing agent is now held to: one place does the arithmetic, so the bill adds
+ * up whoever entered it.
+ */
+function RateCell({
+  pid, code, cost, canEdit, onSaved,
+}: { pid: string; code: string; cost: any | null; canEdit: boolean; onSaved: () => void }) {
+  const { t } = useI18n();
+  const toast = useToast();
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const current = cost?.payload?.rate_minor;
+
+  function open() {
+    // Shown in major units — nobody thinks in cents — and converted on the way
+    // back, because the store holds minor units to avoid float drift.
+    setValue(current != null ? String(Number(current) / 100) : "");
+    setEditing(true);
+  }
+
+  async function save() {
+    const major = Number(value);
+    if (!Number.isFinite(major) || major < 0) { toast(t("boq.rateInvalid"), "bad"); return; }
+    setSaving(true);
+    try {
+      await api.put(`/projects/${pid}/boq/rate`, { code, rate_minor: Math.round(major * 100) });
+      setEditing(false);
+      onSaved();
+    } catch (e: any) {
+      toast(e?.message ?? t("common.loadFail"), "bad");
+    } finally { setSaving(false); }
+  }
+
+  if (!canEdit) return <td className="num r">{cost ? money(current, "") : "—"}</td>;
+
+  if (editing) {
+    return (
+      <td className="num r">
+        <input
+          className="rate-in mono"
+          value={value}
+          autoFocus
+          inputMode="decimal"
+          disabled={saving}
+          onChange={(e) => setValue(e.target.value)}
+          // Enter saves, Escape abandons. A grid of numbers is filled in from
+          // the keyboard or it is not filled in at all.
+          onKeyDown={(e) => {
+            if (e.key === "Enter") void save();
+            if (e.key === "Escape") setEditing(false);
+          }}
+          onBlur={() => { if (!saving) void save(); }}
+          aria-label={t("boq.setRateFor", { code })}
+        />
+      </td>
+    );
+  }
+
+  return (
+    <td className="num r">
+      <button className="rate-btn mono" onClick={open} title={t("boq.setRateFor", { code })}>
+        {cost ? money(current, "") : <span className="rate-add">{t("boq.addRate")}</span>}
+      </button>
+    </td>
   );
 }
