@@ -8,7 +8,7 @@
 #
 # electron-builder only builds for the platform it runs on (macOS needs a Mac,
 # and a signed Windows build needs Windows). So this publishes whatever it just
-# built and leaves the others alone — the page lists what exists, so a platform
+# built and leaves the others alone - the page lists what exists, so a platform
 # nobody has built for simply does not appear.
 
 $ErrorActionPreference = "Stop"
@@ -38,7 +38,7 @@ try {
 
   # Three levels, because the first one needs a Windows privilege most machines
   # do not grant. The NSIS installer pulls in the winCodeSign toolchain, whose
-  # archive contains macOS symlinks — and creating a symlink on Windows requires
+  # archive contains macOS symlinks - and creating a symlink on Windows requires
   # Administrator or Developer Mode, so 7-Zip fails to unpack it and the build
   # dies AFTER the app itself has been built perfectly well.
   #
@@ -48,7 +48,7 @@ try {
   Write-Host "==> Building the installer" -ForegroundColor Cyan
   npm run dist:win
   if ($LASTEXITCODE -ne 0) {
-    Write-Host "    The installer step failed — most likely the symlink privilege." -ForegroundColor Yellow
+    Write-Host "    The installer step failed - most likely the symlink privilege." -ForegroundColor Yellow
     Write-Host "    Falling back to a portable zip, which does not need it." -ForegroundColor Yellow
     Write-Host "    For a real installer, re-run this from an Administrator PowerShell." -ForegroundColor Yellow
     npm run dist:win:zip
