@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useApi, useCan, useToast, Skeleton, EmptyState, Drawer, Field } from "@/lib/ui";
+import { LearnedLessons } from "@/lib/learned";
 import { api } from "@/lib/apiclient";
 import { Icon } from "@/lib/icons";
 import { useI18n } from "@/lib/i18n";
@@ -133,7 +134,9 @@ function EntryDrawer({ edit, setEdit, collections, onDone, toast }: any) {
 
   return (
     <Drawer open title={edit.mode === "new" ? "Add library entry" : "Edit entry"} onClose={() => setEdit(null)}
-      footer={<><button className="mini" onClick={() => setEdit(null)}>Cancel</button><button className="mini pri" disabled={busy || !edit.collection.trim()} onClick={submit}>{busy ? "Saving…" : edit.mode === "new" ? "Add entry" : "Save"}</button></>}>
+      footer={<><button className="mini" onClick={() => setEdit(null)}>Cancel</button><button className="mini pri" disabled={busy || !edit.collection.trim()} onClick={submit}>{busy ? "Saving…" : edit.mode === "new" ? "Add entry" : "Save"}</button>
+      <LearnedLessons />
+    </>}>
       <Field label="Collection">
         <input list="lib-collections" value={edit.collection} disabled={edit.mode === "edit"} onChange={(e) => set({ collection: e.target.value })} placeholder="e.g. rate_book, glossary, policy" />
         <datalist id="lib-collections">{[...new Set([...collections, ...SUGGESTED])].map((c: string) => <option key={c} value={c} />)}</datalist>

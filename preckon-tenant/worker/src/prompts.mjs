@@ -67,8 +67,7 @@ function lessonsBlock(env) {
   return `
 
 WHAT THIS WORKSPACE HAS CORRECTED BEFORE:
-${lines.join("
-")}
+${lines.join("\n")}
 These are this contractor's own past decisions on the same subjects, not rules from outside. Follow one where it plainly applies and say so in the field that records your basis. Ignore one that does not fit THIS project and price it properly instead - a correction made once may have been a one-off, and repeating it blindly is worse than not having it.`;
 }
 
