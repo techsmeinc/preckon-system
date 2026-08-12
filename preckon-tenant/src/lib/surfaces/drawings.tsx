@@ -18,6 +18,7 @@ import { useI18n } from "@/lib/i18n";
 import { BimStudioPanel } from "@/lib/bim/panel";
 import { ParsedSheets } from "@/lib/bim/sheets";
 import { Boundary } from "@/lib/boundary";
+import { PcmPanel } from "@/lib/pcm/panel";
 import {
   ReviewDrawer, StageEmpty, StageHeader, pendingOf, useArtifactActions, type SurfaceProps,
 } from "./common";
@@ -65,6 +66,7 @@ export default function DrawingsSurface({ pid, stage, artifacts, rows, workflows
         <StageHeader stage={stage} workflows={workflows} runs={runs} pid={pid} reload={reload} />
         <Boundary name="Issued drawings"><ParsedSheets pid={pid} /></Boundary>
         <Boundary name="BIM Studio"><BimStudioPanel pid={pid} onMeasured={reload} /></Boundary>
+        <Boundary name="Construction model"><PcmPanel pid={pid} /></Boundary>
         <StageEmpty title={t("draw.emptyTitle")} sub={t("draw.emptySub")} />
       </>
     );
@@ -80,6 +82,8 @@ export default function DrawingsSurface({ pid, stage, artifacts, rows, workflows
       <Boundary name="Issued drawings"><ParsedSheets pid={pid} /></Boundary>
 
       <Boundary name="BIM Studio"><BimStudioPanel pid={pid} onMeasured={reload} /></Boundary>
+
+      <Boundary name="Construction model"><PcmPanel pid={pid} /></Boundary>
 
       <div className="card">
         <div className="chead">
