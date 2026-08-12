@@ -7,8 +7,7 @@ import { use } from "react";
 import { ProjectCover } from "@/lib/project-cover";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useApi, useCan, useToast, Skeleton } from "@/lib/ui";
-import { api } from "@/lib/apiclient";
+import { useApi, Skeleton } from "@/lib/ui";
 import { useProject } from "@/lib/project";
 import { typeLabel, humanize } from "@/lib/catalog";
 import { Icon } from "@/lib/icons";
@@ -18,25 +17,19 @@ import { useI18n, type Key } from "@/lib/i18n";
 export default function ProjectOverviewPage({ params }: { params: Promise<{ pid: string }> }) {
   const { pid } = use(params);
   const router = useRouter();
-  const toast = useToast();
   const { t } = useI18n();
-  const canRun = useCan("workflow.run");
   const { project, lifecycle, artifacts, runs, stages, loading, reload } = useProject();
   const files = useApi<any[]>(`/projects/${pid}/files`);
-  const pursuit = useApi<any>(`/projects/${pid}/pursuit`, [], { refreshMs: 4000 });
 
-  async function startAuto() {
-    try { await api.post(`/projects/${pid}/pursuit/start`, {}); toast(t("project.autoStarted")); pursuit.reload(); }
-    catch (e: any) { toast(e?.message ?? t("project.autoStartFail")); }
-  }
-  async function stopAuto() {
-    try { await api.post(`/projects/${pid}/pursuit/stop`, {}); toast(t("project.autoStopped")); pursuit.reload(); }
-    catch (e: any) { toast(e?.message ?? t("project.autoStopFail")); }
-  }
+  /* Autopilot — "Run automatically" — was removed from this screen.
+     It ran every stage end to end with proposals auto-accepted, which is the
+     one thing this product is built not to do: a bill nobody confirmed is a
+     bill nobody can defend. The endpoints still exist and the runtime still
+     supports it, so nothing is lost if it is wanted back behind a setting;
+     what is gone is a one-click way to bypass the review the whole audit trail
+     depends on. Note the polling that went with it: this page no longer wakes
+     up every four seconds to ask whether a run it cannot start has finished. */
 
-  const pv = pursuit.data;
-  const auto = !!pv?.autopilot;
-  const plan: any[] = pv?.plan ?? [];
   const attention = stages.filter((s) => s.status === "review");
   const states = lifecycle?.states ?? [];
   const curIdx = states.indexOf(lifecycle?.state ?? project.lifecycle_state);
@@ -126,35 +119,6 @@ export default function ProjectOverviewPage({ params }: { params: Promise<{ pid:
       </div>
 
       <ProjectCover pid={pid} />
-
-      <div className="card" style={{ marginBottom: 16, borderColor: auto ? "var(--brand)" : undefined }}>
-        <div className="chead">
-          <div>
-            <h2>{t("project.autopilot")} {auto && <span className="chip running" style={{ marginInlineStart: 8 }}>{t("project.autopilotRunning")}</span>}</h2>
-            <div className="csub">{t("project.autopilotSub")}</div>
-          </div>
-          <span className="mono" style={{ fontSize: 11, color: "var(--slate-400)" }}>{pv ? t("project.autopilotProgress", { done: pv.completed, total: pv.total }) : ""}</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-          {auto
-            ? <button className="mini sm" disabled={!canRun} onClick={stopAuto}>■ {t("project.autopilotStop")}</button>
-            : <button className="mini sm pri" disabled={!canRun} onClick={startAuto}>▶ {t("project.autopilotStart")}</button>}
-          {plan.length > 0 && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {plan.map((p) => (
-                <span
-                  key={p.key}
-                  className={"chip " + (p.status === "completed" ? "confirmed" : p.status === "running" || p.status === "awaiting_review" ? "running" : "plain")}
-                  title={`${p.module} · ${p.status}`}
-                  style={{ fontSize: 11 }}
-                >
-                  {p.status === "completed" ? "✓ " : p.status === "running" || p.status === "awaiting_review" ? "▸ " : ""}{p.name}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
 
       {project.lifecycle_key && (
         <div className="card">
