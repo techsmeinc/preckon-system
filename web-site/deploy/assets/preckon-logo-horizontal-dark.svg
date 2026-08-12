@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 268 56" width="268" height="56" fill="none" role="img" aria-label="Preckon">
+  <!-- FOR DARK BACKGROUNDS. Identical geometry to preckon-logo-horizontal.svg;
+       only the ink is inverted. The teal is NOT lightened: it is the brand
+       colour and it already reads on both grounds, so shifting it would make
+       the two versions look like two different companies. -->
+  <path d="M16 50V8h14a13 13 0 0 1 0 26H16" stroke="#FBFCFE" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="25" cy="21" r="3.6" fill="#15C2A8"/>
+  <text x="64" y="41" font-family="'General Sans','Inter',system-ui,sans-serif" font-size="42" font-weight="600" letter-spacing="-1.4" fill="#FBFCFE">Preck<tspan fill="#15C2A8">o</tspan>n</text>
+</svg>

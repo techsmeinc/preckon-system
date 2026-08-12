@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 268 56" width="268" height="56" fill="none" role="img" aria-label="Preckon">
+  <!-- ONE FILE, EITHER GROUND.
+       The ink is a CSS variable resolved inside the SVG, so this renders dark
+       on a light page and light on a dark one with no second asset and no
+       swapping logic in the host.
+       WHERE IT WORKS: anywhere a browser renders it - <img>, background-image,
+       a bare tab. The media query is evaluated by the browser against the
+       READER's system setting.
+       WHERE IT DOES NOT: Figma, Word, PowerPoint, print, and any site whose
+       theme is a manual toggle rather than the system setting - those follow
+       the light default. Use the -dark file there. -->
+  <style>
+    :root { --pk-ink: #0B1B2B; }
+    @media (prefers-color-scheme: dark) { :root { --pk-ink: #FBFCFE; } }
+  </style>
+  <path d="M16 50V8h14a13 13 0 0 1 0 26H16" stroke="var(--pk-ink)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="25" cy="21" r="3.6" fill="#15C2A8"/>
+  <text x="64" y="41" font-family="'General Sans','Inter',system-ui,sans-serif" font-size="42" font-weight="600" letter-spacing="-1.4" fill="var(--pk-ink)">Preck<tspan fill="#15C2A8">o</tspan>n</text>
+</svg>

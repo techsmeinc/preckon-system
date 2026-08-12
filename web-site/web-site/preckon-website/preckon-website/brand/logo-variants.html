@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Preckon logo — which file to use</title>
+<style>
+  :root { --ink:#0B1B2B; --paper:#FBFCFE; --line:#E3E8EF; --teal:#15C2A8; --muted:#5B6B7C; }
+  *{box-sizing:border-box}
+  body{margin:0;padding:40px 28px 72px;background:var(--paper);color:var(--ink);
+       font:15px/1.6 'Inter',system-ui,sans-serif;}
+  .wrap{max-width:1040px;margin:0 auto}
+  h1{font-size:26px;letter-spacing:-.02em;margin:0 0 6px}
+  .sub{color:var(--muted);margin:0 0 32px;max-width:62ch}
+  h2{font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+     margin:36px 0 12px;font-weight:600}
+
+  /* The point of this page: the SAME file on both grounds, side by side. A logo
+     that has only ever been checked on the ground it was designed for is a logo
+     nobody has checked. */
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:10px}
+  .ground{border:1px solid var(--line);border-radius:12px;padding:26px;
+          display:grid;place-items:center;min-height:132px}
+  .light{background:#FBFCFE}
+  .dark{background:#0B1B2B;border-color:#1E2E3E}
+  .ground img{max-width:100%;height:auto}
+  .cap{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+       margin:0 0 14px}
+  .dark + .cap{color:var(--muted)}
+  code{font:12.5px/1.5 'JetBrains Mono',ui-monospace,monospace;background:#EEF2F6;
+       padding:2px 6px;border-radius:5px}
+  .note{color:var(--muted);font-size:13.5px;margin:8px 0 0}
+  .bad{color:#B4232A}
+  table{border-collapse:collapse;width:100%;margin-top:10px;font-size:13.5px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Preckon logo — which file to use</h1>
+  <p class="sub">
+    The original files are drawn in near-black ink (<code>#0B1B2B</code>), which
+    disappears on a dark ground. These are the variants. Every pair below is the
+    same file shown on both backgrounds — the left half is the test the original
+    passes and the right half is the one it fails.
+  </p>
+
+  <h2>The original — light grounds only</h2>
+  <div class="pair">
+    <div class="ground light"><img src="preckon-logo-horizontal.svg" alt="Preckon logo on a light background" width="268" /></div>
+    <div class="ground dark"><img src="preckon-logo-horizontal.svg" alt="The same logo on a dark background, where it is barely visible" width="268" /></div>
+  </div>
+  <p class="cap">preckon-logo-horizontal.svg <span class="bad">&mdash; unusable on the right</span></p>
+
+  <h2>Dark — for dark grounds</h2>
+  <div class="pair">
+    <div class="ground light"><img src="preckon-logo-horizontal-dark.svg" alt="The dark-ground logo shown on light, where it is too pale" width="268" /></div>
+    <div class="ground dark"><img src="preckon-logo-horizontal-dark.svg" alt="The dark-ground logo on a dark background" width="268" /></div>
+  </div>
+  <p class="cap">preckon-logo-horizontal-dark.svg &mdash; the mirror image: right, not left</p>
+
+  <h2>Auto — one file, either ground</h2>
+  <div class="pair">
+    <div class="ground light"><img src="preckon-logo-horizontal-auto.svg" alt="The adaptive logo on a light background" width="268" /></div>
+    <div class="ground dark"><img src="preckon-logo-horizontal-auto.svg" alt="The adaptive logo on a dark background" width="268" /></div>
+  </div>
+  <p class="cap">preckon-logo-horizontal-auto.svg</p>
+  <p class="note">
+    This one follows <strong>your operating system's</strong> light/dark setting, not the
+    background it happens to be sitting on &mdash; so on this page both halves look
+    the same, and they change together when you switch your OS theme. That is the
+    honest limit of it: it is right for a site that follows the system setting,
+    and wrong for a panel whose colour is fixed regardless. Use the explicit
+    files when you know the ground.
+  </p>
+
+  <h2>Stacked</h2>
+  <div class="pair">
+    <div class="ground light"><img src="preckon-logo-stacked.svg" alt="Stacked logo on light" width="150" /></div>
+    <div class="ground dark"><img src="preckon-logo-stacked-dark.svg" alt="Stacked dark-ground logo on dark" width="150" /></div>
+  </div>
+  <p class="cap">preckon-logo-stacked.svg &nbsp;·&nbsp; preckon-logo-stacked-dark.svg</p>
+
+  <h2>Choosing</h2>
+  <table>
+    <thead><tr><th>Where</th><th>File</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>The website header</td><td>none &mdash; it is inline SVG</td>
+          <td>Already correct: it is drawn with <code>var(--ink)</code>, so the theme toggle moves it.</td></tr>
+      <tr><td>A light document, deck or letterhead</td><td><code>preckon-logo-horizontal.svg</code></td>
+          <td>The original.</td></tr>
+      <tr><td>A dark deck, a dark email, a video end card</td><td><code>preckon-logo-horizontal-dark.svg</code></td>
+          <td>Light ink. The teal is unchanged on purpose &mdash; a brand colour that shifts between versions reads as two companies.</td></tr>
+      <tr><td>A web page that follows the system theme</td><td><code>preckon-logo-horizontal-auto.svg</code></td>
+          <td>One file, no swapping logic.</td></tr>
+      <tr><td>Figma, Word, PowerPoint, print</td><td>the explicit light or dark file</td>
+          <td>None of them evaluate a media query; the auto file falls back to light and would vanish on a dark slide.</td></tr>
+      <tr><td>Favicon and app icons</td><td>unchanged</td>
+          <td>They carry their own dark tile, so they already work on any ground.</td></tr>
+    </tbody>
+  </table>
+
+</div>
+</body>
+</html>
