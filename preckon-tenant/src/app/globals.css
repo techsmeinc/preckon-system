@@ -1328,6 +1328,37 @@ p a,li a,td a,.csub a{min-block-size:0;}
 .ced-cop-ask textarea:focus{outline:none; border-color:var(--brand);}
 .ced-cop-acts{display:flex; gap:6px; justify-content:flex-end; margin-top:7px;}
 
+/* ── Editor assistant: mode, trace, assumptions, confirmation ─────────────────
+   The same three ideas as BIM Studio, in the editor's tighter panel: show which
+   tools ran, say what was assumed, and put a number in front of a large change
+   before it happens. */
+.ced-cop-mode{display:flex; gap:0; margin-bottom:6px; border:1px solid var(--hairline);
+  border-radius:8px; overflow:hidden; width:fit-content;}
+.ced-cop-mode button{font-size:11px; padding:4px 12px; border:0; background:var(--panel);
+  color:var(--slate-500); cursor:pointer; font-family:inherit;}
+.ced-cop-mode button.on{background:var(--brand); color:#fff;}
+.ced-cop-mode button:disabled{opacity:.5; cursor:not-allowed;}
+
+.ced-cop-trace{list-style:none; margin:0 0 5px; padding:0; display:flex; flex-direction:column; gap:2px;}
+.ced-cop-trace li{display:flex; align-items:baseline; gap:6px; flex-wrap:wrap;
+  font-size:10.5px; padding:3px 7px; border-radius:6px; background:var(--panel-2);
+  border-left:2px solid var(--ok, var(--brand));}
+.ced-cop-trace li.is-bad{border-left-color:var(--bad);}
+.ced-cop-trace b{font-size:10.5px; color:var(--ink);}
+.ced-cop-trace .mod{text-transform:uppercase; letter-spacing:.02em; color:var(--slate-500); font-size:9.5px;}
+.ced-cop-trace .sum{flex:1; min-width:120px; color:var(--slate-500);}
+
+.ced-cop-assumed{margin:4px 0 0; padding-left:15px; list-style:disc;}
+.ced-cop-assumed li{font-size:10.5px; color:var(--slate-500); line-height:1.45;}
+
+/* A question is not a failure, so it is not styled like one. */
+.ced-cop-turn .a.is-question{border-left:2px solid var(--brand); padding-left:8px;}
+
+.ced-cop-confirm{margin:6px 0; padding:8px 10px; border-radius:8px;
+  border:1px solid var(--amber, var(--brand)); background:var(--amber-tint, var(--panel-2));}
+.ced-cop-confirm b{display:block; font-size:12px; color:var(--ink);}
+.ced-cop-confirm .csub{font-size:11px;}
+
 /* ── the layer list, folded to the foot ────────────────────────────────── */
 .ced-lay{border:1px solid var(--hairline); border-radius:11px; background:var(--surface);
   flex:none; overflow:hidden;}

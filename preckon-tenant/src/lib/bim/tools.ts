@@ -427,13 +427,20 @@ const gridIntersections: Tool = {
       }
     }
 
-    return ok(`${grids.length} grid lines cross at ${pts.length} distinct point(s).`, {
-      data: {
-        grids: grids.length,
-        count: pts.length,
-        intersections: pts.slice(0, 400).map((p) => ({ x: Number(p.x.toFixed(3)), y: Number(p.y.toFixed(3)), grids: [p.a, p.b] })),
-      },
-    });
+    const data = {
+      grids: grids.length,
+      count: pts.length,
+      intersections: pts.slice(0, 400).map((p) => ({ x: Number(p.x.toFixed(3)), y: Number(p.y.toFixed(3)), grids: [p.a, p.b] })),
+    };
+
+    // No crossings is a failure, not an empty success. Whatever comes next —
+    // placing a column at each — is meaningless against nothing, and an agent
+    // told "ok" will go on to place zero and report that it did the job.
+    if (!pts.length) {
+      return fail(`${grids.length} grid lines, but none of them cross — they may all run the same way.`, { data });
+    }
+
+    return ok(`${grids.length} grid lines cross at ${pts.length} distinct point(s).`, { data });
   },
 };
 

@@ -31,6 +31,7 @@ import {
   ALL_SNAP_MODES, CadViewport, DEFAULT_SNAPS, type CadHandle, type SnapMode, type Tool,
 } from "./viewport";
 import { applyCadOps, type CadMark, type CadOp } from "./agent";
+import type { TraceEntry as CadTrace } from "@/lib/bim/agent2";
 import { saveOver } from "./roundtrip";
 import { IsoView } from "./isoview";
 import { assumedHeight } from "./iso";
@@ -162,8 +163,19 @@ export function CadEditor({
      figure can be checked rather than believed. */
   const [ask, setAsk] = useState("");
   const [asking, setAsking] = useState(false);
-  const [chat, setChat] = useState<Array<{ q: string; a: string; ops: number; removed?: number }>>([]);
+  const [chat, setChat] = useState<Array<{
+    q: string; a: string; ops: number; removed?: number;
+    trace?: CadTrace[]; assumptions?: string[]; question?: boolean;
+  }>>([]);
   const [marks, setMarks] = useState<CadMark[]>([]);
+  /* Ask measures and explains; Edit changes the sheet through the tool registry.
+     Two modes rather than one box because they want different things back — a
+     measurement wants marks on the canvas to check it against, an edit wants the
+     tools it ran. Folding them together would make both answers worse. */
+  const [mode, setMode] = useState<"ask" | "edit">("ask");
+  /* A change large enough that it is worth seeing the number first. Holds the
+     instruction, so agreeing re-sends it rather than making anyone retype. */
+  const [pending, setPending] = useState<{ instruction: string; label: string; affected: number } | null>(null);
   const [copilot, setCopilot] = useState(true);
   const [layersOpen, setLayersOpen] = useState(false);
   /* Plan, stood up, or both. Split is the useful one: you point at something in
@@ -316,9 +328,58 @@ export function CadEditor({
     }
   }
 
+  /**
+   * Edit mode: the tool-driven assistant.
+   *
+   * Ops come back already decided but NOT applied — the browser applies them
+   * once, here, so the canvas and the server agree on exactly what happened.
+   * A large change comes back as a count and no ops, and is only carried out
+   * after somebody has seen the number and said yes.
+   */
+  async function runAssistant(instruction: string, preapproved = false) {
+    if (!instruction || !model || !pid) return;
+    setAsking(true);
+    setMarks([]);
+    try {
+      const r = await api.post<{
+        status: "done" | "needs_confirmation" | "needs_input";
+        reply: string; question?: string; ops?: CadOp[]; assumptions?: string[];
+        trace?: CadTrace[]; pending?: { label: string; affected: number };
+      }>(`/projects/${pid}/cad/assistant`, {
+        instruction, filename, preapproved,
+        model: { insunits: model.insunits, layers: model.layers, entities: model.entities },
+      });
+
+      if (r.status === "needs_confirmation" && r.pending) {
+        setPending({ instruction, label: r.pending.label, affected: r.pending.affected });
+        setChat((c) => [...c, { q: instruction, a: r.reply, ops: 0, trace: r.trace, assumptions: r.assumptions }]);
+        return;
+      }
+
+      setPending(null);
+      let applied = 0, removed = 0;
+      if (r.ops?.length) {
+        const out = applyCadOps(model, r.ops);
+        applied = out.added;
+        removed = out.removed;
+        if (applied || removed) apply(out.model);
+      }
+      setChat((c) => [...c, {
+        q: instruction, a: r.question ?? r.reply, ops: applied, removed,
+        trace: r.trace, assumptions: r.assumptions, question: r.status === "needs_input",
+      }]);
+      setAsk("");
+    } catch (e: any) {
+      setChat((c) => [...c, { q: instruction, a: e?.message ?? t("common.loadFail"), ops: 0 }]);
+    } finally {
+      setAsking(false);
+    }
+  }
+
   async function askAgent() {
     const q = ask.trim();
     if (!q || !model || !pid) return;
+    if (mode === "edit") return runAssistant(q);
     setAsking(true);
     setMarks([]);
     try {
@@ -536,7 +597,28 @@ export function CadEditor({
                     {chat.map((m, i) => (
                       <div className="ced-cop-turn" key={i}>
                         <div className="q">{m.q}</div>
-                        <div className="a">{m.a}</div>
+                        {/* Which tools ran. The same reasoning as BIM Studio: an
+                            assistant that changes an issued drawing has to show
+                            that it looked before it wrote. */}
+                        {m.trace && m.trace.length > 0 && (
+                          <ol className="ced-cop-trace">
+                            {m.trace.map((s, j) => (
+                              <li key={j} className={s.ok ? "" : "is-bad"}>
+                                <b>{s.label}</b>
+                                <span className="mod">{s.module}</span>
+                                <span className="sum">{s.summary}</span>
+                              </li>
+                            ))}
+                          </ol>
+                        )}
+                        <div className={"a" + (m.question ? " is-question" : "")}>{m.a}</div>
+                        {/* What it decided for itself — the part worth arguing
+                            with, so never folded into the sentence above. */}
+                        {m.assumptions && m.assumptions.length > 0 && (
+                          <ul className="ced-cop-assumed">
+                            {m.assumptions.map((x, j) => <li key={j}>{x}</li>)}
+                          </ul>
+                        )}
                         {/* Stated on every turn, including when nothing
                             happened. An answer that describes an edit which was
                             never applied is indistinguishable from one that
@@ -566,13 +648,43 @@ export function CadEditor({
                     </div>
                   )}
 
+                  {/* The number, before the change. The only place a large
+                      deletion gets questioned — ops go straight to the canvas
+                      here, so there is no proposal step further down. */}
+                  {pending && (
+                    <div className="ced-cop-confirm">
+                      <b>{t("ed.confirmTitle", { n: pending.affected })}</b>
+                      <span className="csub">{pending.label}</span>
+                      <div className="ced-cop-acts">
+                        <button className="mini sm pri" disabled={asking}
+                          onClick={() => { const i = pending.instruction; setPending(null); void runAssistant(i, true); }}>
+                          {t("ed.confirmGo")}
+                        </button>
+                        <button className="mini sm" disabled={asking} onClick={() => setPending(null)}>
+                          {t("ed.confirmNo")}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="ced-cop-ask">
+                    {/* Ask measures, Edit changes. Stated rather than inferred:
+                        somebody about to alter an issued sheet should have had
+                        to choose to. */}
+                    <div className="ced-cop-mode" role="group" aria-label={t("ed.modeLabel")}>
+                      <button className={mode === "ask" ? "on" : ""} onClick={() => setMode("ask")} disabled={asking}>
+                        {t("ed.modeAsk")}
+                      </button>
+                      <button className={mode === "edit" ? "on" : ""} onClick={() => setMode("edit")} disabled={asking || !canUpload}>
+                        {t("ed.modeEdit")}
+                      </button>
+                    </div>
                     <textarea
                       rows={2}
                       value={ask}
                       onChange={(e) => setAsk(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void askAgent(); } }}
-                      placeholder={t("ed.copilotPlaceholder")}
+                      placeholder={mode === "edit" ? t("ed.editPlaceholder") : t("ed.copilotPlaceholder")}
                       aria-label={t("ed.copilot")}
                       disabled={asking}
                     />
@@ -581,7 +693,7 @@ export function CadEditor({
                         <button className="mini sm" onClick={() => setMarks([])}>{t("ed.copilotClear")}</button>
                       )}
                       <button className="mini sm pri" onClick={askAgent} disabled={asking || !ask.trim()}>
-                        {asking ? t("ed.copilotThinking") : t("ed.copilotAsk")}
+                        {asking ? t("ed.copilotThinking") : mode === "edit" ? t("ed.modeEdit") : t("ed.copilotAsk")}
                       </button>
                     </div>
                   </div>
