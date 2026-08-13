@@ -41,6 +41,15 @@ uploads/
 *.tgz
 *.tar.gz
 
+# ---- Media ----
+# Reference recordings (competitor demos, screen captures) are kept locally for
+# analysis but never published: they are third-party content and they dominate
+# clone size. Written analysis belongs in docs/ instead.
+*.mp4
+*.mov
+*.avi
+*.mkv
+
 # ---- Logs ----
 *.log
 npm-debug.log*
