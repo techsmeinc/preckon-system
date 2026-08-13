@@ -9,6 +9,7 @@ import { useI18n, type Key } from "@/lib/i18n";
 import { BimStudio } from "./studio";
 import { emptyDocument, type BimDocument } from "./model";
 import { SPECIALIST_LIST } from "./agents";
+import type { DocDiff } from "./proposal";
 import { GetDesktop } from "@/lib/desktopLink";
 
 interface Loaded { doc: BimDocument; version: number }
@@ -25,25 +26,51 @@ export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: 
   const [instruction, setInstruction] = useState("");
   const [specialist, setSpecialist] = useState("all");
   const [drawing, setDrawing] = useState(false);
+  /* What the assistant is offering, awaiting a decision. Survives nothing but
+     this session on purpose — the server keeps the authoritative copy, and it
+     is re-read on load so a reload never loses an unanswered proposal. */
+  const [proposal, setProposal] = useState<{ id: string; diff: DocDiff; reply: string } | null>(null);
+  const [deciding, setDeciding] = useState(false);
   const [nonce, setNonce] = useState(0);
 
-  /** Draw by instruction. The assistant returns the finished model, so the
-   *  Studio remounts on it rather than trying to replay commands client-side. */
+  /* Ask the assistant to draw.
+     It comes back with a PROPOSAL, not a changed model: what it would add, in
+     plain language, for a person to accept or throw away. The model is not
+     touched until somebody presses Apply — which is the difference between an
+     assistant and something that edits your drawing while you watch. */
   async function draw() {
     const text = instruction.trim();
     if (!text) return;
     setDrawing(true);
     try {
-      const r = await api.post<{ reply: string; applied: number; dropped: number }>(
+      const r = await api.post<{ reply: string; applied: number; dropped: number; proposal: string | null; diff: DocDiff }>(
         `/projects/${pid}/bim/agent`, { instruction: text, specialist }
       );
-      toast(r.reply || t("bim.drewN", { n: r.applied }));
-      setInstruction("");
-      setNonce((n) => n + 1);
-      reload();
+      if (r.proposal) {
+        setProposal({ id: r.proposal, diff: r.diff, reply: r.reply });
+        setInstruction("");
+      } else {
+        // It answered without changing anything — a question rather than an
+        // instruction. Say what it said and leave the model alone.
+        toast(r.reply || t("bim.noChange"));
+      }
     } catch (e: any) {
       toast(e?.message ?? t("bim.drawFail"), "bad");
     } finally { setDrawing(false); }
+  }
+
+  /** Accept the proposal, or bin it. Only this writes to the model. */
+  async function decide(decision: "apply" | "discard") {
+    if (!proposal) return;
+    setDeciding(true);
+    try {
+      const r = await api.post<{ applied: boolean }>(`/projects/${pid}/bim/proposal`, { id: proposal.id, decision });
+      toast(r.applied ? t("bim.proposalApplied") : t("bim.proposalDiscarded"));
+      setProposal(null);
+      if (r.applied) { setNonce((n) => n + 1); reload(); }
+    } catch (e: any) {
+      toast(e?.message ?? t("bim.drawFail"), "bad");
+    } finally { setDeciding(false); }
   }
 
 
@@ -134,6 +161,40 @@ export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: 
           <button className="mini sm pri" onClick={draw} disabled={drawing || !instruction.trim()}>
             {drawing ? t("bim.drawing") : t("bim.draw")}
           </button>
+        </div>
+      )}
+
+      {/* The proposal. Shown as what it is: a suggestion with a size, and two
+          buttons. The model underneath is untouched until Apply is pressed. */}
+      {proposal && (
+        <div className="bim-proposal">
+          <div className="bp-head">
+            <b>{t("bim.proposalTitle")}</b>
+            <span className="mono">{proposal.diff.summary}</span>
+          </div>
+          {proposal.reply && <p className="csub bp-reply">{proposal.reply}</p>}
+
+          {/* Itemised, up to a point. A reviewer who cannot see WHAT changed
+              approves everything, which is the same as not being asked. */}
+          <ul className="sch-notes bp-list">
+            {proposal.diff.added.slice(0, 8).map((a) => <li key={a.id}>+ {a.label}</li>)}
+            {proposal.diff.changed.slice(0, 8).map((c) => (
+              <li key={c.id}>~ {c.label} <span className="csub">({c.fields.join(", ")})</span></li>
+            ))}
+            {proposal.diff.removed.slice(0, 8).map((r) => <li key={r.id}>− {r.label}</li>)}
+            {proposal.diff.added.length + proposal.diff.changed.length + proposal.diff.removed.length > 24 && (
+              <li className="csub">…and more — apply to see the whole model</li>
+            )}
+          </ul>
+
+          <div className="bp-actions">
+            <button className="mini sm pri" onClick={() => decide("apply")} disabled={deciding}>
+              {deciding ? t("bim.applying") : t("bim.proposalApply")}
+            </button>
+            <button className="mini sm" onClick={() => decide("discard")} disabled={deciding}>
+              {t("bim.proposalDiscard")}
+            </button>
+          </div>
         </div>
       )}
 

@@ -1418,3 +1418,18 @@ p a,li a,td a,.csub a{min-block-size:0;}
 /* Sized to the column so typing does not shove the amount sideways. */
 .rate-in{width:9ch; text-align:right; padding:3px 6px; border-radius:6px;
   background:var(--panel-2); color:var(--ink); border:1px solid var(--accent); font:inherit;}
+
+/* ── The assistant's proposal ───────────────────────────────────────────────
+   Sits between the instruction box and the canvas, because that is where the
+   eye already is after asking. Bordered in the accent so it reads as something
+   awaiting an answer rather than as a result that has already happened. */
+.bim-proposal{margin:10px 0 14px; padding:12px 14px; border-radius:10px;
+  border:1px solid var(--accent); background:var(--panel-2);}
+.bp-head{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:6px;}
+.bp-head b{font-size:13px; color:var(--ink);}
+.bp-head .mono{font-size:11.5px; color:var(--slate-500);}
+.bp-reply{margin:0 0 8px; line-height:1.55;}
+/* Capped and scrollable: forty added walls must not push the buttons off the
+   screen, and a decision you have to scroll to reach is one people skip. */
+.bp-list{margin:0 0 10px; max-height:180px; overflow:auto;}
+.bp-actions{display:flex; gap:8px; flex-wrap:wrap;}

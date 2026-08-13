@@ -7,13 +7,28 @@ import { errBadRequest } from "@/lib/errors";
 import { runBimAgent } from "@/lib/bim/agent";
 import { applyCommands } from "@/lib/bim/commands";
 import { CATALOG, defaultLevel, describe, emptyDocument, type BimDocument } from "@/lib/bim/model";
+import { diffDocuments, saveProposal } from "@/lib/bim/proposal";
 
-// POST /projects/{pid}/bim/agent — draw by instruction.
+// POST /projects/{pid}/bim/agent — draw by instruction, and STOP.
 //
 // The loop lives here because Core owns the document: after each step the agent
 // is handed the REAL updated model, which is what lets it host a door on a wall
-// it created a moment ago. The API key stays in the worker — Core calls its
+// it created a moment ago. The API key stays in the worker - Core calls its
 // /claude proxy and never sees the key.
+//
+// WHAT CHANGED, AND WHY
+//
+// This route used to write the assistant's result straight into bim_document.
+// The estimator saw the model change and had undo, which is not the same as
+// having agreed to it - and it is the pattern both blueprints forbid in as many
+// words: "Never let an LLM directly mutate production model state."
+//
+// So the result is now a PROPOSAL. The agent still draws into a real document,
+// because that is what makes it able to host a door on a wall it just made; but
+// the document it produces is held to one side with a plain-language diff, and
+// a human applies it. Nothing about the drawing gets worse. What changes is
+// that "the AI added four walls" becomes something somebody decided rather than
+// something they discovered.
 
 const Body = z.object({
   instruction: z.string().min(3).max(2000),
@@ -68,32 +83,38 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
     },
   });
 
-  const version = await useCase(actorFromCtx(ctx), async (_conn, audit) => {
-    const cur = await queryOne<{ version: number }>(
-      "SELECT version FROM bim_document WHERE tenant_id = ? AND project_id = ? FOR UPDATE",
-      [ctx.tenantId, pid]
-    );
-    if (cur && cur.version !== startVersion) {
-      throw errBadRequest("The model changed while the assistant was drawing. Reload and try again.");
-    }
-    const next = (cur?.version ?? 0) + 1;
-    const json = JSON.stringify(doc);
-    if (cur) {
-      await query("UPDATE bim_document SET doc = ?, version = ?, updated_by = ? WHERE tenant_id = ? AND project_id = ?",
-        [json, next, ctx.user.id, ctx.tenantId, pid]);
-    } else {
-      await query("INSERT INTO bim_document (project_id, tenant_id, doc, version, updated_by) VALUES (?,?,?,?,?)",
-        [pid, ctx.tenantId, json, next, ctx.user.id]);
-    }
-    audit({
-      action: "bim.agent",
-      targetKind: "bim_document",
-      targetId: pid,
-      projectId: pid,
-      summary: { specialist: body.specialist, applied: result.applied, dropped: result.dropped, instruction: body.instruction.slice(0, 200) },
+  // Nothing is saved to bim_document here. The proposal is, and applying it is
+  // a separate act by a person.
+  const before: BimDocument = row?.doc ?? emptyDocument();
+  const diff = diffDocuments(before, doc);
+
+  if (!diff.added.length && !diff.changed.length && !diff.removed.length) {
+    // A proposal that changes nothing is not worth a decision. Say what the
+    // assistant said and leave the model alone.
+    return ok({ ...result, proposal: null, diff, doc: null });
+  }
+
+  const proposalId = await useCase(actorFromCtx(ctx), async (_conn, audit) => {
+    const id = await saveProposal({
+      tenantId: ctx.tenantId, projectId: pid, userId: ctx.user.id,
+      baseVersion: startVersion, instruction: body.instruction,
+      specialist: body.specialist, doc, diff, reply: result.reply ?? "",
     });
-    return next;
+    // Audited as a PROPOSAL, distinct from the commit that may follow. The two
+    // are different events and the trail should not blur them: one is a model
+    // suggesting, the other is a person deciding.
+    audit({
+      action: "bim.agent.proposed",
+      targetKind: "bim_proposal",
+      targetId: id,
+      projectId: pid,
+      summary: {
+        specialist: body.specialist, applied: result.applied, dropped: result.dropped,
+        change: diff.summary, instruction: body.instruction.slice(0, 200),
+      },
+    });
+    return id;
   });
 
-  return ok({ ...result, version, doc });
+  return ok({ ...result, proposal: proposalId, diff, baseVersion: startVersion, doc });
 });

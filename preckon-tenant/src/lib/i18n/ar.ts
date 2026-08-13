@@ -1017,6 +1017,13 @@ export const ar: Dict = {
   "bim.drawing": "جارٍ الرسم…",
   "bim.drewN": "تم تطبيق {n} أمرًا",
   "bim.drawFail": "تعذّر على المساعد رسم ذلك",
+  "bim.noChange": "أجاب المساعد دون تغيير النموذج.",
+  "bim.proposalTitle": "يقترح المساعد",
+  "bim.proposalApply": "تطبيق على النموذج",
+  "bim.proposalDiscard": "تجاهل",
+  "bim.applying": "جارٍ التطبيق…",
+  "bim.proposalApplied": "طُبّق على النموذج.",
+  "bim.proposalDiscarded": "تم التجاهل — النموذج دون تغيير.",
   "bim.specialist": "التخصص",
 
   /* ── time ─────────────────────────────────────────────────────────────── */

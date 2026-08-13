@@ -120,9 +120,11 @@ export interface ScaleWarning { objectType: string; measured: number; limit: num
 export function checkScale(objectType: string, largestDimensionM: number): ScaleWarning | null {
   const rule = PLAUSIBLE[objectType];
   if (!rule || !Number.isFinite(largestDimensionM) || largestDimensionM <= rule.max) return null;
-  // The 1000x hint is the whole reason this exists — say it, rather than making
-  // somebody work out why the number is strange.
-  const looksLikeMm = largestDimensionM > rule.max * 100;
+  // The 1000x hint is the whole reason this exists. The test is not "is this
+  // enormous" but "would dividing by a thousand make it ordinary" — a 5,100 m
+  // wall is 5.1 m in millimetres and is exactly the case worth naming, while
+  // comparing against a multiple of the limit misses it entirely.
+  const looksLikeMm = largestDimensionM / 1000 <= rule.max;
   return {
     objectType,
     measured: Math.round(largestDimensionM),
@@ -136,13 +138,18 @@ export function checkScale(objectType: string, largestDimensionM: number): Scale
 /** Scale every coordinate in a geometry. Applied once, at the boundary. */
 export function scaleGeometry<T extends Record<string, any>>(g: T, k: number): T {
   if (k === 1) return g;
-  const pt = (p: [number, number]): [number, number] => [p[0] * k, p[1] * k];
+  // Rounded to the micrometre. 5100 x 0.001 is 5.1000000000000005 in binary
+  // floating point, and storing that spreads noise through every measurement
+  // and every comparison downstream. No building is dimensioned finer than a
+  // micrometre, so nothing real is lost.
+  const r = (n: number) => Math.round(n * k * 1e6) / 1e6;
+  const pt = (p: [number, number]): [number, number] => [r(p[0]), r(p[1])];
   const out: any = { ...g };
   if (g.baseline) out.baseline = g.baseline.map(pt);
   if (g.outline) out.outline = g.outline.map(pt);
   if (g.at) out.at = pt(g.at);
   for (const key of ["thicknessM", "heightM", "widthM", "depthM", "elevationM", "offsetM", "sillM"]) {
-    if (typeof g[key] === "number") out[key] = g[key] * k;
+    if (typeof g[key] === "number") out[key] = r(g[key]);
   }
   return out as T;
 }

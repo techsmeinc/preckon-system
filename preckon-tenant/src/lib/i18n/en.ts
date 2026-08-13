@@ -1016,6 +1016,13 @@ export const en = {
   "bim.drawing": "Drawing…",
   "bim.drewN": "{n} commands applied",
   "bim.drawFail": "The assistant couldn’t draw that",
+  "bim.noChange": "The assistant answered without changing the model.",
+  "bim.proposalTitle": "The assistant proposes",
+  "bim.proposalApply": "Apply to the model",
+  "bim.proposalDiscard": "Discard",
+  "bim.applying": "Applying…",
+  "bim.proposalApplied": "Applied to the model.",
+  "bim.proposalDiscarded": "Discarded — the model is unchanged.",
   "bim.specialist": "Specialist",
 
   /* ── time ─────────────────────────────────────────────────────────────── */

@@ -1018,6 +1018,13 @@ export const fr: Dict = {
   "bim.drawing": "Dessin en cours…",
   "bim.drewN": "{n} commandes appliquées",
   "bim.drawFail": "L’assistant n’a pas pu dessiner cela",
+  "bim.noChange": "L'assistant a repondu sans modifier le modele.",
+  "bim.proposalTitle": "Proposition de l'assistant",
+  "bim.proposalApply": "Appliquer au modele",
+  "bim.proposalDiscard": "Rejeter",
+  "bim.applying": "Application…",
+  "bim.proposalApplied": "Applique au modele.",
+  "bim.proposalDiscarded": "Rejete — le modele est inchange.",
   "bim.specialist": "Spécialiste",
 
   /* ── time ─────────────────────────────────────────────────────────────── */
