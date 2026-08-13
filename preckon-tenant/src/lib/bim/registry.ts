@@ -34,29 +34,38 @@ export interface ToolParam {
   options?: string[];
 }
 
-export interface ToolResult {
+/**
+ * Generic over document and command type.
+ *
+ * BIM Studio works on a BimDocument and emits Commands; the issued-drawing
+ * editor works on a DxfModel and emits CadOps. The registry, the search, the
+ * coercion and the agent loop are identical for both — only the tools differ —
+ * so the types are parameters rather than two copies of this file. Defaults
+ * keep every BIM call site reading exactly as it did.
+ */
+export interface ToolResult<Cmd = Command> {
   ok: boolean;
   /** One sentence for the user. Tools say what they did, not how. */
   summary: string;
   /** Shown as the JSON result card. Keep it small enough to read. */
   data?: unknown;
   /** Empty for read tools. Applied by Core, in order. */
-  commands?: Command[];
+  commands?: Cmd[];
   /** How many elements this touches — drives the confirmation gate. */
   affected?: number;
   /** Anything the tool guessed, so the agent can report it rather than hide it. */
   assumptions?: string[];
 }
 
-export interface ToolContext {
-  doc: BimDocument;
+export interface ToolContext<Doc = BimDocument> {
+  doc: Doc;
   /** Whose session this is — a personal tool only runs for its author. */
   userId?: string;
   /** The specialist driving, for discipline scoping. */
   discipline?: Discipline | "all";
 }
 
-export interface Tool {
+export interface Tool<Doc = BimDocument, Cmd = Command> {
   /** snake_case, unique. This is what the model emits. */
   name: string;
   /** Display name for the tool card, e.g. "Tag Specific Elements". */
@@ -72,7 +81,7 @@ export interface Tool {
   keywords?: string[];
   /** Disciplines this tool may act for. Undefined means any. */
   disciplines?: Discipline[];
-  run: (ctx: ToolContext, args: Record<string, any>) => ToolResult;
+  run: (ctx: ToolContext<Doc>, args: Record<string, any>) => ToolResult<Cmd>;
 }
 
 /** Above this many affected elements, the agent must confirm before applying. */
@@ -80,10 +89,10 @@ export const CONFIRM_THRESHOLD = 25;
 
 // ── Registry ─────────────────────────────────────────────────────────────────
 
-export class ToolRegistry {
-  private tools = new Map<string, Tool>();
+export class ToolRegistry<Doc = BimDocument, Cmd = Command> {
+  private tools = new Map<string, Tool<Doc, Cmd>>();
 
-  register(...tools: Tool[]): this {
+  register(...tools: Tool<Doc, Cmd>[]): this {
     for (const t of tools) {
       if (this.tools.has(t.name)) throw new Error(`Duplicate tool name: ${t.name}`);
       this.tools.set(t.name, t);
@@ -92,7 +101,7 @@ export class ToolRegistry {
   }
 
   /** Replace an existing tool — used when a user edits an authored tool. */
-  upsert(tool: Tool): this {
+  upsert(tool: Tool<Doc, Cmd>): this {
     this.tools.set(tool.name, tool);
     return this;
   }
@@ -101,7 +110,7 @@ export class ToolRegistry {
     return this.tools.delete(name);
   }
 
-  get(name: string, userId?: string): Tool | undefined {
+  get(name: string, userId?: string): Tool<Doc, Cmd> | undefined {
     const t = this.tools.get(name);
     if (!t) return undefined;
     return this.visible(t, userId) ? t : undefined;
@@ -112,16 +121,16 @@ export class ToolRegistry {
    * to distinguish "no such tool" from "that tool is personal", and `get`
    * collapses both to undefined.
    */
-  peek(name: string): Tool | undefined {
+  peek(name: string): Tool<Doc, Cmd> | undefined {
     return this.tools.get(name);
   }
 
   /** A personal tool is visible only to its author. */
-  private visible(t: Tool, userId?: string): boolean {
+  private visible(t: Tool<Doc, Cmd>, userId?: string): boolean {
     return t.scope === "global" || (!!t.owner && t.owner === userId);
   }
 
-  all(userId?: string): Tool[] {
+  all(userId?: string): Tool<Doc, Cmd>[] {
     return [...this.tools.values()].filter((t) => this.visible(t, userId));
   }
 
@@ -137,7 +146,7 @@ export class ToolRegistry {
    * and at this catalogue size recall is not the bottleneck. Revisit if the
    * registry passes a few hundred tools.
    */
-  search(text: string, opts: { userId?: string; limit?: number; discipline?: Discipline | "all" } = {}): Tool[] {
+  search(text: string, opts: { userId?: string; limit?: number; discipline?: Discipline | "all" } = {}): Tool<Doc, Cmd>[] {
     const { userId, limit = 8, discipline } = opts;
     // An empty search means "show me what there is". A search that is ALL
     // filler ("all of the in my") means the caller said nothing useful —
@@ -156,7 +165,7 @@ export class ToolRegistry {
   }
 
   /** Compact catalogue for the model — name, what it does, and its parameters. */
-  describe(tools: Tool[]): string {
+  describe(tools: Tool<Doc, Cmd>[]): string {
     return tools
       .map((t) => {
         const ps = t.params
@@ -179,7 +188,7 @@ export function tokenise(s: string): string[] {
     .filter((w) => w.length > 1 && !STOP.has(w));
 }
 
-function score(t: Tool, terms: string[]): number {
+function score(t: Tool<any, any>, terms: string[]): number {
   const name = tokenise(`${t.name} ${t.label}`);
   const keys = tokenise((t.keywords ?? []).join(" "));
   const desc = tokenise(`${t.description} ${t.module}`);
@@ -204,7 +213,7 @@ function score(t: Tool, terms: string[]): number {
  * rejecting them wastes a turn for no benefit. Coerce what is unambiguous,
  * reject what is not.
  */
-export function coerceArgs(tool: Tool, raw: Record<string, any> = {}): { args: Record<string, any>; errors: string[] } {
+export function coerceArgs(tool: Tool<any, any>, raw: Record<string, any> = {}): { args: Record<string, any>; errors: string[] } {
   const args: Record<string, any> = {};
   const errors: string[] = [];
 
