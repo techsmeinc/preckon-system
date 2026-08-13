@@ -14,6 +14,24 @@ import { GetDesktop } from "@/lib/desktopLink";
 
 interface Loaded { doc: BimDocument; version: number }
 
+/** One tool call, as the route reports it. */
+interface TraceEntry {
+  tool: string; label: string; module: string; scope: string;
+  kind: string; ok: boolean; summary: string; data?: unknown; affected?: number;
+}
+
+interface AgentResponse {
+  reply: string;
+  applied: number;
+  assumptions?: string[];
+  trace?: TraceEntry[];
+  /** Present when the assistant asked instead of guessing. */
+  question?: string;
+  proposal: string | null;
+  diff: DocDiff | null;
+  skipped?: { name: string; reason: string }[];
+}
+
 export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: () => void }) {
   const { t } = useI18n();
   const toast = useToast();
@@ -29,9 +47,18 @@ export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: 
   /* What the assistant is offering, awaiting a decision. Survives nothing but
      this session on purpose — the server keeps the authoritative copy, and it
      is re-read on load so a reload never loses an unanswered proposal. */
-  const [proposal, setProposal] = useState<{ id: string; diff: DocDiff; reply: string } | null>(null);
+  const [proposal, setProposal] = useState<{ id: string; diff: DocDiff; reply: string; assumptions: string[] } | null>(null);
   const [deciding, setDeciding] = useState(false);
   const [nonce, setNonce] = useState(0);
+  /* Which tools ran, in order. Shown because an assistant that edits a building
+     model should be legible: the estimator can see it looked before it wrote,
+     and which tool did the writing. */
+  const [trace, setTrace] = useState<TraceEntry[]>([]);
+  const [openTrace, setOpenTrace] = useState<number | null>(null);
+  /* The assistant could not tell what was meant. Kept separate from a failure —
+     a question is the RIGHT outcome for an ambiguous instruction, and the
+     original wording stays in the box so it can be amended rather than retyped. */
+  const [question, setQuestion] = useState<string | null>(null);
 
   /* Ask the assistant to draw.
      It comes back with a PROPOSAL, not a changed model: what it would add, in
@@ -42,15 +69,20 @@ export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: 
     const text = instruction.trim();
     if (!text) return;
     setDrawing(true);
+    setQuestion(null);
     try {
-      const r = await api.post<{ reply: string; applied: number; dropped: number; proposal: string | null; diff: DocDiff }>(
-        `/projects/${pid}/bim/agent`, { instruction: text, specialist }
-      );
-      if (r.proposal) {
-        setProposal({ id: r.proposal, diff: r.diff, reply: r.reply });
+      const r = await api.post<AgentResponse>(`/projects/${pid}/bim/agent`, { instruction: text, specialist });
+      setTrace(r.trace ?? []);
+
+      if (r.question) {
+        // Ambiguous, and it said so instead of guessing. The instruction stays
+        // put so the answer can be appended to it.
+        setQuestion(r.question);
+      } else if (r.proposal && r.diff) {
+        setProposal({ id: r.proposal, diff: r.diff, reply: r.reply, assumptions: r.assumptions ?? [] });
         setInstruction("");
       } else {
-        // It answered without changing anything — a question rather than an
+        // It answered without changing anything — a query rather than an
         // instruction. Say what it said and leave the model alone.
         toast(r.reply || t("bim.noChange"));
       }
@@ -164,6 +196,44 @@ export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: 
         </div>
       )}
 
+      {/* What it did, step by step. An assistant that edits a building model
+          has to be legible: this shows it looked before it wrote, which tool
+          wrote, and what came back. Collapsed by default — it is evidence to
+          reach for, not a thing to read every time. */}
+      {trace.length > 0 && (
+        <ol className="bim-trace">
+          {trace.map((s, i) => (
+            <li key={i} className={"bt-step" + (s.ok ? "" : " is-bad")}>
+              <button
+                type="button"
+                className="bt-head"
+                aria-expanded={openTrace === i}
+                onClick={() => setOpenTrace(openTrace === i ? null : i)}
+              >
+                <span className="bt-dot" aria-hidden />
+                <b>{s.label}</b>
+                <span className="bt-mod">{s.module}</span>
+                {s.scope === "personal" && <span className="bt-scope">{t("bim.toolPersonal")}</span>}
+                <span className="csub bt-sum">{s.summary}</span>
+              </button>
+              {openTrace === i && s.data !== undefined && (
+                <pre className="bt-data mono">{JSON.stringify(s.data, null, 2)}</pre>
+              )}
+            </li>
+          ))}
+        </ol>
+      )}
+
+      {/* It asked rather than guessed. Deliberately not a toast: a question
+          needs to stay on screen while the answer is typed. */}
+      {question && (
+        <div className="bim-question">
+          <b>{t("bim.questionTitle")}</b>
+          <p>{question}</p>
+          <span className="csub">{t("bim.questionHint")}</span>
+        </div>
+      )}
+
       {/* The proposal. Shown as what it is: a suggestion with a size, and two
           buttons. The model underneath is untouched until Apply is pressed. */}
       {proposal && (
@@ -173,6 +243,14 @@ export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: 
             <span className="mono">{proposal.diff.summary}</span>
           </div>
           {proposal.reply && <p className="csub bp-reply">{proposal.reply}</p>}
+
+          {/* Anything the assistant decided for itself, said out loud. A guess
+              a reviewer never sees is a guess they cannot correct. */}
+          {proposal.assumptions.length > 0 && (
+            <ul className="bp-assumed">
+              {proposal.assumptions.map((a, i) => <li key={i}>{a}</li>)}
+            </ul>
+          )}
 
           {/* Itemised, up to a point. A reviewer who cannot see WHAT changed
               approves everything, which is the same as not being asked. */}

@@ -1024,6 +1024,9 @@ export const ar: Dict = {
   "bim.applying": "جارٍ التطبيق…",
   "bim.proposalApplied": "طُبّق على النموذج.",
   "bim.proposalDiscarded": "تم التجاهل — النموذج دون تغيير.",
+  "bim.toolPersonal": "خاصة بك",
+  "bim.questionTitle": "المساعد يحتاج إلى توضيح",
+  "bim.questionHint": "أضف الإجابة إلى تعليماتك ثم اسأل مرة أخرى.",
   "bim.specialist": "التخصص",
 
   /* ── time ─────────────────────────────────────────────────────────────── */

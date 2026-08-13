@@ -4,10 +4,12 @@ import { requirePermission, requireProject } from "@/lib/context";
 import { query, queryOne } from "@/lib/db";
 import { actorFromCtx, useCase } from "@/lib/usecase";
 import { errBadRequest } from "@/lib/errors";
-import { runBimAgent } from "@/lib/bim/agent";
+import { runBimAgent2 } from "@/lib/bim/agent2";
 import { applyCommands } from "@/lib/bim/commands";
-import { CATALOG, defaultLevel, describe, emptyDocument, type BimDocument } from "@/lib/bim/model";
+import { emptyDocument, type BimDocument } from "@/lib/bim/model";
 import { diffDocuments, saveProposal } from "@/lib/bim/proposal";
+import { buildRegistry } from "@/lib/bim/setup";
+import { loadAuthoredTools } from "@/lib/bim/authored-store";
 
 // POST /projects/{pid}/bim/agent — draw by instruction, and STOP.
 //
@@ -66,22 +68,50 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
     return json;
   };
 
-  const result = await runBimAgent({
+  // The registry is per-request: built-ins plus whatever this user has authored.
+  // A tool that no longer compiles is skipped with a reason rather than taking
+  // the assistant down with it.
+  const { registry, skipped } = buildRegistry(await loadAuthoredTools(ctx.tenantId, ctx.user.id));
+
+  const outcome = await runBimAgent2({
     instruction: body.instruction,
     specialist: body.specialist,
-    summary: describe(doc),
-    levelId: defaultLevel(doc),
-    catalog: Object.values(CATALOG),
-    elements: doc.elements,
+    doc,
+    registry,
+    userId: ctx.user.id,
     model: MODEL,
     callAnthropic,
+    // The confirmation gate is redundant here and would be worse than nothing:
+    // this route already ends in a proposal that a person must accept, so
+    // stopping mid-loop to ask "shall I proceed?" would demand two approvals for
+    // one decision. The gate exists for callers that apply directly.
+    preapproved: true,
     // Applied in memory across the loop; persisted once at the end, so a failed
     // mid-loop step can't leave a half-built model saved.
     apply: async (cmds) => {
       doc = applyCommands(doc, cmds);
-      return { summary: describe(doc), applied: cmds.length, elements: doc.elements };
+      return { doc, applied: cmds.length };
     },
   });
+
+  // The assistant could not tell what was meant and asked. That is a better
+  // outcome than a confident wrong guess, so it is returned as a question rather
+  // than dressed up as a failure.
+  if (outcome.status === "needs_input") {
+    return ok({
+      reply: outcome.reply, question: outcome.reply, applied: 0, dropped: 0,
+      assumptions: [], trace: outcome.trace, skipped, proposal: null, diff: null, doc: null,
+    });
+  }
+
+  const result = {
+    reply: outcome.reply,
+    applied: outcome.status === "done" ? outcome.applied : 0,
+    dropped: 0,
+    assumptions: outcome.status === "done" ? outcome.assumptions : [],
+    trace: outcome.trace,
+    skipped,
+  };
 
   // Nothing is saved to bim_document here. The proposal is, and applying it is
   // a separate act by a person.

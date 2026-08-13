@@ -1025,6 +1025,9 @@ export const fr: Dict = {
   "bim.applying": "Application…",
   "bim.proposalApplied": "Applique au modele.",
   "bim.proposalDiscarded": "Rejete — le modele est inchange.",
+  "bim.toolPersonal": "A vous",
+  "bim.questionTitle": "L'assistant a besoin d'une precision",
+  "bim.questionHint": "Ajoutez la reponse a votre instruction et redemandez.",
   "bim.specialist": "Spécialiste",
 
   /* ── time ─────────────────────────────────────────────────────────────── */

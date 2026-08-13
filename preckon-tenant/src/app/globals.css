@@ -1433,3 +1433,41 @@ p a,li a,td a,.csub a{min-block-size:0;}
    screen, and a decision you have to scroll to reach is one people skip. */
 .bp-list{margin:0 0 10px; max-height:180px; overflow:auto;}
 .bp-actions{display:flex; gap:8px; flex-wrap:wrap;}
+/* What the assistant decided for itself. Set apart from the itemised diff
+   because it is a different kind of claim: the list says what changed, this
+   says what was guessed — and the guess is the part worth arguing with. */
+.bp-assumed{margin:0 0 10px; padding-left:16px; list-style:disc;}
+.bp-assumed li{font-size:12px; color:var(--slate-500); line-height:1.5;}
+
+/* ── The tool trace ───────────────────────────────────────────────────────────
+   Which tools ran, in order. Legibility is the point: an estimator can see the
+   assistant looked before it wrote. Quiet by default — evidence to reach for,
+   not a thing competing with the drawing. */
+.bim-trace{list-style:none; margin:0 0 12px; padding:0; display:flex; flex-direction:column; gap:4px;}
+.bt-step{border:1px solid var(--hairline); border-radius:8px; background:var(--panel-2); overflow:hidden;}
+.bt-step.is-bad{border-color:var(--bad);}
+.bt-head{display:flex; align-items:baseline; gap:8px; width:100%; padding:7px 10px;
+  background:none; border:0; text-align:start; cursor:pointer; font-family:inherit; flex-wrap:wrap;}
+.bt-head:hover{background:var(--panel-3, var(--panel-2));}
+.bt-head b{font-size:12.5px; color:var(--ink);}
+.bt-dot{width:6px; height:6px; border-radius:50%; background:var(--ok, var(--brand)); flex:0 0 auto;
+  align-self:center;}
+.is-bad .bt-dot{background:var(--bad);}
+/* The module a tool came from, and — only when it is the user's own — that it
+   is theirs. A built-in needs no badge; a personal tool does, because "why did
+   it do that" is answered differently for one you wrote. */
+.bt-mod{font-size:10.5px; letter-spacing:.02em; text-transform:uppercase; color:var(--slate-500);}
+.bt-scope{font-size:10px; padding:1px 6px; border-radius:999px;
+  background:var(--brand); color:#fff; letter-spacing:.02em;}
+.bt-sum{flex:1; min-width:160px; font-size:12px;}
+/* Raw result, when asked for. Capped: a query returning four hundred elements
+   should not turn the panel into a scroll of JSON. */
+.bt-data{margin:0; padding:8px 10px; max-height:200px; overflow:auto; font-size:11px;
+  line-height:1.45; border-top:1px solid var(--hairline); background:var(--panel);}
+
+/* A question, not a failure. Given room on screen because the answer gets typed
+   while it is read — a toast would be gone before the sentence was finished. */
+.bim-question{margin:10px 0 14px; padding:12px 14px; border-radius:10px;
+  border:1px solid var(--brand); background:var(--panel-2);}
+.bim-question b{display:block; font-size:13px; color:var(--ink); margin-bottom:6px;}
+.bim-question p{margin:0 0 6px; line-height:1.55; white-space:pre-wrap;}

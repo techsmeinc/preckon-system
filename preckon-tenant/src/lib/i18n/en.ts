@@ -1023,6 +1023,9 @@ export const en = {
   "bim.applying": "Applying…",
   "bim.proposalApplied": "Applied to the model.",
   "bim.proposalDiscarded": "Discarded — the model is unchanged.",
+  "bim.toolPersonal": "Yours",
+  "bim.questionTitle": "The assistant needs to know",
+  "bim.questionHint": "Add the answer to your instruction and ask again.",
   "bim.specialist": "Specialist",
 
   /* ── time ─────────────────────────────────────────────────────────────── */
