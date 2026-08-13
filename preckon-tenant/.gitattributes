@@ -1,0 +1,32 @@
+# Normalize line endings: store text as LF in the repo; check out native locally.
+* text=auto
+
+# Anything that gets EXECUTED on the server must stay LF on every platform.
+#
+# These ship inside preckon-tenant.tgz, packaged on Windows. With
+# core.autocrlf=true a checkout rewrites them to CRLF, tar carries that up
+# faithfully, and bash then refuses the first line: `set -eu` arrives as
+# `set -eu<CR>` and dies with "set: -: invalid option". The deploy fails at the
+# migration step having already replaced the app on disk.
+#
+# `eol=lf` pins the working copy regardless of the platform or the user's
+# autocrlf setting. deploy.ps1 also strips CR on the server, so the two together
+# mean neither a stale checkout nor a fresh clone can reintroduce it.
+*.sh    text eol=lf
+Dockerfile text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.sql   text eol=lf
+
+# Binary assets — never touch EOL.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.zip  binary
+*.tgz  binary
+*.dxf  binary
+*.woff  binary
+*.woff2 binary

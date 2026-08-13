@@ -61,6 +61,18 @@ tar xzf /tmp/preckon-tenant.tgz -C /opt --warning=no-unknown-keyword 2>/dev/null
   || tar xzf /tmp/preckon-tenant.tgz -C /opt
 cd /opt/preckon-tenant
 
+# Bash will not run a script with CRLF line endings: `set -eu` arrives as
+# `set -eu<CR>` and dies with "set: -: invalid option", having printed half the
+# message over the other half because the CR sent the cursor back to column 0.
+#
+# This is normalised HERE, on the server, rather than trusted to be right in the
+# bundle. The packaging half runs on Windows with core.autocrlf=true, so whether
+# a given .sh arrives as LF depends on when it was last checked out — which is
+# not a thing a deploy should be sensitive to. Cheap, idempotent, and it removes
+# the whole class of failure rather than the instance of it.
+echo "==> Normalising line endings"
+find . -name '*.sh' -not -path './node_modules/*' -exec sed -i 's/\r`$//' {} + 2>/dev/null || true
+
 echo "==> Migrations"
 sh scripts/migrate.sh
 
