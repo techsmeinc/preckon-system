@@ -28,20 +28,30 @@ import { CONFIRM_THRESHOLD, coerceArgs, type Tool, type ToolRegistry, type ToolR
 
 const MAX_STEPS = 16;
 
+/**
+ * The loop is generic over document and command type.
+ *
+ * BIM Studio drives a BimDocument emitting Commands; the issued-drawing editor
+ * drives a DxfModel emitting CadOps. Everything here — discovery, read-before-
+ * write, the gate, the trace — is identical for both, so the two differ only in
+ * their tools and in how a document is summarised for the model. Defaults keep
+ * every existing BIM call site unchanged.
+ */
+
 /** What the caller must do next. */
-export type AgentOutcome =
+export type AgentOutcome<Cmd = Command> =
   | { status: "done"; reply: string; applied: number; assumptions: string[]; trace: TraceEntry[] }
-  | { status: "needs_confirmation"; reply: string; pending: PendingAction; trace: TraceEntry[] }
+  | { status: "needs_confirmation"; reply: string; pending: PendingAction<Cmd>; trace: TraceEntry[] }
   | { status: "needs_input"; reply: string; trace: TraceEntry[] };
 
-export interface PendingAction {
+export interface PendingAction<Cmd = Command> {
   tool: string;
   label: string;
   args: Record<string, unknown>;
   affected: number;
   summary: string;
   assumptions: string[];
-  commands: Command[];
+  commands: Cmd[];
 }
 
 export interface TraceEntry {
@@ -56,24 +66,36 @@ export interface TraceEntry {
   affected?: number;
 }
 
-const SYSTEM = `You edit a BIM model by CALLING TOOLS. You never write geometry directly.
+/**
+ * The rules both assistants share. Only the subject noun and the coordinate
+ * convention differ between a metre-based BIM model and a sheet in whatever
+ * units it was drawn in, so those are arguments rather than two prompts that
+ * would drift apart.
+ */
+const sharedRules = (subject: string, coords: string) => `You edit ${subject} by CALLING TOOLS. You never write geometry directly.
 
 HOW TO WORK:
 1. Call discover_tools with a short description of the task to find the tools for it.
-2. Read before you write. Find the elements first (find_elements / resolve_reference),
-   then act on what you found. Never guess an element id.
+2. Read before you write. Find the things first, then act on what you found.
+   Never guess an id — if you did not read it from a tool result, you do not know it.
 3. Call run_tool once per step. Read its result before the next step.
 4. Set done=true with a reply when the instruction is satisfied.
 
-COORDINATES: metres. Plan X east, Y north, Z up.
+COORDINATES: ${coords}
 
 RULES:
-- If the instruction names something ("room 307", "the corridor"), use resolve_reference.
-- If you cannot tell WHICH parameter or element the user means, stop and ask. Say what
-  you would do by default and offer the alternative. Do not guess silently.
+- If the instruction names something ("room 307", "the corridor"), resolve it with a
+  read tool before acting. A name is not an id.
+- If you cannot tell WHICH parameter or element the user means, stop and ask with
+  ask_user. Say what you would do by default and offer the alternative. Do not guess
+  silently — a wrong guess applied to a hundred elements is worse than a question.
 - If a tool reports assumptions, repeat them in your reply and say how to change them.
 - State counts in your reply: what you changed, and how many.
 - Return ONLY tool calls. No prose outside them.`;
+
+export { sharedRules };
+
+const SYSTEM = sharedRules("a BIM model", "metres. Plan X east, Y north, Z up.");
 
 const DISCOVER_TOOL = {
   name: "discover_tools",
@@ -112,22 +134,29 @@ const ASK_TOOL = {
   },
 };
 
-export interface BimAgent2Args {
+export interface BimAgent2Args<Doc = BimDocument, Cmd = Command> {
   instruction: string;
-  specialist: SpecialistId;
-  doc: BimDocument;
-  registry: ToolRegistry;
+  /** BIM only. Omit for documents that have no disciplines, such as a CAD sheet. */
+  specialist?: SpecialistId;
+  doc: Doc;
+  registry: ToolRegistry<Doc, Cmd>;
   userId?: string;
   /** Apply commands to the real document; returns the new doc and how many landed. */
-  apply: (cmds: Command[]) => Promise<{ doc: BimDocument; applied: number }>;
+  apply: (cmds: Cmd[]) => Promise<{ doc: Doc; applied: number }>;
   model: string;
   callAnthropic: (req: { model: string; system: string; messages: any[]; tools: any[]; maxTokens: number }) => Promise<any>;
   /** Skip the confirmation gate — the user already approved this action. */
   preapproved?: boolean;
   confirmThreshold?: number;
+  /** How to describe this document to the model. Defaults to the BIM summary. */
+  summarise?: (doc: Doc) => string;
+  /** Replaces the shared rules wholesale. Build one with `sharedRules`. */
+  persona?: string;
+  /** What the document is called in prose, for the prompt. */
+  noun?: string;
 }
 
-export async function runBimAgent2({
+export async function runBimAgent2<Doc = BimDocument, Cmd = Command>({
   instruction,
   specialist,
   doc,
@@ -138,15 +167,19 @@ export async function runBimAgent2({
   callAnthropic,
   preapproved = false,
   confirmThreshold = CONFIRM_THRESHOLD,
-}: BimAgent2Args): Promise<AgentOutcome> {
-  const spec = SPECIALISTS[specialist] ?? SPECIALISTS.all;
-  const discipline = specialist === "all" || specialist === "general" ? "all" : specialist;
-  const system = `${spec.system}\n\n${SYSTEM}`;
+  summarise,
+  persona,
+  noun = "MODEL",
+}: BimAgent2Args<Doc, Cmd>): Promise<AgentOutcome<Cmd>> {
+  const spec = specialist ? (SPECIALISTS[specialist] ?? SPECIALISTS.all) : undefined;
+  const discipline = !specialist || specialist === "all" || specialist === "general" ? "all" : specialist;
+  const system = `${spec?.system ?? ""}\n\n${persona ?? SYSTEM}`.trim();
+  const describeDoc = summarise ?? ((d: Doc) => describe(d as unknown as BimDocument));
 
   const messages: any[] = [
     {
       role: "user",
-      content: `INSTRUCTION: ${instruction}\n\nMODEL:\n${describe(doc)}`,
+      content: `INSTRUCTION: ${instruction}\n\n${noun}:\n${describeDoc(doc)}`,
     },
   ];
 
@@ -197,7 +230,7 @@ export async function runBimAgent2({
         continue;
       }
       if (!allowed(tool, discipline)) {
-        say(`"${tool.label}" is outside your ${spec.short} remit — it acts on ${tool.disciplines?.join("/")}.`);
+        say(`"${tool.label}" is outside your ${spec?.short ?? "current"} remit — it acts on ${tool.disciplines?.join("/")}.`);
         continue;
       }
 
@@ -207,7 +240,7 @@ export async function runBimAgent2({
         continue;
       }
 
-      let result: ToolResult;
+      let result: ToolResult<Cmd>;
       try {
         result = tool.run({ doc: working, userId, discipline }, args);
       } catch (e: any) {
@@ -277,7 +310,7 @@ export async function runBimAgent2({
 
   return {
     status: "done",
-    reply: reply || `${spec.short}: ${applied} change(s) applied.`,
+    reply: reply || `${spec ? `${spec.short}: ` : ""}${applied} change(s) applied.`,
     applied,
     assumptions,
     trace,
@@ -285,7 +318,7 @@ export async function runBimAgent2({
 }
 
 /** A specialist may only run tools that act for its discipline. */
-function allowed(tool: Tool, discipline: string): boolean {
+function allowed(tool: Tool<any, any>, discipline: string): boolean {
   if (discipline === "all") return true;
   if (!tool.disciplines) return true;
   return tool.disciplines.includes(discipline as any);
