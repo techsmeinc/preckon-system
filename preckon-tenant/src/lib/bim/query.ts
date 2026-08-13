@@ -41,6 +41,16 @@ export interface Selector {
   ids?: Id[];
   /** Elements hosted on these ids (doors/windows on a wall). */
   hostedOn?: Id[];
+  /**
+   * Subtract anything matching these.
+   *
+   * "Update every sheet's issue date EXCEPT the life safety plans" is one of the
+   * commonest shapes a real instruction takes, and expressing it as a positive
+   * filter means enumerating what to keep — which is both fragile and how a bulk
+   * edit quietly hits the one set it was told to leave alone. Each exclusion is a
+   * full selector, so they nest.
+   */
+  not?: Selector[];
   /** Cap the result. Applied last, after ordering by document order. */
   limit?: number;
 }
@@ -142,6 +152,10 @@ export function matches(doc: BimDocument, e: Element, s: Selector): boolean {
     if (!ps.some((p) => p.x >= minX && p.x <= maxX && p.y >= minY && p.y <= maxY)) return false;
   }
 
+  // Exclusions last: everything above decides what is in scope, this decides
+  // what comes back out of it.
+  if (s.not?.some((n) => matches(doc, e, n))) return false;
+
   return true;
 }
 
@@ -195,7 +209,10 @@ export function explain(s: Selector): string {
   for (const t of s.params ?? []) bits.push(`${t.key} ${t.op}${t.value !== undefined ? ` "${t.value}"` : ""}`);
   if (s.within) bits.push(`within (${s.within.minX},${s.within.minY})–(${s.within.maxX},${s.within.maxY})`);
   if (s.limit !== undefined) bits.push(`limit ${s.limit}`);
-  return bits.length ? bits.join(", ") : "everything";
+  const base = bits.length ? bits.join(", ") : "everything";
+  // Spelled out rather than counted: "except 12 things" tells a reviewer nothing
+  // about whether the right 12 were spared.
+  return s.not?.length ? `${base}, except (${s.not.map(explain).join("; ")})` : base;
 }
 
 /** Longest linear element matching a selector — "the longest wall on L2". */

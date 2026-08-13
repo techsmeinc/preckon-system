@@ -340,6 +340,290 @@ const dimensionElements: Tool = {
   },
 };
 
+// ── Module: Parameters (continued) ───────────────────────────────────────────
+
+const renameByPattern: Tool = {
+  name: "rename_by_pattern",
+  label: "Rename By Pattern",
+  module: "Parameters",
+  scope: "global",
+  kind: "write",
+  description:
+    'Rename matching elements from a template. {name} is the current name, {number} a parameter, {i} the 1-based position. Example: "RM-{number}".',
+  keywords: ["rename", "pattern", "template", "renumber", "prefix", "suffix", "naming", "convention"],
+  params: [
+    { name: "selector", type: "selector", description: "Which elements to rename", required: true },
+    { name: "pattern", type: "string", description: 'Template, e.g. "RM-{number}" or "{name} (existing)"', required: true },
+    { name: "startAt", type: "number", description: "First value for {i}", default: 1 },
+  ],
+  run: (ctx, a) => {
+    const targets = query(ctx.doc, a.selector as Selector);
+    if (!targets.length) return fail(`Nothing matches ${explain(a.selector as Selector)}.`, { affected: 0 });
+
+    const pattern = String(a.pattern);
+    const start = Number(a.startAt ?? 1);
+    const unresolved = new Set<string>();
+
+    const commands: Command[] = targets.map((e, i) => {
+      const next = pattern.replace(/\{(\w+)\}/g, (_, key: string) => {
+        if (key === "name") return e.name ?? "";
+        if (key === "i") return String(start + i);
+        if (key === "id") return e.id;
+        if (key === "category") return e.category;
+        const v = e.params?.[key];
+        // A placeholder that resolves to nothing would silently produce "RM-"
+        // for every element, which looks like a rename that worked.
+        if (v === undefined) unresolved.add(key);
+        return v === undefined ? "" : String(v);
+      });
+      return { name: "set_param" as const, args: { id: e.id, key: "name", value: next } };
+    });
+
+    const preview = targets.slice(0, 3).map((e, i) => `${e.name ?? e.id} → ${(commands[i].args as any).value}`);
+    const assumptions = unresolved.size
+      ? [`No value for {${[...unresolved].join("}, {")}} on some elements — that part of the name came out empty.`]
+      : [];
+
+    return ok(`Renaming ${targets.length} element(s) to "${pattern}".`, {
+      commands,
+      affected: targets.length,
+      assumptions,
+      data: { renaming: targets.length, pattern, preview },
+    });
+  },
+};
+
+// ── Module: Structure ────────────────────────────────────────────────────────
+
+const gridIntersections: Tool = {
+  name: "grid_intersections",
+  label: "Find Grid Intersections",
+  module: "Structure",
+  scope: "global",
+  kind: "read",
+  description: "Compute where the grid lines cross. Use before placing columns or foundations at every intersection.",
+  keywords: ["grid", "intersection", "cross", "column", "setting out", "where", "gridline"],
+  params: [
+    { name: "level", type: "string", description: "Restrict to grids on one level" },
+    { name: "tolerance", type: "number", description: "Metres within which two crossings count as one", default: 0.01 },
+  ],
+  run: (ctx, a) => {
+    const grids = query(ctx.doc, { category: "grid", ...(a.level ? { level: a.level } : {}) }).filter(
+      (g) => g.geom?.start && g.geom?.end,
+    );
+    if (grids.length < 2) return fail(`Found ${grids.length} grid line(s) — at least two are needed to cross.`, { data: { grids: grids.length, intersections: [] } });
+
+    const tol = Number(a.tolerance ?? 0.01);
+    const pts: { x: number; y: number; a: string; b: string }[] = [];
+
+    for (let i = 0; i < grids.length; i++) {
+      for (let j = i + 1; j < grids.length; j++) {
+        const p = segmentIntersection(grids[i], grids[j]);
+        if (!p) continue;
+        // Three grids meeting at a point yield three identical crossings;
+        // placing a column at each would triple-stack them.
+        if (pts.some((q) => Math.hypot(q.x - p.x, q.y - p.y) <= tol)) continue;
+        pts.push({ ...p, a: grids[i].name ?? grids[i].id, b: grids[j].name ?? grids[j].id });
+      }
+    }
+
+    return ok(`${grids.length} grid lines cross at ${pts.length} distinct point(s).`, {
+      data: {
+        grids: grids.length,
+        count: pts.length,
+        intersections: pts.slice(0, 400).map((p) => ({ x: Number(p.x.toFixed(3)), y: Number(p.y.toFixed(3)), grids: [p.a, p.b] })),
+      },
+    });
+  },
+};
+
+/** Where two finite grid segments cross, or null if they are parallel or miss. */
+function segmentIntersection(g1: Element, g2: Element): { x: number; y: number } | null {
+  const a = g1.geom.start!;
+  const b = g1.geom.end!;
+  const c = g2.geom.start!;
+  const d = g2.geom.end!;
+  const r = { x: b.x - a.x, y: b.y - a.y };
+  const s = { x: d.x - c.x, y: d.y - c.y };
+  const denom = r.x * s.y - r.y * s.x;
+  if (Math.abs(denom) < 1e-9) return null; // parallel
+  const t = ((c.x - a.x) * s.y - (c.y - a.y) * s.x) / denom;
+  const u = ((c.x - a.x) * r.y - (c.y - a.y) * r.x) / denom;
+  // Grid lines are usually drawn a little short of each other, so the crossing
+  // is allowed slightly outside both segments rather than only strictly within.
+  const pad = 0.05;
+  if (t < -pad || t > 1 + pad || u < -pad || u > 1 + pad) return null;
+  return { x: a.x + t * r.x, y: a.y + t * r.y };
+}
+
+const placeAtPoints: Tool = {
+  name: "place_at_points",
+  label: "Place At Points",
+  module: "Structure",
+  scope: "global",
+  kind: "write",
+  description:
+    "Place a point-type element (column, footing, pile, equipment) at each of a list of points, optionally offset in four directions from each.",
+  keywords: ["place", "column", "grid", "each", "every", "intersection", "array", "repeat", "footing"],
+  params: [
+    { name: "category", type: "string", description: "Catalog category, e.g. column", required: true },
+    { name: "points", type: "selector", description: "Array of {x,y}", required: true },
+    {
+      name: "offsets",
+      type: "string[]",
+      description: 'Directions to offset from each point: any of up, down, left, right, none. Defaults to ["none"].',
+    },
+    { name: "offset", type: "number", description: "Offset distance in metres", default: 0 },
+    { name: "level", type: "string", description: "Level id" },
+  ],
+  run: (ctx, a) => {
+    const item = CATALOG[a.category];
+    if (!item) return fail(`Unknown category "${a.category}".`, { affected: 0 });
+    if (item.kind !== "point") return fail(`${item.label} is not a point item — use place_elements for ${item.kind} items.`, { affected: 0 });
+    if (ctx.discipline && ctx.discipline !== "all" && item.discipline !== ctx.discipline) {
+      return fail(`${a.category} is ${item.discipline}; you are acting as ${ctx.discipline}.`, { affected: 0 });
+    }
+
+    const pts = (Array.isArray(a.points) ? a.points : [a.points]).filter(
+      (p: any) => Number.isFinite(Number(p?.x)) && Number.isFinite(Number(p?.y)),
+    );
+    if (!pts.length) return fail("No usable points given.", { affected: 0 });
+
+    const DIRS: Record<string, [number, number]> = { up: [0, 1], down: [0, -1], left: [-1, 0], right: [1, 0], none: [0, 0] };
+    const dirs: string[] = (a.offsets?.length ? a.offsets : ["none"]).map((d: string) => String(d).toLowerCase());
+    const bad = dirs.filter((d) => !(d in DIRS));
+    if (bad.length) return fail(`Unknown direction(s): ${bad.join(", ")}. Use up, down, left, right or none.`, { affected: 0 });
+
+    const off = Number(a.offset ?? 0);
+    const commands: Command[] = [];
+    for (const p of pts) {
+      for (const d of dirs) {
+        const [dx, dy] = DIRS[d];
+        commands.push({
+          name: "add",
+          args: { category: a.category, at: { x: Number(p.x) + dx * off, y: Number(p.y) + dy * off }, level: a.level },
+        });
+      }
+    }
+
+    return ok(`Placing ${commands.length} ${item.label.toLowerCase()}(s) — ${dirs.length} per point across ${pts.length} point(s).`, {
+      commands,
+      affected: commands.length,
+      assumptions: off === 0 && dirs.length > 1 ? ["Offset is zero, so the items at each point will coincide."] : [],
+      data: { category: a.category, points: pts.length, perPoint: dirs.length, total: commands.length },
+    });
+  },
+};
+
+// ── Module: Views and Schedules ──────────────────────────────────────────────
+
+const createSchedule: Tool = {
+  name: "create_schedule",
+  label: "Create a Schedule",
+  module: "Views and Schedules",
+  scope: "global",
+  kind: "read",
+  description:
+    "Build a schedule of matching elements with chosen fields — a door schedule, a room area schedule. Returns rows; it does not change the model.",
+  keywords: ["schedule", "table", "list", "count", "quantities", "door schedule", "room schedule", "fields", "export"],
+  params: [
+    { name: "selector", type: "selector", description: "Which elements to schedule", required: true },
+    { name: "fields", type: "string[]", description: 'Columns: id, name, category, discipline, level, length, area, or any parameter name' },
+    { name: "groupBy", type: "string", description: "Field to group and count by" },
+  ],
+  run: (ctx, a) => {
+    const rows = query(ctx.doc, a.selector as Selector);
+    if (!rows.length) return fail(`Nothing matches ${explain(a.selector as Selector)} — the schedule would be empty.`, { data: { rows: [] } });
+
+    const fields: string[] = a.fields?.length ? a.fields : ["id", "name", "category", "level"];
+    const value = (e: Element, f: string): string | number | boolean | null => {
+      switch (f) {
+        case "id": return e.id;
+        case "name": return e.name ?? "";
+        case "category": return e.category;
+        case "discipline": return e.discipline;
+        case "level": return e.level ?? "";
+        case "length": return e.geom?.kind === "linear" ? Number(linLength(e).toFixed(3)) : null;
+        case "area": return e.geom?.kind === "area" ? Number(polygonArea(e.geom.outline ?? []).toFixed(3)) : null;
+        default: return (e.params?.[f] ?? (e.geom as any)?.[f] ?? null) as any;
+      }
+    };
+
+    const table = rows.map((e) => Object.fromEntries(fields.map((f) => [f, value(e, f)])));
+
+    let groups: { key: string; count: number }[] | undefined;
+    if (a.groupBy) {
+      const g = new Map<string, number>();
+      for (const e of rows) {
+        const k = String(value(e, a.groupBy) ?? "(none)");
+        g.set(k, (g.get(k) ?? 0) + 1);
+      }
+      groups = [...g.entries()].map(([key, count]) => ({ key, count })).sort((x, y) => y.count - x.count);
+    }
+
+    // Empty columns are worth naming: asking for "fire_rating" and getting a
+    // blank column means the parameter is not on these elements, which is a
+    // different answer from "none of them are fire rated".
+    const empty = fields.filter((f) => table.every((r) => r[f] === null || r[f] === ""));
+
+    return ok(`Scheduled ${rows.length} element(s) across ${fields.length} field(s).`, {
+      assumptions: [
+        ...(a.fields?.length ? [] : [`No fields given — used ${fields.join(", ")}.`]),
+        ...(empty.length ? [`No values found for: ${empty.join(", ")}.`] : []),
+      ],
+      data: { count: rows.length, fields, rows: table.slice(0, 200), truncated: rows.length > 200, groups },
+    });
+  },
+};
+
+const overrideGraphics: Tool = {
+  name: "override_graphics",
+  label: "Override Graphics",
+  module: "Views and Schedules",
+  scope: "global",
+  kind: "write",
+  description:
+    'Colour matching elements — "make all fire rated walls red". Sets a display colour parameter; it does not change geometry.',
+  keywords: ["colour", "color", "red", "highlight", "override", "graphics", "display", "filter", "show", "paint"],
+  params: [
+    { name: "selector", type: "selector", description: "Which elements to colour", required: true },
+    { name: "color", type: "string", description: 'Colour as a hex string, e.g. "#e11d48", or a name like "red"', required: true },
+  ],
+  run: (ctx, a) => {
+    const targets = query(ctx.doc, a.selector as Selector);
+    if (!targets.length) return fail(`Nothing matches ${explain(a.selector as Selector)}.`, { affected: 0 });
+
+    const NAMED: Record<string, string> = {
+      red: "#e11d48", green: "#16a34a", blue: "#2563eb", yellow: "#eab308",
+      orange: "#ea580c", purple: "#9333ea", grey: "#6b7280", gray: "#6b7280", black: "#111827", white: "#ffffff",
+    };
+    const raw = String(a.color).trim().toLowerCase();
+    const hex = NAMED[raw] ?? raw;
+    if (!/^#[0-9a-f]{6}$/.test(hex)) {
+      return fail(`"${a.color}" is not a colour I can use. Give a hex value like #e11d48, or one of: ${Object.keys(NAMED).join(", ")}.`, { affected: 0 });
+    }
+
+    return ok(`Colouring ${targets.length} element(s) ${raw}.`, {
+      commands: targets.map((e) => ({ name: "set_param" as const, args: { id: e.id, key: "color", value: hex } })),
+      affected: targets.length,
+      assumptions: NAMED[raw] ? [`"${raw}" taken as ${hex}.`] : [],
+      data: { coloured: targets.length, color: hex, targets: targets.slice(0, 50).map((e) => e.id) },
+    });
+  },
+};
+
+/** Shoelace area of a closed ring, in square metres. */
+function polygonArea(pts: Vec2[]): number {
+  if (pts.length < 3) return 0;
+  let a = 0;
+  for (let i = 0; i < pts.length; i++) {
+    const p = pts[i];
+    const q = pts[(i + 1) % pts.length];
+    a += p.x * q.y - q.x * p.y;
+  }
+  return Math.abs(a) / 2;
+}
+
 export const BUILTIN_TOOLS: Tool[] = [
   findElements,
   resolveReference,
@@ -347,8 +631,13 @@ export const BUILTIN_TOOLS: Tool[] = [
   tagElements,
   findUntagged,
   setParameter,
+  renameByPattern,
   placeElements,
+  placeAtPoints,
   deleteElements,
   moveElements,
   dimensionElements,
+  gridIntersections,
+  createSchedule,
+  overrideGraphics,
 ];
