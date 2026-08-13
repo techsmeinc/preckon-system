@@ -1,0 +1,62 @@
+# ---- Dependencies ----
+node_modules/
+.pnpm-store/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# ---- Build output ----
+dist/
+build/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+
+# ---- Caches ----
+.cache/
+.pytest_cache/
+.mypy_cache/
+.eslintcache
+
+# ---- Secrets (keep the .example files) ----
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+id_rsa*
+
+# ---- Runtime data / user uploads (not source) ----
+uploads/
+.uploads/
+.pgdata/
+*.sqlite
+*.sqlite3
+
+# ---- Archives ----
+*.zip
+*.tgz
+*.tar.gz
+
+# ---- Logs ----
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-error.log*
+
+# ---- Test / report output ----
+test-results/
+playwright-report/
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+*.swp
+
+# ---- Disabled nested repo histories (kept locally, not published) ----
+.git.disabled/
