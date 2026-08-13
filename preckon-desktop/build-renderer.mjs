@@ -69,7 +69,29 @@ const options = {
   // "use client" is a Next directive with no meaning here, and esbuild warns
   // about it once per file — forty warnings that hide a real one.
   logOverride: { "unsupported-jsx-comment": "silent", "different-path-case": "silent" },
-  banner: { js: "/* Preckon Workstation — built from preckon-tenant/src */" },
+  /* One `process` for the whole bundle, before a line of it runs.
+   *
+   * The tenant components pull in Next's client helpers — link, navigation,
+   * the router — and those read process.env.__NEXT_ROUTER_BASEPATH and its
+   * siblings at MODULE scope, not inside a function. There is no `process` in
+   * a plain browser bundle, so the first such read throws
+   *
+   *   Uncaught ReferenceError: process is not defined
+   *
+   * before React mounts. The window comes up with its background colour, its
+   * menu bar and nothing else — which is exactly the blank window this build
+   * shipped with, and it says nothing about the real cause unless you are
+   * watching the renderer console.
+   *
+   * The define above only rewrites process.env.NODE_ENV; every other read
+   * needs something to read FROM. An empty env is the correct value here:
+   * each flag reads undefined, so every Next feature this app does not have —
+   * i18n, basePath, trailing-slash rewriting — stays off. */
+  banner: {
+    js:
+      "/* Preckon Workstation — built from preckon-tenant/src */\n" +
+      'globalThis.process ??= { env: {} };',
+  },
 };
 
 async function copyStyles() {

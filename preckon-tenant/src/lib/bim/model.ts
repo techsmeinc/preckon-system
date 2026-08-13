@@ -81,6 +81,12 @@ export const CATALOG: Record<string, CatalogItem> = Object.fromEntries([
   // General
   it("level", "general", "point", "Level", 0x94a3b8, { elevation: 0 }),
   it("grid", "general", "linear", "Grid line", 0xc0392b, {}),
+  // Annotation. These carry no physical extent — a tag is a label pinned to an
+  // element (params.target holds the id it annotates), a dimension is a measured
+  // run between two points. They are drawn, scheduled and counted, but they never
+  // contribute quantities, so takeoff must skip them.
+  it("tag", "general", "point", "Tag", 0x2563eb, { width: 0, depth: 0, height: 0 }),
+  it("dimension", "general", "linear", "Dimension", 0x2563eb, { width: 0, height: 0 }),
 
   // ── Architectural ──────────────────────────────────────────────────────────
   it("wall", "architectural", "linear", "Wall", 0xdfe3ea, { width: 0.2, height: 3 }),
@@ -214,20 +220,47 @@ export const levelElev = (doc: BimDocument, id?: Id): number => {
 };
 export const linLength = (e: Element): number => (e.geom.start && e.geom.end ? Math.hypot(e.geom.end.x - e.geom.start.x, e.geom.end.y - e.geom.start.y) : 0);
 
-/** Compact model summary for the AI (ids, discipline, key geometry, hosts). */
-export function describe(doc: BimDocument): string {
+/** One element as a line the AI can read: id, identity, category, geometry, params. */
+export function describeElement(e: Element): string {
   const f = (n: unknown) => (typeof n === "number" && Number.isFinite(n) ? n.toFixed(1) : "0");
-  const rows = list(doc).map((e) => {
-    const g = e.geom ?? { kind: "point" as GeomKind };
-    const loc =
-      g.kind === "linear"
-        ? `(${f(g.start?.x)},${f(g.start?.y)})→(${f(g.end?.x)},${f(g.end?.y)}) len=${f(linLength(e))}`
-        : g.kind === "area"
-          ? `poly[${g.outline?.length ?? 0}]`
-          : g.kind === "hosted"
-            ? `host=${g.host ?? "?"} off=${f(g.offset)}`
-            : `at=(${f(g.at?.x)},${f(g.at?.y)})`;
-    return `${e.id} [${e.discipline}] ${e.category} ${loc}${e.level ? ` lvl=${e.level}` : ""}`;
-  });
-  return rows.length ? rows.join("\n") : "(empty — only a Ground Floor level exists)";
+  const g = e.geom ?? { kind: "point" as GeomKind };
+  const loc =
+    g.kind === "linear"
+      ? `(${f(g.start?.x)},${f(g.start?.y)})→(${f(g.end?.x)},${f(g.end?.y)}) len=${f(linLength(e))}`
+      : g.kind === "area"
+        ? `poly[${g.outline?.length ?? 0}]`
+        : g.kind === "hosted"
+          ? `host=${g.host ?? "?"} off=${f(g.offset)}`
+          : `at=(${f(g.at?.x)},${f(g.at?.y)})`;
+  // Name and params are the whole reason an instruction like "tag room 307" can
+  // resolve. Without them every room is an anonymous poly[4] and the agent has
+  // nothing to match against.
+  const name = e.name ? ` "${e.name}"` : "";
+  const params = Object.entries(e.params ?? {});
+  const p = params.length ? ` {${params.map(([k, v]) => `${k}=${v}`).join(" ")}}` : "";
+  return `${e.id}${name} [${e.discipline}] ${e.category} ${loc}${e.level ? ` lvl=${e.level}` : ""}${p}`;
+}
+
+/**
+ * Compact model summary for the AI.
+ *
+ * `limit` caps how many elements are spelled out. Past that the model is
+ * summarised by category and the agent is told to query for detail — dumping
+ * 5,000 elements into a prompt is both ruinous and useless, since the answer it
+ * needs is almost always a handful of them.
+ */
+export function describe(doc: BimDocument, limit = 400): string {
+  const all = list(doc);
+  if (!all.length) return "(empty — only a Ground Floor level exists)";
+  if (all.length <= limit) return all.map(describeElement).join("\n");
+
+  const counts = new Map<string, number>();
+  for (const e of all) counts.set(e.category, (counts.get(e.category) ?? 0) + 1);
+  const tally = [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([c, n]) => `${c}×${n}`).join(", ");
+  const levelRows = levels(doc).map(describeElement).join("\n");
+  return [
+    `${all.length} elements — too many to list. Use the query tools to find the ones you need.`,
+    `Categories: ${tally}`,
+    levelRows ? `\nLevels:\n${levelRows}` : "",
+  ].filter(Boolean).join("\n");
 }

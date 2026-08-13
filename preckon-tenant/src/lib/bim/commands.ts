@@ -7,7 +7,7 @@
  * division (arch/struct/civil/MEP/fire) that a user can place, the AI can place too.
  */
 
-import { addElement, type BimDocument, CATALOG, defaultLevel, type Geometry, type Id, levelElev, linLength, removeElement, updateElement, type Vec2 } from "./model";
+import { addElement, type BimDocument, CATALOG, defaultLevel, type Geometry, type Id, levelElev, linLength, type ParamValue, removeElement, updateElement, type Vec2 } from "./model";
 
 export type Command =
   | { name: "add"; args: AddArgs }
@@ -35,6 +35,8 @@ interface AddArgs {
   elevation?: number;
   level?: Id;
   name?: string;
+  /** Set at creation. A tag needs its target in the same command that makes it. */
+  params?: Record<string, ParamValue>;
 }
 
 const num = (v: unknown, d: number) => (Number.isFinite(Number(v)) ? Number(v) : d);
@@ -88,7 +90,7 @@ export function applyCommand(doc: BimDocument, cmd: Command): BimDocument {
       const geom = makeGeom(item, cmd.args, doc);
       if (!geom) return doc;
       const level = item.kind === "hosted" ? doc.elements[geom.host ?? ""]?.level : (cmd.args.level ?? defaultLevel(doc));
-      return addElement(doc, { discipline: item.discipline, category: item.category, name: cmd.args.name, level, geom, params: {} }).doc;
+      return addElement(doc, { discipline: item.discipline, category: item.category, name: cmd.args.name, level, geom, params: cmd.args.params ?? {} }).doc;
     }
 
     case "add_level":

@@ -254,6 +254,7 @@ app.whenReady().then(async () => {
      use. Preckon's own form, its own rate limiting, its own password rules —
      and this app never sees or stores a password. */
   ipcMain.handle("preckon:sign-in", async () => {
+    console.log("[probe] sign-in invoked\n" + new Error("here").stack);
     const base = (await readSettings()).server ?? DEFAULT_SERVER;
     return new Promise((resolve) => {
       const win = new BrowserWindow({
