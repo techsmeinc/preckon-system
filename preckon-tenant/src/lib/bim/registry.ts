@@ -107,6 +107,15 @@ export class ToolRegistry {
     return this.visible(t, userId) ? t : undefined;
   }
 
+  /**
+   * Look up a tool ignoring ownership. For diagnostics only — validation needs
+   * to distinguish "no such tool" from "that tool is personal", and `get`
+   * collapses both to undefined.
+   */
+  peek(name: string): Tool | undefined {
+    return this.tools.get(name);
+  }
+
   /** A personal tool is visible only to its author. */
   private visible(t: Tool, userId?: string): boolean {
     return t.scope === "global" || (!!t.owner && t.owner === userId);
@@ -130,8 +139,12 @@ export class ToolRegistry {
    */
   search(text: string, opts: { userId?: string; limit?: number; discipline?: Discipline | "all" } = {}): Tool[] {
     const { userId, limit = 8, discipline } = opts;
+    // An empty search means "show me what there is". A search that is ALL
+    // filler ("all of the in my") means the caller said nothing useful —
+    // returning the whole catalogue there would dress noise up as relevance.
+    if (!text.trim()) return this.all(userId).slice(0, limit);
     const terms = tokenise(text);
-    if (!terms.length) return this.all(userId).slice(0, limit);
+    if (!terms.length) return [];
 
     const scored = this.all(userId)
       .filter((t) => !discipline || discipline === "all" || !t.disciplines || t.disciplines.includes(discipline))

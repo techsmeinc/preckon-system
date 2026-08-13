@@ -69,7 +69,7 @@ export function validateAuthoredTool(def: AuthoredToolDef, registry: ToolRegistr
   if (!def.description?.trim()) errors.push("description is required — it is what the agent searches on");
   if (!def.owner?.trim()) errors.push("owner is required for a personal tool");
 
-  if (registry.get(def.name)?.scope === "global") errors.push(`"${def.name}" is the name of a built-in tool`);
+  if (registry.peek(def.name)?.scope === "global") errors.push(`"${def.name}" is the name of a built-in tool`);
 
   const steps = def.steps ?? [];
   if (!steps.length) errors.push("at least one step is required");
@@ -80,7 +80,9 @@ export function validateAuthoredTool(def: AuthoredToolDef, registry: ToolRegistr
 
   steps.forEach((s, i) => {
     const n = i + 1;
-    const target = registry.get(s.tool);
+    // peek, not get: a personal tool must be reported as "personal", not as
+    // "unknown", or the author cannot tell why their step was rejected.
+    const target = registry.peek(s.tool);
     if (!target) {
       errors.push(`step ${n}: unknown tool "${s.tool}"`);
     } else if (target.scope !== "global") {
