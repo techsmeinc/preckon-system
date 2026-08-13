@@ -65,6 +65,35 @@ const DEFAULT_SERVER = "https://app.preckon.com";
 const PARTITION = "persist:preckon-workspace";
 const workspaceSession = () => session.fromPartition(PARTITION);
 
+/* The session cookie, attached by hand.
+ *
+ * It has to be. A request made from the main process has no initiating page,
+ * so Chromium has no site to compare the target against, treats it as
+ * cross-site, and filters out a SameSite=Lax cookie — which is exactly what
+ * the workspace sets. Neither of the two options that look like they cover
+ * this actually does: `useSessionCookies: true` and `credentials: "include"`
+ * both come back 401 against a real, valid session, while the identical
+ * request with this header set by hand comes back 200.
+ *
+ * The symptom that reaches the user is worse than "signed out": the login
+ * window works, the cookie is stored, and then every call still 401s — so the
+ * app offers to sign in, they do, and nothing changes.
+ *
+ * Read from the partition the login window wrote to, so this is the same jar,
+ * not a second copy of the session.
+ */
+const cookieHeader = async (base) => {
+  const jar = await workspaceSession().cookies.get({ url: base }).catch(() => []);
+  return jar.map((c) => `${c.name}=${c.value}`).join("; ");
+};
+
+/** The given headers, plus the session — omitted entirely when signed out, so
+ *  an empty `Cookie:` never goes out. */
+const signed = async (base, headers) => {
+  const jar = await cookieHeader(base);
+  return jar ? { ...headers, cookie: jar } : headers;
+};
+
 const settingsFile = () => path.join(app.getPath("userData"), "settings.json");
 const readSettings = async () => {
   try { return JSON.parse(await fs.readFile(settingsFile(), "utf8")); } catch { return {}; }
@@ -175,10 +204,10 @@ app.whenReady().then(async () => {
       const res = await net.fetch(url, {
         method: String(method ?? "GET").toUpperCase(),
         session: workspaceSession(),
-        useSessionCookies: true,          // without this the session cookie is not sent
-        headers: body === undefined
+        useSessionCookies: true,
+        headers: await signed(base, body === undefined
           ? { accept: "application/json" }
-          : { accept: "application/json", "content-type": "application/json" },
+          : { accept: "application/json", "content-type": "application/json" }),
         body: body === undefined ? undefined : JSON.stringify(body),
       });
       if (res.status === 204) return { ok: true, data: null };
@@ -212,6 +241,7 @@ app.whenReady().then(async () => {
       const res = await net.fetch(`${base}${apiPath}`, {
         session: workspaceSession(),
         useSessionCookies: true,
+        headers: await signed(base, {}),
       });
       const text = await res.text();
       return res.ok
@@ -234,6 +264,7 @@ app.whenReady().then(async () => {
         method: "POST",
         session: workspaceSession(),
         useSessionCookies: true,
+        headers: await signed(base, {}),
         body: form,
       });
       const body = await res.text();
