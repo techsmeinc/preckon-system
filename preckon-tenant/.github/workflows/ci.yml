@@ -1,0 +1,161 @@
+# Every push and pull request, before review.
+#
+# The point is not ceremony. Preckon now has enough interacting subsystems —
+# artifact graph, workflow runtime, agent ABI, BIM, CAD, PCM, BOQ, programme —
+# that manual regression testing cannot cover a change, and the failures that
+# matter are the quiet ones: a tenant boundary that stops holding, a schema that
+# no longer matches the code, a secret committed by accident.
+#
+# Jobs run in parallel and are individually meaningful, so a red tick says WHAT
+# broke rather than only that something did.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A second push to the same branch cancels the first — no value in finishing a
+# run for a commit nobody will merge.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: preckon-tenant
+
+jobs:
+  static:
+    name: Types and lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: preckon-tenant/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+
+  unit:
+    name: Unit and integration tests
+    runs-on: ubuntu-latest
+    services:
+      # The tenancy and trust-boundary suites need a real database. They are the
+      # two that must never be skipped: one proves a tenant cannot read another's
+      # rows, the other that the AI worker cannot reach the store at all.
+      db:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ci-not-a-real-password
+          MYSQL_DATABASE: preckon_tenant
+        ports: ["3308:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -uroot -pci-not-a-real-password"
+          --health-interval=5s --health-timeout=5s --health-retries=30
+    env:
+      NODE_ENV: test
+      DATABASE_HOST: 127.0.0.1
+      DATABASE_PORT: "3308"
+      DATABASE_USER: root
+      DATABASE_PASSWORD: ci-not-a-real-password
+      DATABASE_NAME: preckon_tenant
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: preckon-tenant/package-lock.json
+      - run: npm ci
+      - name: Apply schema and migrations
+        run: |
+          sudo apt-get update && sudo apt-get install -y mysql-client
+          mysql -h 127.0.0.1 -P 3308 -uroot -pci-not-a-real-password preckon_tenant < db/schema.sql
+          for m in db/migrations/*.sql; do
+            echo "  $m"
+            mysql -h 127.0.0.1 -P 3308 -uroot -pci-not-a-real-password preckon_tenant < "$m"
+          done
+      - run: npm test
+      - name: Migrations are re-runnable
+        # Every migration is written to be safe to apply twice; a deploy relies
+        # on that, so it is worth proving rather than believing.
+        run: |
+          for m in db/migrations/*.sql; do
+            mysql -h 127.0.0.1 -P 3308 -uroot -pci-not-a-real-password preckon_tenant < "$m"
+          done
+
+  build:
+    name: Production build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: preckon-tenant/package-lock.json
+      - run: npm ci
+      - run: npm run build
+        env:
+          NODE_ENV: production
+          # Build-time only. Nothing here reaches a running deployment.
+          BETTER_AUTH_SECRET: ci-build-only-not-a-real-secret-000000
+          INTERNAL_SERVICE_TOKEN: ci-build-only
+
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history: a secret removed from the tip is still a secret, and
+          # this repo has had credentials committed before.
+          fetch-depth: 0
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  hygiene:
+    name: Deployment hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: No known-placeholder secrets in compose
+        # These shipped as literals once. Catching their return is cheaper than
+        # rediscovering them on a public host.
+        run: |
+          if grep -nE 'change-me-service-token|change-me-to-a-long-random-string|TENANT_OWNER_PASSWORD: *[^$]' docker-compose.yml; then
+            echo "::error::A placeholder secret is hard-coded in docker-compose.yml. Use \${VAR:?...} instead."
+            exit 1
+          fi
+      - name: Internal ports are not published to every interface
+        # MySQL, phpMyAdmin and the worker must be loopback-bound. A bare
+        # "3308:3306" publishes on 0.0.0.0 and puts the database on the internet
+        # the moment the host has a public address.
+        run: |
+          if grep -nE '^\s*-\s*"(3308|8081|4000):' docker-compose.yml; then
+            echo "::error::Bind internal service ports to 127.0.0.1 (e.g. \"127.0.0.1:3308:3306\")."
+            exit 1
+          fi
+      - name: Shell scripts are LF
+        # A CRLF script fails on the server with "set: -: invalid option", after
+        # the deploy has already replaced the application on disk.
+        run: |
+          for f in $(find . -name '*.sh' -not -path './node_modules/*'); do
+            if file "$f" | grep -q CRLF; then echo "::error::$f has CRLF line endings"; exit 1; fi
+          done
+      - name: Deploy points at the organisation repository
+        run: |
+          if grep -n 'divya053/newcomplete' scripts/update-from-git.sh; then
+            echo "::error::Production must deploy from the org repository, not a personal one."
+            exit 1
+          fi

@@ -19,7 +19,18 @@ if ($IsLinux -or $IsMacOS) {
   exit 1
 }
 
-$Server  = "root@74.208.182.201"
+# The server address is NOT committed. This repository is cloned onto machines
+# and shared with reviewers, and a public file naming the production host is a
+# free head start for anyone scanning it.
+#
+#   $env:PRECKON_HOST = "203.0.113.10"
+#
+if (-not $env:PRECKON_HOST) {
+  Write-Host 'Set PRECKON_HOST first, e.g.  $env:PRECKON_HOST = "your.server.ip"' -ForegroundColor Red
+  exit 1
+}
+$Server  = "root@$($env:PRECKON_HOST)"
+$DbPass  = if ($env:DATABASE_PASSWORD) { $env:DATABASE_PASSWORD } else { "preckon" }
 $Root    = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)  # ...\Preckon-system
 $Bundle  = Join-Path $Root "preckon-tenant.tgz"
 
@@ -96,7 +107,7 @@ docker compose exec -T app sh -c 'mkdir -p /app/.downloads' 2>/dev/null || true
 # How big the sheets actually are. This decides whether the remaining wait is
 # the network (a big SVG) or was the database all along (a small one).
 echo "==> Sheet sizes"
-docker compose exec -T db mysql -uroot -ppreckon preckon_tenant -e \
+docker compose exec -T db mysql -uroot -p$DbPass preckon_tenant -e \
   "SELECT COUNT(*) sheets,
           ROUND(AVG(LENGTH(svg))/1024) avg_kb,
           ROUND(MAX(LENGTH(svg))/1024) max_kb,

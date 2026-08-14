@@ -214,7 +214,7 @@ All green: **backend 5/5, e2e 2/2.** Both images build clean; `tsc --noEmit` pas
 cd preckon-tenant
 docker compose up --build -d          # mysql · phpmyadmin · app · worker
 docker compose run --rm seed          # catalog + construction pack + demo tenant/owner/project
-# → http://localhost:3100   login  owner@riverside.build / preckon-tenant-2026
+# → http://localhost:3100   login  owner@riverside.build / "$TENANT_OWNER_PASSWORD"
 # → http://localhost:8081   phpMyAdmin (server: db, root/preckon)
 
 # Host plane (control plane)
@@ -234,7 +234,7 @@ docker compose run --rm seed          # owner staff + registers the demo tenant 
 
 | Thing | URL / port | Login |
 |---|---|---|
-| Tenant app | http://localhost:3100 | owner@riverside.build / preckon-tenant-2026 |
+| Tenant app | http://localhost:3100 | owner@riverside.build / "$TENANT_OWNER_PASSWORD" |
 | Tenant phpMyAdmin | http://localhost:8081 | root / preckon (server `db`) |
 | Tenant MySQL | localhost:3308 | root / preckon |
 | Tenant AI worker | localhost:4000 | (service token) |

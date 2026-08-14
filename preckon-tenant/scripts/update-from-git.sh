@@ -12,7 +12,14 @@
 #   bash update-from-git.sh tenant     # one plane
 set -euo pipefail
 
-REPO="https://github.com/divya053/newcomplete.git"
+# The canonical source. This used to point at a personal repository, which meant
+# the artefact running in production was not the one being reviewed in the org
+# repo — a governance gap, not just untidiness. Overridable so a fork or a
+# staging box can be pointed elsewhere deliberately.
+REPO="${PRECKON_REPO:-https://github.com/techsmeinc/preckon-tenant.git}"
+# The tenant repo has the plane at its ROOT; the legacy monorepo nests it under
+# Preckon-system/. Detected after cloning rather than assumed.
+SUBDIR=""
 SRC="/opt/_preckon-src"
 WHAT="${1:-both}"
 
@@ -29,8 +36,16 @@ rm -rf "$SRC"
 git clone --depth 1 "$REPO" "$SRC" >/dev/null
 echo "  $(git -C "$SRC" log --oneline -1)"
 
+# Where the planes live inside whatever was cloned.
+if [ -d "$SRC/Preckon-system/preckon-tenant" ]; then SUBDIR="Preckon-system/"
+elif [ -d "$SRC/preckon-tenant" ]; then SUBDIR=""
+elif [ -d "$SRC/src" ] && [ -d "$SRC/db/migrations" ]; then SUBDIR="STANDALONE"
+else echo "  ! cannot find the tenant plane in $REPO"; exit 1; fi
+
 sync_plane() {
-  local name="$1" from="$SRC/Preckon-system/$1/" to="/opt/$1/"
+  local name="$1" to="/opt/$1/" from
+  if [ "$SUBDIR" = "STANDALONE" ]; then from="$SRC/"; else from="$SRC/$SUBDIR$1/"; fi
+  [ -d "$from" ] || { echo "  skip $name — not present in the source repo"; return; }
   [ -d "$to" ] || { echo "  skip $name — $to does not exist"; return; }
   echo "→ syncing $name"
   rsync -a --delete \
@@ -56,7 +71,14 @@ if want tenant && [ -d /opt/preckon-tenant ]; then
   # uses a newly added field fails with "Payload invalid for <type>". Idempotent
   # (ON DUPLICATE KEY UPDATE), so it is safe on every deploy.
   echo "→ re-registering the pack catalog (artifact schemas)"
-  docker compose --profile tools run --rm seed || echo "  ! catalog seed failed — new payload fields will be rejected"
+  # Fails the deploy. If the artifact schemas do not match the running code,
+  # every agent or editor write touching a newly added field is rejected at
+  # runtime — an application that is up and quietly broken, which is worse than
+  # one that never came up.
+  docker compose --profile tools run --rm seed || {
+    echo "  ! catalog seed FAILED — refusing to deploy code whose artifact schemas are not registered."
+    exit 1
+  }
 
   echo "→ building tenant (first cad build compiles LibreDWG — a few minutes)"
   docker compose build app worker cad

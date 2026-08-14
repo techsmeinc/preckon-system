@@ -1,4 +1,4 @@
-# Deploying the tenant plane to 74.208.182.201
+# Deploying the tenant plane to $PRECKON_HOST
 
 The bundle is `preckon-tenant.tgz`, built from the repo root:
 
@@ -20,13 +20,13 @@ be set on anything publicly reachable.
 
 ```powershell
 cd c:\Users\IKIO\Downloads\New\Preckon-system
-scp preckon-tenant.tgz root@74.208.182.201:/tmp/
+scp preckon-tenant.tgz root@$PRECKON_HOST:/tmp/
 ```
 
 ## 2. Then on the server
 
 ```bash
-ssh root@74.208.182.201
+ssh root@$PRECKON_HOST
 
 # Unpack over the existing checkout. docker-compose.override.yml is not in the
 # bundle, so the server's BETTER_AUTH_URL override survives untouched.
@@ -63,12 +63,12 @@ docker compose exec -T db mysql -uroot -ppreckon preckon_tenant \
 
 # Sign-in still works through the public origin
 curl -s -o /dev/null -w '%{http_code}\n' -X POST \
-  https://app.74.208.182.201.nip.io/api/auth/sign-in/email \
+  https://$PRECKON_ORIGIN/api/auth/sign-in/email \
   -H 'content-type: application/json' \
-  -d '{"email":"owner@cedarstone.build","password":"preckon-tenant-2026"}'
+  -d '{"email":"owner@cedarstone.build","password":"$TENANT_OWNER_PASSWORD"}'
 ```
 
-Then open <https://app.74.208.182.201.nip.io>, go to a project → **Drawings**, and
+Then open <https://$PRECKON_ORIGIN>, go to a project → **Drawings**, and
 type an instruction into BIM Studio's prompt bar.
 
 ## Drawings (.dxf / .dwg)
@@ -130,7 +130,7 @@ tar czf preckon-host.tgz \
 From PowerShell:
 
 ```powershell
-scp preckon-host.tgz root@74.208.182.201:/tmp/
+scp preckon-host.tgz root@$PRECKON_HOST:/tmp/
 ```
 
 Then on the server:

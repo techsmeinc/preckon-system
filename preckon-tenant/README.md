@@ -27,7 +27,7 @@ Then open:
 
 | What | URL | Notes |
 |---|---|---|
-| **App** | http://localhost:3100 | login `owner@riverside.build` / `preckon-tenant-2026` (tenant owner — a customer identity, separate from Host staff) |
+| **App** | http://localhost:3100 | login `owner@riverside.build` / `"$TENANT_OWNER_PASSWORD"` (tenant owner — a customer identity, separate from Host staff) |
 | **phpMyAdmin** | http://localhost:8081 | server `db`, user `root`, password `preckon` |
 | MySQL | `localhost:3308` → 3306 | database `preckon_tenant` |
 | Worker | http://localhost:4000/healthz | stateless; no DB access |
