@@ -10,6 +10,7 @@ import { addElement, describe as describeModel, emptyDocument, type BimDocument 
 import { count, query, resolve, compare } from "@/lib/bim/query";
 import { BUILTIN_TOOLS, centroid } from "@/lib/bim/tools";
 import { ToolRegistry, coerceArgs, CONFIRM_THRESHOLD } from "@/lib/bim/registry";
+import { buildRegistry } from "@/lib/bim/setup";
 import { compileAuthoredTool, resolveTemplates, templateRefs, validateAuthoredTool, type AuthoredToolDef } from "@/lib/bim/authoring";
 
 // ── fixtures ─────────────────────────────────────────────────────────────────
@@ -393,5 +394,61 @@ describe("templates", () => {
 
   it("finds every reference for validation", () => {
     expect(templateRefs({ a: "{{params.x}}", b: ["{{steps.y.z}}"] }).sort()).toEqual(["params.x", "steps.y.z"]);
+  });
+});
+
+// Ask mode: the answer must not be able to change the model.
+//
+// Enforced by withholding the write tools rather than by asking the model to
+// restrain itself. It cannot emit a command it was never given, so the promise
+// holds even when the instruction reads like an order — which matters, because
+// "delete the walls on L2" typed into an Ask box is exactly the case where a
+// prompt-level instruction would be under most pressure.
+describe("asking cannot write", () => {
+  it("offers read tools only", () => {
+    const { registry } = buildRegistry([], { readOnly: true });
+    expect(registry.all().length).toBeGreaterThan(0);
+    expect(registry.all().every((t) => t.kind === "read")).toBe(true);
+  });
+
+  it("withholds every write tool by name", () => {
+    const { registry } = buildRegistry([], { readOnly: true });
+    for (const n of ["tag_elements", "delete_elements", "place_elements", "set_parameter", "create_sheet"]) {
+      expect(registry.get(n), n).toBeUndefined();
+    }
+  });
+
+  it("still finds the read tools a question needs", () => {
+    const { registry } = buildRegistry([], { readOnly: true });
+    expect(registry.search("what is in this model").map((t) => t.name)).toContain("model_overview");
+    expect(registry.search("which rooms have no tag").map((t) => t.name)).toContain("find_untagged");
+  });
+
+  it("withholds an authored tool that writes, with a reason", () => {
+    // An authored tool compiles down to the very commands being withheld, so
+    // allowing it would be a hole straight through the guarantee.
+    const writer: AuthoredToolDef = {
+      name: "tag_all", label: "Tag All", module: "My Tools",
+      description: "tag everything", owner: "alice",
+      steps: [{ tool: "tag_elements", args: { selector: { category: "room" } } }],
+    };
+    const { registry, skipped } = buildRegistry([writer], { readOnly: true });
+    expect(registry.get("tag_all", "alice")).toBeUndefined();
+    expect(skipped.map((s) => s.name)).toContain("tag_all");
+  });
+
+  it("keeps an authored tool that only reads", () => {
+    const reader: AuthoredToolDef = {
+      name: "audit_rooms", label: "Audit Rooms", module: "My Tools",
+      description: "count untagged rooms", owner: "alice",
+      steps: [{ tool: "find_untagged", args: { selector: { category: "room" } } }],
+    };
+    const { registry } = buildRegistry([reader], { readOnly: true });
+    expect(registry.get("audit_rooms", "alice")).toBeDefined();
+  });
+
+  it("offers everything when not asking", () => {
+    const { registry } = buildRegistry([]);
+    expect(registry.get("tag_elements")).toBeDefined();
   });
 });

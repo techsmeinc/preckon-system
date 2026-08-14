@@ -62,6 +62,11 @@ export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: 
     q: string; a: string; trace?: TraceEntry[]; assumptions?: string[]; question?: boolean;
   }>>([]);
   const [openTrace, setOpenTrace] = useState<string | null>(null);
+  /* Ask answers, Edit changes. The same split the issued-drawing editor makes,
+     and for the same reason: "what is in this model" and "delete every wall on
+     L2" should not be one button. Ask is enforced server-side by withholding
+     the write tools, not by asking the model to restrain itself. */
+  const [mode, setMode] = useState<"ask" | "edit">("ask");
   const logRef = useRef<HTMLDivElement>(null);
   /* Authoring is a different job from drawing, so it is folded away rather than
      competing with the canvas. Open it when you want to build a tool; the rest
@@ -78,7 +83,7 @@ export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: 
     if (!text) return;
     setDrawing(true);
     try {
-      const r = await api.post<AgentResponse>(`/projects/${pid}/bim/agent`, { instruction: text, specialist });
+      const r = await api.post<AgentResponse>(`/projects/${pid}/bim/agent`, { instruction: text, specialist, mode });
 
       if (r.proposal && r.diff) {
         setProposal({ id: r.proposal, diff: r.diff, reply: r.reply, assumptions: r.assumptions ?? [] });
@@ -261,7 +266,17 @@ export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: 
           )}
 
           <div className="bim-ask">
-            <select value={specialist} onChange={(e) => setSpecialist(e.target.value)} aria-label={t("bim.specialist")}>
+            {/* Stated rather than inferred: altering a building model should be
+                something you chose, not something a phrasing tipped you into. */}
+            <div className="bim-mode" role="group" aria-label={t("bim.modeLabel")}>
+              <button className={mode === "ask" ? "on" : ""} onClick={() => setMode("ask")} disabled={drawing}>
+                {t("bim.modeAsk")}
+              </button>
+              <button className={mode === "edit" ? "on" : ""} onClick={() => setMode("edit")} disabled={drawing}>
+                {t("bim.modeEdit")}
+              </button>
+            </div>
+            <select value={specialist} onChange={(e) => setSpecialist(e.target.value)} aria-label={t("bim.specialist")} disabled={drawing || mode === "ask"}>
               {SPECIALIST_LIST.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
             </select>
             <textarea
@@ -269,7 +284,7 @@ export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: 
               value={instruction}
               onChange={(e) => setInstruction(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void draw(); } }}
-              placeholder={t("bim.askPlaceholder")}
+              placeholder={mode === "edit" ? t("bim.editPlaceholder") : t("bim.askPlaceholder")}
               aria-label={t("bim.ask")}
               disabled={drawing}
             />
@@ -280,7 +295,7 @@ export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: 
                 </button>
               )}
               <button className="mini sm pri" onClick={() => draw()} disabled={drawing || !instruction.trim()}>
-                {drawing ? t("bim.drawing") : t("bim.draw")}
+                {drawing ? t("bim.drawing") : mode === "edit" ? t("bim.draw") : t("bim.modeAsk")}
               </button>
             </div>
           </div>

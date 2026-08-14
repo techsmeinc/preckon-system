@@ -34,6 +34,10 @@ import { loadAuthoredTools } from "@/lib/bim/authored-store";
 
 const Body = z.object({
   instruction: z.string().min(3).max(2000),
+  /* "ask" withholds the write tools entirely, so the answer cannot change the
+     model even if the instruction reads like an order. A prompt asking the
+     model to behave is not the same guarantee. */
+  mode: z.enum(["ask", "edit"]).default("edit"),
   specialist: z.enum(["all", "architectural", "structural", "civil", "electrical", "mechanical", "plumbing", "fire"]).default("all"),
 });
 
@@ -71,7 +75,11 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
   // The registry is per-request: built-ins plus whatever this user has authored.
   // A tool that no longer compiles is skipped with a reason rather than taking
   // the assistant down with it.
-  const { registry, skipped } = buildRegistry(await loadAuthoredTools(ctx.tenantId, ctx.user.id));
+  const readOnly = body.mode === "ask";
+  const { registry, skipped } = buildRegistry(
+    await loadAuthoredTools(ctx.tenantId, ctx.user.id),
+    { readOnly },
+  );
 
   const outcome = await runBimAgent2({
     instruction: body.instruction,
@@ -112,6 +120,13 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
     trace: outcome.trace,
     skipped,
   };
+
+  /* Asking ends here. With no write tools there is nothing to propose, and
+     manufacturing an empty proposal for a question would put a decision in
+     front of somebody who did not ask to make one. */
+  if (readOnly) {
+    return ok({ ...result, proposal: null, diff: null, doc: null });
+  }
 
   // Nothing is saved to bim_document here. The proposal is, and applying it is
   // a separate act by a person.

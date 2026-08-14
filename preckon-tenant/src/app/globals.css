@@ -1589,3 +1589,14 @@ p a,li a,td a,.csub a{min-block-size:0;}
   background:var(--panel); color:var(--ink); resize:vertical;}
 .bim-ask textarea:focus{border-color:var(--brand);}
 .bim-ask-acts{display:flex; gap:6px; align-items:flex-start;}
+
+/* Ask answers, Edit changes. Same control as the issued-drawing editor, because
+   it is the same decision — and it is stated rather than inferred, so altering a
+   building model is something you chose. */
+.bim-mode{display:flex; border:1px solid var(--hairline); border-radius:8px;
+  overflow:hidden; width:fit-content; flex:0 0 auto;}
+.bim-mode button{font-size:11.5px; padding:6px 12px; border:0; background:var(--panel);
+  color:var(--slate-500); cursor:pointer; font-family:inherit;}
+.bim-mode button.on{background:var(--brand); color:#fff;}
+.bim-mode button:disabled{opacity:.5; cursor:not-allowed;}
+.bim-ask{align-items:flex-start;}

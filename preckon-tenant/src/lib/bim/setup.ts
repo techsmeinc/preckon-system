@@ -21,9 +21,33 @@ export interface BuildResult {
   skipped: { name: string; reason: string }[];
 }
 
-export function buildRegistry(authored: AuthoredToolDef[] = []): BuildResult {
-  const registry = new ToolRegistry().register(...BUILTIN_TOOLS);
+export interface BuildOptions {
+  /**
+   * Read tools only.
+   *
+   * "Ask" is a different promise from "Edit": the answer must not change the
+   * model. Enforcing that by withholding the write tools is worth more than
+   * asking the model nicely in a prompt — it cannot emit a command it was never
+   * given, so the guarantee holds even when the instruction sounds like an
+   * order.
+   */
+  readOnly?: boolean;
+}
+
+export function buildRegistry(authored: AuthoredToolDef[] = [], opts: BuildOptions = {}): BuildResult {
+  const available = opts.readOnly ? BUILTIN_TOOLS.filter((t) => t.kind === "read") : BUILTIN_TOOLS;
+  const registry = new ToolRegistry().register(...available);
   const skipped: { name: string; reason: string }[] = [];
+
+  // An authored tool that writes is not offered in ask mode either, for the same
+  // reason: it compiles down to the very commands being withheld.
+  if (opts.readOnly) {
+    for (const def of authored) {
+      const writes = def.steps.some((st) => BUILTIN_TOOLS.find((b) => b.name === st.tool)?.kind === "write");
+      if (writes) skipped.push({ name: def.name, reason: "changes the model — not available while asking" });
+    }
+    authored = authored.filter((def) => !def.steps.some((st) => BUILTIN_TOOLS.find((b) => b.name === st.tool)?.kind === "write"));
+  }
 
   for (const def of authored) {
     const errors = validateAuthoredTool(def, registry);
