@@ -157,7 +157,26 @@ export async function enqueueJob(input: EnqueueInput): Promise<string> {
     input.ctx.tenantId,
   ]);
 
-  await dispatcher(envelope);
+  /* Dispatch is best-effort; the ROW is the commitment.
+
+     This used to be a bare `await dispatcher(envelope)`, so a worker that was
+     restarting took the whole enqueue down with it — with the ai_job row already
+     written, the step already bound, and nothing anywhere that would ever look
+     at that row again. One worker restart could strand every job in flight.
+
+     Now the job is claimed before it is sent and released for retry if the send
+     fails, so a failure here costs a few seconds of latency instead of the work.
+     The reconciler picks up anything this misses, including the case where Core
+     dies between the INSERT and the POST. */
+  const claimed = await claimForDispatch(jobId);
+  if (!claimed) return jobId; // a reconciler already has it
+
+  try {
+    await dispatcher(envelope);
+  } catch (e: any) {
+    const outcome = await releaseForRetry(jobId, e?.message ?? "dispatch failed");
+    console.warn(`[jobs] dispatch of ${jobId} (${input.jobType}) failed — ${outcome}:`, e?.message);
+  }
   return jobId;
 }
 
