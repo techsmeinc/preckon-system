@@ -1502,3 +1502,59 @@ p a,li a,td a,.csub a{min-block-size:0;}
   border:1px solid var(--brand); background:var(--panel-2);}
 .bim-question b{display:block; font-size:13px; color:var(--ink); margin-bottom:6px;}
 .bim-question p{margin:0 0 6px; line-height:1.55; white-space:pre-wrap;}
+
+/* ── Authoring mode ──────────────────────────────────────────────────────────
+   Building a tool and drawing with one are different jobs. This is folded away
+   behind a disclosure so the canvas keeps its room until somebody wants it. */
+.bim-auth-wrap{margin:0 0 14px;}
+.bim-auth-toggle{display:flex; align-items:baseline; gap:8px; width:100%; padding:8px 10px;
+  border:1px solid var(--hairline); border-radius:9px; background:var(--panel-2);
+  font-family:inherit; font-size:12.5px; color:var(--ink); cursor:pointer; text-align:start;}
+.bim-auth-toggle:hover{border-color:var(--brand);}
+.bim-auth-toggle .csub{font-size:11px; font-weight:400;}
+
+.bim-authoring{padding:12px; border:1px solid var(--hairline); border-top:0;
+  border-radius:0 0 9px 9px; background:var(--panel);}
+.auth-head{display:flex; align-items:baseline; gap:10px; margin-bottom:8px;}
+.auth-head b{font-size:12.5px;}
+
+/* A tool that stopped compiling is shown, not silently missing — otherwise the
+   author has no way to learn why the assistant stopped finding it. */
+.auth-broken{margin-bottom:12px; padding:8px 10px; border-radius:8px;
+  border:1px solid var(--bad); background:var(--panel-2);}
+.auth-broken b{display:block; font-size:12px; margin-bottom:4px;}
+.auth-broken ul{margin:0; padding-left:16px; font-size:11.5px; color:var(--slate-500);}
+
+.auth-list{list-style:none; margin:0 0 14px; padding:0; display:flex; flex-direction:column; gap:6px;}
+.auth-list li{display:flex; justify-content:space-between; gap:10px; align-items:flex-start;
+  padding:8px 10px; border:1px solid var(--hairline); border-radius:8px; background:var(--panel-2);}
+.auth-list li.is-editing{border-color:var(--brand);}
+.auth-list b{font-size:12.5px;}
+.auth-list code{font-size:11px; color:var(--slate-500);}
+.auth-row-acts{display:flex; gap:6px; flex:0 0 auto;}
+
+.auth-fields{display:flex; gap:10px; flex-wrap:wrap;}
+.auth-fields label, .auth-wide{display:flex; flex-direction:column; gap:3px; margin-bottom:10px;}
+.auth-fields label{flex:1; min-width:200px;}
+.auth-wide{width:100%;}
+.bim-authoring label > span:first-child{font-size:11.5px; color:var(--ink);}
+.bim-authoring input, .bim-authoring select, .bim-authoring textarea{
+  font-family:var(--font-body); font-size:12.5px; padding:7px 9px;
+  border:1px solid var(--hairline); border-radius:8px; background:var(--panel);
+  color:var(--ink); width:100%;}
+.bim-authoring textarea.mono{font-family:var(--font-mono, monospace); font-size:11.5px; resize:vertical;}
+.bim-authoring input:focus, .bim-authoring select:focus, .bim-authoring textarea:focus{border-color:var(--brand);}
+
+.auth-steps{display:flex; flex-direction:column; gap:8px; margin:4px 0 12px;}
+.auth-step{border:1px solid var(--hairline); border-radius:8px; padding:8px; background:var(--panel-2);}
+.auth-step-head{display:flex; gap:6px; align-items:center; margin-bottom:6px; flex-wrap:wrap;}
+.auth-step-head select{flex:1; min-width:180px;}
+.auth-n{display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px;
+  border-radius:50%; background:var(--brand); color:#fff; font-size:11px; flex:0 0 auto;}
+.auth-as{max-width:180px;}
+/* The chosen tool's parameters, beside the box you type them into. Without it
+   the JSON is guesswork. */
+.auth-spec{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:5px; font-size:11px;}
+.auth-param code{font-size:11px; color:var(--ink);}
+.auth-tmpl{font-size:11px; margin:0;}
+.auth-acts{display:flex; gap:8px;}

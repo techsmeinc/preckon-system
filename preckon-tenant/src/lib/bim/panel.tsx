@@ -10,6 +10,7 @@ import { BimStudio } from "./studio";
 import { emptyDocument, type BimDocument } from "./model";
 import { SPECIALIST_LIST } from "./agents";
 import type { DocDiff } from "./proposal";
+import { AuthoringPanel } from "./authoring-panel";
 import { GetDesktop } from "@/lib/desktopLink";
 
 interface Loaded { doc: BimDocument; version: number }
@@ -59,6 +60,10 @@ export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: 
      a question is the RIGHT outcome for an ambiguous instruction, and the
      original wording stays in the box so it can be amended rather than retyped. */
   const [question, setQuestion] = useState<string | null>(null);
+  /* Authoring is a different job from drawing, so it is folded away rather than
+     competing with the canvas. Open it when you want to build a tool; the rest
+     of the time it is one line. */
+  const [authoring, setAuthoring] = useState(false);
 
   /* Ask the assistant to draw.
      It comes back with a PROPOSAL, not a changed model: what it would add, in
@@ -273,6 +278,24 @@ export function BimStudioPanel({ pid, onMeasured }: { pid: string; onMeasured?: 
               {t("bim.proposalDiscard")}
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Authoring mode. Behind a disclosure because building a tool and drawing
+          with one are different jobs, and the canvas should not lose room to a
+          form nobody has opened. */}
+      {canEdit && (
+        <div className="bim-auth-wrap">
+          <button
+            type="button"
+            className="bim-auth-toggle"
+            aria-expanded={authoring}
+            onClick={() => setAuthoring((v) => !v)}
+          >
+            <span aria-hidden>{authoring ? "▾" : "▸"}</span> {t("auth.title")}
+            <span className="csub">{t("auth.sub")}</span>
+          </button>
+          {authoring && <AuthoringPanel pid={pid} />}
         </div>
       )}
 
