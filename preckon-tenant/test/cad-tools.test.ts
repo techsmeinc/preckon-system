@@ -188,3 +188,48 @@ describe("the shared registry serves the CAD catalogue too", () => {
     expect(d).toContain("find_text(text:string, layer:string?, exact:boolean?)");
   });
 });
+
+// Regression: a PDF-imported sheet with everything on one flattened layer.
+//
+// From a live drawing — 2,836 entities, all on PDF_GEOMETRY. Asked about "wall
+// layers", list_layers filtered on "wall", matched nothing, and reported
+// "0 layer(s)." while the panel beside it showed 3. That reads as "this drawing
+// has no layers", which is a different and wrong answer.
+describe("a filter that matches nothing", () => {
+  const flattened = (): DxfModel => ({
+    insunits: 4,
+    layers: [
+      { name: "PDF_GEOMETRY", aci: 7, visible: true },
+      { name: "0", aci: 7, visible: true },
+      { name: "Defpoints", aci: 7, visible: false },
+    ],
+    entities: [text("ADIT BACKFILL CLOSURE", 100, 100, "PDF_GEOMETRY")],
+  });
+
+  it("fails rather than reporting an empty success", () => {
+    const r = tool("list_layers").run({ doc: flattened() }, { match: "wall" });
+    expect(r.ok).toBe(false);
+  });
+
+  it("says what it searched for", () => {
+    const r = tool("list_layers").run({ doc: flattened() }, { match: "wall" });
+    expect(r.summary).toContain('"wall"');
+  });
+
+  it("lists what is actually there, so the next step can be right", () => {
+    const r = tool("list_layers").run({ doc: flattened() }, { match: "wall" });
+    expect(r.summary).toContain("PDF_GEOMETRY");
+    expect((r.data as any).layers).toHaveLength(3);
+  });
+
+  it("still reports plainly when nothing was filtered", () => {
+    const r = tool("list_layers").run({ doc: flattened() }, {});
+    expect(r.ok).toBe(true);
+    expect(r.summary).toBe("3 layer(s).");
+  });
+
+  it("counts matches against the total when a filter does hit", () => {
+    const r = tool("list_layers").run({ doc: flattened() }, { match: "pdf" });
+    expect(r.summary).toBe('1 of 3 layer(s) match "pdf".');
+  });
+});

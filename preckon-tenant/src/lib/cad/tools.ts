@@ -125,10 +125,25 @@ const listLayers: CadTool = {
     const needle = String(a.match ?? "").toLowerCase();
     const counts: Record<string, number> = {};
     for (const e of ctx.doc.entities) counts[e.layer] = (counts[e.layer] ?? 0) + 1;
-    const rows = ctx.doc.layers
-      .filter((l) => !needle || l.name.toLowerCase().includes(needle))
-      .map((l) => ({ name: l.name, visible: l.visible, entities: counts[l.name] ?? 0 }));
-    return ok(`${rows.length} layer(s).`, { data: { layers: rows } });
+    const row = (l: { name: string; visible: boolean }) => ({ name: l.name, visible: l.visible, entities: counts[l.name] ?? 0 });
+    const all = ctx.doc.layers.map(row);
+    const rows = needle ? all.filter((l) => l.name.toLowerCase().includes(needle)) : all;
+
+    /* A filter that matches nothing must not read as "this drawing has no
+       layers". It happens constantly on imported sheets: a question about wall
+       layers filters on "wall", a PDF import has everything flattened onto one
+       PDF_GEOMETRY layer, and a bare "0 layer(s)." sends the agent off to
+       explain an absence that is really a naming mismatch. Say what was searched
+       for, and show what is actually there so the next step can be right. */
+    if (needle && !rows.length) {
+      return fail(`No layer name contains "${a.match}". This drawing has ${all.length}: ${all.map((l) => l.name).join(", ")}.`, {
+        data: { matched: 0, filter: a.match, layers: all },
+      });
+    }
+
+    return ok(needle ? `${rows.length} of ${all.length} layer(s) match "${a.match}".` : `${rows.length} layer(s).`, {
+      data: { matched: rows.length, total: all.length, ...(needle ? { filter: a.match } : {}), layers: rows },
+    });
   },
 };
 
