@@ -2,6 +2,7 @@ import type { AgentContext } from "./abi";
 import { query } from "./db";
 import { newId } from "./ids";
 import { TIER_ORDER, type Tier } from "./constants";
+import { claimForDispatch, clearLease, releaseForRetry } from "./job-queue";
 
 // ── §5 The job seam. Core owns dispatch + tracking; the stateless worker runs
 // the (stub) agent logic and returns proposals. The worker has NO store access
@@ -92,6 +93,15 @@ let dispatcher: Dispatcher = async (env) => {
 export function setDispatcher(fn: Dispatcher): void {
   dispatcher = fn;
 }
+
+/**
+ * Send an envelope using whatever dispatcher is currently configured.
+ *
+ * The reconciler needs this rather than the module-private binding: tests swap
+ * the dispatcher for an in-process one, and recovery has to follow the swap or
+ * it would quietly go to the network in a test that never expected it to.
+ */
+export const dispatchEnvelope: Dispatcher = (env) => dispatcher(env);
 
 export interface EnqueueInput {
   ctx: AgentContext;
@@ -192,6 +202,9 @@ export async function recordJobResult(result: JobResult): Promise<{
     return { job, alreadyDone: true }; // idempotent — duplicate callback is a no-op
 
   const status = result.status === "succeeded" ? "succeeded" : "failed";
+  // The queue stops watching a job the moment a real result lands, so the
+  // reconciler cannot reclaim one that has already reported.
+  await clearLease(result.job_id);
   await query(
     `UPDATE ai_job SET status = ?, result = ?, roster = COALESCE(?, roster), error = ?, trace_id = ?,
         input_tokens = ?, output_tokens = ?, cost_minor = ?, model = COALESCE(?, model),
