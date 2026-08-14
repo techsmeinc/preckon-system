@@ -29,6 +29,18 @@ function usage(env) {
   return { model: env.tier === "deep" ? "claude-opus-4-8" : "claude-haiku-4-5", input_tokens: 500, output_tokens: 120, cost_minor: 8 };
 }
 
+/**
+ * Usage for a stub answer.
+ *
+ * It must NOT claim a model that never ran. The plain usage() above reports
+ * "claude-opus-4-8" whatever produced the result, which writes a real model name
+ * onto a fabricated job and makes the two indistinguishable in ai_job forever
+ * after. Cost is zero because nothing was spent.
+ */
+function stubUsage() {
+  return { model: "stub:deterministic", input_tokens: 0, output_tokens: 0, cost_minor: 0 };
+}
+
 // tier → concrete model id (env-overridable). Used only on the real-Claude path.
 const MODEL_FOR_TIER = {
   routing: process.env.ANTHROPIC_MODEL_ROUTING ?? "claude-haiku-4-5",
@@ -37,22 +49,78 @@ const MODEL_FOR_TIER = {
 };
 
 /**
- * Compute a JobResult for an envelope. HYBRID: if ANTHROPIC_API_KEY is set, the
- * agent reasons with Claude; otherwise (or on any error) it falls back to the
- * deterministic stub. The stub doubles as the output SHAPE TEMPLATE so real
- * outputs stay schema-valid (Core validates them regardless, §5.1). Async.
+ * May a deterministic stub stand in for a real answer?
+ *
+ * The stub exists so the runtime — gates, provenance, stale/re-plan, audit —
+ * can be exercised without model nondeterminism. That is worth keeping. What is
+ * not acceptable is what it used to do: on a Claude outage, return invented
+ * quantities as `status: "succeeded"`, indistinguishable from a real bill.
+ *
+ * A fabricated BOQ that looks successful is worse than no BOQ. Somebody prices
+ * work from it. So:
+ *
+ *   DEMO_STUB_MODE=true  → permitted anywhere, an explicit and deliberate choice
+ *   NODE_ENV=production  → never
+ *   otherwise (dev/test) → permitted
+ *
+ * Production with no key does not quietly degrade either: the job fails and says
+ * the key is missing, which is a fixable complaint rather than a plausible
+ * invention.
+ */
+export function stubPolicy(envv = process.env) {
+  if (String(envv.DEMO_STUB_MODE).toLowerCase() === "true") {
+    return { allowed: true, why: "DEMO_STUB_MODE=true" };
+  }
+  if (envv.NODE_ENV === "production") {
+    return { allowed: false, why: "NODE_ENV=production and DEMO_STUB_MODE is not set" };
+  }
+  return { allowed: true, why: `NODE_ENV=${envv.NODE_ENV ?? "development"}` };
+}
+
+const failure = (base, message, detail) => ({
+  ...base,
+  usage: stubUsage(),
+  status: "failed",
+  outputs: undefined,
+  error: { message, ...(detail ? { detail } : {}) },
+});
+
+/**
+ * Compute a JobResult for an envelope.
+ *
+ * With a key, the agent reasons with Claude. Without one — or when Claude fails
+ * — the deterministic stub answers ONLY where stubPolicy permits it; otherwise
+ * the job fails so Core can retry it and a person can see that it did not run.
+ * The stub doubles as the output SHAPE TEMPLATE, so real outputs stay
+ * schema-valid (Core validates them regardless, §5.1).
  */
 export async function computeJobResult(env) {
   const base = { job_id: env.job_id, usage: usage(env), trace_id: `lf_${env.job_id.slice(0, 8)}`, error: null };
   const template = buildOutputs(env);
+  const policy = stubPolicy();
+
   if (process.env.ANTHROPIC_API_KEY) {
     try {
       return await withClaude(env, base, template);
     } catch (e) {
-      console.error("[worker] Claude call failed — falling back to stub:", e.message);
+      if (!policy.allowed) {
+        // Loud, and it fails. Core marks the job failed, the step does not
+        // advance, and the user is told — rather than being handed a bill that
+        // no model ever produced.
+        console.error(`[worker] job ${env.job_id} (${env.job_type}) FAILED — Claude error, and stub output is not permitted (${policy.why}):`, e.message);
+        return failure(base, `The AI service failed and this deployment does not permit substitute output (${policy.why}). The job was not completed.`, e.message);
+      }
+      console.warn(`[worker] Claude call failed — using STUB output because ${policy.why}:`, e.message);
+      return finalize({ ...base, usage: stubUsage() }, template);
     }
   }
-  return finalize(base, template);
+
+  if (!policy.allowed) {
+    console.error(`[worker] job ${env.job_id} (${env.job_type}) FAILED — no ANTHROPIC_API_KEY and stub output is not permitted (${policy.why}).`);
+    return failure(base, `No AI service is configured and this deployment does not permit substitute output (${policy.why}). Set ANTHROPIC_API_KEY on the worker.`);
+  }
+
+  return finalize({ ...base, usage: stubUsage() }, template);
 }
 
 function finalize(base, template) {
