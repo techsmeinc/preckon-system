@@ -14,6 +14,7 @@ import type { Command } from "./commands";
 import { CATALOG, type Element, type Vec2, levels, linLength } from "./model";
 import { count, explain, query, resolve, type Selector } from "./query";
 import type { Tool, ToolContext, ToolResult } from "./registry";
+import { DOCUMENTATION_TOOLS } from "./documentation";
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -632,6 +633,7 @@ function polygonArea(pts: Vec2[]): number {
 }
 
 export const BUILTIN_TOOLS: Tool[] = [
+  ...DOCUMENTATION_TOOLS,
   findElements,
   resolveReference,
   modelOverview,

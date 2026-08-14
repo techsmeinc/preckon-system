@@ -44,9 +44,22 @@ function polygonArea(pts: { x: number; y: number }[]): number {
  * Deductions for openings are applied to their host wall, because a wall billed
  * without its door and window openings taken out is the classic overmeasure.
  */
+/**
+ * Categories that are drawn but never built.
+ *
+ * A tag, a dimension, a view, a sheet, a viewport — none of them is a thing
+ * anybody pours, erects or is paid for. Measuring them would put lines in a bill
+ * for annotation, which is an overmeasure nobody would think to look for because
+ * the geometry it came from is real enough to survive a glance.
+ *
+ * This list must grow whenever a documentation category is added to CATALOG.
+ * The takeoff test asserts that every zero-extent general category is in here.
+ */
+const NOT_MEASURED = new Set(["level", "tag", "dimension", "view", "sheet", "viewport"]);
+
 export function takeoff(doc: BimDocument): Measurement[] {
   const out: Measurement[] = [];
-  const elements = list(doc).filter((e) => e.category !== "level");
+  const elements = list(doc).filter((e) => !NOT_MEASURED.has(e.category));
 
   // Opening area per host wall, so wall areas come out net.
   const deductions = new Map<string, number>();

@@ -87,6 +87,14 @@ export const CATALOG: Record<string, CatalogItem> = Object.fromEntries([
   // contribute quantities, so takeoff must skip them.
   it("tag", "general", "point", "Tag", 0x2563eb, { width: 0, depth: 0, height: 0 }),
   it("dimension", "general", "linear", "Dimension", 0x2563eb, { width: 0, height: 0 }),
+  // Documentation. A view is a way of looking at the model, a sheet is a piece
+  // of paper, and a viewport is a view placed on a sheet at a position. None has
+  // physical extent — they are elements only so that one document model, one
+  // command interpreter and one query engine serve them too, which is the same
+  // bargain the catalog makes everywhere else. Takeoff must skip them.
+  it("view", "general", "point", "View", 0x0ea5e9, { width: 0, depth: 0, height: 0 }),
+  it("sheet", "general", "point", "Sheet", 0x0ea5e9, { width: 0, depth: 0, height: 0 }),
+  it("viewport", "general", "point", "Viewport", 0x0ea5e9, { width: 0, depth: 0, height: 0 }),
 
   // ── Architectural ──────────────────────────────────────────────────────────
   it("wall", "architectural", "linear", "Wall", 0xdfe3ea, { width: 0.2, height: 3 }),
