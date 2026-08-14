@@ -1558,3 +1558,34 @@ p a,li a,td a,.csub a{min-block-size:0;}
 .auth-param code{font-size:11px; color:var(--ink);}
 .auth-tmpl{font-size:11px; margin:0;}
 .auth-acts{display:flex; gap:8px;}
+
+/* ── BIM Studio: the conversation ────────────────────────────────────────────
+   Same shape as the issued-drawing editor, because it is the same job. A
+   single-shot box loses the thread — the commonest exchange is an instruction, a
+   clarifying question, and the answer, and with only a "last result" you cannot
+   see what you were asked while you type the reply. */
+.bim-chat{margin-bottom:12px;}
+.bim-log{max-height:280px; overflow:auto; display:flex; flex-direction:column; gap:10px;
+  padding:10px; margin-bottom:8px; border:1px solid var(--hairline); border-radius:9px;
+  background:var(--panel-2);}
+.bim-turn .q{font-size:12.5px; padding:6px 10px; border-radius:9px; background:var(--brand);
+  color:#fff; align-self:flex-end; max-width:85%; margin-inline-start:auto; width:fit-content;}
+.bim-turn .a{font-size:12.5px; line-height:1.55; margin-top:6px; white-space:pre-wrap;}
+/* A question is not a failure, so it is not styled like one. */
+.bim-turn .a.is-question{border-inline-start:2px solid var(--brand); padding-inline-start:8px;}
+.bim-assumed{margin:5px 0 0; padding-inline-start:16px; list-style:disc;}
+.bim-assumed li{font-size:11.5px; color:var(--slate-500); line-height:1.5;}
+
+/* Starters: the useful instructions are not obvious, and an empty box teaches
+   nobody what this can do. */
+.bim-eg{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;}
+.bim-eg button{font-size:11.5px; padding:5px 10px; border-radius:999px;
+  border:1px solid var(--hairline); background:var(--panel-2); color:var(--slate-500);
+  cursor:pointer; font-family:inherit;}
+.bim-eg button:hover{border-color:var(--brand); color:var(--ink);}
+
+.bim-ask textarea{flex:1; min-width:220px; font-family:var(--font-body); font-size:13px;
+  padding:9px 12px; border:1px solid var(--hairline); border-radius:9px;
+  background:var(--panel); color:var(--ink); resize:vertical;}
+.bim-ask textarea:focus{border-color:var(--brand);}
+.bim-ask-acts{display:flex; gap:6px; align-items:flex-start;}
