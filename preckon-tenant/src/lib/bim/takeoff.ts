@@ -55,7 +55,15 @@ function polygonArea(pts: { x: number; y: number }[]): number {
  * This list must grow whenever a documentation category is added to CATALOG.
  * The takeoff test asserts that every zero-extent general category is in here.
  */
-const NOT_MEASURED = new Set(["level", "tag", "dimension", "view", "sheet", "viewport"]);
+const NOT_MEASURED = new Set([
+  "level",
+  // A grid line is setting-out, not construction. It was being measured as
+  // linear metres — a 200 m grid line on a 16-grid frame adds kilometres of
+  // billed "Grid line" to a bill that nobody ordered, and it looks plausible
+  // enough in a category list to survive review.
+  "grid",
+  "tag", "dimension", "view", "sheet", "viewport",
+]);
 
 export function takeoff(doc: BimDocument): Measurement[] {
   const out: Measurement[] = [];
