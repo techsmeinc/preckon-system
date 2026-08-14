@@ -11,22 +11,31 @@ services:
     image: mysql:8.0
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: preckon
-      MYSQL_DATABASE: preckon_tenant
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD:-preckon}
+      MYSQL_DATABASE: ${DATABASE_NAME:-preckon_tenant}
     ports:
-      - "3308:3306"
+      # Loopback only. Published so a developer can point a client at 3308;
+      # bound to 127.0.0.1 so a server with a public interface does not put
+      # MySQL on the internet the moment it comes up.
+      - "127.0.0.1:3308:3306"
     volumes:
       - db_data:/var/lib/mysql
       # Schema runs once, on first init.
       - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-ppreckon"]
+      # Follows the password variable rather than repeating it: the two drifting
+      # apart makes a healthy database report unhealthy forever.
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p\"$$MYSQL_ROOT_PASSWORD\""]
       interval: 5s
       timeout: 5s
       retries: 30
 
+  # Root-level database access over HTTP. Behind a profile so it does NOT start
+  # with `docker compose up` — run it deliberately with `--profile tools` when
+  # you want it, on a machine where that is appropriate.
   phpmyadmin:
     image: phpmyadmin:5
+    profiles: ["tools"]
     restart: unless-stopped
     depends_on:
       db:
@@ -35,10 +44,10 @@ services:
       PMA_HOST: db
       PMA_PORT: 3306
       PMA_USER: root
-      PMA_PASSWORD: preckon
+      PMA_PASSWORD: ${DATABASE_PASSWORD:-preckon}
       UPLOAD_LIMIT: 64M
     ports:
-      - "8081:80"
+      - "127.0.0.1:8081:80"
 
   worker:
     build: ./worker
@@ -52,12 +61,14 @@ services:
       # hundreds of KB. Neither service holds a database handle or a credential,
       # so this adds no reach.
       CAD_URL: http://cad:7400
-      INTERNAL_SERVICE_TOKEN: change-me-service-token
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:?set INTERNAL_SERVICE_TOKEN in .env}
       # Set ANTHROPIC_API_KEY (e.g. in a .env next to this file) to use REAL Claude
       # agents; unset → deterministic stub agents. Model ids are env-overridable.
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
     ports:
-      - "4000:4000"
+      # Internal. Core reaches it over the compose network as http://worker:4000;
+      # this publish is only so a developer can curl the /claude proxy locally.
+      - "127.0.0.1:4000:4000"
 
   # The CAD extraction sidecar (§5.1, same trust boundary as the worker): parses
   # .dxf/.dwg into a measured summary. No DB driver, no credentials, and the
@@ -86,11 +97,11 @@ services:
       DATABASE_HOST: db
       DATABASE_PORT: "3306"
       DATABASE_USER: root
-      DATABASE_PASSWORD: preckon
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-preckon}
       DATABASE_NAME: preckon_tenant
-      BETTER_AUTH_SECRET: change-me-to-a-long-random-string-min-32-chars
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?set BETTER_AUTH_SECRET in .env (32+ random chars)}
       BETTER_AUTH_URL: http://localhost:3100
-      INTERNAL_SERVICE_TOKEN: change-me-service-token
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:?set INTERNAL_SERVICE_TOKEN in .env}
       WORKER_URL: http://worker:4000
       CAD_URL: http://cad:7400
       CORE_URL: http://app:3000
@@ -124,12 +135,12 @@ services:
       DATABASE_HOST: db
       DATABASE_PORT: "3306"
       DATABASE_USER: root
-      DATABASE_PASSWORD: preckon
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-preckon}
       DATABASE_NAME: preckon_tenant
-      BETTER_AUTH_SECRET: change-me-to-a-long-random-string-min-32-chars
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?set BETTER_AUTH_SECRET in .env (32+ random chars)}
       BETTER_AUTH_URL: http://localhost:3100
       TENANT_OWNER_EMAIL: owner@riverside.build
-      TENANT_OWNER_PASSWORD: preckon-tenant-2026
+      TENANT_OWNER_PASSWORD: ${TENANT_OWNER_PASSWORD:?set TENANT_OWNER_PASSWORD in .env}
     command: ["npm", "run", "seed"]
 
 volumes:

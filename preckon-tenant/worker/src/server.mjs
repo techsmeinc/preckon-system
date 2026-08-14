@@ -4,7 +4,7 @@
 // materializes the proposals. This process has no DB driver and no DB env; the
 // trust boundary is structural, not just conventional.
 import http from "node:http";
-import { computeJobResult } from "./agents.mjs";
+import { computeJobResult, stubPolicy } from "./agents.mjs";
 
 const PORT = Number(process.env.PORT ?? 4000);
 const CORE_URL = process.env.CORE_URL ?? "http://localhost:3100";
@@ -105,4 +105,29 @@ const server = http.createServer(async (req, res) => {
   res.writeHead(404).end("not found");
 });
 
-server.listen(PORT, () => console.log(`[worker] listening on :${PORT} — Core at ${CORE_URL}`));
+/**
+ * Say at boot what this worker will actually do, rather than letting it be
+ * discovered one job at a time.
+ *
+ * The dangerous configuration is production with no key: every job then fails,
+ * and the reason is one line buried in a per-job log. The dangerous-and-quiet
+ * one is DEMO_STUB_MODE left on in production, where invented quantities are
+ * returned as successes. Both get announced here.
+ */
+function announce() {
+  const hasKey = !!process.env.ANTHROPIC_API_KEY;
+  const policy = stubPolicy();
+  const prod = process.env.NODE_ENV === "production";
+
+  console.log(`[worker] listening on :${PORT} — Core at ${CORE_URL}`);
+  console.log(`[worker] Claude: ${hasKey ? "configured" : "NOT configured"} · stub output: ${policy.allowed ? "permitted" : "refused"} (${policy.why})`);
+
+  if (!hasKey && !policy.allowed) {
+    console.error("[worker] ▲ Every AI job will FAIL: no ANTHROPIC_API_KEY, and substitute output is not permitted here. Set the key.");
+  }
+  if (prod && policy.allowed) {
+    console.error("[worker] ▲ DEMO_STUB_MODE is on in production. Invented quantities will be returned as successful results. Turn it off unless this box is a demo.");
+  }
+}
+
+server.listen(PORT, announce);
