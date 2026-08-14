@@ -37,14 +37,32 @@ git clone --depth 1 "$REPO" "$SRC" >/dev/null
 echo "  $(git -C "$SRC" log --oneline -1)"
 
 # Where the planes live inside whatever was cloned.
+#
+# STANDALONE means the repository IS one plane, at its root — which is how the
+# per-plane org repos are laid out. WHICH plane it is comes from the repo name,
+# and that matters more than it looks: without it, `sync_plane preckon-host`
+# would take "$SRC/" as its source and rsync --delete the TENANT over the host
+# plane. The default invocation does both planes, so that is one command away
+# from destroying the other install.
+STANDALONE_PLANE=""
 if [ -d "$SRC/Preckon-system/preckon-tenant" ]; then SUBDIR="Preckon-system/"
 elif [ -d "$SRC/preckon-tenant" ]; then SUBDIR=""
-elif [ -d "$SRC/src" ] && [ -d "$SRC/db/migrations" ]; then SUBDIR="STANDALONE"
+elif [ -d "$SRC/src" ] && [ -d "$SRC/db/migrations" ]; then
+  SUBDIR="STANDALONE"
+  STANDALONE_PLANE="$(basename "$REPO" .git)"
+  echo "  $REPO holds $STANDALONE_PLANE at its root"
 else echo "  ! cannot find the tenant plane in $REPO"; exit 1; fi
 
 sync_plane() {
   local name="$1" to="/opt/$1/" from
-  if [ "$SUBDIR" = "STANDALONE" ]; then from="$SRC/"; else from="$SRC/$SUBDIR$1/"; fi
+  if [ "$SUBDIR" = "STANDALONE" ]; then
+    # Only the plane this repository actually holds. Syncing any other from here
+    # would copy the wrong source over it, and rsync --delete makes that final.
+    [ "$name" = "$STANDALONE_PLANE" ] || { echo "  skip $name — $REPO holds only $STANDALONE_PLANE"; return; }
+    from="$SRC/"
+  else
+    from="$SRC/$SUBDIR$1/"
+  fi
   [ -d "$from" ] || { echo "  skip $name — not present in the source repo"; return; }
   [ -d "$to" ] || { echo "  skip $name — $to does not exist"; return; }
   echo "→ syncing $name"
