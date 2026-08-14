@@ -9,6 +9,7 @@ import { enqueueJob, recordJobResult, type JobInputArtifact, type JobResult } fr
 import type { Tier } from "./constants";
 import { cadDigest } from "./cad";
 import { join as pathJoin } from "node:path";
+import { isTypeMatch, typeMatchSql } from "./artifact-types";
 
 // ── §4 The workflow runtime: Preckon Core's deterministic scheduler. No LLM.
 // It materializes a step per node, dispatches steps whose upstream completed,
@@ -88,16 +89,15 @@ async function gateResolved(
   let pendingRemains = false;
   let hasConfirmed = false;
   for (const t of gateTypes) {
-    const short = t.split(".").pop();
     const pending = await queryOne<{ n: number }>(
       `SELECT COUNT(*) AS n FROM artifact
-        WHERE tenant_id = ? AND source_run_id = ? AND type_key LIKE ? AND status = 'pending'`,
-      [tenantId, runId, `%${short}`]
+        WHERE tenant_id = ? AND source_run_id = ? AND ${typeMatchSql("type_key", t).sql} AND status = 'pending'`,
+      [tenantId, runId, ...typeMatchSql("type_key", t).params]
     );
     const confirmed = await queryOne<{ n: number }>(
       `SELECT COUNT(*) AS n FROM artifact
-        WHERE tenant_id = ? AND source_run_id = ? AND type_key LIKE ? AND status = 'confirmed'`,
-      [tenantId, runId, `%${short}`]
+        WHERE tenant_id = ? AND source_run_id = ? AND ${typeMatchSql("type_key", t).sql} AND status = 'confirmed'`,
+      [tenantId, runId, ...typeMatchSql("type_key", t).params]
     );
     if (Number(pending?.n ?? 0) > 0) pendingRemains = true;
     if (Number(confirmed?.n ?? 0) > 0) hasConfirmed = true;
@@ -246,8 +246,8 @@ export async function advanceRun(tenantId: string, runId: string): Promise<void>
         const overType = node.over!;
         const items = await query<{ id: string }>(
           `SELECT id FROM artifact
-            WHERE tenant_id = ? AND project_id = ? AND type_key LIKE ? AND status = 'confirmed'`,
-          [tenantId, run.project_id, `%${overType.split(".").pop()}`]
+            WHERE tenant_id = ? AND project_id = ? AND ${typeMatchSql("type_key", overType).sql} AND status = 'confirmed'`,
+          [tenantId, run.project_id, ...typeMatchSql("type_key", overType).params]
         );
         await query(
           "UPDATE workflow_run_step SET status = 'completed', output_artifact_ids = ?, started_at = NOW(3), ended_at = NOW(3) WHERE id = ?",
@@ -490,7 +490,7 @@ async function dispatchAgentStep(
   const agent = await getAgent(node.agent_key!);
   const jt =
     agent.job_types.find((j) => j.type === node.job_type) ??
-    agent.job_types.find((j) => (node.job_type ? j.type.endsWith(node.job_type) : false)) ??
+    agent.job_types.find((j) => (node.job_type ? isTypeMatch(j.type, node.job_type) : false)) ??
     agent.job_types[0];
   const tier: Tier = jt?.tier ?? "deep";
   const promptRef = jt?.prompt_ref ?? `${jt?.type ?? node.agent_key}@v1`;
@@ -517,8 +517,8 @@ async function dispatchAgentStep(
       if (c === "*") continue;
       const rows = await query<{ id: string; type_key: string; payload: any }>(
         `SELECT id, type_key, payload FROM artifact
-          WHERE tenant_id = ? AND project_id = ? AND type_key LIKE ? AND status = 'confirmed'`,
-        [tenantId, projectId, `%${c.split(".").pop()}`]
+          WHERE tenant_id = ? AND project_id = ? AND ${typeMatchSql("type_key", c).sql} AND status = 'confirmed'`,
+        [tenantId, projectId, ...typeMatchSql("type_key", c).params]
       );
       for (const r of rows) out.push({ id: r.id, type: r.type_key, payload: r.payload });
     }

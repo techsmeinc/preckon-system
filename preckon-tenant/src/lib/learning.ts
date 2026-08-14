@@ -1,5 +1,6 @@
 import { uuidv7 } from "uuidv7";
 import { query } from "./db";
+import { typeMatchSql } from "./artifact-types";
 
 // Learning from being corrected.
 //
@@ -125,10 +126,10 @@ export async function lessonsFor(
   return query<Lesson>(
     `SELECT subject, field, was_value, now_value, times_seen
        FROM learned_lesson
-      WHERE tenant_id = ? AND type_key LIKE ? AND status = 'active' AND subject IN (${ph})
+      WHERE tenant_id = ? AND ${typeMatchSql("type_key", typeKey).sql} AND status = 'active' AND subject IN (${ph})
       ORDER BY times_seen DESC, updated_at DESC
       LIMIT ${Math.min(100, Math.max(1, limit))}`,
-    [tenantId, `%${shortType(typeKey)}`, ...keys]
+    [tenantId, ...typeMatchSql("type_key", typeKey).params, ...keys]
   );
 }
 

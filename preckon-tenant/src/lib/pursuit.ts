@@ -5,6 +5,7 @@ import { licensedWorkflows } from "./entitlements";
 import { getLifecycle, advanceLifecycle } from "./lifecycle";
 import { startRun } from "./runtime";
 import type { Artifact } from "./store";
+import { typeMatchSql } from "./artifact-types";
 
 // ── Pursuit orchestrator (autopilot). Domain-NEUTRAL: it reads the tenant's bound
 // pack purely as data (licensed workflows, their agents' consumes/produces, and
@@ -128,8 +129,8 @@ async function autoAdvanceLifecycle(tenantId: string, projectId: string): Promis
     let advanced = false;
     for (const t of outgoing) {
       const rows = await query<Artifact>(
-        `SELECT * FROM artifact WHERE tenant_id = ? AND project_id = ? AND type_key LIKE ? AND status = 'confirmed' ORDER BY created_at DESC`,
-        [tenantId, projectId, `%${short(t.trigger_type)}`]
+        `SELECT * FROM artifact WHERE tenant_id = ? AND project_id = ? AND ${typeMatchSql("type_key", t.trigger_type).sql} AND status = 'confirmed' ORDER BY created_at DESC`,
+        [tenantId, projectId, ...typeMatchSql("type_key", t.trigger_type).params]
       );
       const match = rows.find((r) =>
         Object.entries(t.trigger_match ?? {}).every(([k, v]) => r.payload?.[k] === v)

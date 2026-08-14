@@ -5,6 +5,7 @@ import { errNotFound } from "./errors";
 import { newId } from "./ids";
 import { enqueueJob, recordJobResult, type JobInputArtifact, type JobResult } from "./jobs";
 import type { Tier } from "./constants";
+import { isTypeMatch, matchesAnyType } from "./artifact-types";
 
 // §6 — the Orchestrator role realized on the §5 machinery. A user posts a
 // message → Core assembles the whole-run context → enqueues a supervisor job →
@@ -30,7 +31,7 @@ async function supervisorJob(
   const jobs: Array<{ type: string; tier: Tier; prompt_ref: string }> = Array.isArray(row?.job_types)
     ? row!.job_types
     : [];
-  const match = jobs.find((j) => j.type === kind || j.type.endsWith(`.${kind}`));
+  const match = jobs.find((j) => isTypeMatch(j.type, kind));
   if (match) return match;
   const short = supervisorKey.replace(/^agent\./, "").split(".").pop() ?? supervisorKey;
   const type = `${short}.${kind}`;
@@ -56,7 +57,7 @@ async function assembleContext(
     [tenantId, projectId]
   );
   const filtered = scopeTypes.length
-    ? rows.filter((r) => scopeTypes.some((t) => r.type_key.endsWith(t)))
+    ? rows.filter((r) => matchesAnyType(r.type_key, scopeTypes))
     : rows;
   return filtered.map((r) => ({ id: r.id, type: r.type_key, payload: r.payload }));
 }
