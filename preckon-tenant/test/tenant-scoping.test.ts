@@ -48,8 +48,16 @@ function walk(dir: string, acc: string[] = []): string[] {
   return acc;
 }
 
-/** A quote or backtick closing the SQL argument, then a comma or paren. */
-const ARG_END = new RegExp("[\"'" + String.fromCharCode(96) + "]\\s*[,)]");
+/**
+ * Where the SQL argument ends.
+ *
+ * Not simply "a quote then a comma": SQL is full of `status = 'confirmed',
+ * ended_at = NOW(3)`, and cutting there loses the WHERE clause and makes a
+ * perfectly scoped statement look unscoped. The argument ends at a quote
+ * followed by the parameter array or the closing paren of the call.
+ */
+const Q = "[\"'" + String.fromCharCode(96) + "]";
+const ARG_END = new RegExp(Q + "\\s*(?:,\\s*\\[|\\)|,\\s*params)");
 
 /**
  * Statements a file issues against the database.
@@ -59,7 +67,20 @@ const ARG_END = new RegExp("[\"'" + String.fromCharCode(96) + "]\\s*[,)]");
  * identifiers, and a delimiter-matching scan cuts the statement at the first of
  * them — losing exactly the tail where the WHERE clause lives.
  */
-export function statementsIn(source: string): { sql: string; interpolated: boolean }[] {
+/**
+ * Comments removed before scanning.
+ *
+ * This codebase explains itself in prose, and that prose names tables and SQL
+ * verbs — "INSERT into audit_event directly (a trigger forbids UPDATE/DELETE)"
+ * is a comment, not a query. Scanning it produces a finding against a statement
+ * that does not exist, and a rule that cries wolf is a rule that gets deleted.
+ */
+function stripComments(source: string): string {
+  return source.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/^\s*\/\/.*$/gm, " ");
+}
+
+export function statementsIn(input: string): { sql: string; interpolated: boolean }[] {
+  const source = stripComments(input);
   const out: { sql: string; interpolated: boolean }[] = [];
   // Constructed per call: a shared /g/ regex carries lastIndex between calls and
   // would silently skip the start of every file after the first.
