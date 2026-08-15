@@ -92,6 +92,23 @@ jobs:
             mysql -h 127.0.0.1 -P 3308 -uroot -pci-not-a-real-password preckon_tenant < "$m"
           done
 
+  evaluation:
+    name: AI evaluation
+    runs-on: ubuntu-latest
+    # Its own job rather than a line inside `unit`, because "the assistant stopped
+    # reaching for the right tool" is a different failure from "a function
+    # returned the wrong number" and deserves to say so on the PR. Needs no
+    # database and no API key — it scores the deterministic half.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: preckon-tenant/package-lock.json
+      - run: npm ci
+      - run: npm run eval
+
   build:
     name: Production build
     runs-on: ubuntu-latest
