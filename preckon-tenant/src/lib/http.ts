@@ -1,10 +1,34 @@
 import { NextResponse } from "next/server";
 import { getAuthContext, requireServiceAuth, type AuthContext } from "./context";
-import { toErrorEnvelope } from "./errors";
+import { ApiError, toErrorEnvelope } from "./errors";
+import { enrichContext, logFailure, logInfo, requestIdFrom, runWithContext } from "./log";
 
-function toErrorResponse(err: unknown): NextResponse {
+/**
+ * Turn a thrown value into a response, and make it findable.
+ *
+ * Every failure gets the request id — in the body so the UI can show it, and in
+ * a header so it is visible in the network tab without parsing. That id is on
+ * every log line the request produced, which is the difference between "it said
+ * something went wrong" and a support question somebody can actually answer.
+ *
+ * Expected failures (a missing permission, a stale artifact) are logged at warn:
+ * they are the system working. Unexpected ones get the stack.
+ */
+function toErrorResponse(err: unknown, requestId: string): NextResponse {
   const { status, body } = toErrorEnvelope(err);
-  return NextResponse.json(body, { status });
+
+  if (err instanceof ApiError) {
+    logInfo("request failed", { code: err.code, status, message: err.message });
+  } else {
+    logFailure("unhandled error", err, { status });
+  }
+
+  const withId =
+    body && typeof body === "object"
+      ? { ...(body as object), error: { ...((body as any).error ?? {}), requestId } }
+      : body;
+
+  return NextResponse.json(withId, { status, headers: { "x-request-id": requestId } });
 }
 
 /** Wrap a user-authenticated route handler: resolve ctx, run, envelope errors. */
@@ -12,13 +36,29 @@ export function route<T = unknown>(
   handler: (req: Request, ctx: AuthContext, params: T) => Promise<NextResponse | Response>
 ) {
   return async (req: Request, context: { params: Promise<T> }) => {
-    try {
-      const ctx = await getAuthContext(req);
-      const params = ((await context?.params) ?? ({} as T)) as T;
-      return await handler(req, ctx, params);
-    } catch (err) {
-      return toErrorResponse(err);
-    }
+    const requestId = requestIdFrom(req);
+    const started = Date.now();
+    // The route is the path with ids stripped: /projects/abc/bim and
+    // /projects/def/bim are the same route, and grouping by the raw path would
+    // make every request unique and the field useless.
+    const routeName = new URL(req.url).pathname.replace(/\/[0-9a-f-]{8,}/gi, "/:id");
+
+    return runWithContext({ requestId, route: `${req.method} ${routeName}` }, async () => {
+      try {
+        const ctx = await getAuthContext(req);
+        enrichContext({ tenantId: ctx.tenantId, userId: ctx.user?.id });
+        const params = ((await context?.params) ?? ({} as T)) as T;
+        const res = await handler(req, ctx, params);
+        res.headers.set("x-request-id", requestId);
+        // Only the slow ones. A line per request buries the signal, and the
+        // question worth answering from logs is "what was slow", not "what ran".
+        const ms = Date.now() - started;
+        if (ms > 2000) logInfo("slow request", { ms, status: res.status });
+        return res;
+      } catch (err) {
+        return toErrorResponse(err, requestId);
+      }
+    });
   };
 }
 
@@ -27,13 +67,22 @@ export function serviceRoute<T = unknown>(
   handler: (req: Request, params: T) => Promise<NextResponse | Response>
 ) {
   return async (req: Request, context: { params: Promise<T> }) => {
-    try {
-      requireServiceAuth(req);
-      const params = ((await context?.params) ?? ({} as T)) as T;
-      return await handler(req, params);
-    } catch (err) {
-      return toErrorResponse(err);
-    }
+    // The worker sends back the id it was given, so its half of the work joins
+    // the same trace as the request that started it.
+    const requestId = requestIdFrom(req);
+    const routeName = new URL(req.url).pathname.replace(/\/[0-9a-f-]{8,}/gi, "/:id");
+
+    return runWithContext({ requestId, route: `${req.method} ${routeName}` }, async () => {
+      try {
+        requireServiceAuth(req);
+        const params = ((await context?.params) ?? ({} as T)) as T;
+        const res = await handler(req, params);
+        res.headers.set("x-request-id", requestId);
+        return res;
+      } catch (err) {
+        return toErrorResponse(err, requestId);
+      }
+    });
   };
 }
 

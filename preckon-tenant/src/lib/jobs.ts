@@ -3,6 +3,7 @@ import { query } from "./db";
 import { newId } from "./ids";
 import { TIER_ORDER, type Tier } from "./constants";
 import { claimForDispatch, clearLease, releaseForRetry } from "./job-queue";
+import { currentRequestId, logWarn } from "./log";
 
 // ── §5 The job seam. Core owns dispatch + tracking; the stateless worker runs
 // the (stub) agent logic and returns proposals. The worker has NO store access
@@ -78,11 +79,16 @@ export type Dispatcher = (env: JobEnvelope) => Promise<void>;
 
 let dispatcher: Dispatcher = async (env) => {
   const url = `${process.env.WORKER_URL ?? "http://localhost:4000"}/run`;
+  const rq = currentRequestId();
   const res = await fetch(url, {
     method: "POST",
     headers: {
       "content-type": "application/json",
       authorization: `Bearer ${process.env.INTERNAL_SERVICE_TOKEN ?? ""}`,
+      // Carries the trace across the process boundary. The worker echoes it on
+      // the result callback, so its half of the work lands on the same request
+      // id as the click that started it.
+      ...(rq ? { "x-request-id": rq } : {}),
     },
     body: JSON.stringify(env),
   });
@@ -185,7 +191,7 @@ export async function enqueueJob(input: EnqueueInput): Promise<string> {
     await dispatcher(envelope);
   } catch (e: any) {
     const outcome = await releaseForRetry(jobId, e?.message ?? "dispatch failed");
-    console.warn(`[jobs] dispatch of ${jobId} (${input.jobType}) failed — ${outcome}:`, e?.message);
+    logWarn("job dispatch failed", { jobId, jobType: input.jobType, outcome, err: e?.message });
   }
   return jobId;
 }
