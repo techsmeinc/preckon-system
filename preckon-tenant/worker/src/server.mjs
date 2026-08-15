@@ -10,12 +10,19 @@ const PORT = Number(process.env.PORT ?? 4000);
 const CORE_URL = process.env.CORE_URL ?? "http://localhost:3100";
 const TOKEN = process.env.INTERNAL_SERVICE_TOKEN ?? "";
 
-async function postResult(result) {
+async function postResult(result, requestId) {
   const url = `${CORE_URL}/api/internal/jobs/${result.job_id}/result`;
   try {
     const res = await fetch(url, {
       method: "POST",
-      headers: { "content-type": "application/json", authorization: `Bearer ${TOKEN}` },
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${TOKEN}`,
+        // Echoed back so Core logs the callback under the request that started
+        // the job. Without it the worker's half of a trace is orphaned — and
+        // that is exactly the half you want when the job is what went wrong.
+        ...(requestId ? { "x-request-id": requestId } : {}),
+      },
       body: JSON.stringify(result),
     });
     if (!res.ok) console.error(`[worker] callback ${result.job_id} failed: ${res.status}`);
