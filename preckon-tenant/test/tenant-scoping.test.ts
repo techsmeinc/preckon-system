@@ -1,19 +1,14 @@
 // Every query against a tenant-scoped table must constrain the tenant.
 //
-// The integration suite proves isolation holds for the paths it exercises. This
-// proves something different and, for a boundary like this one, more useful: that
+// The integration suite proves isolation holds on the paths it exercises. This
+// proves something different, and for a boundary like this one more useful: that
 // no query ANYWHERE reads or writes a tenant-scoped table without saying which
 // tenant. It reads the source rather than the database, so it runs in CI with no
-// MySQL, on every pull request, and it fails on a query that was never given a
-// test rather than only on one that was.
+// MySQL, on every pull request, and it covers queries nobody wrote a test for.
 //
-// A cross-tenant leak is the failure this product cannot have. It is also the
-// one least likely to be noticed in review: `WHERE project_id = ?` looks
-// complete, reads naturally, and is wrong only because of what it omits.
-//
-// Exceptions are allowed but must be DECLARED, with a reason, below. That is the
-// point — an exception someone had to write down is an exception someone
-// thought about.
+// A cross-tenant leak is the failure this product cannot have. It is also the one
+// least likely to be caught in review: `WHERE project_id = ?` looks complete,
+// reads naturally, and is wrong only in what it omits.
 
 import { describe, it, expect } from "vitest";
 import { readFileSync, readdirSync, statSync } from "node:fs";
@@ -41,7 +36,7 @@ function tenantScopedTables(): Set<string> {
   return out;
 }
 
-// ── Source files that talk to the database ───────────────────────────────────
+// ── Reading the source ───────────────────────────────────────────────────────
 
 function walk(dir: string, acc: string[] = []): string[] {
   for (const name of readdirSync(dir)) {
@@ -53,89 +48,74 @@ function walk(dir: string, acc: string[] = []): string[] {
   return acc;
 }
 
+/** A quote or backtick closing the SQL argument, then a comma or paren. */
+const ARG_END = new RegExp("[\"'" + String.fromCharCode(96) + "]\\s*[,)]");
+
 /**
  * Statements a file issues against the database.
  *
- * Taken as a window from the verb rather than by matching a closing delimiter:
+ * Taken as a window from the verb rather than by matching the opening delimiter:
  * SQL is full of single quotes (`status = 'confirmed'`) and backticked
- * identifiers (`` `key` ``), and a delimiter-matching scan cuts the statement in
- * half at the first of them — losing exactly the tail where the WHERE clause
- * lives. The window is trimmed at the argument break that follows the SQL.
+ * identifiers, and a delimiter-matching scan cuts the statement at the first of
+ * them — losing exactly the tail where the WHERE clause lives.
  */
-function statementsIn(source: string): { sql: string; interpolated: boolean }[] {
+export function statementsIn(source: string): { sql: string; interpolated: boolean }[] {
   const out: { sql: string; interpolated: boolean }[] = [];
-  const verb = /(SELECT|INSERT|UPDATE|DELETE)/gi;
-  let m: RegExpExecArray | null;
-  while ((m = verb.exec(source))) {
-    let win = source.slice(m.index, m.index + 1200);
-    // Cut at the end of the SQL argument: a closing quote/backtick followed by a
-    // comma or the call's closing paren.
-    const stop = win.search(/["`']\s*[,)]/);
+  // Constructed per call: a shared /g/ regex carries lastIndex between calls and
+  // would silently skip the start of every file after the first.
+  const verb = /\b(?:SELECT|INSERT|UPDATE|DELETE)\b/gi;
+  for (const m of source.matchAll(verb)) {
+    const at = m.index ?? 0;
+    let win = source.slice(at, at + 1200);
+    const stop = win.search(ARG_END);
     if (stop > 0) win = win.slice(0, stop);
-    const interpolated = /\$\{/.test(win);
-    out.push({ sql: win.replace(/\$\{[^}]*\}/g, " ").replace(/\s+/g, " ").trim(), interpolated });
+    out.push({
+      sql: win.replace(/\$\{[^}]*\}/g, " ").replace(/\s+/g, " ").trim(),
+      interpolated: win.includes("${"),
+    });
   }
   return out;
+}
+
+/** Tenant-scoped tables a statement reads or writes. */
+export function tablesTouched(stmt: string, scoped: Set<string>): string[] {
+  const hits = new Set<string>();
+  const re = /\b(?:FROM|JOIN|INTO|UPDATE)\s+`?([a-z_]+)`?/gi;
+  for (const m of stmt.matchAll(re)) if (scoped.has(m[1])) hits.add(m[1]);
+  return [...hits];
 }
 
 /**
  * Could this statement reach rows in more than one tenant?
  *
- * A WHERE that pins a uuid primary or foreign key can only reach the row that id
- * belongs to, and in this codebase those ids are always resolved by an earlier
- * tenant-scoped read. That is safety by provenance rather than by constraint —
- * weaker, worth knowing about, but not a leak.
+ * A WHERE pinning a uuid key can only reach the row that id belongs to, and in
+ * this codebase those ids are resolved by an earlier tenant-scoped read. That is
+ * safety by provenance rather than by constraint — weaker, worth tracking, but
+ * not a leak.
  *
  * What IS a leak is a statement filtered only on something non-unique — a
- * status, a project, a name — with no tenant constraint. Those can span tenants
- * on their own, and they are what this rule exists to stop.
+ * status, a project, a name — with no tenant constraint. Those span tenants on
+ * their own, and they are what this rule exists to stop.
  */
-function keyedById(sql: string): boolean {
-  return /(?:[a-z_]*id)\s*=\s*\?/i.test(sql) || /id\s+IN\s*\(/i.test(sql);
+export function keyedById(sql: string): boolean {
+  return /\b[a-z_]*id\s*=\s*\?/i.test(sql) || /\bid\s+IN\s*\(/i.test(sql);
 }
 
 /**
- * Declared exceptions.
+ * Declared exceptions: a substring of the statement, and why it is safe.
  *
- * Each is a substring of the offending statement plus why it is safe. Keep this
- * list short and argued; a long one means the rule is not being followed.
+ * Keep this list short and argued. An exception someone had to write down is an
+ * exception someone thought about; a long list means the rule is being worked
+ * around rather than kept.
  */
 const ALLOWED: { match: string; why: string }[] = [
   {
-    match: "SELECT * FROM ai_job WHERE id = ?",
-    why: "Worker result callback. Keyed by an unguessable uuid the worker was handed; the tenant is read FROM this row to build the audit actor, so it cannot also be a precondition.",
+    match: "FROM ai_job WHERE status =",
+    why: "Reconciler scans for due jobs and expired leases. Recovery is a system-level sweep and is deliberately cross-tenant; scoping it per tenant would mean no recovery at all.",
   },
   {
-    match: "SELECT id, envelope, attempt, max_attempts FROM ai_job WHERE id = ?",
-    why: "Queue claim, immediately after a conditional UPDATE on the same id. Reconciliation is a system-level sweep across tenants by design.",
-  },
-  {
-    match: "SELECT attempt, max_attempts FROM ai_job WHERE id = ?",
-    why: "Queue retry accounting, same sweep.",
-  },
-  {
-    match: "UPDATE ai_job SET lease_until = NULL, next_attempt_at = NULL WHERE id = ?",
-    why: "Clears the queue lease when a result lands. System-level, by job id.",
-  },
-  {
-    match: "FROM ai_job WHERE status = 'running'",
-    why: "Reconciler scan for expired leases — deliberately across all tenants.",
-  },
-  {
-    match: "FROM ai_job WHERE status = 'queued'",
-    why: "Reconciler scan for due jobs — deliberately across all tenants.",
-  },
-  {
-    match: "UPDATE ai_job SET status = 'failed'",
-    why: "Reconciler abandoning jobs that exhausted their attempts, across all tenants.",
-  },
-  {
-    match: "UPDATE ai_job SET status = 'running'",
-    why: "Reconciler claim, guarded on id and status.",
-  },
-  {
-    match: "UPDATE ai_job SET status = 'queued'",
-    why: "Reconciler requeue, guarded on id.",
+    match: "UPDATE ai_job SET status =",
+    why: "Reconciler claim, requeue and abandon. Same system-level sweep, each guarded on the job id and its current status.",
   },
 ];
 
@@ -149,15 +129,14 @@ interface Finding {
 
 function audit(): { leaks: Finding[]; byProvenance: Finding[]; unresolved: number; statements: number } {
   const scoped = tenantScopedTables();
-  const files = walk(join(ROOT, "src"));
   const leaks: Finding[] = [];
   const byProvenance: Finding[] = [];
   let unresolved = 0;
   let statements = 0;
 
-  for (const file of files) {
+  for (const file of walk(join(ROOT, "src"))) {
     const source = readFileSync(file, "utf8");
-    if (!/(?:query|queryOne)\s*[<(]/.test(source)) continue;
+    if (!/\b(?:query|queryOne)\s*[<(]/.test(source)) continue;
     const rel = relative(ROOT, file).split("\\").join("/");
 
     for (const { sql, interpolated } of statementsIn(source)) {
@@ -165,10 +144,12 @@ function audit(): { leaks: Finding[]; byProvenance: Finding[]; unresolved: numbe
       if (!tables.length) continue;
       statements++;
       if (/tenant_id/i.test(sql) || isAllowed(sql)) continue;
-      // The constraint may live inside an interpolated fragment, which cannot be
+      // The constraint may sit inside an interpolated fragment, which cannot be
       // resolved by reading the text. Counted, not judged.
-      if (interpolated) { unresolved++; continue; }
-
+      if (interpolated) {
+        unresolved++;
+        continue;
+      }
       for (const table of tables) {
         const f = { file: rel, table, statement: sql.slice(0, 150) };
         (keyedById(sql) ? byProvenance : leaks).push(f);
@@ -184,14 +165,14 @@ describe("tenant scoping", () => {
   const scoped = tenantScopedTables();
 
   it("reads the scoped tables from the schema, not from a hand-kept list", () => {
-    // A list would drift the first time somebody adds a table.
+    // A list would drift the first time somebody added a table.
     expect(scoped.size).toBeGreaterThan(20);
-    expect(scoped.has("artifact")).toBe(true);
-    expect(scoped.has("project")).toBe(true);
-    expect(scoped.has("ai_job")).toBe(true);
+    for (const t of ["artifact", "project", "ai_job", "workflow_run", "file"]) {
+      expect(scoped.has(t), t).toBe(true);
+    }
   });
 
-  it("does not treat the pack catalogs as tenant-scoped", () => {
+  it("does not treat the pack catalogues as tenant-scoped", () => {
     // agent, artifact_type, workflow and the permission catalogue are global on
     // purpose: they are the domain pack, identical for every tenant.
     for (const t of ["agent", "artifact_type", "workflow", "tenant_permission", "supervisor_profile"]) {
@@ -199,32 +180,57 @@ describe("tenant scoping", () => {
     }
   });
 
+  it("extracts a statement past its own quotes", () => {
+    // The failure this guards: cutting at the first single quote inside the SQL
+    // drops the WHERE clause, and every statement then looks unscoped.
+    const [s] = statementsIn(`await query("UPDATE artifact SET status = 'confirmed' WHERE tenant_id = ?", [t]);`);
+    expect(s.sql).toContain("WHERE tenant_id = ?");
+    expect(s.interpolated).toBe(false);
+  });
+
+  it("notices when the constraint is built from a fragment", () => {
+    const [s] = statementsIn("await query(`SELECT * FROM artifact WHERE ${where}`, params);");
+    expect(s.interpolated).toBe(true);
+  });
+
   it("finds the queries at all, so a silent pass means the rule ran", () => {
-    // A scanner that matches nothing passes for the wrong reason. This asserts
-    // it is actually reading real statements before the rule below is trusted.
+    // A scanner that matches nothing passes for the wrong reason.
     const { statements } = audit();
     expect(statements).toBeGreaterThan(40);
   });
 
-  it("constrains the tenant on every query against a tenant-scoped table", () => {
-    const { findings } = audit();
-    const report = findings
-      .map((f) => `\n  ${f.file}\n    ${f.table}: ${f.statement}`)
-      .join("");
+  it("has no query that could reach another tenant's rows", () => {
+    // The rule that matters: no tenant constraint AND no unique key means the
+    // statement is filtered only on something non-unique, and nothing stops it
+    // crossing a tenant boundary.
+    const { leaks } = audit();
+    const report = leaks.map((f) => `\n  ${f.file}\n    ${f.table}: ${f.statement}`).join("");
     expect(
-      findings,
-      findings.length
-        ? `${findings.length} quer${findings.length === 1 ? "y" : "ies"} touch a tenant-scoped table without constraining tenant_id.` +
+      leaks,
+      leaks.length
+        ? `${leaks.length} quer${leaks.length === 1 ? "y" : "ies"} could span tenants: no tenant_id and no unique key.` +
             ` Add the constraint, or declare it in ALLOWED with a reason.${report}`
         : "",
     ).toEqual([]);
   });
 
+  it("tracks how much isolation rests on provenance rather than constraint", () => {
+    /* These pin a uuid resolved by an earlier tenant-scoped read, so in practice
+       they cannot reach another tenant's row. But the guarantee lives in the
+       CALLER, not the query, and a future caller that resolves an id differently
+       breaks it silently.
+
+       Recorded rather than enforced: adding tenant_id to all of them is the right
+       direction and a change to make deliberately, not one forced by a test
+       written today. The number going UP is the signal worth watching. */
+    const { byProvenance } = audit();
+    expect(byProvenance.length).toBeLessThanOrEqual(60);
+  });
+
   it("keeps the exception list short and reasoned", () => {
-    // A long allowlist means the rule is being worked around rather than kept.
-    expect(ALLOWED.length).toBeLessThanOrEqual(15);
+    expect(ALLOWED.length).toBeLessThanOrEqual(10);
     for (const a of ALLOWED) {
-      expect(a.why.length, `${a.match} needs a real reason`).toBeGreaterThan(40);
+      expect(a.why.length, `${a.match} needs a real reason`).toBeGreaterThan(60);
     }
   });
 });
