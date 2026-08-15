@@ -99,12 +99,13 @@ const server = http.createServer(async (req, res) => {
     }
     // Ack immediately; process + call back asynchronously (§5.4 transport).
     res.writeHead(202).end("accepted");
+    const requestId = req.headers["x-request-id"];
     setImmediate(async () => {
       try {
         const result = await computeJobResult(envelope);
-        await postResult(result);
+        await postResult(result, requestId);
       } catch (err) {
-        await postResult({ job_id: envelope.job_id, status: "failed", error: { message: err.message } });
+        await postResult({ job_id: envelope.job_id, status: "failed", error: { message: err.message } }, requestId);
       }
     });
     return;
