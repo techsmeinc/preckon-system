@@ -143,3 +143,76 @@ describe("motion", () => {
     expect(rules).toMatch(/prefers-reduced-motion/);
   });
 });
+
+// ── Contrast ────────────────────────────────────────────────────────────────
+//
+// Both documents set WCAG 2.2 AA as the target, and two values in the
+// blueprint's own light palette do not reach it — text-muted at 3.69:1 and
+// warning at 3.89:1. Where a palette and an accessibility target disagree, the
+// target wins: the standard says AA is not a later enhancement. Those two are
+// darkened to the nearest passing value with the hue held.
+//
+// Computed from the stylesheet rather than from a list, so a token edited to a
+// prettier shade fails here rather than in an audit months later.
+
+const relLuminance = (hexColour: string): number => {
+  const h = hexColour.replace("#", "");
+  const chan = [0, 2, 4].map((i) => {
+    const c = parseInt(h.slice(i, i + 2), 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * chan[0] + 0.7152 * chan[1] + 0.0722 * chan[2];
+};
+
+const contrast = (a: string, b: string): number => {
+  const [hi, lo] = [relLuminance(a), relLuminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
+
+/** Read a literal hex token out of a block of the stylesheet. */
+function token(block: string, name: string): string | null {
+  const m = block.match(new RegExp(`--${name}\s*:\s*(#[0-9a-f]{6})`, "i"));
+  return m ? m[1] : null;
+}
+
+const lightBlock = CSS.slice(CSS.indexOf(":root{"), CSS.indexOf('[data-theme="dark"]'));
+const darkBlock = CSS.slice(CSS.indexOf('[data-theme="dark"]'));
+
+describe("contrast (WCAG 2.2 AA)", () => {
+  const AA = 4.5;
+
+  it("reads the palette from the stylesheet, not from a copy of it", () => {
+    // Otherwise this tests a list somebody forgot to update.
+    expect(token(lightBlock, "canvas")).toBe("#F5F7F8");
+    expect(token(darkBlock, "canvas")).toBe("#101619");
+  });
+
+  for (const name of ["text-primary", "text-secondary", "text-muted"]) {
+    it(`${name} clears AA on the light canvas`, () => {
+      const fg = token(lightBlock, name)!;
+      const bg = token(lightBlock, "canvas")!;
+      expect(contrast(fg, bg), `${name} ${fg} on ${bg}`).toBeGreaterThanOrEqual(AA);
+    });
+
+    it(`${name} clears AA on the dark canvas`, () => {
+      const fg = token(darkBlock, name)!;
+      const bg = token(darkBlock, "canvas")!;
+      expect(contrast(fg, bg), `${name} ${fg} on ${bg}`).toBeGreaterThanOrEqual(AA);
+    });
+  }
+
+  it("the accent is legible as text on white", () => {
+    // It carries links and active labels, not only button fills.
+    expect(contrast(token(lightBlock, "brand")!, "#FFFFFF")).toBeGreaterThanOrEqual(AA);
+  });
+
+  it("the warning INK differs from the warning FILL, and only the ink must pass", () => {
+    /* The blueprint value is right for a chip fill and too light for text on it.
+       Keeping both means a status bar and a status chip still read as the same
+       colour family while the text on them stays legible. */
+    const ink = token(lightBlock, "warning")!;
+    const fill = token(lightBlock, "warning-fill")!;
+    expect(ink).not.toBe(fill);
+    expect(contrast(ink, "#FFFFFF")).toBeGreaterThanOrEqual(AA);
+  });
+});

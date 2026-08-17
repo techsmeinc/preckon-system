@@ -78,11 +78,39 @@
   --fill-neutral:color-mix(in srgb,var(--slate-400) 26%,var(--surface));
 }
 [data-theme="dark"]{
-  --ink:#EAF1F8; --paper:#0A1626; --surface:#0F2033; --panel-2:#0C1B2E;
-  --slate-700:#C7D3E0; --slate-600:#A8B6C6; --slate-500:#8493A6; --slate-400:#79889B; --slate-300:#3A4C60;
-  --hairline:#1D3250; --teal-tint:rgba(21,194,168,.14);
-  --amber-tint:rgba(245,165,36,.14); --blue-tint:rgba(59,130,246,.16); --red-tint:rgba(239,68,68,.15);
-  --teal-ink:#10AD9A; --amber-ink:#F5A524; --blue-ink:#5A96F7; --red-ink:#F05353;
+  /* Blueprint §8. Every value here clears 4.5:1 against this canvas as
+     specified, so unlike the light palette none needed adjusting. Only the
+     tokens are redefined — no component is styled inside this block, so a rule
+     written once serves both themes. */
+  --canvas:#101619;
+  --surface:#161E22;
+  --surface-subtle:#1B252A;
+  --surface-raised:#202B30;
+  --text-primary:#E8EEF0;
+  --text-secondary:#B5C0C5;
+  --text-muted:#89969D;
+  --border:#2A383E;
+  --border-strong:#43535B;
+  --accent-hover:#58C9BC;
+  --accent-subtle:#143B38;
+  --info:#5BA6E6;
+  --success:#65B77B;
+  --warning:#E0A23A;
+  --warning-fill:#E0A23A;
+  --critical:#F06D63;
+  --focus:#69B7F5;
+
+  /* The accent brightens for dark ground; a tenant override still wins because
+     --accent follows --brand. Not a glow — the standard rules those out. */
+  --brand:#39B8AA;
+  --ink-deep:#0A0E10;
+  /* 700 and 600 are literal greys rather than aliases, so they do NOT flip with
+     the semantic tokens and have to be restated here. Left out, they stay at
+     their light-theme values — near-black text on a near-black canvas. */
+  --slate-700:#D6DFE3; --slate-600:var(--text-secondary);
+  --teal-tint:var(--accent-subtle);
+  --amber-tint:rgba(224,162,58,.16); --blue-tint:rgba(91,166,230,.16); --red-tint:rgba(240,109,99,.16);
+  --teal-ink:var(--brand); --amber-ink:var(--warning); --blue-ink:var(--info); --red-ink:var(--critical);
   color-scheme:dark;
   /* Dark mode is chosen, not flipped: the same hues re-stepped against this
      surface. A tint that reads as a gentle wash on white becomes invisible on
