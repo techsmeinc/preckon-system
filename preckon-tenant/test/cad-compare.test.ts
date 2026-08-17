@@ -221,3 +221,31 @@ describe("tolerance", () => {
     expect(d.unchanged).toBe(1);
   });
 });
+
+describe("nearest-match pairing, off the diagonal", () => {
+  it("pairs by true distance, not by a coordinate mix-up", () => {
+    /* Regression. The comparator read `y.x - from.y` for the second candidate —
+       comparing an x against a y. It went unnoticed because the first fixture
+       put every shape at y=0, where from.x and from.y coincide and the wrong
+       term gives the right answer.
+
+       Here the shapes sit off that diagonal, so a comparator that confuses the
+       axes pairs each source with the wrong target and reports movements far
+       larger than the ones that happened. */
+    const a = sheet([
+      line(1000, 50, 1100, 50),
+      line(4000, 900, 4100, 900),
+    ]);
+    const b = sheet([
+      line(4000, 920, 4100, 920),   // deliberately out of source order
+      line(1000, 70, 1100, 70),
+    ]);
+
+    const d = compareRevisions(a, b);
+    expect(d.moved).toHaveLength(2);
+    // Each shape moved 20 units. A mis-paired diff reports thousands.
+    for (const m of d.moved) expect(m.distance).toBe(20);
+    expect(d.added).toEqual([]);
+    expect(d.removed).toEqual([]);
+  });
+});
