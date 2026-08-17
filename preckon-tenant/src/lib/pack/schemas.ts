@@ -78,6 +78,13 @@ export const SCHEMAS: Record<string, any> = {
       unit: { type: "string", enum: ["m", "m2", "m3", "nr", "kg", "t", "lm"] },
       location: { type: "string" },
       method: { type: "string" },
+      /* Which drawing layers the figure was read from.
+         Optional and additive: records written before this existed stay valid,
+         and revision impact treats their absence as "cannot be shown safe"
+         rather than as "safe". Without it, a revision to one layer can only
+         flag every measurement on the sheet, which is noise people learn to
+         dismiss — precision here is what keeps the feature switched on. */
+      source_layers: { type: "array", items: { type: "string" }, maxItems: 64 },
     },
   },
   boq_line: {
