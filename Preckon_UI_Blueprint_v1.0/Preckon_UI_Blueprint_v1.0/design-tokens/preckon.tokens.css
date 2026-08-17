@@ -1,0 +1,100 @@
+:root,
+[data-theme="light"] {
+  --pk-canvas: #F5F7F8;
+  --pk-surface: #FFFFFF;
+  --pk-surface-subtle: #F0F3F4;
+  --pk-surface-raised: #FFFFFF;
+
+  --pk-text-primary: #172126;
+  --pk-text-secondary: #526068;
+  --pk-text-muted: #74828A;
+
+  --pk-border: #D8DEE2;
+  --pk-border-strong: #B8C2C8;
+
+  --pk-accent: #087E75;
+  --pk-accent-hover: #066B64;
+  --pk-accent-subtle: #E6F3F1;
+
+  --pk-info: #1769AA;
+  --pk-success: #2F7D4A;
+  --pk-warning: #B56A00;
+  --pk-critical: #B42318;
+  --pk-focus: #0B78D0;
+}
+
+[data-theme="dark"] {
+  --pk-canvas: #101619;
+  --pk-surface: #161E22;
+  --pk-surface-subtle: #1B252A;
+  --pk-surface-raised: #202B30;
+
+  --pk-text-primary: #E8EEF0;
+  --pk-text-secondary: #B5C0C5;
+  --pk-text-muted: #89969D;
+
+  --pk-border: #2A383E;
+  --pk-border-strong: #43535B;
+
+  --pk-accent: #39B8AA;
+  --pk-accent-hover: #58C9BC;
+  --pk-accent-subtle: #143B38;
+
+  --pk-info: #5BA6E6;
+  --pk-success: #65B77B;
+  --pk-warning: #E0A23A;
+  --pk-critical: #F06D63;
+  --pk-focus: #69B7F5;
+}
+
+:root {
+  --pk-topbar-height: 56px;
+  --pk-context-header-height: 52px;
+  --pk-nav-expanded: 232px;
+  --pk-nav-collapsed: 64px;
+  --pk-inspector-default: 360px;
+
+  --pk-radius-sm: 4px;
+  --pk-radius-md: 6px;
+  --pk-radius-lg: 8px;
+  --pk-radius-dialog: 10px;
+
+  --pk-space-1: 2px;
+  --pk-space-2: 4px;
+  --pk-space-3: 6px;
+  --pk-space-4: 8px;
+  --pk-space-5: 12px;
+  --pk-space-6: 16px;
+  --pk-space-7: 20px;
+  --pk-space-8: 24px;
+  --pk-space-9: 32px;
+  --pk-space-10: 40px;
+  --pk-space-11: 48px;
+
+  --pk-font-ui: "IBM Plex Sans", system-ui, sans-serif;
+  --pk-font-ar: "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --pk-font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+html[lang="ar"] {
+  font-family: var(--pk-font-ar);
+}
+
+html[lang="en"] {
+  font-family: var(--pk-font-ui);
+}
+
+/* Direction-safe utility examples */
+.pk-inline-start-border {
+  border-inline-start: 1px solid var(--pk-border);
+}
+
+.pk-panel-padding {
+  padding-inline: var(--pk-space-6);
+  padding-block: var(--pk-space-5);
+}
+
+.pk-focusable:focus-visible {
+  outline: 2px solid var(--pk-focus);
+  outline-offset: 2px;
+}

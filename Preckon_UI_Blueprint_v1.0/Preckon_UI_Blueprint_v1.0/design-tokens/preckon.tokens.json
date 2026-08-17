@@ -1,0 +1,114 @@
+{
+  "meta": {
+    "name": "Preckon Design Tokens v1.0",
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "direction": [
+      "ltr",
+      "rtl"
+    ]
+  },
+  "layout": {
+    "topBar": "56px",
+    "navExpanded": "232px",
+    "navCollapsed": "64px",
+    "contextHeader": "52px",
+    "inspectorDefault": "360px",
+    "inspectorMin": "300px",
+    "inspectorMax": "520px"
+  },
+  "radius": {
+    "sm": "4px",
+    "md": "6px",
+    "lg": "8px",
+    "dialog": "10px"
+  },
+  "spacing": {
+    "1": "2px",
+    "2": "4px",
+    "3": "6px",
+    "4": "8px",
+    "5": "12px",
+    "6": "16px",
+    "7": "20px",
+    "8": "24px",
+    "9": "32px",
+    "10": "40px",
+    "11": "48px"
+  },
+  "typography": {
+    "fontLatin": "IBM Plex Sans, system-ui, sans-serif",
+    "fontArabic": "\"IBM Plex Sans Arabic\", system-ui, sans-serif",
+    "fontMono": "\"IBM Plex Mono\", ui-monospace, monospace",
+    "pageTitle": {
+      "size": "20px",
+      "weight": 600,
+      "lineHeight": "28px"
+    },
+    "sectionTitle": {
+      "size": "16px",
+      "weight": 600,
+      "lineHeight": "24px"
+    },
+    "panelTitle": {
+      "size": "14px",
+      "weight": 600,
+      "lineHeight": "20px"
+    },
+    "body": {
+      "size": "14px",
+      "weight": 400,
+      "lineHeight": "20px"
+    },
+    "dense": {
+      "size": "13px",
+      "weight": 400,
+      "lineHeight": "18px"
+    },
+    "label": {
+      "size": "12px",
+      "weight": 500,
+      "lineHeight": "16px"
+    }
+  },
+  "light": {
+    "canvas": "#F5F7F8",
+    "surface": "#FFFFFF",
+    "surfaceSubtle": "#F0F3F4",
+    "surfaceRaised": "#FFFFFF",
+    "textPrimary": "#172126",
+    "textSecondary": "#526068",
+    "textMuted": "#74828A",
+    "border": "#D8DEE2",
+    "borderStrong": "#B8C2C8",
+    "accent": "#087E75",
+    "accentHover": "#066B64",
+    "accentSubtle": "#E6F3F1",
+    "info": "#1769AA",
+    "success": "#2F7D4A",
+    "warning": "#B56A00",
+    "critical": "#B42318",
+    "focus": "#0B78D0"
+  },
+  "dark": {
+    "canvas": "#101619",
+    "surface": "#161E22",
+    "surfaceSubtle": "#1B252A",
+    "surfaceRaised": "#202B30",
+    "textPrimary": "#E8EEF0",
+    "textSecondary": "#B5C0C5",
+    "textMuted": "#89969D",
+    "border": "#2A383E",
+    "borderStrong": "#43535B",
+    "accent": "#39B8AA",
+    "accentHover": "#58C9BC",
+    "accentSubtle": "#143B38",
+    "info": "#5BA6E6",
+    "success": "#65B77B",
+    "warning": "#E0A23A",
+    "critical": "#F06D63",
+    "focus": "#69B7F5"
+  }
+}
