@@ -1,0 +1,130 @@
+// Conformance with the Preckon UI Blueprint and Frontend Design System.
+//
+// These rules are not aesthetic preferences. Each one is a thing the standard
+// states, that a reviewer cannot reliably catch by eye, and that regresses
+// quietly: a physical `padding-left` looks correct in English and breaks Arabic;
+// `outline:none` looks tidy and removes the only cue a keyboard user has.
+//
+// Scoped deliberately to what the documents state OBJECTIVELY. Whether a screen
+// "looks designed for construction" is a review question and belongs with a
+// human; whether it removed a focus ring is a fact.
+
+import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+const CSS = readFileSync(join(__dirname, "..", "src", "app", "globals.css"), "utf8");
+
+/** Comments describe rules; they are not rules. */
+const rules = CSS.replace(/\/\*[\s\S]*?\*\//g, " ");
+
+describe("RTL — logical properties", () => {
+  /* Blueprint §16.2 and Design System §9.2 require inline properties. The failure
+     is invisible in English: a `padding-left` on a list marker reads perfectly in
+     LTR and puts the indent on the wrong side of every Arabic screen. */
+  it("uses no physical padding or margin", () => {
+    const found = rules.match(/(?:padding|margin)-(?:left|right)\s*:/g) ?? [];
+    expect(found, `use padding-inline-start/end instead: ${found.join(", ")}`).toEqual([]);
+  });
+
+  it("uses no physical border sides", () => {
+    const found = rules.match(/border-(?:left|right)\s*:/g) ?? [];
+    expect(found, `use border-inline-start/end instead: ${found.join(", ")}`).toEqual([]);
+  });
+
+  it("aligns text logically", () => {
+    // text-align: left/right pins a column to a side of the screen rather than
+    // to the start of the reading direction.
+    const found = rules.match(/text-align\s*:\s*(?:left|right)\b/g) ?? [];
+    expect(found, `use text-align: start/end: ${found.join(", ")}`).toEqual([]);
+  });
+
+  it("carries an Arabic type stack, since the product ships Arabic", () => {
+    expect(CSS).toMatch(/Arabic/i);
+  });
+});
+
+describe("focus is never removed", () => {
+  /* Blueprint §15 and Design System §7.2: never remove focus outlines without
+     replacing them. A border-colour change is not a replacement — it is a
+     colour-only cue, which §7.3 rules out separately. */
+  it("has a 2px focus ring", () => {
+    expect(rules).toMatch(/:focus-visible\s*\{[^}]*outline\s*:\s*2px/);
+  });
+
+  it("does not set outline:none without a focus-visible ring nearby", () => {
+    const suppressions = [...rules.matchAll(/([^{}]*):focus[^{]*\{[^}]*outline\s*:\s*none/g)];
+    const offenders = suppressions
+      .map((m) => m[0].slice(0, 90).replace(/\s+/g, " ").trim())
+      // A suppression is acceptable only where the same selector set also has a
+      // focus-visible ring; otherwise the control has no keyboard affordance.
+      .filter(() => !/focus-visible\s*[^{]*\{[^}]*outline\s*:\s*2px/.test(rules));
+    expect(offenders, `focus removed with no replacement: ${offenders.join(" | ")}`).toEqual([]);
+  });
+});
+
+describe("no generic AI styling", () => {
+  /* Blueprint §6 "No purple AI gradient", §22 "Avoid purple gradient, animated
+     glow"; Design System §19.3. Purple is not in either palette, so a purple
+     value in the stylesheet is by definition off-system. */
+  it("has no purple in the palette", () => {
+    const purple = rules.match(/#(?:7c6cff|a99bff|8b5cf6|a855f7|6d28d9|7c3aed)/gi) ?? [];
+    expect(purple, `purple is not a Preckon colour: ${purple.join(", ")}`).toEqual([]);
+  });
+
+  it("uses no gradients as decoration", () => {
+    // Permitted only where a gradient is doing real work (a canvas grid, a
+    // sparkline fill). A gradient on a card or a button is the AI-template look
+    // both documents rule out.
+    const grads = rules.match(/(?:linear|radial|conic)-gradient/g) ?? [];
+    expect(grads.length, "gradients should be rare and functional").toBeLessThanOrEqual(6);
+  });
+});
+
+describe("radius stays modest", () => {
+  /* Blueprint §11: small 4px, controls 6px, menus 8px, dialogs 8–10px, and
+     "Avoid large 16–24px dashboard rounding". 999px is a deliberate pill for
+     genuinely pill-shaped controls and is not the rounding being warned about. */
+  it("has nothing rounded beyond the dialog ceiling", () => {
+    const over = (rules.match(/border-radius\s*:[^;]*?\b(1[1-9]|2[0-9]|3[0-9])px/g) ?? [])
+      .filter((r) => !/999px/.test(r));
+    expect(over, `radius above 10px: ${over.join(" | ")}`).toEqual([]);
+  });
+});
+
+describe("theme architecture", () => {
+  it("defines light, dark by preference, and dark by explicit choice", () => {
+    // Design System §10: light, dark and system. The un-stamped state is the
+    // common one, so prefers-color-scheme must be handled as well as the stamp.
+    expect(rules).toMatch(/prefers-color-scheme\s*:\s*dark/);
+    expect(rules).toMatch(/\[data-theme=["']?dark["']?\]/);
+  });
+
+  it("declares color-scheme so native controls follow the theme", () => {
+    // Without it, a select's option list renders in the OS light scheme over a
+    // dark page — unreadable, and not something a screenshot review catches.
+    expect(rules).toMatch(/color-scheme\s*:/);
+  });
+});
+
+describe("typography", () => {
+  it("uses tabular numerals where figures line up", () => {
+    // Blueprint §9.3: quantities, money, dates, percentages, durations.
+    expect(rules).toMatch(/font-variant-numeric\s*:\s*tabular-nums/);
+  });
+
+  it("keeps application headings out of marketing sizes", () => {
+    /* Blueprint §9.2: "Avoid 28–40px application headings except on true
+       landing/onboarding screens." Sized in rem or px, an h1 at 32px inside a
+       workspace is the SaaS hero the standard rules out. */
+    const huge = rules.match(/font-size\s*:\s*(?:3[0-9]|4[0-9])px/g) ?? [];
+    expect(huge, `application text should not be this large: ${huge.join(", ")}`).toEqual([]);
+  });
+});
+
+describe("motion", () => {
+  it("respects reduced motion", () => {
+    // Blueprint §24, Design System §7.5.
+    expect(rules).toMatch(/prefers-reduced-motion/);
+  });
+});

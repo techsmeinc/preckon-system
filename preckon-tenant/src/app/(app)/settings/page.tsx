@@ -121,7 +121,9 @@ function Preferences() {
   const [prefs, setPrefs] = useState<{ currency: string; dateFormat: string }>({ currency: "USD", dateFormat: "DD MMM YYYY" });
 
   useEffect(() => {
-    setTheme(document.documentElement.getAttribute("data-theme") ?? "light");
+    // The PREFERENCE, not the resolved theme: "system" must show as System in
+    // the picker rather than as whatever the OS happens to be right now.
+    setTheme(document.documentElement.getAttribute("data-theme-pref") ?? "system");
     setPrefs(readPref("display", { currency: "USD", dateFormat: "DD MMM YYYY" }));
   }, []);
 

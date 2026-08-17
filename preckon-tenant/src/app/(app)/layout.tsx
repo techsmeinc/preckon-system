@@ -139,9 +139,20 @@ function AppShell({
   const roleLabel = me?.roles?.[0]?.name ?? t("shell.member");
   const canAdmin = ADMIN_PERMS.some((p) => me?.permissions?.includes(p));
 
+  /* Light → Dark → System, rather than a two-way flip. Without System in the
+     cycle, the only way back to "follow my machine" was to clear storage. */
   function toggleTheme() {
-    const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", next);
+    const order = ["light", "dark", "system"] as const;
+    const current = (document.documentElement.getAttribute("data-theme-pref") ?? "system") as (typeof order)[number];
+    const next = order[(order.indexOf(current) + 1) % order.length];
+    const resolved =
+      next === "system"
+        ? window.matchMedia?.("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light"
+        : next;
+    document.documentElement.setAttribute("data-theme", resolved);
+    document.documentElement.setAttribute("data-theme-pref", next);
     try { localStorage.setItem("preckon-theme", next); } catch {}
   }
 

@@ -22,7 +22,6 @@
        1.86:1. The tint and the fill keep the brand value — only the ink moves,
        so a status bar and a status chip still look like the same family. */
     --teal-ink:#0B7E70; --amber-ink:#9D6307; --blue-ink:#0B62F1; --red-ink:#DA1313;
-  --violet:#7C6CFF; --violet-tint:#EEE9FF;
   --font-display:'General Sans','Inter',system-ui,sans-serif;
   --font-body:'Inter',system-ui,sans-serif; --font-mono:'JetBrains Mono',ui-monospace,monospace;
   --side:250px;
@@ -45,7 +44,7 @@
   --ink:#EAF1F8; --paper:#0A1626; --surface:#0F2033; --panel-2:#0C1B2E;
   --slate-700:#C7D3E0; --slate-600:#A8B6C6; --slate-500:#8493A6; --slate-400:#79889B; --slate-300:#3A4C60;
   --hairline:#1D3250; --teal-tint:rgba(21,194,168,.14);
-  --amber-tint:rgba(245,165,36,.14); --blue-tint:rgba(59,130,246,.16); --red-tint:rgba(239,68,68,.15); --violet-tint:rgba(124,108,255,.16);
+  --amber-tint:rgba(245,165,36,.14); --blue-tint:rgba(59,130,246,.16); --red-tint:rgba(239,68,68,.15);
   --teal-ink:#10AD9A; --amber-ink:#F5A524; --blue-ink:#5A96F7; --red-ink:#F05353;
   color-scheme:dark;
   /* Dark mode is chosen, not flipped: the same hues re-stepped against this
@@ -165,6 +164,12 @@ tbody tr:hover{background:var(--panel-2);}
 tbody tr.clickable{cursor:pointer;}
 td .t-name{font-weight:600; color:var(--ink);}
 td .t-sub{font-family:var(--font-mono); font-size:10.5px; color:var(--slate-400);}
+/* Tabular numerals, per the type standard: quantities, money, dates,
+   percentages, durations and variance. Proportional digits make a column of
+   figures ragged — 1,240 and 2,410 stop lining up at the thousands separator —
+   which is precisely the comparison a bill of quantities exists to support. */
+td.num,.num,.mono,.rate-in,input[type="number"],
+[class*="qty"],[class*="amount"],[class*="rate"]{font-variant-numeric:tabular-nums;}
 td.num{font-family:var(--font-mono); color:var(--ink);}
 
 /* chips */
@@ -458,7 +463,7 @@ td.num{font-family:var(--font-mono); color:var(--ink);}
 .stage{font-family:var(--font-mono); font-size:10.5px; color:var(--slate-600); background:var(--panel-2); border:1px solid var(--hairline);
   border-radius:6px; padding:3px 8px; white-space:nowrap;}
 .trow-lbl{font-size:12.5px; color:var(--slate-500); display:flex; justify-content:space-between; gap:12px; padding:9px 0; border-top:1px solid var(--hairline);}
-.trow-lbl b{color:var(--ink); font-weight:600; text-align:right;}
+.trow-lbl b{color:var(--ink); font-weight:600; text-align:end;}
 
 /* ---------- PROJECT WORKSPACE: header, chain tabs, stepper ---------- */
 .pw-back{display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:var(--slate-500); font-weight:600; cursor:pointer; margin-bottom:12px; background:none; border:0;}
@@ -1459,7 +1464,7 @@ p a,li a,td a,.csub a{min-block-size:0;}
 .rate-add{color:var(--slate-500); font-size:11.5px;}
 .rate-btn:hover .rate-add{color:var(--ink);}
 /* Sized to the column so typing does not shove the amount sideways. */
-.rate-in{width:9ch; text-align:right; padding:3px 6px; border-radius:6px;
+.rate-in{width:9ch; text-align:end; padding:3px 6px; border-radius:6px;
   background:var(--panel-2); color:var(--ink); border:1px solid var(--accent); font:inherit;}
 
 /* ── The assistant's proposal ───────────────────────────────────────────────

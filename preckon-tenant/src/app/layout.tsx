@@ -28,8 +28,29 @@ export const metadata: Metadata = {
 // Locale is applied here too: an Arabic user must not see one frame of
 // left-to-right layout before React hydrates and flips it.
 const themeInit = `(function(){try{
-  var t=localStorage.getItem('preckon-theme')||'light';
+  /* Light, Dark and SYSTEM. System was missing: with no stored preference this
+     defaulted to light and never asked the operating system, so a user whose
+     machine is in dark mode got a light application on first visit and had no
+     way to say "follow my system". Both design documents require all three.
+
+     'system' is stored as itself rather than resolved once, so the app keeps
+     following the OS when it changes at dusk instead of freezing at whatever it
+     was the day the preference was set. */
+  var stored=localStorage.getItem('preckon-theme');
+  var pref=stored||'system';
+  var dark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var t=pref==='system'?(dark?'dark':'light'):pref;
   document.documentElement.setAttribute('data-theme',t);
+  document.documentElement.setAttribute('data-theme-pref',pref);
+  if(pref==='system'&&window.matchMedia){
+    var mq=window.matchMedia('(prefers-color-scheme: dark)');
+    var onChange=function(e){
+      if(localStorage.getItem('preckon-theme')!=='light'&&localStorage.getItem('preckon-theme')!=='dark'){
+        document.documentElement.setAttribute('data-theme',e.matches?'dark':'light');
+      }
+    };
+    if(mq.addEventListener)mq.addEventListener('change',onChange);else if(mq.addListener)mq.addListener(onChange);
+  }
   var b=localStorage.getItem('preckon-brand');
   if(b) document.documentElement.style.setProperty('--brand',b);
   var l=localStorage.getItem('preckon-locale')||localStorage.getItem('preckon-tenant-locale');
