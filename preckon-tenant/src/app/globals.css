@@ -69,7 +69,7 @@ a{color:inherit; text-decoration:none;}
   background-image:linear-gradient(var(--hairline) 1px,transparent 1px),linear-gradient(90deg,var(--hairline) 1px,transparent 1px);
   background-size:26px 26px; opacity:.5;}
 .login{position:relative; width:100%; max-width:392px; background:var(--surface); border:1px solid var(--hairline);
-  border-radius:16px; padding:34px; box-shadow:0 40px 90px -50px rgba(0,0,0,.55);}
+  border-radius:10px; padding:34px; box-shadow:0 40px 90px -50px rgba(0,0,0,.55);}
 .login .brand{display:flex; align-items:center; gap:11px; margin-bottom:6px;}
 .login .brand .wm{font-family:var(--font-display); font-weight:600; font-size:17px; color:var(--ink); letter-spacing:-.02em;}
 .login .brand .wm .o{color:var(--teal);}
@@ -81,7 +81,13 @@ a{color:inherit; text-decoration:none;}
 .field label{display:block; font-size:11.5px; font-weight:600; color:var(--ink); margin-bottom:6px;}
 .field input{width:100%; padding:11px 13px; border:1.5px solid var(--hairline); border-radius:10px; background:var(--panel-2);
   color:var(--ink); font-family:var(--font-body); font-size:14px;}
-.field input:focus{outline:none; border-color:var(--teal);}
+/* A border tint alone is a colour-only cue, and WCAG 2.2 asks focus to be
+   perceivable without relying on colour. The ring is kept and the border still
+   moves, so focus reads as a shape change as well as a hue change. */
+.field input:focus-visible,.fld input:focus-visible,.fld textarea:focus-visible,
+.fld select:focus-visible,.chat-in input:focus-visible{
+  outline:2px solid var(--teal); outline-offset:2px; border-color:var(--teal);}
+.field input:focus{border-color:var(--teal);}
 .auth-note{font-size:12.5px; color:var(--slate-500); margin:0 0 18px; line-height:1.5;}
 .auth-err{display:flex; align-items:flex-start; gap:8px; margin:0 0 14px; font-size:12.5px; color:var(--red-ink);
   background:var(--red-tint); border:1px solid var(--red); border-radius:9px; padding:10px 12px;}
@@ -171,9 +177,15 @@ td.num{font-family:var(--font-mono); color:var(--ink);}
 .chip.suspended,.chip.rejected,.chip.failed,.chip.critical{color:var(--red-ink); background:var(--red-tint);}
 .chip.stale{color:var(--amber-ink); background:var(--amber-tint);}
 .chip.superseded,.chip.draft,.chip.skipped{color:var(--slate-500); background:var(--panel-2);}
-.chip.persona,.chip.flag{color:var(--violet); background:var(--violet-tint);}
+/* Persona is the AI colleague; flag marks a normative clause. Both were purple,
+   which the design standard rules out — AI is a capability here, not a colour.
+   Persona takes the product accent, flag takes the informational blue, so the
+   two stop sharing a meaning they never had. */
+.chip.persona{color:var(--teal-ink); background:var(--teal-tint);}
+.chip.flag{color:var(--blue-ink); background:var(--blue-tint);}
 [data-theme="dark"] .chip.pastdue,[data-theme="dark"] .chip.pending,[data-theme="dark"] .chip.warn,[data-theme="dark"] .chip.bidding,[data-theme="dark"] .chip.stale{color:#f0b64e;}
-[data-theme="dark"] .chip.persona,[data-theme="dark"] .chip.flag{color:#a99bff;}
+[data-theme="dark"] .chip.persona{color:var(--teal);}
+[data-theme="dark"] .chip.flag{color:var(--blue);}
 
 .mini{font-family:var(--font-body); font-size:12.5px; font-weight:600; padding:8px 13px; border-radius:8px; border:1px solid var(--hairline); background:transparent; color:var(--ink); cursor:pointer;}
 .mini:hover{border-color:var(--slate-400);}
@@ -183,7 +195,7 @@ td.num{font-family:var(--font-mono); color:var(--ink);}
 .rowbtn{font-family:var(--font-body); font-size:12px; font-weight:600; color:var(--teal-ink); background:transparent; border:0; cursor:pointer;}
 
 /* placeholder / empty / error */
-.placeholder{background:var(--surface); border:1px dashed var(--hairline); border-radius:16px; padding:56px 32px; text-align:center;}
+.placeholder{background:var(--surface); border:1px dashed var(--hairline); border-radius:10px; padding:56px 32px; text-align:center;}
 .placeholder .pic{width:56px; height:56px; border-radius:14px; background:var(--teal-tint); color:var(--teal-ink); display:grid; place-items:center; margin:0 auto 18px;}
 .placeholder h2,.placeholder h3{font-family:var(--font-display); font-weight:600; font-size:20px; color:var(--ink); margin:0 0 8px; letter-spacing:-.01em;}
 .placeholder p{font-size:13.5px; color:var(--slate-500); max-width:52ch; margin:0 auto;}
@@ -203,7 +215,7 @@ td.num{font-family:var(--font-mono); color:var(--ink);}
 .fld{margin-bottom:15px;}
 .fl{font-size:11.5px; font-weight:600; color:var(--ink); margin:0 0 6px; display:block;}
 .fld input[type=text],.fld input[type=number],.fld textarea,.fld select{width:100%; padding:9px 11px; border:1.5px solid var(--hairline); border-radius:9px; background:var(--panel-2); color:var(--ink); font-family:var(--font-body); font-size:13px;}
-.fld input:focus,.fld textarea:focus,.fld select:focus{outline:none; border-color:var(--teal);}
+.fld input:focus,.fld textarea:focus,.fld select:focus{border-color:var(--teal);}
 .fld input.mono,.fld textarea.mono{font-family:var(--font-mono);}
 .fld textarea{min-height:120px; resize:vertical;}
 
@@ -252,7 +264,7 @@ td.num{font-family:var(--font-mono); color:var(--ink);}
 .bubble.user{align-self:flex-end; background:var(--teal); color:#04120f;}
 .chat-in{display:flex; gap:8px;}
 .chat-in input{flex:1; padding:9px 11px; border:1.5px solid var(--hairline); border-radius:9px; background:var(--panel-2); color:var(--ink); font-size:13px;}
-.chat-in input:focus{outline:none; border-color:var(--teal);}
+.chat-in input:focus{border-color:var(--teal);}
 
 .spin{display:inline-block; width:14px; height:14px; border:2px solid var(--hairline); border-top-color:var(--teal); border-radius:50%; animation:spin .7s linear infinite; vertical-align:middle;}
 @keyframes spin{to{transform:rotate(360deg);}}
@@ -1162,7 +1174,7 @@ svg,img{max-width:100%;}
      the screen, docked to the bottom where a thumb is. */
   .chat-dock{
     inset-inline:0; right:auto; bottom:0; width:100%; max-width:100%;
-    border-radius:16px 16px 0 0; max-height:82dvh;
+    border-radius:10px 10px 0 0; max-height:82dvh;
   }
 }
 
@@ -1342,17 +1354,17 @@ p a,li a,td a,.csub a{min-block-size:0;}
 .ced-cop-trace{list-style:none; margin:0 0 5px; padding:0; display:flex; flex-direction:column; gap:2px;}
 .ced-cop-trace li{display:flex; align-items:baseline; gap:6px; flex-wrap:wrap;
   font-size:10.5px; padding:3px 7px; border-radius:6px; background:var(--panel-2);
-  border-left:2px solid var(--ok, var(--brand));}
+  border-inline-start:2px solid var(--ok, var(--brand));}
 .ced-cop-trace li.is-bad{border-left-color:var(--bad);}
 .ced-cop-trace b{font-size:10.5px; color:var(--ink);}
 .ced-cop-trace .mod{text-transform:uppercase; letter-spacing:.02em; color:var(--slate-500); font-size:9.5px;}
 .ced-cop-trace .sum{flex:1; min-width:120px; color:var(--slate-500);}
 
-.ced-cop-assumed{margin:4px 0 0; padding-left:15px; list-style:disc;}
+.ced-cop-assumed{margin:4px 0 0; padding-inline-start:15px; list-style:disc;}
 .ced-cop-assumed li{font-size:10.5px; color:var(--slate-500); line-height:1.45;}
 
 /* A question is not a failure, so it is not styled like one. */
-.ced-cop-turn .a.is-question{border-left:2px solid var(--brand); padding-left:8px;}
+.ced-cop-turn .a.is-question{border-inline-start:2px solid var(--brand); padding-inline-start:8px;}
 
 .ced-cop-confirm{margin:6px 0; padding:8px 10px; border-radius:8px;
   border:1px solid var(--amber, var(--brand)); background:var(--amber-tint, var(--panel-2));}
@@ -1467,7 +1479,7 @@ p a,li a,td a,.csub a{min-block-size:0;}
 /* What the assistant decided for itself. Set apart from the itemised diff
    because it is a different kind of claim: the list says what changed, this
    says what was guessed — and the guess is the part worth arguing with. */
-.bp-assumed{margin:0 0 10px; padding-left:16px; list-style:disc;}
+.bp-assumed{margin:0 0 10px; padding-inline-start:16px; list-style:disc;}
 .bp-assumed li{font-size:12px; color:var(--slate-500); line-height:1.5;}
 
 /* ── The tool trace ───────────────────────────────────────────────────────────
@@ -1523,7 +1535,7 @@ p a,li a,td a,.csub a{min-block-size:0;}
 .auth-broken{margin-bottom:12px; padding:8px 10px; border-radius:8px;
   border:1px solid var(--bad); background:var(--panel-2);}
 .auth-broken b{display:block; font-size:12px; margin-bottom:4px;}
-.auth-broken ul{margin:0; padding-left:16px; font-size:11.5px; color:var(--slate-500);}
+.auth-broken ul{margin:0; padding-inline-start:16px; font-size:11.5px; color:var(--slate-500);}
 
 .auth-list{list-style:none; margin:0 0 14px; padding:0; display:flex; flex-direction:column; gap:6px;}
 .auth-list li{display:flex; justify-content:space-between; gap:10px; align-items:flex-start;
