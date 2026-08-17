@@ -31,6 +31,8 @@ import {
   ALL_SNAP_MODES, CadViewport, DEFAULT_SNAPS, type CadHandle, type SnapMode, type Tool,
 } from "./viewport";
 import { applyCadOps, type CadMark, type CadOp } from "./agent";
+import { compareRevisions, type RevisionDiff } from "./compare";
+import { assessRevisionImpact, dimensionChanges, type ImpactReport, type MeasurementRef } from "./impact";
 import type { TraceEntry as CadTrace } from "@/lib/bim/agent2";
 import { saveOver } from "./roundtrip";
 import { IsoView } from "./isoview";
@@ -173,6 +175,16 @@ export function CadEditor({
      measurement wants marks on the canvas to check it against, an edit wants the
      tools it ran. Folding them together would make both answers worse. */
   const [mode, setMode] = useState<"ask" | "edit">("ask");
+  /* Revision comparison. The diff runs in the browser because compareRevisions
+     is pure and the editor already fetches and parses DXF — sending two whole
+     drawings to the server to be diffed would move megabytes to compute
+     something this page can do locally. Only the measurements come from the
+     API, because only the server knows them. */
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [comparing, setComparing] = useState(false);
+  const [diff, setDiff] = useState<RevisionDiff | null>(null);
+  const [impact, setImpact] = useState<ImpactReport | null>(null);
+  const [compareAgainst, setCompareAgainst] = useState("");
   /* A change large enough that it is worth seeing the number first. Holds the
      instruction, so agreeing re-sends it rather than making anyone retype. */
   const [pending, setPending] = useState<{ instruction: string; label: string; affected: number } | null>(null);
@@ -407,6 +419,54 @@ export function CadEditor({
     }
   }
 
+  /**
+   * Compare the open sheet against another revision.
+   *
+   * The diff runs here rather than on the server: compareRevisions is pure, this
+   * page already fetches and parses DXF, and shipping two whole drawings across
+   * the wire to compute something the browser can do locally would be slower and
+   * no more correct.
+   *
+   * Argument order is deliberate — the OTHER file is the earlier revision and
+   * what is open is the later one, so "added" reads as what this revision added.
+   */
+  async function runCompare(otherFid: string) {
+    if (!model || !pid || !otherFid) return;
+    setComparing(true);
+    setDiff(null);
+    setImpact(null);
+    try {
+      const text = await fetchDxf(pid, otherFid);
+      const other = withIds(parseToModel(new DxfParser().parseSync(text) as any));
+      const d = compareRevisions(other, model);
+      setDiff(d);
+
+      /* Measurements come from the server because only it knows them. A failure
+         here must not lose the diff — the comparison is useful on its own, and
+         the impact is the bonus. */
+      try {
+        const rows = await api.get<any>(`/projects/${pid}/artifacts?type=drawing_measurement`);
+        const items: any[] = rows?.artifacts ?? rows ?? [];
+        const sheet = filename.replace(/\.[^.]+$/, "");
+        const mine: MeasurementRef[] = items
+          .map((a) => ({ id: a.id, ...(a.payload ?? {}) }))
+          .filter((m: any) => m.sheet_no && sheet.includes(m.sheet_no))
+          .map((m: any) => ({
+            id: m.id, sheet_no: m.sheet_no, item: m.item,
+            quantity: Number(m.quantity ?? 0), unit: m.unit ?? "",
+            source_layers: m.source_layers,
+          }));
+        setImpact(assessRevisionImpact(sheet, d, mine));
+      } catch {
+        // Left null; the diff still renders.
+      }
+    } catch (e: any) {
+      toast(e?.message ?? t("common.loadFail"), "bad");
+    } finally {
+      setComparing(false);
+    }
+  }
+
   const pick = (nt: Tool) => { setTool(nt); setMeasuring(false); };
   const factor = model ? unitFactorOf(model.insunits, display) : 1;
 
@@ -578,6 +638,117 @@ export function CadEditor({
         </div>
 
         <aside className="ced-side">
+          {/* Revision comparison. Folded away by default: it answers a question
+              you ask occasionally and deliberately, unlike the assistant, which
+              is the first thing reached for on an unfamiliar sheet. */}
+          {pid && fid && (
+            <div className="ced-cmp">
+              <button className="ced-cop-h" onClick={() => setCompareOpen((v) => !v)} aria-expanded={compareOpen}>
+                <span className="tw-glyph" aria-hidden>{compareOpen ? "▾" : "▸"}</span>
+                <span>{t("ed.compare")}</span>
+                {diff && <span className="ced-cop-n mono">{diff.added.length + diff.removed.length + diff.moved.length + diff.textChanged.length}</span>}
+              </button>
+
+              {compareOpen && (
+                <div className="ced-cmp-body">
+                  <p className="ced-cop-intro">{t("ed.compareIntro")}</p>
+                  <div className="ced-cmp-pick">
+                    <select
+                      value={compareAgainst}
+                      onChange={(e) => setCompareAgainst(e.target.value)}
+                      aria-label={t("ed.compareAgainst")}
+                      disabled={comparing}
+                    >
+                      <option value="">{t("ed.comparePick")}</option>
+                      {(otherFiles ?? []).map((f: any) => (
+                        <option key={f.id} value={f.id}>{f.filename}</option>
+                      ))}
+                    </select>
+                    <button
+                      className="mini sm pri"
+                      onClick={() => runCompare(compareAgainst)}
+                      disabled={comparing || !compareAgainst}
+                    >
+                      {comparing ? t("ed.comparing") : t("ed.compareRun")}
+                    </button>
+                  </div>
+
+                  {diff && (
+                    <div className="ced-cmp-out">
+                      <div className="ced-cmp-sum">{diff.summary}</div>
+
+                      {/* Dimension changes first, and ranked by proportion: they
+                          are the one signal a reader can act on immediately, and
+                          the one most easily lost in a diff of two thousand
+                          entities. */}
+                      {dimensionChanges(diff).length > 0 && (
+                        <>
+                          <div className="ced-cmp-h">{t("ed.compareDims")}</div>
+                          <ul className="ced-cmp-list">
+                            {dimensionChanges(diff).slice(0, 8).map((c, i) => (
+                              <li key={i}>
+                                <span className="mono">{c.before} → {c.after}</span>
+                                <span className="csub">
+                                  {c.delta > 0 ? "+" : ""}{c.delta}
+                                  {c.percent !== null ? ` · ${c.percent}%` : ""} · {c.layer}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </>
+                      )}
+
+                      {diff.byLayer.length > 0 && (
+                        <>
+                          <div className="ced-cmp-h">{t("ed.compareLayers")}</div>
+                          <ul className="ced-cmp-list">
+                            {diff.byLayer.slice(0, 8).map((l) => (
+                              <li key={l.layer}>
+                                <span className="mono">{l.layer}</span>
+                                <span className="csub">
+                                  {[l.added && `+${l.added}`, l.removed && `−${l.removed}`,
+                                    l.moved && `↔${l.moved}`, l.textChanged && `✎${l.textChanged}`]
+                                    .filter(Boolean).join("  ")}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </>
+                      )}
+
+                      {/* What it means for the numbers. "Unverifiable" is its own
+                          line on purpose: a measurement with no recorded source
+                          cannot be shown safe, and folding it into "unaffected"
+                          is how a stale quantity reaches a bill. */}
+                      {impact && (
+                        <div className={"ced-cmp-impact" + (impact.needsReview ? " needs-review" : "")}>
+                          <div className="ced-cmp-h">{t("ed.compareImpact")}</div>
+                          <ul className="ced-cmp-list">
+                            {impact.affected.slice(0, 8).map((a) => (
+                              <li key={a.id}>
+                                <b>{a.item}</b>
+                                <span className="csub">{a.quantity} {a.unit} · {a.via.join(", ")}</span>
+                              </li>
+                            ))}
+                          </ul>
+                          <p className="csub">
+                            {t("ed.compareCounts", {
+                              affected: impact.affected.length,
+                              unknown: impact.unknown.length,
+                              ok: impact.unaffected,
+                            })}
+                          </p>
+                          {/* Nothing here recalculates. */}
+                          <p className="csub">{t("ed.compareNoRecalc")}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* The assistant sits above the layer list because it is the thing you
               reach for first on an unfamiliar sheet: what is this, how big is
               it, how many of those are there. */}
