@@ -6,22 +6,59 @@
 @import url('https://api.fontshare.com/v2/css?f[]=general-sans@500,600,700&display=swap');
 
 :root{
+  /* ── The Preckon UI Blueprint palette (§7 light) ─────────────────────────────
+     These are the canonical semantic names the design standard uses. The older
+     Preckon names below are kept as ALIASES pointing at them, so ~1,500 lines of
+     existing rules keep working while new work can use the standard vocabulary.
+     One value, two names — not two palettes drifting apart.
+
+     TWO DELIBERATE DEVIATIONS, both for contrast:
+
+       text-muted  #74828A → #667279   3.69:1 on canvas
+       warning     #B56A00 → #A56000   3.89:1 on canvas
+
+     Both fail the 4.5:1 that the same documents mandate (Blueprint §15, Design
+     System §7.1). Where a palette and an accessibility target disagree, the
+     accessibility target wins — the standard says AA is not a later enhancement.
+     Each is darkened to the nearest passing value with the hue held, so the
+     family still reads as the same colour. The original values remain correct
+     for large text and for non-text use such as a chip fill or a status cap. */
+  --canvas:#F5F7F8;
+  --surface:#FFFFFF;
+  --surface-subtle:#F0F3F4;
+  --surface-raised:#FFFFFF;
+  --text-primary:#172126;
+  --text-secondary:#526068;
+  --text-muted:#667279;          /* blueprint #74828A, darkened to reach 4.5:1 */
+  --border:#D8DEE2;
+  --border-strong:#B8C2C8;
+  --accent-hover:#066B64;
+  --accent-subtle:#E6F3F1;
+  --info:#1769AA;
+  --success:#2F7D4A;
+  --warning:#A56000;             /* blueprint #B56A00, darkened to reach 4.5:1 */
+  --warning-fill:#B56A00;        /* the blueprint value, for fills and caps */
+  --critical:#B42318;
+  --focus:#0B78D0;
+
   /* --brand is the white-label accent. Admin → Branding rewrites it at runtime and
      in production it is injected per tenant from `tenant_theme` (§7). Everything
-     that reads as "the customer's colour" must use --brand, not --teal. */
-  --brand:#15C2A8;
-  --ink:#0B1B2B; --ink-deep:#06101C; --teal:#15C2A8; --teal-press:#0FA593; --teal-tint:#E8FAF6;
-  --slate-700:#334155; --slate-600:#475569; --slate-500:#525F72; --slate-400:#5D718D; --slate-300:#CBD5E1;
-    /* 400 and 500 carry the quiet and secondary text. At #94A3B8 and #64748B
-       they measured 2.4:1 and 4.4:1 against this paper — below the 4.5:1 that
-       WCAG 1.4.3 asks for at AA. Re-stepped to the nearest passing values with
-       the hue held, so the ramp still reads as the same greys. */
-  --paper:#F4F7FB; --surface:#FFFFFF; --panel-2:#F1F5F9; --hairline:#E3E8EF;
-  --amber:#F5A524; --amber-tint:#FEF3E2; --blue:#3B82F6; --blue-tint:#E7F0FE; --red:#EF4444; --red-tint:#FDECEC;
+     that reads as "the customer's colour" must use --brand, not --teal.
+     It now defaults to the blueprint accent; --accent follows it, so a tenant's
+     own colour still flows through both vocabularies. */
+  --brand:#087E75;
+  --accent:var(--brand);
+  --ink:var(--text-primary); --ink-deep:#0B1418;
+  --teal:var(--brand); --teal-press:var(--accent-hover); --teal-tint:var(--accent-subtle);
+  --slate-700:#2C383E; --slate-600:#43535B; --slate-500:var(--text-secondary);
+  --slate-400:var(--text-muted); --slate-300:var(--border-strong);
+  --paper:var(--canvas); --panel-2:var(--surface-subtle); --hairline:var(--border);
+  --amber:var(--warning-fill); --amber-tint:#F8EFE1; --blue:var(--info); --blue-tint:#E7F0F8;
+  --red:var(--critical); --red-tint:#FBEAE8;
     /* Signal colours read as text on their own tint: an amber chip measured
        1.86:1. The tint and the fill keep the brand value — only the ink moves,
        so a status bar and a status chip still look like the same family. */
-    --teal-ink:#0B7E70; --amber-ink:#9D6307; --blue-ink:#0B62F1; --red-ink:#DA1313;
+    --teal-ink:var(--brand); --amber-ink:var(--warning); --blue-ink:var(--info); --red-ink:var(--critical);
   --font-display:'General Sans','Inter',system-ui,sans-serif;
   --font-body:'Inter',system-ui,sans-serif; --font-mono:'JetBrains Mono',ui-monospace,monospace;
   --side:250px;
