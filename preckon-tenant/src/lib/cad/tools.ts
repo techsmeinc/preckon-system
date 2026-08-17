@@ -16,6 +16,7 @@
 
 import type { CadOp } from "./agent";
 import { type DxfModel, type Entity, modelBounds, nativeUnit } from "./model";
+import { affectedLayers, compareRevisions } from "./compare";
 import type { Tool, ToolContext, ToolResult } from "../bim/registry";
 
 export type CadTool = Tool<DxfModel, CadOp>;
@@ -364,7 +365,60 @@ const clearRegion: CadTool = {
   },
 };
 
+// ── Module: Revisions ────────────────────────────────────────────────────────
+
+const compareRevision: CadTool = {
+  name: "compare_revision",
+  label: "Compare With a Revision",
+  module: "Revisions",
+  scope: "global",
+  kind: "read",
+  description:
+    'Compare the open drawing against another revision: what was added, removed, moved, and which dimension text changed. Use to answer "what changed in this revision".',
+  keywords: ["compare", "revision", "changed", "diff", "difference", "rev", "previous", "against", "superseded"],
+  params: [
+    { name: "other", type: "selector", description: "The other revision as a drawing model: {insunits, layers, entities}", required: true },
+  ],
+  run: (ctx: Ctx, a) => {
+    const other = a.other as DxfModel | undefined;
+    if (!other?.entities) return fail("No other revision was supplied to compare against.");
+
+    /* Argument order matters and is easy to get backwards. The SUPPLIED revision
+       is treated as the earlier one and the open drawing as the later, so
+       "added" means added by the revision on screen — which is what somebody
+       looking at it expects to read. */
+    const d = compareRevisions(other, ctx.doc);
+    const layers = affectedLayers(d);
+
+    return ok(`Against that revision: ${d.summary}.`, {
+      assumptions: [
+        "The supplied revision is treated as the earlier one; additions are what the open drawing has and it does not.",
+        ...(layers.length ? [`Quantities read from ${layers.join(", ")} should be re-checked.`] : []),
+      ],
+      data: {
+        summary: d.summary,
+        unchanged: d.unchanged,
+        added: d.added.length,
+        removed: d.removed.length,
+        moved: d.moved.length,
+        textChanged: d.textChanged,
+        byLayer: d.byLayer,
+        layersAdded: d.layersAdded,
+        layersRemoved: d.layersRemoved,
+        affectedLayers: layers,
+        /* Biggest movements first: a reviewer judges a revision by the largest
+           thing that shifted, not by a list in drawing order. */
+        largestMoves: [...d.moved]
+          .sort((x, y) => y.distance - x.distance)
+          .slice(0, 20)
+          .map((m) => ({ layer: m.after.layer, dx: m.dx, dy: m.dy, distance: m.distance })),
+      },
+    });
+  },
+};
+
 export const CAD_TOOLS: CadTool[] = [
+  compareRevision,
   drawingOverview,
   listLayers,
   findText,
