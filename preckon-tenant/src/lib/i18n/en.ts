@@ -492,7 +492,7 @@ export const en = {
   "ed.compareLayers": "By layer",
   "ed.compareImpact": "Quantities to re-check",
   "ed.compareCounts": "{affected} affected · {unknown} unverifiable · {ok} unaffected",
-  "ed.compareNoRecalc": "Nothing has been recalculated. These are flagged for review."
+  "ed.compareNoRecalc": "Nothing has been recalculated. These are flagged for review.",
   "ed.modeAsk": "Ask",
   "ed.modeEdit": "Edit",
   "ed.editPlaceholder": "Note the clash by grid C… cloud the stair… delete the X-JUNK layer…",

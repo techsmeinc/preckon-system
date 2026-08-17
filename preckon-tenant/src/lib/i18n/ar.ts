@@ -493,7 +493,7 @@ export const ar: Dict = {
   "ed.compareLayers": "حسب الطبقة",
   "ed.compareImpact": "كميات تحتاج إعادة تحقق",
   "ed.compareCounts": "{affected} متأثرة · {unknown} غير قابلة للتحقق · {ok} غير متأثرة",
-  "ed.compareNoRecalc": "لم يُعد حساب أي شيء. هذه العناصر مُعلَّمة للمراجعة."
+  "ed.compareNoRecalc": "لم يُعد حساب أي شيء. هذه العناصر مُعلَّمة للمراجعة.",
   "ed.modeAsk": "اسأل",
   "ed.modeEdit": "تعديل",
   "ed.editPlaceholder": "سجّل التعارض عند المحور C… طوّق الدرج… احذف طبقة X-JUNK…",

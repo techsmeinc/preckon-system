@@ -185,6 +185,31 @@ export function CadEditor({
   const [diff, setDiff] = useState<RevisionDiff | null>(null);
   const [impact, setImpact] = useState<ImpactReport | null>(null);
   const [compareAgainst, setCompareAgainst] = useState("");
+  const [otherFiles, setOtherFiles] = useState<{ id: string; filename: string }[]>([]);
+
+  /* The other drawings in this project, fetched only once the panel is opened —
+     an estimator who never compares should not pay for the list on every open. */
+  useEffect(() => {
+    if (!compareOpen || !pid || otherFiles.length) return;
+    let alive = true;
+    api
+      .get<any>(`/projects/${pid}/files`)
+      .then((r) => {
+        if (!alive) return;
+        const list: any[] = r?.files ?? r ?? [];
+        setOtherFiles(
+          list
+            .filter((f) => f.id !== fid && /\.(dxf|dwg)$/i.test(f.filename ?? ""))
+            .map((f) => ({ id: f.id, filename: f.filename })),
+        );
+      })
+      .catch(() => {
+        // A missing list leaves the picker empty; the panel still explains itself.
+      });
+    return () => {
+      alive = false;
+    };
+  }, [compareOpen, pid, fid, otherFiles.length]);
   /* A change large enough that it is worth seeing the number first. Holds the
      instruction, so agreeing re-sends it rather than making anyone retype. */
   const [pending, setPending] = useState<{ instruction: string; label: string; affected: number } | null>(null);

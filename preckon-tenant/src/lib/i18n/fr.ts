@@ -494,7 +494,7 @@ export const fr: Dict = {
   "ed.compareLayers": "Par calque",
   "ed.compareImpact": "Quantites a reverifier",
   "ed.compareCounts": "{affected} affectees · {unknown} invérifiables · {ok} inchangees",
-  "ed.compareNoRecalc": "Rien n’a ete recalcule. Ces elements sont signales pour revue."
+  "ed.compareNoRecalc": "Rien n’a ete recalcule. Ces elements sont signales pour revue.",
   "ed.modeAsk": "Demander",
   "ed.modeEdit": "Modifier",
   "ed.editPlaceholder": "Signalez le conflit pres de la trame C… encadrez l'escalier… supprimez le calque X-JUNK…",
