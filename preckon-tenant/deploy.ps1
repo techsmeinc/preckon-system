@@ -51,9 +51,59 @@ $size = (Get-Item $Bundle).Length
 Write-Host ("    {0:N0} bytes" -f $size)
 if ($size -lt 200000) { throw "That bundle is far too small to be real. Aborting before it overwrites a good one." }
 
-Write-Host "==> Copying up (password prompt #1)" -ForegroundColor Cyan
-scp $Bundle "${Server}:/tmp/preckon-tenant.tgz"
-if ($LASTEXITCODE -ne 0) { throw "scp failed" }
+# ── Getting bytes to this server ─────────────────────────────────────────────
+#
+# The link resets bulk transfers partway through: the handshake and any small
+# command succeed, then a large upload dies at a consistent offset having crawled
+# along at a few KB/s. Two things make that survivable.
+#
+# IPQoS=none. OpenSSH marks packets DSCP EF by default (`ssh -G` shows "ipqos ef
+# cs0") — the class reserved for VoIP, which carriers police to a small budget
+# and drop beyond it. That produces exactly this shape of failure, and the marking
+# buys us nothing on a file copy.
+#
+# reput, not scp. scp has no notion of resume, so a reset means starting from
+# zero — on a link that dies every ~100KB, a 1.3MB bundle never lands, however
+# many times you retry. sftp's `reput` continues from what arrived. The transfer
+# is then verified by SIZE rather than by exit code, because the thing being
+# defended against is precisely a connection that reports success having moved
+# only part of the file.
+$SshOpts = @("-o", "IPQoS=none", "-o", "ServerAliveInterval=15", "-o", "ServerAliveCountMax=3")
+$Key = Join-Path $env:USERPROFILE ".ssh\ionos_preckon"
+if (Test-Path $Key) {
+  $SshOpts += @("-i", $Key)
+} else {
+  Write-Host "    (no SSH key at $Key - expect a password prompt per attempt)" -ForegroundColor Yellow
+}
+
+function Send-Bundle {
+  param([string]$Local, [string]$Remote, [long]$Size, [int]$Attempts = 25)
+
+  $batch = Join-Path $env:TEMP "preckon-put.sftp"
+  [IO.File]::WriteAllText($batch, "reput `"$Local`" `"$Remote`"`nexit`n",
+                          (New-Object Text.UTF8Encoding $false))
+
+  for ($i = 1; $i -le $Attempts; $i++) {
+    & sftp @SshOpts -b $batch $Server 2>&1 | Out-Null
+
+    # The server's own count is the only one that matters. sftp can exit 0 on a
+    # reset, and it can exit non-zero having transferred the last byte.
+    $landed = (& ssh @SshOpts $Server "stat -c %s '$Remote' 2>/dev/null || echo 0") -join ""
+    $landed = [long]($landed.Trim())
+
+    if ($landed -eq $Size) {
+      Write-Host ("    {0:N0} bytes landed (attempt {1})" -f $landed, $i) -ForegroundColor Green
+      return
+    }
+    if ($landed -gt $Size) { throw "remote file is LARGER than the bundle - delete $Remote and re-run" }
+    Write-Host ("    attempt {0}: {1:N0} / {2:N0} bytes ({3:P0}) - resuming" -f `
+                $i, $landed, $Size, ($landed / $Size)) -ForegroundColor DarkYellow
+  }
+  throw "upload did not complete in $Attempts attempts - the link to $($env:PRECKON_HOST) is too unstable"
+}
+
+Write-Host "==> Copying up (resumable)" -ForegroundColor Cyan
+Send-Bundle -Local $Bundle -Remote "/tmp/preckon-tenant.tgz" -Size $size
 
 # The remote half goes up as a file rather than as pasted text, so there is no
 # way for it to end up typed into a password prompt.
@@ -144,12 +194,11 @@ $tmp = Join-Path $env:TEMP "preckon-remote-deploy.sh"
 # LF endings and no BOM: bash will not run a script with CRLF line endings.
 [IO.File]::WriteAllText($tmp, ($remote -replace "`r`n", "`n"), (New-Object Text.UTF8Encoding $false))
 
-Write-Host "==> Sending the deploy script (password prompt #2)" -ForegroundColor Cyan
-scp $tmp "${Server}:/tmp/preckon-remote-deploy.sh"
-if ($LASTEXITCODE -ne 0) { throw "scp of the deploy script failed" }
+Write-Host "==> Sending the deploy script" -ForegroundColor Cyan
+Send-Bundle -Local $tmp -Remote "/tmp/preckon-remote-deploy.sh" -Size (Get-Item $tmp).Length
 
-Write-Host "==> Deploying (password prompt #3)" -ForegroundColor Cyan
-ssh $Server "bash /tmp/preckon-remote-deploy.sh"
+Write-Host "==> Deploying" -ForegroundColor Cyan
+& ssh @SshOpts $Server "bash /tmp/preckon-remote-deploy.sh"
 if ($LASTEXITCODE -ne 0) { throw "remote deploy failed" }
 
 Write-Host "==> Done. Hard-refresh app.preckon.com (Ctrl+Shift+R)." -ForegroundColor Green
