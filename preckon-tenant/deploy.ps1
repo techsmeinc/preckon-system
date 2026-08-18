@@ -87,6 +87,28 @@ find . -name '*.sh' -not -path './node_modules/*' -exec sed -i 's/\r`$//' {} + 2
 echo "==> Migrations"
 sh scripts/migrate.sh
 
+# Artifact payload schemas live in the DATABASE, registered from the pack — they
+# are NOT read from source at runtime. Ship code that uses a newly added field
+# without re-registering, and the server keeps validating against the previous
+# shape: every agent or editor write of that field is rejected with "Payload
+# invalid for <type>" while the deploy itself reports success. An application
+# that is up and quietly broken is worse than one that never came up.
+#
+# update-from-git.sh has always done this; this script did not, which is how the
+# two deploy paths could land the same commit and behave differently.
+#
+# --build, because `run` otherwise reuses the seed image already on the box —
+# built from the PREVIOUS bundle — and would register the old catalog over the
+# new code, reporting success. Before the app comes up, so there is no window in
+# which it serves requests against schemas that do not match it. Idempotent
+# (ON DUPLICATE KEY UPDATE), and cheap next to the build that follows.
+echo "==> Re-registering the pack catalog (artifact schemas)"
+docker compose build seed && docker compose --profile tools run --rm seed || {
+  echo "  ! catalog seed FAILED - the schemas in the database do not match the code being deployed."
+  echo "    Refusing to bring the app up against them."
+  exit 1
+}
+
 # The WORKER is in this list, and leaving it out is how a deploy lands cleanly
 # and changes nothing. Every prompt, every agent and every tool lives in
 # worker/src and is baked into that image  -  so a change to how the Copilot
