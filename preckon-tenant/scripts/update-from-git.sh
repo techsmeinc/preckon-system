@@ -93,10 +93,11 @@ if want tenant && [ -d /opt/preckon-tenant ]; then
   # every agent or editor write touching a newly added field is rejected at
   # runtime — an application that is up and quietly broken, which is worse than
   # one that never came up.
-  # --build matters: without it, `run` reuses whatever seed image is already on
-  # the box, which was built from the PREVIOUS checkout. The seed would then
-  # dutifully register the old catalog over the new code and report success —
-  # exactly the failure this step exists to prevent, wearing a green tick.
+  # The seeder is rebuilt first, deliberately. Without that, `run` reuses
+  # whatever seed image is already on the box — built from the PREVIOUS checkout
+  # — and the seed dutifully registers the old catalog over the new code and
+  # reports success: exactly the failure this step exists to prevent, wearing a
+  # green tick. (`run --build` is the one-flag form, but wants Compose v2.13+.)
   docker compose build seed && docker compose --profile tools run --rm seed || {
     echo "  ! catalog seed FAILED — refusing to deploy code whose artifact schemas are not registered."
     exit 1

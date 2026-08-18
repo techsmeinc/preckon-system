@@ -97,11 +97,14 @@ sh scripts/migrate.sh
 # update-from-git.sh has always done this; this script did not, which is how the
 # two deploy paths could land the same commit and behave differently.
 #
-# --build, because `run` otherwise reuses the seed image already on the box —
-# built from the PREVIOUS bundle — and would register the old catalog over the
-# new code, reporting success. Before the app comes up, so there is no window in
-# which it serves requests against schemas that do not match it. Idempotent
-# (ON DUPLICATE KEY UPDATE), and cheap next to the build that follows.
+# The seeder is rebuilt first, deliberately. `run` otherwise reuses the seed
+# image already on the box — built from the PREVIOUS bundle — and would register
+# the old catalog over the new code, reporting success. (`run --build` says this
+# in one flag but wants Compose v2.13+; two commands work on every v2.)
+#
+# Before the app comes up, so there is no window in which it serves requests
+# against schemas that do not match it. Idempotent (ON DUPLICATE KEY UPDATE),
+# and cheap next to the build that follows.
 echo "==> Re-registering the pack catalog (artifact schemas)"
 docker compose build seed && docker compose --profile tools run --rm seed || {
   echo "  ! catalog seed FAILED - the schemas in the database do not match the code being deployed."
