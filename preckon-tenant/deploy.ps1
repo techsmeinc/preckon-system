@@ -76,8 +76,63 @@ if (Test-Path $Key) {
   Write-Host "    (no SSH key at $Key - expect a password prompt per attempt)" -ForegroundColor Yellow
 }
 
+function Get-RemoteSize {
+  param([string]$Remote)
+  $n = (& ssh @SshOpts $Server "stat -c %s '$Remote' 2>/dev/null || echo 0") -join ""
+  return [long]($n.Trim())
+}
+
+# SHA-256 of the first N bytes of a local file, to answer the only question that
+# makes resuming safe: is what is already on the server a PREFIX of what we are
+# sending, or is it a different file that happens to be shorter?
+function Get-LocalPrefixSha {
+  param([string]$Path, [long]$Bytes)
+  $fs = [IO.File]::OpenRead($Path)
+  try {
+    $buf = New-Object byte[] $Bytes
+    $read = 0
+    while ($read -lt $Bytes) {
+      $n = $fs.Read($buf, $read, $Bytes - $read)
+      if ($n -le 0) { break }
+      $read += $n
+    }
+    $sha = [Security.Cryptography.SHA256]::Create()
+    return (($sha.ComputeHash($buf, 0, $read) | ForEach-Object { $_.ToString("x2") }) -join "")
+  } finally { $fs.Dispose() }
+}
+
 function Send-Bundle {
   param([string]$Local, [string]$Remote, [long]$Size, [int]$Attempts = 25)
+
+  $localSha = (Get-FileHash $Local -Algorithm SHA256).Hash.ToLower()
+
+  # ── Why this does not trust the byte count ─────────────────────────────────
+  #
+  # `reput` resumes onto whatever is already at the remote path, and /tmp still
+  # holds the bundle from the LAST deploy. Resuming onto that appends the tail of
+  # the new tarball to the body of the old one and produces a corrupt hybrid —
+  # which, if the new bundle is the larger, arrives at exactly the expected
+  # length. A size check passes it, `tar xzf` then unpacks garbage over
+  # /opt/preckon-tenant. This is not hypothetical: it is what this function did
+  # on its first outing.
+  #
+  # So the leftover is only resumed onto once its bytes are shown to be a prefix
+  # of the file being sent, and the finished transfer is verified by SHA-256 of
+  # the whole thing. Length is evidence of progress, never of correctness.
+  $landed = Get-RemoteSize $Remote
+  if ($landed -gt 0) {
+    $usable = $false
+    if ($landed -le $Size) {
+      $remoteSha = ((& ssh @SshOpts $Server "sha256sum '$Remote' | cut -d' ' -f1") -join "").Trim()
+      $usable = ($remoteSha -eq (Get-LocalPrefixSha -Path $Local -Bytes $landed))
+    }
+    if (-not $usable) {
+      Write-Host ("    discarding {0:N0} unrelated bytes already at {1}" -f $landed, $Remote) -ForegroundColor DarkYellow
+      & ssh @SshOpts $Server "rm -f '$Remote'" | Out-Null
+    } elseif ($landed -lt $Size) {
+      Write-Host ("    resuming from {0:N0} bytes already there" -f $landed) -ForegroundColor DarkGray
+    }
+  }
 
   $batch = Join-Path $env:TEMP "preckon-put.sftp"
   [IO.File]::WriteAllText($batch, "reput `"$Local`" `"$Remote`"`nexit`n",
@@ -86,21 +141,35 @@ function Send-Bundle {
   for ($i = 1; $i -le $Attempts; $i++) {
     & sftp @SshOpts -b $batch $Server 2>&1 | Out-Null
 
-    # The server's own count is the only one that matters. sftp can exit 0 on a
-    # reset, and it can exit non-zero having transferred the last byte.
-    $landed = (& ssh @SshOpts $Server "stat -c %s '$Remote' 2>/dev/null || echo 0") -join ""
-    $landed = [long]($landed.Trim())
+    # The server's own account of the file, not sftp's exit code: sftp can exit 0
+    # on a reset, and non-zero having transferred the last byte.
+    $landed = Get-RemoteSize $Remote
 
     if ($landed -eq $Size) {
-      Write-Host ("    {0:N0} bytes landed (attempt {1})" -f $landed, $i) -ForegroundColor Green
-      return
+      $remoteSha = ((& ssh @SshOpts $Server "sha256sum '$Remote' | cut -d' ' -f1") -join "").Trim()
+      if ($remoteSha -eq $localSha) {
+        Write-Host ("    {0:N0} bytes landed, sha256 verified (attempt {1})" -f $landed, $i) -ForegroundColor Green
+        return
+      }
+      # Right length, wrong file. Nothing about the remainder can be trusted.
+      Write-Host "    length matched but sha256 did not - discarding and starting over" -ForegroundColor Red
+      & ssh @SshOpts $Server "rm -f '$Remote'" | Out-Null
+      continue
     }
-    if ($landed -gt $Size) { throw "remote file is LARGER than the bundle - delete $Remote and re-run" }
+    if ($landed -gt $Size) {
+      Write-Host "    remote file overshot the bundle - discarding" -ForegroundColor Red
+      & ssh @SshOpts $Server "rm -f '$Remote'" | Out-Null
+      continue
+    }
     Write-Host ("    attempt {0}: {1:N0} / {2:N0} bytes ({3:P0}) - resuming" -f `
                 $i, $landed, $Size, ($landed / $Size)) -ForegroundColor DarkYellow
   }
   throw "upload did not complete in $Attempts attempts - the link to $($env:PRECKON_HOST) is too unstable"
 }
+
+# Computed here so the server can be told what to expect, independently of
+# anything the upload path claims about itself.
+$BundleSha = (Get-FileHash $Bundle -Algorithm SHA256).Hash.ToLower()
 
 Write-Host "==> Copying up (resumable)" -ForegroundColor Cyan
 Send-Bundle -Local $Bundle -Remote "/tmp/preckon-tenant.tgz" -Size $size
@@ -113,6 +182,23 @@ cd /tmp
 actual=`$(stat -c %s /tmp/preckon-tenant.tgz)
 echo "==> Bundle on server: `$actual bytes"
 if [ "`$actual" -ne $size ]; then echo "SIZE MISMATCH  -  expected $size. Aborting."; exit 1; fi
+
+# The size agreeing proves only that something of the right length arrived. A
+# resumed upload onto a previous deploy's leftover produces exactly that: the
+# body of the old bundle with the tail of the new one, at the correct length.
+# The digest is what distinguishes the right file from a plausible one.
+sha=`$(sha256sum /tmp/preckon-tenant.tgz | cut -d' ' -f1)
+if [ "`$sha" != "$BundleSha" ]; then
+  echo "CHECKSUM MISMATCH  -  expected $BundleSha, got `$sha."
+  echo "The bundle on this server is not the one that was packaged. Aborting before it is unpacked."
+  exit 1
+fi
+
+# Belt and braces, and cheap: a tarball that will not list is one that must not
+# be extracted over a working install.
+tar tzf /tmp/preckon-tenant.tgz >/dev/null 2>&1 || {
+  echo "Bundle is not a readable tarball. Aborting."; exit 1; }
+echo "==> Bundle verified (sha256 `${sha:0:12}…)"
 
 echo "==> Unpacking"
 # Windows tar records file attributes as a SCHILY.fflags header GNU tar does not
