@@ -62,12 +62,14 @@ if ($size -lt 200000) { throw "That bundle is far too small to be real. Aborting
 # and drop beyond it. That produces exactly this shape of failure, and the marking
 # buys us nothing on a file copy.
 #
-# reput, not scp. scp has no notion of resume, so a reset means starting from
-# zero — on a link that dies every ~100KB, a 1.3MB bundle never lands, however
-# many times you retry. sftp's `reput` continues from what arrived. The transfer
-# is then verified by SIZE rather than by exit code, because the thing being
-# defended against is precisely a connection that reports success having moved
-# only part of the file.
+# sftp, not scp. scp has no notion of resume, so a reset means starting from
+# zero — on a link that dies every ~100KB, a 1.3MB bundle never lands however
+# many times you retry. sftp's `reput` continues from what arrived.
+#
+# The transfer is verified by SHA-256, not by exit code and not by length. sftp
+# can exit 0 on a reset; and a resume onto a previous deploy's leftover yields a
+# corrupt hybrid of exactly the expected length. Only the digest separates the
+# right file from a plausible one.
 $SshOpts = @("-o", "IPQoS=none", "-o", "ServerAliveInterval=15", "-o", "ServerAliveCountMax=3")
 $Key = Join-Path $env:USERPROFILE ".ssh\ionos_preckon"
 if (Test-Path $Key) {
@@ -76,10 +78,27 @@ if (Test-Path $Key) {
   Write-Host "    (no SSH key at $Key - expect a password prompt per attempt)" -ForegroundColor Yellow
 }
 
+# Windows PowerShell turns anything a native command writes to stderr into an
+# ErrorRecord, and $ErrorActionPreference = "Stop" makes that terminating. ssh
+# and docker both narrate progress on stderr perfectly happily, so under Stop a
+# healthy deploy dies on its own build log. Exit codes are checked explicitly
+# instead - which is the thing that actually indicates failure.
+function Invoke-Native {
+  param([scriptblock]$Block)
+  $prev = $ErrorActionPreference
+  $ErrorActionPreference = "Continue"
+  try { & $Block } finally { $ErrorActionPreference = $prev }
+}
+
 function Get-RemoteSize {
   param([string]$Remote)
-  $n = (& ssh @SshOpts $Server "stat -c %s '$Remote' 2>/dev/null || echo 0") -join ""
+  $n = (Invoke-Native { & ssh @SshOpts $Server "stat -c %s '$Remote' 2>/dev/null || echo 0" }) -join ""
   return [long]($n.Trim())
+}
+
+function Get-RemoteSha {
+  param([string]$Remote)
+  return ((Invoke-Native { & ssh @SshOpts $Server "sha256sum '$Remote' 2>/dev/null | cut -d' ' -f1" }) -join "").Trim()
 }
 
 # SHA-256 of the first N bytes of a local file, to answer the only question that
@@ -123,42 +142,54 @@ function Send-Bundle {
   if ($landed -gt 0) {
     $usable = $false
     if ($landed -le $Size) {
-      $remoteSha = ((& ssh @SshOpts $Server "sha256sum '$Remote' | cut -d' ' -f1") -join "").Trim()
-      $usable = ($remoteSha -eq (Get-LocalPrefixSha -Path $Local -Bytes $landed))
+      $usable = ((Get-RemoteSha $Remote) -eq (Get-LocalPrefixSha -Path $Local -Bytes $landed))
     }
     if (-not $usable) {
       Write-Host ("    discarding {0:N0} unrelated bytes already at {1}" -f $landed, $Remote) -ForegroundColor DarkYellow
-      & ssh @SshOpts $Server "rm -f '$Remote'" | Out-Null
+      Invoke-Native { & ssh @SshOpts $Server "rm -f '$Remote'" } | Out-Null
     } elseif ($landed -lt $Size) {
       Write-Host ("    resuming from {0:N0} bytes already there" -f $landed) -ForegroundColor DarkGray
     }
   }
 
   $batch = Join-Path $env:TEMP "preckon-put.sftp"
-  [IO.File]::WriteAllText($batch, "reput `"$Local`" `"$Remote`"`nexit`n",
-                          (New-Object Text.UTF8Encoding $false))
 
   for ($i = 1; $i -le $Attempts; $i++) {
-    & sftp @SshOpts -b $batch $Server 2>&1 | Out-Null
+    # `reput` is RESUME put: it stats the remote file and fails outright if there
+    # is nothing to resume - which is precisely the state the prefix check above
+    # leaves behind when it discards a stale leftover. So the verb is chosen from
+    # what is actually there, per attempt, because a reset mid-transfer turns the
+    # second case into the first.
+    $landed = Get-RemoteSize $Remote
+    $verb = if ($landed -gt 0) { "reput" } else { "put" }
+    [IO.File]::WriteAllText($batch, "$verb `"$Local`" `"$Remote`"`nexit`n",
+                            (New-Object Text.UTF8Encoding $false))
+
+    # A dropped connection is the expected case here, not an exception. Windows
+    # PowerShell turns any native command's stderr into an ErrorRecord, and with
+    # $ErrorActionPreference = "Stop" that aborts the whole deploy on the first
+    # reset - defeating the retry loop this function exists to provide.
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try { & sftp @SshOpts -b $batch $Server 2>&1 | Out-Null } catch { } finally { $ErrorActionPreference = $prev }
 
     # The server's own account of the file, not sftp's exit code: sftp can exit 0
     # on a reset, and non-zero having transferred the last byte.
     $landed = Get-RemoteSize $Remote
 
     if ($landed -eq $Size) {
-      $remoteSha = ((& ssh @SshOpts $Server "sha256sum '$Remote' | cut -d' ' -f1") -join "").Trim()
-      if ($remoteSha -eq $localSha) {
+      if ((Get-RemoteSha $Remote) -eq $localSha) {
         Write-Host ("    {0:N0} bytes landed, sha256 verified (attempt {1})" -f $landed, $i) -ForegroundColor Green
         return
       }
       # Right length, wrong file. Nothing about the remainder can be trusted.
       Write-Host "    length matched but sha256 did not - discarding and starting over" -ForegroundColor Red
-      & ssh @SshOpts $Server "rm -f '$Remote'" | Out-Null
+      Invoke-Native { & ssh @SshOpts $Server "rm -f '$Remote'" } | Out-Null
       continue
     }
     if ($landed -gt $Size) {
       Write-Host "    remote file overshot the bundle - discarding" -ForegroundColor Red
-      & ssh @SshOpts $Server "rm -f '$Remote'" | Out-Null
+      Invoke-Native { & ssh @SshOpts $Server "rm -f '$Remote'" } | Out-Null
       continue
     }
     Write-Host ("    attempt {0}: {1:N0} / {2:N0} bytes ({3:P0}) - resuming" -f `
@@ -284,7 +315,7 @@ Write-Host "==> Sending the deploy script" -ForegroundColor Cyan
 Send-Bundle -Local $tmp -Remote "/tmp/preckon-remote-deploy.sh" -Size (Get-Item $tmp).Length
 
 Write-Host "==> Deploying" -ForegroundColor Cyan
-& ssh @SshOpts $Server "bash /tmp/preckon-remote-deploy.sh"
+Invoke-Native { & ssh @SshOpts $Server "bash /tmp/preckon-remote-deploy.sh" }
 if ($LASTEXITCODE -ne 0) { throw "remote deploy failed" }
 
 Write-Host "==> Done. Hard-refresh app.preckon.com (Ctrl+Shift+R)." -ForegroundColor Green
