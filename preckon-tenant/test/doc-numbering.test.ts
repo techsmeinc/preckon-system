@@ -25,8 +25,11 @@ const simple: NumberingScheme = {
   ],
 };
 
+// A volume of "01" rather than "ZZ": ZZ is the absent placeholder, and in
+// ISO 19650 it already means "no volume applicable", so a supplied ZZ and an
+// omitted volume are the same statement. Pinned explicitly further down.
 const full = () => ({
-  project: "DXB01", originator: "ABC", volume: "ZZ", level: "04",
+  project: "DXB01", originator: "ABC", volume: "01", level: "04",
   type: "DR", role: "M", number: "103",
 });
 
@@ -41,7 +44,7 @@ describe("building a number", () => {
   });
 
   it("builds a full ISO 19650 number", () => {
-    expect(formatNumber(ISO19650_SCHEME, full())).toBe("DXB01-ABC-ZZ-04-DR-M-0103");
+    expect(formatNumber(ISO19650_SCHEME, full())).toBe("DXB01-ABC-01-04-DR-M-0103");
   });
 
   it("refuses rather than emitting a broken number", () => {
@@ -61,13 +64,23 @@ describe("absent optional segments", () => {
     /* The whole reason: a variable number of parts cannot be parsed back, and
        two different documents could format to the same string. */
     const v = { ...full(), level: "" };
-    expect(formatNumber(ISO19650_SCHEME, v)).toBe(`DXB01-ABC-ZZ-${DEFAULT_ABSENT}-DR-M-0103`);
+    expect(formatNumber(ISO19650_SCHEME, v)).toBe(`DXB01-ABC-01-${DEFAULT_ABSENT}-DR-M-0103`);
   });
 
   it("keep the separator count fixed however many are absent", () => {
     const v = { ...full(), volume: "", level: "" };
     const out = formatNumber(ISO19650_SCHEME, v);
     expect(out.split("-")).toHaveLength(ISO19650_SCHEME.segments.length);
+  });
+
+  it("treats a supplied placeholder as absent, because it says the same thing", () => {
+    /* ZZ is not a workaround here — ISO 19650 already uses it to mean "no
+       volume applicable". So a person who selects ZZ and a person who leaves
+       the field empty have made the same statement, and the parsed value must
+       not depend on which route they took. */
+    const back = parseNumber(ISO19650_SCHEME, "DXB01-ABC-ZZ-04-DR-M-0103");
+    expect(back.ok).toBe(true);
+    expect(back.values.volume).toBeUndefined();
   });
 
   it("come back absent, not as the placeholder", () => {
@@ -85,7 +98,7 @@ describe("reading a number back", () => {
     const back = parseNumber(ISO19650_SCHEME, formatNumber(ISO19650_SCHEME, v));
     expect(back.ok).toBe(true);
     expect(back.values).toMatchObject({
-      project: "DXB01", originator: "ABC", volume: "ZZ", level: "04",
+      project: "DXB01", originator: "ABC", volume: "01", level: "04",
       type: "DR", role: "M", number: "103",
     });
   });
