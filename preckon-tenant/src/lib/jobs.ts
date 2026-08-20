@@ -4,6 +4,10 @@ import { newId } from "./ids";
 import { TIER_ORDER, type Tier } from "./constants";
 import { claimForDispatch, clearLease, releaseForRetry } from "./job-queue";
 import { currentRequestId, logWarn } from "./log";
+import { decideDispatch, type DispatchDecision } from "./ai/govern";
+import { loadRegistry, loadTenantPolicy, recordUsage, spendFor } from "./ai/store";
+import { TIER_ALIAS } from "./ai/registry";
+import type { Sensitivity } from "./ai/policy";
 
 // ── §5 The job seam. Core owns dispatch + tracking; the stateless worker runs
 // the (stub) agent logic and returns proposals. The worker has NO store access
