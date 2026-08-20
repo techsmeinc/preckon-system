@@ -49,21 +49,28 @@ describe("the waterfall compounds in order", () => {
     expect(w.stages.at(-1)!.runningMinor).toBe(w.sellMinor);
   });
 
-  it("gives a different answer when the order changes, and says so honestly", () => {
-    const a: Stage[] = [
-      { key: "o", label: "OH", basis: "markup_on_cost", percent: 10 },
-      { key: "p", label: "Profit", basis: "markup_on_cost", percent: 10 },
-    ];
-    const b: Stage[] = [a[1], a[0]];
-    // Same percentages, same cost, same total here (commutative for markups)...
-    expect(waterfall(100_000, a).sellMinor).toBe(waterfall(100_000, b).sellMinor);
-    // ...but not once a margin-on-price stage is in the stack.
-    const withMargin: Stage[] = [
+  it("commutes for percentage stages, because they compound multiplicatively", () => {
+    // Worth pinning: it is tempting to assume order always matters. For pure
+    // percentages it does not - 1.1 x (1/0.9) is the same either way round -
+    // and a waterfall that produced different totals here would be wrong.
+    const stack: Stage[] = [
       { key: "o", label: "OH", basis: "markup_on_cost", percent: 10 },
       { key: "p", label: "Profit", basis: "margin_on_price", percent: 10 },
     ];
-    const reversed: Stage[] = [withMargin[1], withMargin[0]];
-    expect(waterfall(100_000, withMargin).sellMinor).not.toBe(waterfall(100_000, reversed).sellMinor);
+    const reversed: Stage[] = [stack[1], stack[0]];
+    expect(waterfall(100_000, stack).sellMinor).toBe(waterfall(100_000, reversed).sellMinor);
+  });
+
+  it("does NOT commute once a fixed amount is in the stack", () => {
+    // This is the order that has to be decided deliberately: profit before the
+    // bond earns nothing on it; profit after earns 10% of it.
+    const bondFirst: Stage[] = [
+      { key: "bond", label: "Bond", basis: "fixed", amountMinor: 20_000 },
+      { key: "p", label: "Profit", basis: "markup_on_cost", percent: 10 },
+    ];
+    const profitFirst: Stage[] = [bondFirst[1], bondFirst[0]];
+    expect(waterfall(100_000, bondFirst).sellMinor).toBe(132_000);
+    expect(waterfall(100_000, profitFirst).sellMinor).toBe(130_000);
   });
 
   it("keeps a stage out of the base when asked", () => {
@@ -79,7 +86,10 @@ describe("the waterfall compounds in order", () => {
 
   it("prices a target margin, and reports what a cut leaves", () => {
     const price = priceForMargin(1_000_000, 12);
-    expect(marginAtPrice(1_000_000, price)).toBeCloseTo(12, 6);
+    // Not exact: the price is rounded to whole minor units, so the achieved
+    // margin lands a fraction of a basis point off. Rounding to real money is
+    // the right call; pretending it is exact would not be.
+    expect(marginAtPrice(1_000_000, price)).toBeCloseTo(12, 3);
     expect(marginAtPrice(1_000_000, 950_000)).toBeLessThan(0);   // under water, not clamped
   });
 });
