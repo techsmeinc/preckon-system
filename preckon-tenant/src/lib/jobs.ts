@@ -76,6 +76,50 @@ export function clampTier(requested: Tier, maxTier: Tier): Tier {
   return TIER_ORDER.indexOf(requested) <= TIER_ORDER.indexOf(maxTier) ? requested : maxTier;
 }
 
+/** Raised when the tenant's AI policy or budget forbids a job outright. */
+export class DispatchNotPermitted extends Error {
+  constructor(public decision: DispatchDecision) {
+    super(decision.why);
+    this.name = "DispatchNotPermitted";
+  }
+}
+
+/**
+ * Ask the governance layer before spending anyone's money or sending anyone's
+ * data anywhere.
+ *
+ * Runs on the enqueue path, which is the last point where refusing is cheap:
+ * after this the envelope is at the worker and the tokens are gone. Failures
+ * here resolve to "permitted" on purpose — see store.ts. Governance that can
+ * take the product down when its own tables hiccup would not survive contact
+ * with a release.
+ */
+async function governDispatch(input: EnqueueInput): Promise<DispatchDecision> {
+  const alias = TIER_ALIAS[input.tier] ?? input.tier;
+  const [{ policy, version }, registry] = await Promise.all([
+    loadTenantPolicy(input.ctx.tenantId),
+    loadRegistry(),
+  ]);
+  const spend = await spendFor(input.ctx.tenantId, input.ctx.projectId);
+
+  // A rough token estimate from the inlined artifacts — four characters to the
+  // token. Precise enough to catch a request that is an order of magnitude too
+  // large, which is what a pre-flight budget check is for.
+  const inlined = JSON.stringify(input.inputArtifacts ?? []).length;
+  return decideDispatch({
+    alias,
+    registry,
+    policy,
+    policyVersion: version,
+    sensitivity: input.sensitivity,
+    module: input.ctx.agentKey,
+    estimatedInputTokens: Math.ceil(inlined / 4),
+    spend,
+    fallbackModel: TIER_MODEL[input.tier],
+    enforce: process.env.AI_POLICY_ENFORCE === "1",
+  });
+}
+
 // ── Dispatcher: how an envelope reaches the worker. Default = HTTP POST to the
 // worker (production/docker). Overridable so tests can run the worker's compute
 // in-process and drive the callback deterministically without a network hop.
@@ -124,6 +168,10 @@ export interface EnqueueInput {
   /** Override the idempotency key (§5.7). A re-run is genuinely new work, so it
    *  carries the step attempt to stay distinct from the prior job. */
   idempotencyKey?: string;
+  /** How sensitive the inlined inputs are. Omitted means `confidential`, which
+   *  is policy.ts's deliberate default: unclassified data is treated as the
+   *  thing you would least like to send to a third party. */
+  sensitivity?: Sensitivity;
 }
 
 /** §5.4 — write ai_job (queued) + push the JobEnvelope to the worker. Returns jobId. */
@@ -131,6 +179,35 @@ export async function enqueueJob(input: EnqueueInput): Promise<string> {
   const jobId = newId();
   const idempotencyKey =
     input.idempotencyKey ?? `${input.ctx.stepId}:${input.jobType}:${input.ctx.tenantId}`;
+
+  /* Policy, registry and budget, before anything is written or sent.
+     A refusal is recorded in the ledger rather than only thrown: "what did the
+     policy stop, and what would it have stopped" is the question an operator
+     actually asks, and it cannot be answered from an exception that vanished
+     into a log line. */
+  const decision = await governDispatch(input);
+  if (!decision.permitted) {
+    await recordUsage({
+      tenantId: input.ctx.tenantId,
+      projectId: input.ctx.projectId,
+      jobId,
+      requestId: currentRequestId(),
+      module: input.ctx.agentKey,
+      taskType: input.jobType,
+      executionClass: decision.executionClass,
+      modelAlias: decision.alias,
+      provider: decision.provider,
+      providerModel: decision.model,
+      sensitivity: decision.sensitivity,
+      policyVersion: decision.policyVersion,
+      outcome: "rejected",
+      errorCode: decision.reasons[0] ?? "not_permitted",
+    });
+    if (decision.blocked) throw new DispatchNotPermitted(decision);
+    logWarn("ai policy would have blocked this job", {
+      jobId, jobType: input.jobType, why: decision.why, reasons: decision.reasons,
+    });
+  }
   const envelope: JobEnvelope = {
     job_id: jobId,
     job_type: input.jobType,
@@ -160,7 +237,9 @@ export async function enqueueJob(input: EnqueueInput): Promise<string> {
       input.ctx.agentKey,
       input.jobType,
       input.tier,
-      TIER_MODEL[input.tier],
+      // Resolved through the registry alias when one is registered, so swapping
+      // a provider model is a row in ai_model_registry rather than a deploy.
+      decision.model,
       JSON.stringify(envelope),
       input.promptRef,
       idempotencyKey,
@@ -233,5 +312,31 @@ export async function recordJobResult(result: JobResult): Promise<{
       result.job_id,
     ]
   );
+
+  /* One ledger row per ATTEMPT.
+     ai_job carries the latest usage only, so a job that failed twice and then
+     succeeded reports a third of what it cost — and every budget measured
+     against it permits more than the customer agreed to. This row is the
+     append-only record that does not overwrite its own history. Written after
+     the status UPDATE and guarded by the idempotency check above, so a
+     duplicate callback cannot double-count. */
+  await recordUsage({
+    tenantId: job.tenant_id,
+    projectId: job.project_id,
+    jobId: result.job_id,
+    requestId: result.trace_id ?? currentRequestId(),
+    attempt: Number(job.attempts ?? 1) || 1,
+    module: job.agent_key,
+    taskType: job.job_type,
+    executionClass: "external",
+    modelAlias: TIER_ALIAS[job.tier] ?? job.tier ?? null,
+    providerModel: result.usage?.model ?? job.model ?? null,
+    inputTokens: result.usage?.input_tokens ?? 0,
+    outputTokens: result.usage?.output_tokens ?? 0,
+    costMinor: result.usage?.cost_minor ?? 0,
+    outcome: status,
+    errorCode: result.error ? "worker_error" : null,
+  });
+
   return { job: { ...job, status }, alreadyDone: false };
 }
