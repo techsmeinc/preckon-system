@@ -120,13 +120,12 @@ export function decideDispatch(input: DispatchInput): DispatchDecision {
   }
 
   const permittedBoundaries = allowedBoundaries(input.policy, sensitivity);
-  const eligible = eligibleModels(
-    [{ alias: entry.alias, boundary: entry.boundary, frontier: entry.frontier }],
+  const eligibility = eligibleModels(
     input.policy,
-    sensitivity,
-    input.module,
+    [{ alias: entry.alias, boundary: entry.boundary, frontier: entry.frontier }],
+    { sensitivity, module: input.module },
   );
-  const isEligible = eligible.some((m) => m.alias === entry.alias);
+  const isEligible = eligibility.eligible.some((m) => m.alias === entry.alias);
 
   if (!isEligible) {
     if (!permittedBoundaries.includes(entry.boundary)) reasons.push("boundary_not_permitted");

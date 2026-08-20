@@ -137,8 +137,14 @@ describe("what the ledger will record", () => {
   });
 
   it("prices the estimate off the registry's rate card", () => {
-    // 1M input tokens at 300 minor/M = 300 minor.
-    const d = decideDispatch(base({ sensitivity: "internal", estimatedInputTokens: 1_000_000 }));
+    // 1M input tokens at 300 minor/M = 300 minor. The per-request cap that
+    // defaultPolicy ships with is lifted here so this measures the rate card
+    // and not the budget rule beside it.
+    const uncapped: TenantPolicy = { ...defaultPolicy("saas"), budgets: {} };
+    const d = decideDispatch(base({
+      policy: uncapped, sensitivity: "internal", estimatedInputTokens: 1_000_000,
+    }));
     expect(d.estimatedCostMinor).toBe(300);
+    expect(d.permitted).toBe(true);
   });
 });
