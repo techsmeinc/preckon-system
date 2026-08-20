@@ -101,7 +101,7 @@ export function RegisterPanel({ pid }: { pid: string }) {
         )}
       </div>
 
-      <TransmittalCard pid={pid} state={transmittals} />
+      <TransmittalCard state={transmittals} />
 
       {adding && scheme && (
         <RegisterDrawer
@@ -206,6 +206,7 @@ function DocumentDrawer({ pid, doc, canEdit, canIssue, onClose, onChanged }: {
   const revisions = useApi<any>(`/projects/${pid}/documents/${doc.id}/revisions`, [doc.id]);
   const reviews = useApi<any>(`/projects/${pid}/documents/${doc.id}/reviews`, [doc.id]);
   const [busy, setBusy] = useState(false);
+  const [sending, setSending] = useState<any | null>(null);
 
   const rows: any[] = revisions.data?.revisions ?? revisions.data ?? [];
 
@@ -275,6 +276,12 @@ function DocumentDrawer({ pid, doc, canEdit, canIssue, onClose, onChanged }: {
       ) : rows.map((r: any) => {
         const cycles = cyclesFor(r.id);
         const openCycle = cycles.find((c: any) => c.status === "open");
+        /* The column is `state`, not `status` — draft | current | superseded.
+           Reading the wrong field left every revision showing "Draft" after it
+           had been issued, and left Issue offered on a revision that was
+           already the current one. */
+        const state: string = r.state ?? "draft";
+        const issued = state === "current" || state === "superseded";
         return (
           <div key={r.id} className="card" style={{ padding: "10px 12px", marginBottom: 8 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
@@ -282,8 +289,9 @@ function DocumentDrawer({ pid, doc, canEdit, canIssue, onClose, onChanged }: {
                 <b style={{ fontFamily: "var(--font-mono)" }}>{r.revision_code ?? r.revisionCode}</b>
                 {r.suitability ? <span className="csub"> · {r.suitability}</span> : null}
                 <div className="csub">{r.description ?? ""}</div>
+                {r.issued_at ? <div className="csub">Issued {r.issued_at}</div> : null}
               </div>
-              <StatusChip status={r.status ?? "draft"} />
+              <StatusChip status={state} />
             </div>
 
             {cycles.length > 0 && (
@@ -303,23 +311,94 @@ function DocumentDrawer({ pid, doc, canEdit, canIssue, onClose, onChanged }: {
             )}
 
             <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-              {canEdit && !openCycle && r.status !== "current" && (
+              {canEdit && !openCycle && !issued && (
                 <button className="mini sm" disabled={busy} onClick={() => openReview(r.id)}>Send for review</button>
               )}
-              {canIssue && r.status !== "current" && (
+              {canIssue && !issued && (
                 <button className="mini sm" disabled={busy} onClick={() => issue(r.id)}>Issue</button>
+              )}
+              {/* Issuing used to leave the reader at "Nothing transmitted yet —
+                  issue a revision, then send it", with nothing anywhere that
+                  sends one. An instruction with no button is worse than no
+                  instruction. */}
+              {canEdit && state === "current" && (
+                <button className="mini sm" disabled={busy} onClick={() => setSending(r)}>Send to…</button>
               )}
             </div>
           </div>
         );
       })}
+
+      {sending && (
+        <SendDrawer
+          pid={pid} doc={doc} revision={sending}
+          onClose={() => setSending(null)}
+          onSent={() => { setSending(null); onChanged(); toast("Transmitted"); }}
+        />
+      )}
+    </Drawer>
+  );
+}
+
+/**
+ * Compose and send a transmittal.
+ *
+ * Issues and sends in one action, because that is one act to the person doing
+ * it — but the two API calls stay separate, since a transmittal that is created
+ * and not sent is a real state (a draft nobody released) and collapsing them
+ * would make it unreachable.
+ */
+function SendDrawer({ pid, doc, revision, onClose, onSent }: {
+  pid: string; doc: Doc; revision: any; onClose: () => void; onSent: () => void;
+}) {
+  const toast = useToast();
+  const [purpose, setPurpose] = useState("For construction");
+  const [subject, setSubject] = useState(`${doc.document_number} revision ${revision.revision_code ?? ""}`.trim());
+  const [party, setParty] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function send() {
+    setBusy(true);
+    try {
+      const created: any = await api.post(`/projects/${pid}/transmittals`, {
+        purpose,
+        subject,
+        revision_ids: [revision.id],
+        recipients: [{ party: party.trim(), kind: "to" }],
+      });
+      const id = created?.id ?? created?.transmittal?.id;
+      if (!id) { toast("The transmittal was not created.", "bad"); return; }
+      await api.post(`/projects/${pid}/transmittals/${id}/send`, {});
+      onSent();
+    } catch (e) {
+      toast(errMessage(e), "bad");
+    } finally { setBusy(false); }
+  }
+
+  return (
+    <Drawer
+      open title="Send a transmittal" onClose={onClose}
+      footer={
+        <button className="btn btn-primary" disabled={!party.trim() || !purpose.trim() || busy} onClick={send}>
+          {busy ? "Sending…" : "Send"}
+        </button>
+      }
+    >
+      <div className="csub" style={{ marginBottom: 12 }}>
+        Sending <b style={{ fontFamily: "var(--font-mono)" }}>{doc.document_number}</b> revision{" "}
+        <b>{revision.revision_code}</b>. A transmittal carries the revision, so this stays a record of
+        exactly what went out even after the document moves on.
+      </div>
+      <Field label="Purpose"><input className="inp" value={purpose} onChange={(e) => setPurpose(e.target.value)} /></Field>
+      <Field label="Subject"><input className="inp" value={subject} onChange={(e) => setSubject(e.target.value)} /></Field>
+      <Field label="To"><input className="inp" placeholder="Main Contractor" value={party} onChange={(e) => setParty(e.target.value)} /></Field>
     </Drawer>
   );
 }
 
 /* ── transmittals ─────────────────────────────────────────────────────────── */
 
-function TransmittalCard({ pid, state }: { pid: string; state: any }) {
+function TransmittalCard({ state }: { state: any }) {
   const rows: any[] = state.data?.transmittals ?? state.data ?? [];
   return (
     <div className="card" style={{ padding: "14px 18px", marginTop: 16 }}>
@@ -336,14 +415,18 @@ function TransmittalCard({ pid, state }: { pid: string; state: any }) {
       ) : (
         <div className="tw">
           <table className="tbl">
-            <thead><tr><th>Purpose</th><th>Subject</th><th>Status</th><th>Items</th><th>Sent</th></tr></thead>
+            <thead>
+              <tr><th>Number</th><th>Purpose</th><th>Subject</th><th>Status</th><th>Items</th><th>To</th><th>Sent</th></tr>
+            </thead>
             <tbody>
               {rows.map((t: any) => (
                 <tr key={t.id}>
+                  <td style={{ fontFamily: "var(--font-mono)", whiteSpace: "nowrap" }}>{t.transmittal_number ?? "—"}</td>
                   <td>{t.purpose}</td>
                   <td>{t.subject ?? "—"}</td>
                   <td><StatusChip status={t.status ?? "draft"} /></td>
-                  <td>{t.items ?? t.item_count ?? "—"}</td>
+                  <td>{t.item_count ?? "—"}</td>
+                  <td>{t.recipient_count ?? "—"}</td>
                   <td>{t.sent_at ? fmtDate(t.sent_at) : "—"}</td>
                 </tr>
               ))}
