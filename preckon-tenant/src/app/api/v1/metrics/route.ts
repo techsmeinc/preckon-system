@@ -61,21 +61,25 @@ export async function GET(req: Request) {
   const started = Date.now();
 
   const jobsByStatus = await safe(() => query<any>(
-    `SELECT status, COUNT(*) AS n FROM ai_job
+    `-- metrics:instance-wide
+     SELECT status, COUNT(*) AS n FROM ai_job
       WHERE queued_at >= NOW() - INTERVAL 24 HOUR GROUP BY status`), []);
 
   const queueDepth = await safe(() => query<any>(
-    `SELECT COUNT(*) AS n FROM ai_job WHERE status IN ('queued','running')`), [{ n: 0 }]);
+    `-- metrics:instance-wide
+     SELECT COUNT(*) AS n FROM ai_job WHERE status IN ('queued','running')`), [{ n: 0 }]);
 
   // The oldest thing still waiting. A rising number here is the earliest
   // visible sign that the worker has stopped, and it moves long before any
   // failure count does.
   const oldestQueued = await safe(() => query<any>(
-    `SELECT COALESCE(TIMESTAMPDIFF(SECOND, MIN(queued_at), NOW()), 0) AS s
+    `-- metrics:instance-wide
+     SELECT COALESCE(TIMESTAMPDIFF(SECOND, MIN(queued_at), NOW()), 0) AS s
        FROM ai_job WHERE status = 'queued'`), [{ s: 0 }]);
 
   const usage = await safe(() => query<any>(
-    `SELECT execution_class, COUNT(*) AS attempts,
+    `-- metrics:instance-wide
+     SELECT execution_class, COUNT(*) AS attempts,
             COALESCE(SUM(cost_minor),0) AS cost_minor,
             COALESCE(SUM(input_tokens + output_tokens),0) AS tokens
        FROM ai_usage_ledger
@@ -83,12 +87,16 @@ export async function GET(req: Request) {
       GROUP BY execution_class`), []);
 
   const rejected = await safe(() => query<any>(
-    `SELECT COUNT(*) AS n FROM ai_usage_ledger
+    `-- metrics:instance-wide
+     SELECT COUNT(*) AS n FROM ai_usage_ledger
       WHERE outcome = 'rejected' AND created_at >= NOW() - INTERVAL 24 HOUR`), [{ n: 0 }]);
 
-  const tenants = await safe(() => query<any>(`SELECT COUNT(*) AS n FROM tenant`), [{ n: 0 }]);
-  const projects = await safe(() => query<any>(`SELECT COUNT(*) AS n FROM project`), [{ n: 0 }]);
-  const docs = await safe(() => query<any>(`SELECT COUNT(*) AS n FROM document_register`), [{ n: 0 }]);
+  const tenants = await safe(() => query<any>(`-- metrics:instance-wide
+     SELECT COUNT(*) AS n FROM tenant`), [{ n: 0 }]);
+  const projects = await safe(() => query<any>(`-- metrics:instance-wide
+     SELECT COUNT(*) AS n FROM project`), [{ n: 0 }]);
+  const docs = await safe(() => query<any>(`-- metrics:instance-wide
+     SELECT COUNT(*) AS n FROM document_register`), [{ n: 0 }]);
 
   const metrics: Metric[] = [
     {

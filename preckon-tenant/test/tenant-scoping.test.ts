@@ -129,7 +129,7 @@ export function keyedById(sql: string): boolean {
  * exception someone thought about; a long list means the rule is being worked
  * around rather than kept.
  */
-const ALLOWED: { match: string; why: string }[] = [
+const ALLOWED: { match?: string; file?: string; why: string }[] = [
   {
     match: "FROM ai_job WHERE status =",
     why: "Reconciler scans for due jobs and expired leases. Recovery is a system-level sweep and is deliberately cross-tenant; scoping it per tenant would mean no recovery at all.",
@@ -139,13 +139,23 @@ const ALLOWED: { match: string; why: string }[] = [
     why: "Reconciler claim, requeue and abandon. Same system-level sweep, each guarded on the job id and its current status.",
   },
   {
-    match: "-- metrics:instance-wide",
+    file: "src/app/api/v1/metrics/route.ts",
     why:
       "The operational metrics endpoint aggregates the whole instance on purpose — queue depth and spend per tenant would be a different feature, and a per-tenant metric cannot answer 'has the worker stopped'. It returns counts and durations only, never content, and is gated by METRICS_TOKEN where the deployment needs it.",
   },
 ];
 
-const isAllowed = (stmt: string) => ALLOWED.some((a) => stmt.includes(a.match));
+/**
+ * An exception is either a statement fragment or a whole file.
+ *
+ * The file form exists for endpoints that are instance-wide by design. Six
+ * separate statement matches for one metrics route would make this list long
+ * and unarguable, which is what its own comment above warns against.
+ */
+const isAllowed = (stmt: string, file: string) =>
+  ALLOWED.some((a) =>
+    (a.match != null && stmt.includes(a.match)) ||
+    (a.file != null && file.endsWith(a.file)));
 
 interface Finding {
   file: string;
@@ -169,7 +179,7 @@ function audit(): { leaks: Finding[]; byProvenance: Finding[]; unresolved: numbe
       const tables = tablesTouched(sql, scoped);
       if (!tables.length) continue;
       statements++;
-      if (/tenant_id/i.test(sql) || isAllowed(sql)) continue;
+      if (/tenant_id/i.test(sql) || isAllowed(sql, rel)) continue;
       // The constraint may sit inside an interpolated fragment, which cannot be
       // resolved by reading the text. Counted, not judged.
       if (interpolated) {
