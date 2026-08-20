@@ -33,7 +33,7 @@ interface Doc {
 }
 
 interface Segment { key: string; label: string; kind: string; values?: string[]; optional?: boolean }
-interface Scheme { id: string | null; key: string; name: string; segments: Segment[]; example: string }
+interface Scheme { id: string | null; key: string; name: string; separator?: string; segments: Segment[]; example: string }
 
 type SortKey = "document_number" | "title" | "discipline" | "current_revision" | "required_by";
 

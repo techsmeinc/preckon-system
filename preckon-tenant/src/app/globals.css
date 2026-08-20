@@ -1739,3 +1739,12 @@ tr:hover .row-actions,.row-actions:focus-within{ opacity:1; }
 th.sortable{ cursor:pointer; user-select:none; white-space:nowrap; }
 th.sortable:hover{ color:var(--ink); }
 th.sortable .dir{ opacity:.5; font-size:10px; margin-inline-start:4px; }
+
+/* A cell that opens something, styled as text rather than as a button: a table
+   full of buttons reads as a form, and the number IS the thing you click. */
+.linkish{
+  background:none; border:0; padding:0; font:inherit; color:var(--ink);
+  cursor:pointer; text-align:inherit; border-bottom:1px dotted var(--slate-300);
+}
+.linkish:hover{ color:var(--teal-ink); border-bottom-color:var(--teal); }
+.linkish:focus-visible{ outline:2px solid var(--teal); outline-offset:2px; border-radius:2px; }
