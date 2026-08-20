@@ -138,10 +138,12 @@ export function compareScenarios(
 ): ScenarioDelta {
   const a = priceScenario(base, from);
   const b = priceScenario(base, to);
-  const bLines = new Map(b.lines.map((l) => [l.id, l]));
-  const reasons = new Map(to.adjustments.map((x) => [x.lineId, x]));
+  // `as const` so the pairs are tuples: without it the Map is inferred over the
+  // union of key and value, and `adj.kind` widens to string.
+  const bLines = new Map(b.lines.map((l) => [l.id, l] as const));
+  const reasons = new Map(to.adjustments.map((x) => [x.lineId, x] as const));
 
-  const lines: LineDelta[] = a.lines.map((la) => {
+  const lines: LineDelta[] = a.lines.map((la): LineDelta => {
     const lb = bLines.get(la.id);
     const adj = reasons.get(la.id);
     return {

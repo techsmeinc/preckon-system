@@ -1378,3 +1378,87 @@ CREATE TABLE pcm_coordinate_system (
   created_at    DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   UNIQUE KEY pcm_crs_project (tenant_id, project_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ── ProcureLogix: enquiries, vendors and quotations (migration 023) ──────────
+-- Declared here as well as in the migration so tenant-scoping.test.ts can see
+-- them: a table the scoping test cannot enumerate is a table whose queries go
+-- unchecked, which is the whole point of the drift guard that caught this.
+
+CREATE TABLE IF NOT EXISTS vendor (
+  id             CHAR(36)     NOT NULL PRIMARY KEY,
+  tenant_id      CHAR(36)     NOT NULL,
+  name           VARCHAR(200) NOT NULL,
+  trade          VARCHAR(120) NULL,
+  email          VARCHAR(200) NULL,
+  phone          VARCHAR(60)  NULL,
+  status         ENUM('active','suspended','archived') NOT NULL DEFAULT 'active',
+  prequalified   BOOLEAN      NOT NULL DEFAULT FALSE,
+  notes          TEXT         NULL,
+  created_at     DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at     DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  KEY idx_vendor_tenant (tenant_id, status),
+  KEY idx_vendor_trade (tenant_id, trade)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS rfq (
+  id             CHAR(36)     NOT NULL PRIMARY KEY,
+  tenant_id      CHAR(36)     NOT NULL,
+  project_id     CHAR(36)     NOT NULL,
+  package_id     CHAR(36)     NOT NULL,
+  revision       INT          NOT NULL DEFAULT 1,
+  title          VARCHAR(240) NOT NULL,
+  status         ENUM('draft','issued','closed','awarded','cancelled') NOT NULL DEFAULT 'draft',
+  scope_json     JSON         NOT NULL,
+  issued_at      DATETIME(3)  NULL,
+  due_at         DATETIME(3)  NULL,
+  closed_at      DATETIME(3)  NULL,
+  awarded_vendor CHAR(36)     NULL,
+  created_by     CHAR(36)     NULL,
+  created_at     DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at     DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  UNIQUE KEY uq_rfq_package_revision (tenant_id, package_id, revision),
+  KEY idx_rfq_project (tenant_id, project_id, status),
+  KEY idx_rfq_due (tenant_id, status, due_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS rfq_vendor (
+  id             CHAR(36)     NOT NULL PRIMARY KEY,
+  rfq_id         CHAR(36)     NOT NULL,
+  vendor_id      CHAR(36)     NOT NULL,
+  state          ENUM('invited','viewed','declined','quoted','no_response') NOT NULL DEFAULT 'invited',
+  decline_reason VARCHAR(400) NULL,
+  invited_at     DATETIME(3)  NULL,
+  responded_at   DATETIME(3)  NULL,
+  UNIQUE KEY uq_rfq_vendor (rfq_id, vendor_id),
+  KEY idx_rfq_vendor_state (rfq_id, state)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS quote (
+  id             CHAR(36)     NOT NULL PRIMARY KEY,
+  tenant_id      CHAR(36)     NOT NULL,
+  rfq_id         CHAR(36)     NOT NULL,
+  vendor_id      CHAR(36)     NOT NULL,
+  currency       CHAR(3)      NOT NULL DEFAULT 'AED',
+  quoted_minor   BIGINT       NOT NULL DEFAULT 0,
+  valid_until    DATE         NULL,
+  lead_time_days INT          NULL,
+  qualifications JSON         NULL,
+  submitted_at   DATETIME(3)  NOT NULL,
+  late           BOOLEAN      NOT NULL DEFAULT FALSE,
+  received_by    CHAR(36)     NULL,
+  created_at     DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  UNIQUE KEY uq_quote_rfq_vendor (rfq_id, vendor_id),
+  KEY idx_quote_tenant (tenant_id, rfq_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS quote_line (
+  id             CHAR(36)     NOT NULL PRIMARY KEY,
+  quote_id       CHAR(36)     NOT NULL,
+  scope_item_id  VARCHAR(64)  NOT NULL,
+  rate_minor     BIGINT       NOT NULL DEFAULT 0,
+  qty            DECIMAL(18,4) NULL,
+  excluded       BOOLEAN      NOT NULL DEFAULT FALSE,
+  note           VARCHAR(400) NULL,
+  UNIQUE KEY uq_quote_line (quote_id, scope_item_id),
+  KEY idx_quote_line_scope (scope_item_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

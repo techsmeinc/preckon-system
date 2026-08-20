@@ -68,7 +68,10 @@ export function effective(calendar: Calendar, all: Calendar[]): Calendar {
     ...calendar,
     workdays: [...workdays].sort() as Weekday[],
     holidays: [...holidays].sort(),
-    hoursPerDay: chain.findLast((c) => c.hoursPerDay != null)?.hoursPerDay ?? 8,
+    // The narrowest level that states hours wins. Walked backwards rather than
+    // with findLast, which needs a newer lib target than this project sets.
+    hoursPerDay:
+      [...chain].reverse().find((c) => c.hoursPerDay != null)?.hoursPerDay ?? 8,
   };
 }
 
