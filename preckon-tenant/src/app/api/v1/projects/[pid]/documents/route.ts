@@ -40,7 +40,14 @@ export const GET = route<{ pid: string }>(async (req, ctx, { pid }) => {
     limit: Number(url.searchParams.get("limit") ?? 500),
   });
 
-  const schemes = await listSchemes(ctx.tenantId, pid);
+  /* Report the scheme registration will ACTUALLY use, not just the stored ones.
+     A project that has never configured numbering has no rows here, while POST
+     falls back to the built-in ISO 19650 scheme — so returning an empty list
+     left the register screen with no scheme to render its form from, and the
+     "Register a document" button did nothing at all. The read and the write
+     have to agree about what exists. */
+  const stored = await listSchemes(ctx.tenantId, pid);
+  const schemes = stored.length ? stored : [await resolveScheme(ctx.tenantId, pid, null)];
 
   return ok({
     documents: rows,
@@ -48,7 +55,11 @@ export const GET = route<{ pid: string }>(async (req, ctx, { pid }) => {
     // an example so the person can see the shape before they fill it in.
     schemes: schemes.map((s) => ({
       id: s.id, key: s.key, name: s.name, separator: s.separator,
-      segments: s.segments, is_default: s.isDefault, example: exampleNumber(s),
+      segments: s.segments,
+      // The built-in fallback has no stored row and so no isDefault flag; it is
+      // the default by virtue of being the only one.
+      is_default: (s as { isDefault?: boolean }).isDefault ?? true,
+      example: exampleNumber(s),
     })),
   });
 });
