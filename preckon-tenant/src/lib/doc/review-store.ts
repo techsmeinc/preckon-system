@@ -193,9 +193,16 @@ export async function openReviews(tenantId: string, projectId: string) {
   return query<any>(
     `SELECT rv.id, rv.stage, rv.status, rv.due_at, rv.min_approvals,
             r.revision_code, r.suitability, d.document_number, d.title, r.id AS revision_id,
+            -- tenant_id is repeated on both subqueries rather than inherited
+            -- from the outer join. It is redundant today, because review_id is
+            -- already tenant-scoped above; it stops being redundant the moment
+            -- somebody rewrites the outer query, and the scoping guard is right
+            -- to refuse the implicit version.
             (SELECT COUNT(*) FROM document_review_assignee a
-              WHERE a.review_id = rv.id AND a.decision = 'pending') AS pending,
-            (SELECT COUNT(*) FROM document_review_assignee a WHERE a.review_id = rv.id) AS reviewers
+              WHERE a.tenant_id = rv.tenant_id AND a.review_id = rv.id
+                AND a.decision = 'pending') AS pending,
+            (SELECT COUNT(*) FROM document_review_assignee a
+              WHERE a.tenant_id = rv.tenant_id AND a.review_id = rv.id) AS reviewers
        FROM document_review rv
        JOIN document_revision r ON r.id = rv.revision_id
        JOIN document_register d ON d.id = r.document_id
