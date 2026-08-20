@@ -50,9 +50,45 @@ export interface CostSummary {
   rows: CostRow[];
 }
 
+
+/**
+ * Where cost is counted from.
+ *
+ * ai_job carries only the LATEST usage for a job, so a job that failed twice
+ * and then succeeded reported one attempt's cost and the two failures were
+ * free. ai_usage_ledger has one row per attempt, which is what it was created
+ * for, and reading it is the whole point of having written it.
+ *
+ * But the ledger starts empty — it was added on 20 Aug 2026 and holds nothing
+ * before that. Reading it alone would erase every previous month from the cost
+ * report, so this unions the two and takes ai_job only for jobs the ledger has
+ * never seen. Going forward the ledger wins and retries are counted; looking
+ * back, the history is still there.
+ */
+const SOURCE = `(
+  SELECT tenant_id, project_id,
+         module        AS agent_key,
+         task_type     AS job_type,
+         COALESCE(provider_model, model_alias) AS model,
+         outcome       AS status,
+         execution_class,
+         input_tokens, output_tokens, cost_minor,
+         created_at    AS queued_at
+    FROM ai_usage_ledger
+  UNION ALL
+  SELECT j.tenant_id, j.project_id, j.agent_key, j.job_type, j.model, j.status,
+         CASE WHEN j.model = 'stub:deterministic' THEN 'stub' ELSE 'external' END,
+         j.input_tokens, j.output_tokens, j.cost_minor, j.queued_at
+    FROM ai_job j
+   WHERE NOT EXISTS (
+     SELECT 1 FROM ai_usage_ledger l
+      WHERE l.job_id = j.id AND l.tenant_id = j.tenant_id
+   )
+) AS usage`
+
 const SELECT = `
   COUNT(*) AS jobs,
-  SUM(CASE WHEN model = 'stub:deterministic' THEN 1 ELSE 0 END) AS stub_jobs,
+  SUM(CASE WHEN execution_class = 'stub' OR model = 'stub:deterministic' THEN 1 ELSE 0 END) AS stub_jobs,
   SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) AS failed,
   COALESCE(SUM(input_tokens), 0)  AS input_tokens,
   COALESCE(SUM(output_tokens), 0) AS output_tokens,
@@ -134,7 +170,7 @@ export async function costByTenant(
 
   const rows = await query<Raw>(
     `SELECT ${group} AS \`key\`, ${SELECT}
-       FROM ai_job
+       FROM ${SOURCE}
       WHERE ${where.join(" AND ")}
       GROUP BY ${group}
       ORDER BY cost_minor DESC
@@ -157,7 +193,7 @@ export async function tenantsOverCeiling(
 ): Promise<{ tenantId: string; costMinor: number; jobs: number }[]> {
   const rows = await query<{ tenant_id: string; cost_minor: number; jobs: number }>(
     `SELECT tenant_id, COALESCE(SUM(cost_minor), 0) AS cost_minor, COUNT(*) AS jobs
-       FROM ai_job
+       FROM ${SOURCE}
       WHERE queued_at >= ?
       GROUP BY tenant_id
      HAVING cost_minor > ?
@@ -178,7 +214,7 @@ export async function tenantsOverCeiling(
 export async function tierMix(tenantId: string, since: Date): Promise<{ tier: string; jobs: number; costMinor: number }[]> {
   const rows = await query<{ tier: string; jobs: number; cost_minor: number }>(
     `SELECT tier, COUNT(*) AS jobs, COALESCE(SUM(cost_minor), 0) AS cost_minor
-       FROM ai_job
+       FROM ${SOURCE}
       WHERE tenant_id = ? AND queued_at >= ?
       GROUP BY tier
       ORDER BY cost_minor DESC`,

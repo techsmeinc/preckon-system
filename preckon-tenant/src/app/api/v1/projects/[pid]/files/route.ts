@@ -7,6 +7,7 @@ import { query } from "@/lib/db";
 import { newId } from "@/lib/ids";
 import { actorFromCtx, useCase } from "@/lib/usecase";
 import { errBadRequest } from "@/lib/errors";
+import { checkUpload } from "@/lib/upload-safety";
 import { cadAsPageText, extractCad, isCadFile, renderCad, type CadExtractOutcome } from "@/lib/cad";
 
 const STORAGE_DIR = process.env.FILE_STORAGE_DIR ?? "./.uploads";
@@ -42,6 +43,26 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
   if (!(file instanceof File)) throw errBadRequest("multipart form field 'file' is required");
 
   const buf = Buffer.from(await file.arrayBuffer());
+
+  /* Gate the upload before it is written anywhere.
+     upload-safety.ts existed and nothing called it, so every check it makes —
+     extension against magic number, blocked executable types, path separators
+     in the name, absurd size — was being made by nobody. Checked here, on the
+     BYTES, because the declared mime type is supplied by the client and is the
+     first thing an attacker changes.
+
+     It is not an antivirus and does not pretend to be: it closes the cheap
+     holes, and a real scanner still belongs behind it. */
+  const safety = checkUpload({
+    filename: file.name,
+    declaredMime: file.type || null,
+    sizeBytes: buf.length,
+    head: buf.subarray(0, 16),
+  });
+  if (safety.verdict === "reject") {
+    throw errBadRequest(`${safety.why} ${safety.reasons.join(" ")}`.trim());
+  }
+
   const checksum = createHash("sha256").update(buf).digest("hex");
   const id = newId();
   const dir = path.join(STORAGE_DIR, ctx.tenantId, pid);
