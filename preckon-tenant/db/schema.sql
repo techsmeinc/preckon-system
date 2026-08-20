@@ -1152,3 +1152,229 @@ CREATE TABLE document_comment (
   CONSTRAINT fk_doccomment_region   FOREIGN KEY (region_id)   REFERENCES source_region(id)     ON DELETE SET NULL,
   CONSTRAINT fk_doccomment_review   FOREIGN KEY (review_id)   REFERENCES document_review(id)   ON DELETE SET NULL
 ) ENGINE=InnoDB;
+
+
+-- ============================================================================
+-- AI governance — policy, model registry, prompt registry, usage ledger and
+-- response cache (migration 021).
+-- ============================================================================
+
+CREATE TABLE ai_tenant_policy (
+  tenant_id       CHAR(36)    NOT NULL PRIMARY KEY,
+  policy_version  INT         NOT NULL DEFAULT 1,
+  deployment_mode ENUM('saas','private','sovereign') NOT NULL DEFAULT 'saas',
+  policy_json     JSON        NOT NULL,
+  updated_by      CHAR(36)    NULL,
+  updated_at      DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)
+) ENGINE=InnoDB;
+
+CREATE TABLE ai_tenant_policy_history (
+  id             CHAR(36)    NOT NULL PRIMARY KEY,
+  tenant_id      CHAR(36)    NOT NULL,
+  policy_version INT         NOT NULL,
+  policy_json    JSON        NOT NULL,
+  changed_by     CHAR(36)    NULL,
+  changed_at     DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  UNIQUE KEY ai_policy_history_uidx (tenant_id, policy_version),
+  KEY ai_policy_history_scope_idx (tenant_id, changed_at)
+) ENGINE=InnoDB;
+
+CREATE TABLE ai_model_registry (
+  alias              VARCHAR(96)  NOT NULL PRIMARY KEY,
+  provider           VARCHAR(96)  NOT NULL,
+  provider_model     VARCHAR(160) NOT NULL,
+  boundary           ENUM('local','preckon','external') NOT NULL,
+  is_frontier        BOOLEAN      NOT NULL DEFAULT FALSE,
+  capabilities_json  JSON         NOT NULL,
+  context_limit      INT          NOT NULL,
+  rate_card_json     JSON         NOT NULL,
+  typical_latency_ms INT          NULL,
+  licence            VARCHAR(160) NULL,
+  -- §33: a model may not become approved until it has a measured evaluation.
+  evaluation_version VARCHAR(64)  NULL,
+  status             ENUM('approved','candidate','retired') NOT NULL DEFAULT 'candidate',
+  updated_at         DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  KEY ai_model_status_idx (status, boundary)
+) ENGINE=InnoDB;
+
+CREATE TABLE ai_prompt_version (
+  id            CHAR(36)     NOT NULL PRIMARY KEY,
+  prompt_key    VARCHAR(128) NOT NULL,
+  version       INT          NOT NULL,
+  task_type     VARCHAR(96)  NOT NULL,
+  -- system prefix, task instructions, output schema, model overrides.
+  prompt_json   JSON         NOT NULL,
+  -- Stable prefixes improve provider prompt-cache reuse (§9.11), so the hash of
+  -- the prefix is stored to make drift visible.
+  prefix_hash   CHAR(64)     NULL,
+  status        ENUM('draft','approved','retired') NOT NULL DEFAULT 'draft',
+  eval_version  VARCHAR(64)  NULL,
+  created_by    CHAR(36)     NULL,
+  created_at    DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  UNIQUE KEY ai_prompt_version_uidx (prompt_key, version),
+  KEY ai_prompt_task_idx (task_type, status)
+) ENGINE=InnoDB;
+
+CREATE TABLE ai_usage_ledger (
+  id                  CHAR(36)     NOT NULL PRIMARY KEY,
+  tenant_id           CHAR(36)     NOT NULL,
+  project_id          CHAR(36)     NULL,
+  job_id              CHAR(36)     NULL,
+  request_id          VARCHAR(64)  NULL,
+  -- Which attempt of that job this row is. The column ai_job cannot express.
+  attempt             INT          NOT NULL DEFAULT 1,
+
+  module              VARCHAR(64)  NULL,
+  task_type           VARCHAR(96)  NULL,
+  execution_class     ENUM('deterministic','cache','local','preckon','external','stub') NOT NULL DEFAULT 'external',
+  model_alias         VARCHAR(96)  NULL,
+  provider            VARCHAR(96)  NULL,
+  provider_model      VARCHAR(160) NULL,
+  prompt_key          VARCHAR(128) NULL,
+  prompt_version      INT          NULL,
+  sensitivity         VARCHAR(24)  NULL,
+  policy_version      INT          NULL,
+
+  input_tokens        BIGINT       NOT NULL DEFAULT 0,
+  cached_input_tokens BIGINT       NOT NULL DEFAULT 0,
+  output_tokens       BIGINT       NOT NULL DEFAULT 0,
+  retrieval_tokens    BIGINT       NOT NULL DEFAULT 0,
+  gpu_milliseconds    BIGINT       NOT NULL DEFAULT 0,
+  cost_minor          BIGINT       NOT NULL DEFAULT 0,
+  latency_ms          INT          NOT NULL DEFAULT 0,
+
+  cache_hit           BOOLEAN      NOT NULL DEFAULT FALSE,
+  confidence          DECIMAL(8,6) NULL,
+  validation_status   VARCHAR(32)  NULL,
+  outcome             ENUM('succeeded','failed','rejected','cancelled') NOT NULL,
+  error_code          VARCHAR(64)  NULL,
+  created_at          DATETIME(6)  NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+
+  KEY ai_usage_tenant_idx  (tenant_id, created_at),
+  KEY ai_usage_project_idx (tenant_id, project_id, created_at),
+  KEY ai_usage_job_idx     (job_id, attempt),
+  KEY ai_usage_task_idx    (tenant_id, module, task_type, created_at)
+) ENGINE=InnoDB;
+
+CREATE TABLE ai_response_cache (
+  cache_key      CHAR(64)     NOT NULL PRIMARY KEY,
+  tenant_id      CHAR(36)     NOT NULL,
+  project_id     CHAR(36)     NULL,
+  task_type      VARCHAR(96)  NOT NULL,
+  sensitivity    VARCHAR(24)  NOT NULL,
+  policy_version INT          NOT NULL,
+  prompt_version VARCHAR(64)  NOT NULL,
+  schema_version VARCHAR(64)  NULL,
+  model_alias    VARCHAR(96)  NULL,
+  -- Sorted, comma-joined revision keys, so invalidating one revision can find
+  -- every answer computed from it without parsing JSON.
+  revision_keys  TEXT         NULL,
+  response_json  JSON         NOT NULL,
+  input_tokens   BIGINT       NOT NULL DEFAULT 0,
+  output_tokens  BIGINT       NOT NULL DEFAULT 0,
+  cost_minor     BIGINT       NOT NULL DEFAULT 0,
+  hits           INT          NOT NULL DEFAULT 0,
+  created_at     DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  last_hit_at    DATETIME(3)  NULL,
+  KEY ai_cache_scope_idx (tenant_id, project_id, task_type),
+  KEY ai_cache_policy_idx (tenant_id, policy_version),
+  KEY ai_cache_prompt_idx (tenant_id, prompt_version)
+) ENGINE=InnoDB;
+
+
+-- ============================================================================
+-- Tables that had drifted: created in a migration but never declared here, so
+-- the tenant-scoping guard could not see them. Found by schema-drift.test.ts.
+-- ============================================================================
+
+CREATE TABLE bim_document (
+  project_id  CHAR(36)    NOT NULL PRIMARY KEY,
+  tenant_id   CHAR(36)    NOT NULL,
+  doc         JSON        NOT NULL,
+  -- Bumped on every save; the client sends the version it loaded so a stale tab
+  -- can't silently overwrite a colleague's model.
+  version     INT         NOT NULL DEFAULT 1,
+  updated_by  CHAR(36),
+  created_at  DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at  DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  KEY bim_tenant_idx (tenant_id),
+  CONSTRAINT fk_bim_project FOREIGN KEY (project_id) REFERENCES project(id)
+) ENGINE=InnoDB;
+
+CREATE TABLE cad_extraction (
+  file_id     CHAR(36)    NOT NULL PRIMARY KEY,
+  tenant_id   CHAR(36)    NOT NULL,
+  project_id  CHAR(36)    NOT NULL,
+  units       VARCHAR(16),
+  -- Denormalised counts so the Documents list can show "12 layers · 148 blocks"
+  -- without parsing the whole summary for every row.
+  layer_count INT         NOT NULL DEFAULT 0,
+  block_count INT         NOT NULL DEFAULT 0,
+  sheet_count INT         NOT NULL DEFAULT 0,
+  summary     JSON        NOT NULL,
+  -- Non-fatal problems the parse hit (recovered errors, missing ODA converter
+  -- on a DWG, unresolved xrefs). Shown to the estimator, not swallowed.
+  warnings    JSON,
+  svg         LONGTEXT,
+  created_at  DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  KEY cad_scope_idx (tenant_id, project_id),
+  CONSTRAINT fk_cad_file FOREIGN KEY (file_id) REFERENCES file(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE project_programme (
+  project_id        CHAR(36)    NOT NULL PRIMARY KEY,
+  tenant_id         CHAR(36)    NOT NULL,
+  -- NULL means the Gantt stays in relative "day N" mode.
+  commencement_date DATE        NULL,
+  updated_by        CHAR(36),
+  created_at        DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at        DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  KEY prog_tenant_idx (tenant_id),
+  CONSTRAINT fk_prog_project FOREIGN KEY (project_id) REFERENCES project(id)
+) ENGINE=InnoDB;
+
+CREATE TABLE learned_lesson (
+  id           CHAR(36) NOT NULL PRIMARY KEY,
+  tenant_id    CHAR(36) NOT NULL,
+  -- Where it was FIRST learned. Kept for provenance, never for filtering: the
+  -- whole point is that it applies to the next project, not this one.
+  project_id   CHAR(36),
+  type_key     VARCHAR(120) NOT NULL,      -- construction.cost_line, …
+  -- The natural key a future record is matched on: a BOQ code, an item
+  -- description, a layer name. Lowercased on write so matching is stable.
+  subject      VARCHAR(255) NOT NULL,
+  field        VARCHAR(64) NOT NULL,       -- which field was corrected
+  was_value    TEXT,                       -- what the agent proposed
+  now_value    TEXT NOT NULL,              -- what the human made it
+  -- How many times a human has made this same correction. One is an anecdote.
+  times_seen   INT NOT NULL DEFAULT 1,
+  -- Retired rather than deleted: a lesson that turned out to be wrong is worth
+  -- keeping visible, and a hard delete loses the fact that it was ever applied.
+  status       ENUM('active','retired') NOT NULL DEFAULT 'active',
+  created_by   CHAR(36),
+  created_at   DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at   DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  -- The lookup a run does: everything this tenant knows about these subjects,
+  -- for this kind of record. Never a scan.
+  KEY lesson_lookup_idx (tenant_id, type_key, subject, status),
+  -- One row per (tenant, type, subject, field). A repeat correction increments
+  -- times_seen rather than adding a second row that says the same thing.
+  UNIQUE KEY lesson_unique (tenant_id, type_key, subject, field)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE pcm_coordinate_system (
+  id            CHAR(36) NOT NULL PRIMARY KEY,
+  tenant_id     CHAR(36) NOT NULL,
+  project_id    CHAR(36) NOT NULL,
+  name          VARCHAR(120) NOT NULL DEFAULT 'Project local',
+  -- The unit every stored coordinate is in. Metres, and stated so that a future
+  -- change is a migration rather than an assumption somebody has to discover.
+  linear_unit   VARCHAR(20) NOT NULL DEFAULT 'm',
+  -- Where project (0,0) sits on the site, when that is known. Null until a
+  -- survey point is given; never guessed.
+  origin_east   DECIMAL(18,6),
+  origin_north  DECIMAL(18,6),
+  rotation_deg  DECIMAL(10,6) NOT NULL DEFAULT 0,
+  created_at    DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  UNIQUE KEY pcm_crs_project (tenant_id, project_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
