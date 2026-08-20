@@ -138,6 +138,11 @@ const ALLOWED: { match: string; why: string }[] = [
     match: "UPDATE ai_job SET status =",
     why: "Reconciler claim, requeue and abandon. Same system-level sweep, each guarded on the job id and its current status.",
   },
+  {
+    match: "-- metrics:instance-wide",
+    why:
+      "The operational metrics endpoint aggregates the whole instance on purpose — queue depth and spend per tenant would be a different feature, and a per-tenant metric cannot answer 'has the worker stopped'. It returns counts and durations only, never content, and is gated by METRICS_TOKEN where the deployment needs it.",
+  },
 ];
 
 const isAllowed = (stmt: string) => ALLOWED.some((a) => stmt.includes(a.match));
