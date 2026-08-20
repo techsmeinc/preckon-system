@@ -19,6 +19,15 @@ export interface Measurement {
   unit: string;
   location?: string;
   method: string;
+  /**
+   * The model elements this quantity was measured from.
+   *
+   * Carried so the measurement can be anchored back to what produced it — the
+   * difference between a bill that says "120 m² of blockwork" and one where
+   * clicking that figure lights up the walls it came from. Without it the
+   * method string is the only evidence, and prose is not a trace.
+   */
+  element_ids?: string[];
 }
 
 const round = (n: number, dp = 2) => Number(n.toFixed(dp));
@@ -79,8 +88,10 @@ export function takeoff(doc: BimDocument): Measurement[] {
   }
 
   // Points and hosted elements are counted by category, not listed one by one —
-  // a bill wants "Sprinkler head — 120 nr", not 120 lines.
-  const counts = new Map<string, { n: number; e: Element }>();
+  // a bill wants "Sprinkler head — 120 nr", not 120 lines. The ids are still
+  // collected: the bill shows one line, and clicking it should still light up
+  // all 120 heads rather than none of them.
+  const counts = new Map<string, { n: number; e: Element; ids: string[] }>();
 
   for (const e of elements) {
     const cat = CATALOG[e.category];
@@ -101,6 +112,7 @@ export function takeoff(doc: BimDocument): Measurement[] {
           item: `${label} — ${e.geom.width ?? 0.2} m thick, ${h} m high`,
           quantity: round(net),
           unit: "m2",
+          element_ids: [e.id],
           location: e.name,
           method: ded > 0
             ? `${round(len)} m x ${h} m less ${round(ded)} m² openings (BIM model)`
@@ -112,6 +124,7 @@ export function takeoff(doc: BimDocument): Measurement[] {
           item: `${label}${e.geom.width ? ` — ${e.geom.width} m` : ""}`,
           quantity: round(len),
           unit: "m",
+          element_ids: [e.id],
           location: e.name,
           method: "Run length measured on the BIM model",
         });
@@ -130,6 +143,7 @@ export function takeoff(doc: BimDocument): Measurement[] {
         item: `${label}${th ? ` — ${th} m thick` : ""}`,
         quantity: round(asVolume ? area * th : area),
         unit: asVolume ? "m3" : "m2",
+        element_ids: [e.id],
         location: e.name,
         method: asVolume
           ? `${round(area)} m² x ${th} m thickness (BIM model)`
@@ -141,11 +155,11 @@ export function takeoff(doc: BimDocument): Measurement[] {
     // point + hosted → counted
     const key = `${e.category}|${sheet}`;
     const cur = counts.get(key);
-    if (cur) cur.n += 1;
-    else counts.set(key, { n: 1, e });
+    if (cur) { cur.n += 1; cur.ids.push(e.id); }
+    else counts.set(key, { n: 1, e, ids: [e.id] });
   }
 
-  for (const [key, { n, e }] of counts) {
+  for (const [key, { n, e, ids }] of counts) {
     const cat = CATALOG[e.category];
     const sheet = key.split("|")[1];
     out.push({
@@ -153,6 +167,7 @@ export function takeoff(doc: BimDocument): Measurement[] {
       item: cat?.label ?? e.category,
       quantity: n,
       unit: "nr",
+      element_ids: ids,
       method: "Counted on the BIM model",
     });
   }

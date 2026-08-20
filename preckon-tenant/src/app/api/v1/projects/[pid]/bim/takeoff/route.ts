@@ -5,6 +5,7 @@ import { actorFromCtx, useCase } from "@/lib/usecase";
 import { errBadRequest } from "@/lib/errors";
 import { emitArtifact, listArtifacts } from "@/lib/store";
 import { takeoff } from "@/lib/bim/takeoff";
+import { addSourceRegion } from "@/lib/doc/store";
 import type { BimDocument } from "@/lib/bim/model";
 
 // POST /projects/{pid}/bim/takeoff — measure the BIM model into the chain.
@@ -50,8 +51,9 @@ export const POST = route<{ pid: string }>(async (_req, ctx, { pid }) => {
     }
 
     let emitted = 0;
+    let anchored = 0;
     for (const m of measurements) {
-      await emitArtifact(
+      const artifact: any = await emitArtifact(
         {
           tenantId: ctx.tenantId,
           projectId: pid,
@@ -63,6 +65,33 @@ export const POST = route<{ pid: string }>(async (_req, ctx, { pid }) => {
         audit
       );
       emitted++;
+
+      /* Anchor the measurement to the elements it was measured from.
+         This is what turns "120 m² of blockwork" into a figure you can click
+         to light up the walls behind it. Written here rather than left to the
+         reader to infer from the method string, because prose is not a trace —
+         and a quantity whose evidence is a sentence gets re-measured by hand.
+         Best-effort: a missing anchor must never fail a takeoff that is
+         otherwise correct. */
+      const artifactId = artifact?.id ?? artifact;
+      if (artifactId && m.element_ids?.length) {
+        for (const elementId of m.element_ids) {
+          try {
+            await addSourceRegion(ctx.tenantId, pid, {
+              regionType: "model_object",
+              nativeId: elementId,
+              entityType: "drawing_measurement",
+              entityId: String(artifactId),
+              // "rule", not "ai": this is arithmetic on geometry a person drew,
+              // not a model's reading of a drawing. The distinction decides
+              // whether the number needs confirming.
+              method: "rule",
+              confidence: 1,
+            });
+            anchored++;
+          } catch { /* the measurement stands with or without its anchor */ }
+        }
+      }
     }
 
     audit({
@@ -70,9 +99,9 @@ export const POST = route<{ pid: string }>(async (_req, ctx, { pid }) => {
       targetKind: "bim_document",
       targetId: pid,
       projectId: pid,
-      summary: { emitted, superseded: priorBim.length },
+      summary: { emitted, superseded: priorBim.length, anchored },
     });
-    return { emitted, superseded: priorBim.length };
+    return { emitted, superseded: priorBim.length, anchored };
   });
 
   return ok(result, 201);
