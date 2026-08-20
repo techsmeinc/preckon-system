@@ -1462,3 +1462,41 @@ CREATE TABLE IF NOT EXISTS quote_line (
   UNIQUE KEY uq_quote_line (quote_id, scope_item_id),
   KEY idx_quote_line_scope (scope_item_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ── QuantLogix: measurement rules as data (migration 024) ───────────────────
+-- Versioned rather than edited: a quantity measured last month was measured
+-- under last month's rules, and an editable set would make its working cite a
+-- rule that no longer says what it said.
+
+CREATE TABLE IF NOT EXISTS measurement_rule_set (
+  id            CHAR(36)     NOT NULL PRIMARY KEY,
+  tenant_id     CHAR(36)     NOT NULL,
+  project_id    CHAR(36)     NULL,
+  `key`         VARCHAR(64)  NOT NULL,
+  name          VARCHAR(200) NOT NULL,
+  standard      VARCHAR(64)  NOT NULL,
+  version       INT          NOT NULL DEFAULT 1,
+  status        ENUM('draft','active','retired') NOT NULL DEFAULT 'draft',
+  is_default    BOOLEAN      NOT NULL DEFAULT FALSE,
+  created_by    CHAR(36)     NULL,
+  created_at    DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  UNIQUE KEY uq_rule_set_version (tenant_id, `key`, version),
+  KEY idx_rule_set_project (tenant_id, project_id, status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS measurement_rule (
+  id            CHAR(36)     NOT NULL PRIMARY KEY,
+  tenant_id     CHAR(36)     NOT NULL,
+  rule_set_id   CHAR(36)     NOT NULL,
+  seq           INT          NOT NULL DEFAULT 0,
+  `key`         VARCHAR(64)  NOT NULL,
+  kind          ENUM('deduct_openings','minimum_quantity','round','waste_factor',
+                     'convert_unit','threshold_exclude') NOT NULL,
+  label         VARCHAR(200) NOT NULL,
+  reference     VARCHAR(120) NULL,
+  threshold     DECIMAL(18,4) NULL,
+  value         DECIMAL(18,4) NULL,
+  applies_to    JSON          NULL,
+  UNIQUE KEY uq_rule_key (rule_set_id, `key`),
+  KEY idx_rule_seq (rule_set_id, seq)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
