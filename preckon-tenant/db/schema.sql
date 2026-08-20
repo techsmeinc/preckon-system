@@ -553,10 +553,13 @@ CREATE TABLE chunk (
   project_id  CHAR(36) NOT NULL,
   source_kind ENUM('file_page','artifact','library') NOT NULL,
   source_id   CHAR(36) NOT NULL,
+  revision_id CHAR(36),
+  page_number INT,
   ordinal     INT NOT NULL DEFAULT 0,
   text        LONGTEXT NOT NULL,
   embedding   JSON,
   token_count INT,
+  index_version VARCHAR(32) NOT NULL DEFAULT 'v1',
   created_at  DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   KEY chunk_scope_idx  (tenant_id, project_id, source_kind),
   KEY chunk_source_idx (source_kind, source_id),
@@ -868,6 +871,10 @@ CREATE TABLE document_register (
                     NOT NULL DEFAULT 'registered',
 
   retention         VARCHAR(64)  NULL,
+  retention_years   INT          NULL,
+  legal_hold        BOOLEAN      NOT NULL DEFAULT FALSE,
+  legal_hold_reason VARCHAR(512) NULL,
+  legal_hold_at     DATETIME(3)  NULL,
   handover_category VARCHAR(64)  NULL,
   required_by       DATE         NULL,
 
@@ -1027,4 +1034,121 @@ CREATE TABLE source_region (
   CONSTRAINT fk_srcregion_project  FOREIGN KEY (project_id)  REFERENCES project(id)           ON DELETE CASCADE,
   CONSTRAINT fk_srcregion_file     FOREIGN KEY (file_id)     REFERENCES file(id)              ON DELETE CASCADE,
   CONSTRAINT fk_srcregion_revision FOREIGN KEY (revision_id) REFERENCES document_revision(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+
+-- ============================================================================
+-- DocLogix part two — distribution, review, comments (migration 020).
+-- Kept here so the tenant-scoping guard can see these tables are scoped.
+-- ============================================================================
+
+CREATE TABLE distribution_list (
+  id          CHAR(36)     NOT NULL PRIMARY KEY,
+  tenant_id   CHAR(36)     NOT NULL,
+  -- NULL project_id makes it an organisation-wide list.
+  project_id  CHAR(36)     NULL,
+  name        VARCHAR(255) NOT NULL,
+  description VARCHAR(512) NULL,
+  -- Filters that decide when this list is offered: discipline, doc_type,
+  -- package. Suggesting every list on every issue is the same as suggesting
+  -- none.
+  applies_to  JSON         NULL,
+  is_default  BOOLEAN      NOT NULL DEFAULT FALSE,
+  created_by  CHAR(36)     NULL,
+  created_at  DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at  DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  UNIQUE KEY distribution_list_uidx (tenant_id, project_id, name),
+  KEY distribution_list_scope_idx (tenant_id, project_id),
+  CONSTRAINT fk_distlist_project FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE distribution_member (
+  id          CHAR(36)     NOT NULL PRIMARY KEY,
+  tenant_id   CHAR(36)     NOT NULL,
+  list_id     CHAR(36)     NOT NULL,
+  party       VARCHAR(255) NOT NULL,
+  email       VARCHAR(320) NULL,
+  user_id     CHAR(36)     NULL,
+  -- 'to' owes an acknowledgement, 'cc' is informed only. Carried onto the
+  -- transmittal so the distinction survives the copy.
+  kind        ENUM('to','cc') NOT NULL DEFAULT 'to',
+  created_at  DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  UNIQUE KEY distribution_member_uidx (list_id, party),
+  KEY distribution_member_scope_idx (tenant_id, list_id),
+  CONSTRAINT fk_distmember_list FOREIGN KEY (list_id) REFERENCES distribution_list(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE document_review (
+  id            CHAR(36)     NOT NULL PRIMARY KEY,
+  tenant_id     CHAR(36)     NOT NULL,
+  project_id    CHAR(36)     NOT NULL,
+  -- Reviews attach to a REVISION. Reviewing "the document" is meaningless when
+  -- the content changes underneath the reviewer.
+  revision_id   CHAR(36)     NOT NULL,
+
+  stage         VARCHAR(64)  NOT NULL DEFAULT 'internal',
+  status        ENUM('open','completed','cancelled') NOT NULL DEFAULT 'open',
+  -- How many approvals are needed before the cycle can complete. 0 means every
+  -- assigned reviewer must respond.
+  min_approvals INT          NOT NULL DEFAULT 0,
+  due_at        DATETIME(3)  NULL,
+  opened_by     CHAR(36)     NULL,
+  opened_at     DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  closed_at     DATETIME(3)  NULL,
+  outcome       ENUM('approved','approved_with_comments','revise_and_resubmit','rejected') NULL,
+
+  KEY document_review_rev_idx   (tenant_id, revision_id, status),
+  KEY document_review_due_idx   (tenant_id, project_id, status, due_at),
+  CONSTRAINT fk_docreview_revision FOREIGN KEY (revision_id) REFERENCES document_revision(id) ON DELETE CASCADE,
+  CONSTRAINT fk_docreview_project  FOREIGN KEY (project_id)  REFERENCES project(id)           ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE document_review_assignee (
+  id          CHAR(36)     NOT NULL PRIMARY KEY,
+  tenant_id   CHAR(36)     NOT NULL,
+  review_id   CHAR(36)     NOT NULL,
+  party       VARCHAR(255) NOT NULL,
+  user_id     CHAR(36)     NULL,
+  -- ISO 19650 response codes are contractual language, not opinions: a
+  -- "revise and resubmit" obliges the originator to act.
+  decision    ENUM('pending','approved','approved_with_comments','revise_and_resubmit','rejected')
+              NOT NULL DEFAULT 'pending',
+  decided_at  DATETIME(3)  NULL,
+  note        VARCHAR(1000) NULL,
+  created_at  DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  UNIQUE KEY document_review_assignee_uidx (review_id, party),
+  KEY document_review_assignee_scope_idx (tenant_id, review_id, decision),
+  CONSTRAINT fk_docreviewassignee_review FOREIGN KEY (review_id) REFERENCES document_review(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE document_comment (
+  id           CHAR(36)     NOT NULL PRIMARY KEY,
+  tenant_id    CHAR(36)     NOT NULL,
+  project_id   CHAR(36)     NOT NULL,
+  revision_id  CHAR(36)     NOT NULL,
+  review_id    CHAR(36)     NULL,
+  -- Where on the page. NULL for a comment about the document as a whole.
+  region_id    CHAR(36)     NULL,
+
+  body         TEXT         NOT NULL,
+  -- Threading, so a reply is attached to what it answers.
+  parent_id    CHAR(36)     NULL,
+  status       ENUM('open','resolved','withdrawn') NOT NULL DEFAULT 'open',
+  -- A comment that obliges a change is different from an observation, and the
+  -- difference decides whether the revision can be issued.
+  is_blocking  BOOLEAN      NOT NULL DEFAULT FALSE,
+
+  author_id    CHAR(36)     NULL,
+  author_party VARCHAR(255) NULL,
+  resolved_by  CHAR(36)     NULL,
+  resolved_at  DATETIME(3)  NULL,
+  created_at   DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at   DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+
+  KEY document_comment_rev_idx    (tenant_id, revision_id, status),
+  KEY document_comment_review_idx (tenant_id, review_id),
+  KEY document_comment_thread_idx (parent_id),
+  CONSTRAINT fk_doccomment_revision FOREIGN KEY (revision_id) REFERENCES document_revision(id) ON DELETE CASCADE,
+  CONSTRAINT fk_doccomment_region   FOREIGN KEY (region_id)   REFERENCES source_region(id)     ON DELETE SET NULL,
+  CONSTRAINT fk_doccomment_review   FOREIGN KEY (review_id)   REFERENCES document_review(id)   ON DELETE SET NULL
 ) ENGINE=InnoDB;
