@@ -81,14 +81,10 @@ export async function cyclesFor(tenantId: string, revisionId: string): Promise<R
         party: a.party,
         decision: a.decision as Decision,
         decidedAt: a.decided_at ? new Date(a.decided_at).toISOString() : undefined,
-        note: a.note ?? undefined,
       })),
     comments: comments
       .filter((c) => c.review_id === r.id)
-      .map((c) => ({
-        id: c.id, body: c.body, status: c.status,
-        blocking: !!c.is_blocking, author: c.author_party ?? undefined,
-      })),
+      .map((c) => ({ id: c.id, status: c.status, isBlocking: !!c.is_blocking })),
   })) as ReviewCycle[];
 }
 
@@ -141,7 +137,13 @@ export async function decide(input: DecideInput): Promise<DecideResult> {
   const cycle = cycles.find((c) => c.id === input.reviewId)!;
   const state = reviewState(cycle);
 
-  if (state.settled) {
+  /* review.ts is the judge of whether the cycle can close: `canComplete` means
+     enough people have answered and no blocking comment is outstanding. A
+     cycle is never closed here on a count of decisions, because "everyone
+     approved but one blocking comment is unresolved" is exactly the case that
+     must NOT close. */
+  const settled = state.canComplete && state.outcome != null;
+  if (settled) {
     await query(
       `UPDATE document_review SET status = 'completed', outcome = ?, closed_at = NOW(3)
         WHERE tenant_id = ? AND id = ?`,
@@ -150,8 +152,8 @@ export async function decide(input: DecideInput): Promise<DecideResult> {
   }
   return {
     ok: true,
-    outcome: state.settled ? state.outcome ?? null : null,
-    status: state.settled ? "completed" : "open",
+    outcome: settled ? state.outcome : null,
+    status: settled ? "completed" : "open",
   };
 }
 

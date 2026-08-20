@@ -10,6 +10,7 @@ import { Icon } from "@/lib/icons";
 import { useProject, ofType } from "@/lib/project";
 import { humanize } from "@/lib/catalog";
 import { useI18n, fmtDateLocal } from "@/lib/i18n";
+import { RegisterPanel } from "@/lib/doc/register-panel";
 
 export default function DocumentsPage({ params }: { params: Promise<{ pid: string }> }) {
   const { pid } = use(params);
@@ -23,6 +24,7 @@ export default function DocumentsPage({ params }: { params: Promise<{ pid: strin
   const [busy, setBusy] = useState(false);
   const [drag, setDrag] = useState(false);
   const [classifying, setClassifying] = useState(false);
+  const [tab, setTab] = useState<"intake" | "register">("intake");
 
   async function upload(list: FileList | null) {
     const chosen = Array.from(list ?? []);
@@ -70,8 +72,23 @@ export default function DocumentsPage({ params }: { params: Promise<{ pid: strin
     }
   }
 
+  /* Two jobs, two tabs.
+     Intake is "files arrived, classify them". The register is "these documents
+     exist, at these revisions, and this is what went out". They were previously
+     the same screen doing only the first, which is why anything registered
+     through the DocLogix API was invisible here. */
+  if (tab === "register") {
+    return (
+      <>
+        <DocTabs tab={tab} setTab={setTab} />
+        <RegisterPanel pid={pid} />
+      </>
+    );
+  }
+
   return (
     <>
+      <DocTabs tab={tab} setTab={setTab} />
       <input ref={ref} type="file" multiple hidden onChange={(e) => upload(e.target.files)} />
 
       {canEdit && (
@@ -205,4 +222,16 @@ function fileKind(mime?: string, filename?: string): string {
   if (mime.includes("image")) return "Image";
   if (mime.includes("text")) return "Text";
   return mime.split("/").pop() ?? mime;
+}
+
+/** Intake and the register are different jobs; this is the switch between them. */
+function DocTabs({ tab, setTab }: { tab: string; setTab: (t: "intake" | "register") => void }) {
+  return (
+    <nav className="ws-tabs" role="tablist" aria-label="Documents" style={{ marginBottom: 14 }}>
+      <button role="tab" aria-selected={tab === "intake"} className={tab === "intake" ? "on" : ""}
+              onClick={() => setTab("intake")}>Intake</button>
+      <button role="tab" aria-selected={tab === "register"} className={tab === "register" ? "on" : ""}
+              onClick={() => setTab("register")}>Register</button>
+    </nav>
+  );
 }
