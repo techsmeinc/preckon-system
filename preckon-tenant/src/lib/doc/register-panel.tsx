@@ -11,8 +11,13 @@
 // "these documents exist, at these revisions, and this is what went out". A
 // file can arrive without being a controlled document, and a controlled
 // document exists from the moment it is required, long before its file does.
+//
+// The table does the work. Everything you can do to a document is on its row —
+// the drawer is for detail, not for actions — because a register is read in a
+// meeting, and "open this, then open that" is not how anybody reads in a
+// meeting.
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { api } from "@/lib/apiclient";
 import { useApi, useCan, useToast, Skeleton, EmptyState, Drawer, Field, StatusChip, errMessage, fmtDate } from "@/lib/ui";
 
@@ -30,6 +35,12 @@ interface Doc {
 interface Segment { key: string; label: string; kind: string; values?: string[]; optional?: boolean }
 interface Scheme { id: string | null; key: string; name: string; segments: Segment[]; example: string }
 
+type SortKey = "document_number" | "title" | "discipline" | "current_revision" | "required_by";
+
+/** Past its required-by date with nothing issued. The row the register is for. */
+const isLate = (d: Doc) =>
+  !!d.required_by && !d.current_revision && Date.parse(d.required_by) < Date.now();
+
 export function RegisterPanel({ pid }: { pid: string }) {
   const toast = useToast();
   const canEdit = useCan("artifact.edit");
@@ -40,10 +51,36 @@ export function RegisterPanel({ pid }: { pid: string }) {
   const [adding, setAdding] = useState(false);
   const [open, setOpen] = useState<Doc | null>(null);
   const [q, setQ] = useState("");
+  const [filter, setFilter] = useState<"all" | "late" | "issued" | "unissued">("all");
+  const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>({ key: "document_number", dir: 1 });
 
   const scheme = reg.data?.schemes?.[0];
-  const docs = (reg.data?.documents ?? []).filter(
-    (d) => !q || `${d.document_number} ${d.title}`.toLowerCase().includes(q.toLowerCase()),
+  const all = reg.data?.documents ?? [];
+
+  const docs = useMemo(() => {
+    const text = q.trim().toLowerCase();
+    const rows = all.filter((d) => {
+      if (text && !`${d.document_number} ${d.title} ${d.discipline ?? ""}`.toLowerCase().includes(text)) return false;
+      if (filter === "late") return isLate(d);
+      if (filter === "issued") return !!d.current_revision;
+      if (filter === "unissued") return !d.current_revision;
+      return true;
+    });
+    return [...rows].sort((a, b) => {
+      const av = String(a[sort.key] ?? ""), bv = String(b[sort.key] ?? "");
+      // Numeric-aware, so sheet 10 sorts after sheet 2 rather than before it.
+      return av.localeCompare(bv, undefined, { numeric: true, sensitivity: "base" }) * sort.dir;
+    });
+  }, [all, q, filter, sort]);
+
+  const lateCount = all.filter(isLate).length;
+  const toggle = (key: SortKey) =>
+    setSort((s) => ({ key, dir: s.key === key && s.dir === 1 ? -1 : 1 }));
+
+  const Th = ({ k, children }: { k: SortKey; children: React.ReactNode }) => (
+    <th className="sortable" onClick={() => toggle(k)} aria-sort={sort.key === k ? (sort.dir === 1 ? "ascending" : "descending") : "none"}>
+      {children}<span className="dir">{sort.key === k ? (sort.dir === 1 ? "▲" : "▼") : ""}</span>
+    </th>
   );
 
   return (
@@ -53,45 +90,70 @@ export function RegisterPanel({ pid }: { pid: string }) {
           <div>
             <h2>Document register</h2>
             <div className="csub">
-              {reg.loading ? "Loading…" : `${docs.length} controlled document${docs.length === 1 ? "" : "s"}`}
+              {reg.loading ? "Loading…" : `${docs.length} of ${all.length} controlled document${all.length === 1 ? "" : "s"}`}
               {scheme ? ` · numbering: ${scheme.key}` : ""}
+              {lateCount > 0 && <> · <b style={{ color: "var(--red-ink)" }}>{lateCount} late</b></>}
             </div>
           </div>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            {/* Filters rather than a search-only box: "what is late" is the
+                question this screen is opened to answer, and making somebody
+                construct it out of a text search is making them work. */}
+            <div className="ws-tabs" role="group" aria-label="Filter">
+              {([["all", "All"], ["late", `Late${lateCount ? ` (${lateCount})` : ""}`], ["issued", "Issued"], ["unissued", "Not issued"]] as const).map(([k, label]) => (
+                <button key={k} className={filter === k ? "on" : ""} onClick={() => setFilter(k)}>{label}</button>
+              ))}
+            </div>
             <input
-              className="inp" placeholder="Filter by number or title" value={q}
-              onChange={(e) => setQ(e.target.value)} style={{ width: 220 }}
+              className="inp" placeholder="Filter by number, title or discipline" value={q}
+              onChange={(e) => setQ(e.target.value)} style={{ width: 240 }}
             />
             {canEdit && <button className="btn btn-primary" onClick={() => setAdding(true)}>Register a document</button>}
           </div>
         </div>
 
-        {reg.loading ? <Skeleton rows={4} /> : docs.length === 0 ? (
+        {reg.loading ? <Skeleton rows={4} /> : all.length === 0 ? (
           <EmptyState
             title="Nothing registered yet"
             sub="A document belongs in the register from the moment it is required — before its file exists. That is what makes the register able to tell you what is late."
           />
+        ) : docs.length === 0 ? (
+          <EmptyState title="Nothing matches" sub="No document matches this filter." />
         ) : (
           <div className="tw">
             <table className="tbl">
               <thead>
                 <tr>
-                  <th>Number</th><th>Title</th><th>Discipline</th>
-                  <th>Current</th><th>Status</th><th>Required by</th>
+                  <Th k="document_number">Number</Th>
+                  <Th k="title">Title</Th>
+                  <Th k="discipline">Discipline</Th>
+                  <Th k="current_revision">Current</Th>
+                  <th>Status</th>
+                  <Th k="required_by">Required by</Th>
+                  <th style={{ textAlign: "right" }}><span className="vh">Actions</span></th>
                 </tr>
               </thead>
               <tbody>
                 {docs.map((d) => (
-                  <tr key={d.id} onClick={() => setOpen(d)} style={{ cursor: "pointer" }}>
-                    <td style={{ fontFamily: "var(--font-mono)", whiteSpace: "nowrap" }}>{d.document_number}</td>
+                  <tr key={d.id}>
+                    <td style={{ fontFamily: "var(--font-mono)", whiteSpace: "nowrap" }}>
+                      <button className="linkish" onClick={() => setOpen(d)}>{d.document_number}</button>
+                    </td>
                     <td>{d.title}</td>
                     <td>{d.discipline ?? "—"}</td>
-                    <td>{d.current_revision ?? "—"}</td>
-                    <td><StatusChip status={d.status ?? "registered"} /></td>
-                    {/* A required-by date in the past with nothing issued is the
-                        row this whole screen exists to make visible. */}
-                    <td style={{ color: isLate(d) ? "var(--red-ink)" : undefined }}>
+                    <td><b>{d.current_revision ?? "—"}</b></td>
+                    <td>
+                      {isLate(d)
+                        ? <StatusChip status="late" label="Late" />
+                        : <StatusChip status={d.status ?? "registered"} />}
+                    </td>
+                    <td style={{ color: isLate(d) ? "var(--red-ink)" : undefined, whiteSpace: "nowrap" }}>
                       {d.required_by ? fmtDate(d.required_by) : "—"}
+                    </td>
+                    <td>
+                      <div className="row-actions">
+                        <button className="mini sm" onClick={() => setOpen(d)}>Open</button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -122,9 +184,6 @@ export function RegisterPanel({ pid }: { pid: string }) {
   );
 }
 
-const isLate = (d: Doc) =>
-  !!d.required_by && !d.current_revision && Date.parse(d.required_by) < Date.now();
-
 /* ── registering ──────────────────────────────────────────────────────────── */
 
 function RegisterDrawer({ pid, scheme, onClose, onDone }: {
@@ -139,6 +198,14 @@ function RegisterDrawer({ pid, scheme, onClose, onDone }: {
   // The sequence segment is allocated by the server, so it is shown as such
   // rather than offered as a field somebody can fight with.
   const editable = scheme.segments.filter((s) => s.kind !== "sequence");
+
+  /* The number as it will be, updating as the form is filled.
+     Filling six segments and finding out afterwards is how people discover
+     they have used the wrong originator code on document forty. */
+  const preview = scheme.segments
+    .map((s) => (s.kind === "sequence" ? "####" : (segments[s.key] || (s.optional ? "" : "…"))))
+    .filter(Boolean)
+    .join(scheme.separator ?? "-");
 
   async function submit() {
     setBusy(true); setIssues([]);
@@ -162,8 +229,15 @@ function RegisterDrawer({ pid, scheme, onClose, onDone }: {
     >
       <Field label="Title"><input className="inp" value={title} onChange={(e) => setTitle(e.target.value)} /></Field>
 
-      <div className="csub" style={{ margin: "10px 0 6px" }}>
-        {scheme.name}. Example: <b style={{ fontFamily: "var(--font-mono)" }}>{scheme.example}</b>
+      <div className="csub" style={{ margin: "10px 0 4px" }}>{scheme.name}</div>
+      <div style={{
+        fontFamily: "var(--font-mono)", fontSize: 13, padding: "8px 10px",
+        background: "var(--panel-2)", borderRadius: 8, marginBottom: 12,
+      }}>
+        {preview || scheme.example}
+        <div className="csub" style={{ fontFamily: "var(--font-body)", marginTop: 2 }}>
+          #### is allocated when you register.
+        </div>
       </div>
 
       {editable.map((s) => (
@@ -196,7 +270,7 @@ function RegisterDrawer({ pid, scheme, onClose, onDone }: {
   );
 }
 
-/* ── one document: revisions, issue, review ───────────────────────────────── */
+/* ── one document: revision timeline, review, issue, send ─────────────────── */
 
 function DocumentDrawer({ pid, doc, canEdit, canIssue, onClose, onChanged }: {
   pid: string; doc: Doc; canEdit: boolean; canIssue: boolean;
@@ -236,8 +310,7 @@ function DocumentDrawer({ pid, doc, canEdit, canIssue, onClose, onChanged }: {
     setBusy(true);
     try {
       await api.post(`/projects/${pid}/documents/${doc.id}/reviews`, {
-        revision_id: rid, stage: "internal", min_approvals: 1,
-        parties: ["Discipline lead"],
+        revision_id: rid, stage: "internal", min_approvals: 1, parties: ["Discipline lead"],
       });
       reviews.reload(); toast("Sent for review");
     } catch (e) { toast(errMessage(e), "bad"); } finally { setBusy(false); }
@@ -266,68 +339,79 @@ function DocumentDrawer({ pid, doc, canEdit, canIssue, onClose, onChanged }: {
       </div>
 
       {canEdit && (
-        <button className="mini" disabled={busy} onClick={addRevision} style={{ marginBottom: 12 }}>
+        <button className="mini" disabled={busy} onClick={addRevision} style={{ marginBottom: 14 }}>
           Raise a revision
         </button>
       )}
 
       {revisions.loading ? <Skeleton rows={2} /> : rows.length === 0 ? (
         <div className="csub">No revisions yet.</div>
-      ) : rows.map((r: any) => {
-        const cycles = cyclesFor(r.id);
-        const openCycle = cycles.find((c: any) => c.status === "open");
-        /* The column is `state`, not `status` — draft | current | superseded.
-           Reading the wrong field left every revision showing "Draft" after it
-           had been issued, and left Issue offered on a revision that was
-           already the current one. */
-        const state: string = r.state ?? "draft";
-        const issued = state === "current" || state === "superseded";
-        return (
-          <div key={r.id} className="card" style={{ padding: "10px 12px", marginBottom: 8 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-              <div>
-                <b style={{ fontFamily: "var(--font-mono)" }}>{r.revision_code ?? r.revisionCode}</b>
-                {r.suitability ? <span className="csub"> · {r.suitability}</span> : null}
-                <div className="csub">{r.description ?? ""}</div>
-                {r.issued_at ? <div className="csub">Issued {r.issued_at}</div> : null}
-              </div>
-              <StatusChip status={state} />
-            </div>
+      ) : (
+        /* A timeline rather than a stack of equal cards: revisions are a
+           sequence, and which one is current is the first thing anybody wants
+           from it. */
+        <ol style={{ listStyle: "none", margin: 0, padding: 0, borderInlineStart: "2px solid var(--hairline)" }}>
+          {rows.map((r: any) => {
+            const state: string = r.state ?? "draft";
+            const issued = state === "current" || state === "superseded";
+            const cycles = cyclesFor(r.id);
+            const openCycle = cycles.find((c: any) => c.status === "open");
 
-            {cycles.length > 0 && (
-              <div className="csub" style={{ marginTop: 6 }}>
-                {cycles.map((c: any) => (
-                  <div key={c.id}>
-                    {c.description}
-                    {c.status === "open" && canEdit && (
-                      <span style={{ marginInlineStart: 8, display: "inline-flex", gap: 6 }}>
-                        <button className="mini sm" disabled={busy} onClick={() => decide(c.id, "approved")}>Approve</button>
-                        <button className="mini sm" disabled={busy} onClick={() => decide(c.id, "revise_and_resubmit")}>Revise</button>
-                      </span>
-                    )}
+            return (
+              <li key={r.id} style={{ position: "relative", padding: "0 0 16px 14px" }}>
+                <span style={{
+                  position: "absolute", insetInlineStart: -6, top: 4, width: 10, height: 10, borderRadius: "50%",
+                  background: state === "current" ? "var(--teal)" : state === "superseded" ? "var(--slate-300)" : "var(--amber)",
+                }} />
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                  <div>
+                    <b style={{ fontFamily: "var(--font-mono)" }}>{r.revision_code ?? r.revisionCode}</b>
+                    {r.suitability ? <span className="csub"> · {r.suitability}</span> : null}
                   </div>
-                ))}
-              </div>
-            )}
+                  <StatusChip status={state} />
+                </div>
+                {r.description && <div className="csub">{r.description}</div>}
+                <div className="csub">
+                  {r.issued_at ? `Issued ${r.issued_at}` : r.created_at ? `Raised ${r.created_at}` : ""}
+                </div>
 
-            <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-              {canEdit && !openCycle && !issued && (
-                <button className="mini sm" disabled={busy} onClick={() => openReview(r.id)}>Send for review</button>
-              )}
-              {canIssue && !issued && (
-                <button className="mini sm" disabled={busy} onClick={() => issue(r.id)}>Issue</button>
-              )}
-              {/* Issuing used to leave the reader at "Nothing transmitted yet —
-                  issue a revision, then send it", with nothing anywhere that
-                  sends one. An instruction with no button is worse than no
-                  instruction. */}
-              {canEdit && state === "current" && (
-                <button className="mini sm" disabled={busy} onClick={() => setSending(r)}>Send to…</button>
-              )}
-            </div>
-          </div>
-        );
-      })}
+                {cycles.length > 0 && (
+                  <div style={{ marginTop: 6 }}>
+                    {cycles.map((c: any) => (
+                      <div key={c.id} className="csub" style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                        <StatusChip status={c.status === "open" ? "in_review" : (c.state?.outcome ?? "completed")} />
+                        <span>{c.description}</span>
+                        {c.status === "open" && canEdit && (
+                          <>
+                            <button className="mini sm" disabled={busy} onClick={() => decide(c.id, "approved")}>Approve</button>
+                            <button className="mini sm" disabled={busy} onClick={() => decide(c.id, "revise_and_resubmit")}>Revise</button>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+                  {canEdit && !openCycle && !issued && (
+                    <button className="mini sm" disabled={busy} onClick={() => openReview(r.id)}>Send for review</button>
+                  )}
+                  {canIssue && !issued && (
+                    <button className="mini sm" disabled={busy} onClick={() => issue(r.id)}>Issue</button>
+                  )}
+                  {/* Issuing used to leave the reader at "Nothing transmitted yet
+                      — issue a revision, then send it", with nothing anywhere
+                      that sends one. An instruction with no button is worse than
+                      no instruction. */}
+                  {canEdit && state === "current" && (
+                    <button className="mini sm" disabled={busy} onClick={() => setSending(r)}>Send to…</button>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+      )}
 
       {sending && (
         <SendDrawer
@@ -343,7 +427,7 @@ function DocumentDrawer({ pid, doc, canEdit, canIssue, onClose, onChanged }: {
 /**
  * Compose and send a transmittal.
  *
- * Issues and sends in one action, because that is one act to the person doing
+ * Creates and sends in one action, because that is one act to the person doing
  * it — but the two API calls stay separate, since a transmittal that is created
  * and not sent is a real state (a draft nobody released) and collapsing them
  * would make it unreachable.
@@ -361,8 +445,7 @@ function SendDrawer({ pid, doc, revision, onClose, onSent }: {
     setBusy(true);
     try {
       const created: any = await api.post(`/projects/${pid}/transmittals`, {
-        purpose,
-        subject,
+        purpose, subject,
         revision_ids: [revision.id],
         recipients: [{ party: party.trim(), kind: "to" }],
       });
@@ -411,12 +494,12 @@ function TransmittalCard({ state }: { state: any }) {
         </div>
       </div>
       {state.loading ? <Skeleton rows={2} /> : rows.length === 0 ? (
-        <EmptyState title="Nothing transmitted yet" sub="Issue a revision, then send it." />
+        <EmptyState title="Nothing transmitted yet" sub="Open a document, then Send to… on its current revision." />
       ) : (
         <div className="tw">
           <table className="tbl">
             <thead>
-              <tr><th>Number</th><th>Purpose</th><th>Subject</th><th>Status</th><th>Items</th><th>To</th><th>Sent</th></tr>
+              <tr><th>Number</th><th>Purpose</th><th>Subject</th><th>Status</th><th className="num">Items</th><th className="num">To</th><th>Sent</th></tr>
             </thead>
             <tbody>
               {rows.map((t: any) => (
@@ -425,9 +508,9 @@ function TransmittalCard({ state }: { state: any }) {
                   <td>{t.purpose}</td>
                   <td>{t.subject ?? "—"}</td>
                   <td><StatusChip status={t.status ?? "draft"} /></td>
-                  <td>{t.item_count ?? "—"}</td>
-                  <td>{t.recipient_count ?? "—"}</td>
-                  <td>{t.sent_at ? fmtDate(t.sent_at) : "—"}</td>
+                  <td className="num">{t.item_count ?? "—"}</td>
+                  <td className="num">{t.recipient_count ?? "—"}</td>
+                  <td style={{ whiteSpace: "nowrap" }}>{t.sent_at ? fmtDate(t.sent_at) : "—"}</td>
                 </tr>
               ))}
             </tbody>

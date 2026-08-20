@@ -1706,3 +1706,36 @@ p a,li a,td a,.csub a{min-block-size:0;}
   border:1px solid var(--hairline); background:var(--panel-2);}
 .ced-cmp-impact.needs-review{border-color:var(--amber); background:var(--amber-tint);}
 .ced-cmp-impact .csub{display:block; margin-top:5px; font-size:10.5px;}
+
+/* ── Table wrapper ───────────────────────────────────────────────────────────
+   `.tw` was used on five screens — projects, desktop, submission, the BOQ
+   pipeline and the document register — and defined nowhere at all. Every one of
+   those tables was simply clipped when it outgrew its card, which is how the
+   register's right-hand columns vanished behind an open drawer with no
+   indication there was more to see.
+
+   The scroll belongs to the wrapper, never to the page: a workspace whose whole
+   body scrolls sideways loses its navigation off the left edge. */
+.tw{ overflow-x:auto; -webkit-overflow-scrolling:touch; max-width:100%; }
+.tw > table{ min-width:100%; }
+
+/* ── Chip states the document chain uses ─────────────────────────────────────
+   These read as plain grey text until they are given a colour, so an "Issued"
+   document and a "Draft" one looked identical at a glance — which is the one
+   distinction the register exists to make. */
+.chip.issued,.chip.current,.chip.sent,.chip.acknowledged{ color:var(--teal-ink); background:var(--teal-tint); }
+.chip.registered,.chip.planned{ color:var(--blue-ink); background:var(--blue-tint); }
+.chip.late,.chip.overdue,.chip.recalled{ color:var(--red-ink); background:var(--red-tint); }
+.chip.in_review,.chip.for_review{ color:var(--amber-ink); background:var(--amber-tint); }
+
+/* Row actions: visible on the row rather than hidden behind opening a drawer,
+   but quiet until the row is hovered so a long register does not read as a
+   wall of buttons. */
+.row-actions{ display:flex; gap:6px; justify-content:flex-end; opacity:.35; transition:opacity .12s ease; }
+tr:hover .row-actions,.row-actions:focus-within{ opacity:1; }
+@media (hover:none){ .row-actions{ opacity:1; } }
+
+/* A sortable header says so, and says which way. */
+th.sortable{ cursor:pointer; user-select:none; white-space:nowrap; }
+th.sortable:hover{ color:var(--ink); }
+th.sortable .dir{ opacity:.5; font-size:10px; margin-inline-start:4px; }
