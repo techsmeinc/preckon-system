@@ -23,6 +23,7 @@ import {
 } from "./model";
 import { applyCommands, initHistory, redo, run, undo, type Command, type History } from "./commands";
 import { BimIso } from "./iso";
+import { useResizablePanel, SplitHandle } from "@/lib/resizable";
 
 const hex = (c: number) => "#" + c.toString(16).padStart(6, "0");
 
@@ -107,7 +108,11 @@ export function BimStudio({
   const [view, setView] = useState<"2d" | "3d" | "split">("2d");
 
   const doc = hist.doc;
-  const bounds = useMemo(() => boundsOf(doc), [doc]);
+const bimPane = useResizablePanel({
+    storageKey: "preckon.bim.side", defaultWidth: 280, min: 200, max: 720, cssVar: "--bim-side",
+  });
+  const bounds = useMemo(
+  () => boundsOf(doc), [doc]);
 
   const dispatch = useCallback((cmds: Command | Command[]) => {
     if (readOnly) return;
@@ -202,7 +207,7 @@ export function BimStudio({
 
       {err && <div className="auth-err" style={{ marginBottom: 12 }}>{err}</div>}
 
-      <div className="bim-wrap">
+      <div {...bimPane.containerProps} className={"bim-wrap" + (bimPane.dragging ? " resizing" : "")}>
         <div className="bim-main">
           <div className="bim-bar">
             <span className="mono" style={{ fontSize: 11, color: "var(--slate-400)" }}>
@@ -258,6 +263,8 @@ export function BimStudio({
             )}
           </div>
         </div>
+
+        <SplitHandle {...bimPane.handleProps} />
 
         <aside className="bim-side">
           <h4>{t("bim.legend")}</h4>

@@ -37,6 +37,7 @@ import type { TraceEntry as CadTrace } from "@/lib/bim/agent2";
 import { saveOver } from "./roundtrip";
 import { IsoView } from "./isoview";
 import { assumedHeight } from "./iso";
+import { useResizablePanel, SplitHandle } from "@/lib/resizable";
 
 const DRAW: Array<[Tool, string, string]> = [
   ["line", "ed.line", "╱"],
@@ -126,6 +127,12 @@ export function CadEditor({
   const { t } = useI18n();
   const toast = useToast();
   const canUpload = useCan("artifact.edit");
+  /* The assistant column is draggable and remembered. It was 250px for
+     everybody, which is a ribbon three words wide for anyone reading a
+     copilot answer and 250px of lost drawing for anyone who is not. */
+  const cedPane = useResizablePanel({
+    storageKey: "preckon.ced.side", defaultWidth: 250, min: 200, max: 720, cssVar: "--ced-side",
+  });
   const vp = useRef<CadHandle>(null);
 
   const [model, setModel] = useState<DxfModel | null>(null);
@@ -624,7 +631,7 @@ export function CadEditor({
       </div>
 
       {/* ── canvas + layers ────────────────────────────────────────────── */}
-      <div className="ced-body">
+      <div {...cedPane.containerProps} className={"ced-body" + (cedPane.dragging ? " resizing" : "")}>
         <div className={"ced-canvas ced-view-" + view}>
           {view !== "3d" && (
           <CadViewport
@@ -661,6 +668,8 @@ export function CadEditor({
             />
           )}
         </div>
+
+        <SplitHandle {...cedPane.handleProps} />
 
         <aside className="ced-side">
           {/* Revision comparison. Folded away by default: it answers a question
