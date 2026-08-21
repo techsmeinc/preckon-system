@@ -3,10 +3,13 @@ import { query } from "./db";
 import { newId } from "./ids";
 import { TIER_ORDER, type Tier } from "./constants";
 import { claimForDispatch, clearLease, releaseForRetry } from "./job-queue";
-import { currentRequestId, logWarn } from "./log";
+import { currentRequestId, logInfo, logWarn } from "./log";
 import { decideDispatch, type DispatchDecision } from "./ai/govern";
 import { loadRegistry, loadTenantPolicy, recordUsage, spendFor } from "./ai/store";
 import { TIER_ALIAS } from "./ai/registry";
+import { resolvePrompt } from "./ai/prompt-store";
+import type { CacheDimensions } from "./ai/cache";
+import * as responseCache from "./ai/cache-store";
 import type { Sensitivity } from "./ai/policy";
 
 // ── §5 The job seam. Core owns dispatch + tracking; the stateless worker runs
@@ -33,6 +36,12 @@ export interface JobEnvelope {
   prompt_ref: string;
   inputs: { artifacts: JobInputArtifact[]; params: Record<string, unknown> };
   idempotency_key: string;
+  /** Dimensions this dispatch would be cached under. Carried on the envelope so
+   *  the completion path can write the answer back without recomputing them —
+   *  the policy version and prompt version in force at DISPATCH are what the
+   *  answer was produced under, and re-deriving them at completion would silently
+   *  file the result under a version it never ran. */
+  cache?: CacheDimensions;
 }
 
 export interface JobOutput {
@@ -174,6 +183,145 @@ export interface EnqueueInput {
   sensitivity?: Sensitivity;
 }
 
+/* ── Response cache ──────────────────────────────────────────────────────────
+   Two switches, deliberately separate.
+
+   Warming is on by default: every completed job stores its answer, and the hit
+   counters then show what reuse WOULD have saved. That is the number worth
+   having before turning reuse on, and collecting it costs one insert.
+
+   Reuse is off by default, behind AI_CACHE_REUSE. Serving a stored answer
+   instead of calling the model is a real behaviour change on a live system, and
+   it should be somebody's decision rather than a side effect of a deploy — the
+   same reasoning that left policy enforcement report-only behind a flag. */
+const CACHE_WARM = process.env.AI_CACHE_WARM !== "off";
+const CACHE_REUSE = process.env.AI_CACHE_REUSE === "on";
+/** Reuse ceiling. Correctness comes from the key; this only bounds staleness for
+ *  things the key cannot see, so it is a backstop rather than the mechanism. */
+const CACHE_MAX_AGE_MS = Number(process.env.AI_CACHE_MAX_AGE_MS ?? 30 * 24 * 3600_000);
+
+/**
+ * The dimensions this dispatch is cached under.
+ *
+ * `input` is the whole request — artifacts and params — rather than a prompt
+ * string, because that is what actually determines the answer: two jobs with the
+ * same params over different artifacts are different questions. It is hashed
+ * into the key and never stored, so its size here does not matter.
+ *
+ * The artifact ids double as revision keys, which is what makes scoped
+ * invalidation work: re-issuing a document produces a new artifact id, so every
+ * answer computed from the old one can be found and dropped.
+ */
+export function cacheDimensionsFor(
+  input: EnqueueInput, decision: DispatchDecision, promptRef: string,
+): CacheDimensions {
+  return {
+    tenantId: input.ctx.tenantId,
+    projectId: input.ctx.projectId ?? null,
+    taskType: input.jobType,
+    input: JSON.stringify({
+      artifacts: input.inputArtifacts.map((a) => ({ id: a.id, type: a.type })),
+      params: input.params ?? {},
+    }),
+    revisionKeys: input.inputArtifacts.map((a) => a.id),
+    sensitivity: decision.sensitivity,
+    policyVersion: decision.policyVersion,
+    promptVersion: promptRef,
+    modelAlias: decision.alias,
+  };
+}
+
+/** What a cache hit yields: a job row that already has its answer. */
+export interface CachedJob {
+  jobId: string;
+  result: JobResult;
+  savedMinor: number;
+}
+
+/**
+ * Serve a job from the cache, if reuse is permitted and an answer is stored.
+ *
+ * Returns a real ai_job row and a JobResult, NOT a shortcut. The caller passes
+ * the result through the same completion path a worker's callback takes, so a
+ * cached answer produces the same artifacts, the same audit events and the same
+ * workflow advance as a computed one. A cache that bypassed materialisation
+ * would produce runs whose outputs exist only when the cache missed.
+ *
+ * Null means "call the model" — for a miss, for reuse being switched off, and
+ * for any failure. There is no path here that can stop work happening.
+ */
+export async function tryCachedJob(input: EnqueueInput): Promise<CachedJob | null> {
+  if (!CACHE_REUSE) return null;
+  try {
+    const decision = await governDispatch(input);
+    if (!decision.permitted && decision.blocked) return null; // let enqueueJob refuse it properly
+
+    const prompt = await resolvePrompt(input.jobType, input.promptRef);
+    const dims = cacheDimensionsFor(input, decision, prompt.ref);
+    const hit = await responseCache.lookup(input.ctx.tenantId, dims, CACHE_MAX_AGE_MS);
+    if (!hit) return null;
+
+    const jobId = newId();
+    const envelope: JobEnvelope = {
+      job_id: jobId,
+      job_type: input.jobType,
+      agent_key: input.ctx.agentKey,
+      agent_kind: input.agentKind,
+      tenant_id: input.ctx.tenantId,
+      project_id: input.ctx.projectId,
+      run_id: input.ctx.runId,
+      step_id: input.ctx.stepId,
+      tier: input.tier,
+      prompt_ref: prompt.ref,
+      inputs: { artifacts: input.inputArtifacts, params: input.params ?? {} },
+      idempotency_key:
+        input.idempotencyKey ?? `${input.ctx.stepId}:${input.jobType}:${input.ctx.tenantId}`,
+      cache: dims,
+    };
+
+    // Written as 'queued' like any other job. recordJobResult moves it to
+    // succeeded, so the row passes through the same states and the job list
+    // does not grow a second kind of history to understand.
+    await query(
+      `INSERT INTO ai_job
+         (id, tenant_id, project_id, run_id, step_id, agent_key, job_type, status,
+          tier, model, envelope, prompt_ref, idempotency_key)
+       VALUES (?,?,?,?,?,?,?, 'queued', ?,?,?,?,?)`,
+      [
+        jobId, input.ctx.tenantId, input.ctx.projectId, input.ctx.runId, input.ctx.stepId,
+        input.ctx.agentKey, input.jobType, input.tier, decision.model,
+        JSON.stringify(envelope), prompt.ref, envelope.idempotency_key,
+      ],
+    );
+    await query("UPDATE workflow_run_step SET job_id = ? WHERE id = ? AND tenant_id = ?", [
+      jobId, input.ctx.stepId, input.ctx.tenantId,
+    ]);
+
+    const cached = hit.response as { outputs?: any[]; message?: any } | null;
+    logInfo("ai.cache.hit", {
+      jobId, jobType: input.jobType, key: hit.key, hits: hit.hits, savedMinor: hit.costMinor,
+    });
+
+    return {
+      jobId,
+      savedMinor: hit.costMinor,
+      result: {
+        job_id: jobId,
+        status: "succeeded",
+        outputs: cached?.outputs ?? [],
+        message: cached?.message,
+        // Zero cost and zero tokens, because none were spent. The ledger row
+        // this becomes is marked cache_hit, so "what did we spend" and "what
+        // did we serve" stay separable.
+        usage: { model: decision.model, input_tokens: 0, output_tokens: 0, cost_minor: 0 },
+      },
+    };
+  } catch (e) {
+    logWarn("ai.cache.serve_failed", { jobType: input.jobType, error: String(e) });
+    return null;
+  }
+}
+
 /** §5.4 — write ai_job (queued) + push the JobEnvelope to the worker. Returns jobId. */
 export async function enqueueJob(input: EnqueueInput): Promise<string> {
   const jobId = newId();
@@ -186,6 +334,17 @@ export async function enqueueJob(input: EnqueueInput): Promise<string> {
      actually asks, and it cannot be answered from an exception that vanished
      into a log line. */
   const decision = await governDispatch(input);
+
+  /* Resolve the prompt through the registry.
+     input.promptRef is the caller's default — a `${type}@v1` string built from
+     the job_type row. When a prompt is registered and approved for this task,
+     the registry's version wins and the ref recorded against the job is the one
+     that actually ran. When nothing is registered the caller's ref survives
+     untouched, so an unregistered task behaves exactly as it did before. */
+  const prompt = await resolvePrompt(input.jobType, input.promptRef);
+  const promptRef = prompt.ref;
+  const dims = cacheDimensionsFor(input, decision, promptRef);
+
   if (!decision.permitted) {
     await recordUsage({
       tenantId: input.ctx.tenantId,
@@ -200,6 +359,8 @@ export async function enqueueJob(input: EnqueueInput): Promise<string> {
       providerModel: decision.model,
       sensitivity: decision.sensitivity,
       policyVersion: decision.policyVersion,
+      promptKey: prompt.registered ? prompt.key : null,
+      promptVersion: prompt.registered ? prompt.version : null,
       outcome: "rejected",
       errorCode: decision.reasons[0] ?? "not_permitted",
     });
@@ -218,9 +379,10 @@ export async function enqueueJob(input: EnqueueInput): Promise<string> {
     run_id: input.ctx.runId,
     step_id: input.ctx.stepId,
     tier: input.tier,
-    prompt_ref: input.promptRef,
+    prompt_ref: promptRef,
     inputs: { artifacts: input.inputArtifacts, params: input.params ?? {} },
     idempotency_key: idempotencyKey,
+    cache: dims,
   };
 
   await query(
@@ -241,7 +403,10 @@ export async function enqueueJob(input: EnqueueInput): Promise<string> {
       // a provider model is a row in ai_model_registry rather than a deploy.
       decision.model,
       JSON.stringify(envelope),
-      input.promptRef,
+      // The ref that actually ran, not the one the caller asked for. These
+      // differ exactly when the registry has a newer approved version, and the
+      // job row is where somebody looks to find out which.
+      promptRef,
       idempotencyKey,
     ]
   );
@@ -320,6 +485,15 @@ export async function recordJobResult(result: JobResult): Promise<{
      append-only record that does not overwrite its own history. Written after
      the status UPDATE and guarded by the idempotency check above, so a
      duplicate callback cannot double-count. */
+  const envelope = parseEnvelope(job.envelope);
+  const promptRef = parseRef(job.prompt_ref ?? "");
+  // A job whose usage reports nothing spent was not computed — it came from the
+  // cache. Distinguishing it here keeps "what we served" and "what we paid for"
+  // separable in the ledger, which is the whole point of the cache_hit column.
+  const servedFromCache =
+    status === "succeeded" && (result.usage?.cost_minor ?? 0) === 0 &&
+    (result.usage?.input_tokens ?? 0) === 0 && !!envelope?.cache;
+
   await recordUsage({
     tenantId: job.tenant_id,
     projectId: job.project_id,
@@ -328,15 +502,36 @@ export async function recordJobResult(result: JobResult): Promise<{
     attempt: Number(job.attempts ?? 1) || 1,
     module: job.agent_key,
     taskType: job.job_type,
-    executionClass: "external",
+    executionClass: servedFromCache ? "cache" : "external",
     modelAlias: TIER_ALIAS[job.tier] ?? job.tier ?? null,
     providerModel: result.usage?.model ?? job.model ?? null,
+    // Which prompt produced this output. Read off the job row rather than
+    // resolved again: the registry may have approved a new version since this
+    // job was dispatched, and the answer belongs to the one that ran.
+    promptKey: promptRef.version != null ? promptRef.key : null,
+    promptVersion: promptRef.version,
     inputTokens: result.usage?.input_tokens ?? 0,
     outputTokens: result.usage?.output_tokens ?? 0,
     costMinor: result.usage?.cost_minor ?? 0,
+    cacheHit: servedFromCache,
     outcome: status,
     errorCode: result.error ? "worker_error" : null,
   });
+
+  /* Write-through.
+     Only successes, and only answers that were actually computed — storing a
+     cache hit back over itself would reset its own hit counter and lose the
+     evidence of reuse. Failures are never stored: a cached failure is a job that
+     can never succeed until something invalidates it. */
+  if (CACHE_WARM && status === "succeeded" && !servedFromCache && envelope?.cache) {
+    await responseCache.store({
+      dims: envelope.cache,
+      response: { outputs: result.outputs ?? [], message: result.message ?? null },
+      inputTokens: result.usage?.input_tokens ?? 0,
+      outputTokens: result.usage?.output_tokens ?? 0,
+      costMinor: result.usage?.cost_minor ?? 0,
+    });
+  }
 
   return { job: { ...job, status }, alreadyDone: false };
 }
