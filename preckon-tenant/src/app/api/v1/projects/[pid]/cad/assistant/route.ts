@@ -89,7 +89,10 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
   let drawing = body.model as DxfModel;
   if (!drawing.entities.length) throw errBadRequest("There is no geometry in this drawing to work on.");
 
-  const registry = new ToolRegistry<DxfModel, CadOp>().register(...CAD_TOOLS);
+  // Markup tools and drafting tools, registered together but kept as separate
+  // catalogues: the first set reads and annotates an issued sheet, the second
+  // draws on it, and a deployment may reasonably want one without the other.
+  const registry = new ToolRegistry<DxfModel, CadOp>().register(...CAD_TOOLS, ...DRAFTING_TOOLS);
 
   const callAnthropic = async (r: any) => {
     const res = await fetch(`${WORKER}/claude`, {

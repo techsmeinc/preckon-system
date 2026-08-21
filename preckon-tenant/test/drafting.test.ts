@@ -174,9 +174,12 @@ describe("fillet", () => {
   });
 
   it("keeps every arc point at the radius from the centre", () => {
+    // 5 decimals, not 6: coordinates are rounded to 6dp, so a hypotenuse of two
+    // rounded values can differ from the true radius by slightly more than the
+    // 6dp tolerance. That is the rounding, not the arc.
     const f = fillet(a, b, 2)!;
     for (const p of f.arc) {
-      expect(Math.hypot(p.x - f.centre.x, p.y - f.centre.y)).toBeCloseTo(2, 6);
+      expect(Math.hypot(p.x - f.centre.x, p.y - f.centre.y)).toBeCloseTo(2, 5);
     }
   });
 
