@@ -118,11 +118,12 @@ const tagElements: Tool = {
   module: "Tagging",
   scope: "global",
   kind: "write",
-  description: "Place a tag on every element matching a selector. The tag text defaults to the element name. Skips elements that already carry a tag.",
-  keywords: ["tag", "label", "annotate", "annotation", "mark", "identify"],
+  description: "Place a tag on every element matching a selector. Reads each element's own value from a named parameter (room number, door mark), or takes one fixed string for all of them. Skips elements that already carry a tag.",
+  keywords: ["tag", "label", "annotate", "annotation", "mark", "identify", "number"],
   params: [
     { name: "selector", type: "selector", description: "Which elements to tag", required: true },
-    { name: "text", type: "string", description: "Tag text. Defaults to each element's name, then its id." },
+    { name: "field", type: "string", description: 'Parameter to read each tag\'s text from, e.g. "number" or "mark". This is what "tag the rooms with their numbers" means — each tag shows its own element\'s value.' },
+    { name: "text", type: "string", description: "One fixed string for every tag. Use `field` instead when each tag should differ." },
     { name: "skipTagged", type: "boolean", description: "Skip elements that already have a tag", default: true },
   ],
   run: (ctx, a) => {
