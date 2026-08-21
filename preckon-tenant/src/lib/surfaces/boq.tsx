@@ -7,6 +7,7 @@ import { Fragment, useMemo, useState } from "react";
 import { ofType } from "@/lib/project";
 import { money, qty, confPct } from "@/lib/chain";
 import { BoqPipeline } from "@/lib/boq/pipeline";
+import { QuantityCell, TraceSummary } from "@/lib/boq/quantity-trace";
 import {
   ReviewDrawer, StageEmpty, StageHeader, StatusCell, pendingOf, useArtifactActions, type SurfaceProps,
 } from "./common";
@@ -81,6 +82,11 @@ export default function BoqSurface({ pid, stage, artifacts, rows, workflows, run
         <div className="s"><div className="k">{t("boq.reviewed")}</div><div className="v">{totals.pct}%</div></div>
       </div>
 
+      {/* How many lines do not tie back, before you read any of them. A
+          per-line flag only means something once you know whether there are two
+          or two hundred. */}
+      <TraceSummary rows={rows} artifacts={artifacts} />
+
       <div className="card" style={{ padding: "14px 18px" }}>
         <div className="chead">
           <div>
@@ -124,7 +130,11 @@ export default function BoqSurface({ pid, stage, artifacts, rows, workflows, run
                       <td className="num" style={{ color: "var(--slate-500)" }}>{l.payload?.code ?? "—"}</td>
                       <td className="t-name" style={{ fontWeight: 500 }}>{l.payload?.description ?? "—"}</td>
                       <td className="num">{unitLabel(l.payload?.unit)}</td>
-                      <td className="num r">{qty(l.payload?.quantity)}</td>
+                      {/* Clickable: opens the measurements behind the figure
+                          and states whether they total it. */}
+                      <td className="num r">
+                        <QuantityCell row={l} artifacts={artifacts} format={qty} />
+                      </td>
                       <RateCell
                         pid={pid}
                         code={String(l.payload?.code ?? "")}

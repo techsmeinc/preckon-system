@@ -1791,3 +1791,73 @@ th.sortable .dir{ opacity:.5; font-size:10px; margin-inline-start:4px; }
   .ced-body,.bim-wrap,
   .ced-body[data-collapsed="1"],.bim-wrap[data-collapsed="1"]{ grid-template-columns:1fr; }
 }
+
+/* ── Quantity traceback (QuantLogix) ─────────────────────────────────────────
+   Clicking a billed quantity opens the measurements behind it and says whether
+   they total the figure. The styling follows one rule: the flag appears ONLY on
+   lines that do not tie back. A mark on every row is decoration, and decoration
+   on every row gets ignored on every row. */
+.qty-trace{
+  background:none; border:0; padding:0; font:inherit; color:var(--ink);
+  cursor:pointer; text-align:inherit; border-bottom:1px dotted var(--slate-300);
+}
+.qty-trace:hover{ color:var(--teal-ink); border-bottom-color:var(--teal); }
+.qty-trace:focus-visible{ outline:2px solid var(--teal); outline-offset:2px; border-radius:2px; }
+.qty-trace.untied{ color:var(--amber-ink); border-bottom-color:var(--amber); }
+.qty-flag{
+  display:inline-block; margin-inline-start:4px; font-weight:700; font-size:11px;
+  color:var(--amber-ink);
+}
+
+/* Anchored to the table cell rather than the viewport: the row you clicked
+   stays visible, which is the whole point of checking a number in context. */
+td{ position:relative; }
+.trace-pop{
+  position:absolute; z-index:40; inset-inline-end:0; top:100%; margin-top:4px;
+  min-width:min(460px, 90vw); max-width:min(560px, 92vw);
+  max-height:60vh; overflow:auto; text-align:start;
+  background:var(--paper); border:1px solid var(--hairline); border-radius:8px;
+  box-shadow:0 10px 30px rgba(0,0,0,.18); padding:12px 14px;
+}
+.trace-head{
+  display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+  margin-bottom:10px; font-size:12.5px;
+}
+
+/* The verdict is the answer; the source list below is supporting evidence.
+   So it reads first and carries the colour. */
+.trace-verdict{ border-radius:6px; padding:8px 10px; margin-bottom:8px; }
+.trace-verdict.ok  { background:var(--teal-tint);  color:var(--teal-ink); }
+.trace-verdict.warn{ background:var(--amber-tint); color:var(--amber-ink); }
+.trace-verdict.bad { background:var(--red-tint);   color:var(--red-ink); }
+.tv-label{ font-weight:600; font-size:12px; margin-bottom:3px; }
+.tv-nums{
+  display:flex; flex-wrap:wrap; gap:12px;
+  font-family:var(--font-mono); font-size:11.5px;
+}
+.tv-diff{ font-weight:600; }
+
+.trace-why{ font-size:12px; color:var(--slate-600); margin:0 0 10px; line-height:1.45; }
+
+.trace-sheet{ border-top:1px solid var(--hairline); padding-top:8px; margin-top:8px; }
+.ts-head{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
+.ts-sub{ font-family:var(--font-mono); font-size:11px; color:var(--slate-500); }
+.ts-table{ width:100%; margin-top:4px; font-size:11.5px; }
+.ts-table td{ padding:2px 0; border:0; }
+.ts-loc{ color:var(--slate-500); }
+
+.trace-note{ margin-top:8px; padding:6px 8px; border-radius:5px; font-size:11.5px; }
+.trace-note.bad{ background:var(--red-tint); color:var(--red-ink); }
+
+/* Bill-wide, above the table: a per-line flag only means something once you
+   know whether there are two of them or two hundred. */
+.trace-banner{
+  margin:8px 0; padding:9px 12px; border-radius:6px; font-size:12.5px;
+  background:var(--amber-tint); color:var(--amber-ink);
+  border:1px solid color-mix(in srgb, var(--amber) 40%, transparent);
+}
+
+@media (max-width: 720px){
+  /* Anchored popovers do not fit a narrow screen; full width beats clipped. */
+  .trace-pop{ position:fixed; inset-inline:8px; top:auto; bottom:8px; min-width:0; max-width:none; }
+}
