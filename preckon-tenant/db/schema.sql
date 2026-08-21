@@ -1513,3 +1513,17 @@ CREATE TABLE IF NOT EXISTS twoFactor (
   KEY idx_twofactor_secret (secret(64)),
   CONSTRAINT fk_twofactor_user FOREIGN KEY (userId) REFERENCES `user`(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ── SCIM provisioning (migration 026) ───────────────────────────────────────
+CREATE TABLE IF NOT EXISTS tenant_scim_token (
+  id           CHAR(36)     NOT NULL PRIMARY KEY,
+  tenant_id    CHAR(36)     NOT NULL,
+  token        VARCHAR(255) NOT NULL,
+  label        VARCHAR(120) NULL,
+  created_by   CHAR(36)     NULL,
+  created_at   DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  last_used_at DATETIME(3)  NULL,
+  revoked_at   DATETIME(3)  NULL,
+  UNIQUE KEY uq_scim_token (token),
+  KEY idx_scim_tenant (tenant_id, revoked_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
