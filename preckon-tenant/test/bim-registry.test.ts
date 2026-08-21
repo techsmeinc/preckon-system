@@ -160,8 +160,11 @@ describe("tag_elements", () => {
   });
 
   it("reports the assumption when it invents the tag text", () => {
+    // The fallback now tries the identity parameters — number, then mark, then
+    // type — before the element name, so the reported assumption names all of
+    // them rather than only the last resort.
     const r = BUILTIN_TOOLS.find((t) => t.name === "tag_elements")!.run({ doc: model() }, { selector: { category: "room" } });
-    expect(r.assumptions?.join(" ")).toMatch(/taken from each element's name/i);
+    expect(r.assumptions?.join(" ")).toMatch(/taken from each element's number, mark or name/i);
   });
 
   it("fails honestly when nothing matches", () => {

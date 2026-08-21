@@ -15,6 +15,7 @@ import { CATALOG, type Element, type Vec2, levels, linLength } from "./model";
 import { count, explain, query, resolve, type Selector } from "./query";
 import type { Tool, ToolContext, ToolResult } from "./registry";
 import { DOCUMENTATION_TOOLS } from "./documentation";
+import { TAG_MAINTENANCE_TOOLS } from "./tagging";
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -138,19 +139,48 @@ const tagElements: Tool = {
     const todo = a.skipTagged === false ? targets : targets.filter((e) => !tagged.has(e.id));
     const skipped = targets.length - todo.length;
 
-    const commands: Command[] = todo.map((e) => ({
-      name: "add" as const,
-      args: {
-        category: "tag",
-        at: centroid(e),
-        level: e.level,
-        name: a.text ?? e.name ?? e.id,
-        params: { target: e.id, text: a.text ?? e.name ?? e.id },
-      },
-    }));
+    const field = a.field ? String(a.field) : null;
+    let missingField = 0;
+
+    /* What one tag reads.
+       A fixed `text` wins where it was given, because asking for it is
+       unambiguous. Otherwise the per-element value: the named field, then the
+       conventional identity parameters, then the name, then the id. An empty
+       tag is worse than no tag — it looks like the job was done and the
+       drawing still cannot be referred to. */
+    const textFor = (e: Element): string => {
+      if (a.text) return String(a.text);
+      if (field) {
+        const v = e.params?.[field];
+        if (v != null && String(v).trim()) return String(v).trim();
+        missingField++;
+      }
+      const identity = e.params?.number ?? e.params?.mark ?? e.params?.type;
+      if (identity != null && String(identity).trim()) return String(identity).trim();
+      return e.name ?? e.id;
+    };
+
+    const commands: Command[] = todo.map((e) => {
+      const text = textFor(e);
+      return {
+        name: "add" as const,
+        args: {
+          category: "tag",
+          at: centroid(e),
+          level: e.level,
+          name: text,
+          params: { target: e.id, text, ...(field ? { field } : {}) },
+        },
+      };
+    });
 
     const assumptions: string[] = [];
-    if (!a.text) assumptions.push("Tag text taken from each element's name.");
+    if (!a.text && !field) assumptions.push("Tag text taken from each element's number, mark or name.");
+    if (missingField) {
+      // Falling back silently would produce tags that look right and read as
+      // element ids on a plot.
+      assumptions.push(`${missingField} element(s) carry no "${field}" value, so their tag fell back to the number, name or id. Worth checking before the sheet is issued.`);
+    }
     if (skipped) assumptions.push(`${skipped} element(s) already tagged and were skipped.`);
 
     return ok(`Tagging ${todo.length} element(s).`, {
@@ -635,6 +665,7 @@ function polygonArea(pts: Vec2[]): number {
 
 export const BUILTIN_TOOLS: Tool[] = [
   ...DOCUMENTATION_TOOLS,
+  ...TAG_MAINTENANCE_TOOLS,
   findElements,
   resolveReference,
   modelOverview,
