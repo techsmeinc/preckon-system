@@ -7,7 +7,7 @@ import { currentRequestId, logInfo, logWarn } from "./log";
 import { decideDispatch, type DispatchDecision } from "./ai/govern";
 import { loadRegistry, loadTenantPolicy, recordUsage, spendFor } from "./ai/store";
 import { TIER_ALIAS } from "./ai/registry";
-import { resolvePrompt } from "./ai/prompt-store";
+import { parseRef, resolvePrompt } from "./ai/prompt-store";
 import type { CacheDimensions } from "./ai/cache";
 import * as responseCache from "./ai/cache-store";
 import type { Sensitivity } from "./ai/policy";
