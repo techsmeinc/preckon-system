@@ -112,20 +112,26 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
   // that matters more than it looks.
   const render = cad?.ok ? await renderCad(path.join(STORAGE_DIR, storageKey)) : null;
 
-  await useCase(actorFromCtx(ctx), async (_conn, audit) => {
-    /* A drawing we couldn't parse is 'failed', not 'ingested'. The bytes are
-       kept either way, but the chain must not treat an unreadable file as
-       understood — that is how a BOQ ends up quietly missing a discipline.
+  /* A drawing we couldn't parse is 'failed', not 'ingested'. The bytes are kept
+     either way, but the chain must not treat an unreadable file as understood —
+     that is how a BOQ ends up quietly missing a discipline.
 
-       A scan gets 'needs_ocr' for the same reason and a different remedy:
-       'failed' means send a different file, 'needs_ocr' means this one is a
-       photograph of paper and running OCR over it would produce something
-       readable. Collapsing the two makes a scanned set look like a corrupt
-       upload, so somebody re-uploads it and it fails identically. */
-    const status =
-      cad && !cad.ok ? "failed"
-      : scan?.ingestStatus === "needs_ocr" ? "needs_ocr"
-      : "ingested";
+     A scan gets 'needs_ocr' for the same reason and a different remedy:
+     'failed' means send a different file, 'needs_ocr' means this one is a
+     photograph of paper and running OCR over it would produce something
+     readable. Collapsing the two makes a scanned set look like a corrupt
+     upload, so somebody re-uploads it and it fails identically.
+
+     Declared out here rather than inside the useCase callback because the
+     response below reports it too. Left inside, the reference below would
+     resolve to the DOM's global `status: string` instead of erroring — it
+     typechecks cleanly and returns the wrong value at runtime. */
+  const status: "failed" | "needs_ocr" | "ingested" =
+    cad && !cad.ok ? "failed"
+    : scan?.ingestStatus === "needs_ocr" ? "needs_ocr"
+    : "ingested";
+
+  await useCase(actorFromCtx(ctx), async (_conn, audit) => {
     await query(
       `INSERT INTO file (id, tenant_id, project_id, storage_key, filename, mime, size_bytes, checksum, status, page_count, uploaded_by)
        VALUES (?,?,?,?,?,?,?,?, ?, ?, ?)`,
