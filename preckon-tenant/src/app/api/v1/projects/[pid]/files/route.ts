@@ -9,6 +9,7 @@ import { actorFromCtx, useCase } from "@/lib/usecase";
 import { errBadRequest } from "@/lib/errors";
 import { checkUpload } from "@/lib/upload-safety";
 import { cadAsPageText, extractCad, isCadFile, renderCad, type CadExtractOutcome } from "@/lib/cad";
+import { assessDocument, type DocumentAssessment } from "@/lib/doc/ocr";
 
 const STORAGE_DIR = process.env.FILE_STORAGE_DIR ?? "./.uploads";
 
@@ -74,6 +75,7 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
   // sidecar; else treat as UTF-8.
   let pages: string[] = [];
   let cad: CadExtractOutcome | null = null;
+  let scan: DocumentAssessment | null = null;
 
   if (isCadFile(file.name)) {
     // A .dxf is ASCII, so the UTF-8 fallback would "succeed" and fill the store
@@ -89,6 +91,14 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
       const parsed = await pdf(buf);
       pages = String(parsed.text ?? "").split("\f").filter((s) => s.trim().length > 0);
       if (pages.length === 0) pages = [String(parsed.text ?? "")];
+
+      /* A scanned PDF extracts to nothing and would otherwise be recorded as
+         `ingested` — the same failure the CAD branch below guards against, and
+         the reason it says "that is how a BOQ ends up quietly missing a
+         discipline". A scan takes this branch and gets no error at all: the
+         file appears in the register, the agents read an empty document, and
+         whatever it contained is simply absent from everything downstream. */
+      scan = assessDocument(pages.map((text, i) => ({ page: i + 1, text })));
     } catch {
       pages = ["[unparsed pdf]"];
     }
@@ -103,10 +113,19 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
   const render = cad?.ok ? await renderCad(path.join(STORAGE_DIR, storageKey)) : null;
 
   await useCase(actorFromCtx(ctx), async (_conn, audit) => {
-    // A drawing we couldn't parse is 'failed', not 'ingested'. The bytes are
-    // kept either way, but the chain must not treat an unreadable file as
-    // understood — that is how a BOQ ends up quietly missing a discipline.
-    const status = cad && !cad.ok ? "failed" : "ingested";
+    /* A drawing we couldn't parse is 'failed', not 'ingested'. The bytes are
+       kept either way, but the chain must not treat an unreadable file as
+       understood — that is how a BOQ ends up quietly missing a discipline.
+
+       A scan gets 'needs_ocr' for the same reason and a different remedy:
+       'failed' means send a different file, 'needs_ocr' means this one is a
+       photograph of paper and running OCR over it would produce something
+       readable. Collapsing the two makes a scanned set look like a corrupt
+       upload, so somebody re-uploads it and it fails identically. */
+    const status =
+      cad && !cad.ok ? "failed"
+      : scan?.ingestStatus === "needs_ocr" ? "needs_ocr"
+      : "ingested";
     await query(
       `INSERT INTO file (id, tenant_id, project_id, storage_key, filename, mime, size_bytes, checksum, status, page_count, uploaded_by)
        VALUES (?,?,?,?,?,?,?,?, ?, ?, ?)`,
@@ -143,6 +162,12 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
         filename: file.name,
         pages: pages.length,
         ...(cad ? { cad: cad.ok, ...(cad.ok ? {} : { error: cad.error }) } : {}),
+        // Recorded whenever a PDF was assessed, not only when it failed: a
+        // mixed set ingests successfully while some of its pages are invisible
+        // downstream, and that is the hardest version of this to notice later.
+        ...(scan && (scan.entirelyScanned || scan.mixed)
+          ? { scan: { status: scan.ingestStatus, pagesNeedingOcr: scan.pagesNeedingOcr, why: scan.summary } }
+          : {}),
       },
     });
   });
@@ -152,8 +177,12 @@ export const POST = route<{ pid: string }>(async (req, ctx, { pid }) => {
       id,
       filename: file.name,
       pages: pages.length,
-      status: cad && !cad.ok ? "failed" : "ingested",
+      status,
       ...(cad && !cad.ok ? { error: cad.error } : {}),
+      // The uploader is told at once. Finding out that a drawing set was never
+      // read, weeks later and via a bill that is missing a trade, is the
+      // outcome this whole path exists to prevent.
+      ...(scan?.warnings.length ? { warnings: scan.warnings } : {}),
     },
     201
   );

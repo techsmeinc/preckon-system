@@ -519,7 +519,7 @@ CREATE TABLE file (
   mime        VARCHAR(128),
   size_bytes  BIGINT,
   checksum    CHAR(64),
-  status      ENUM('pending','uploaded','ingesting','ingested','failed') NOT NULL DEFAULT 'pending',
+  status      ENUM('pending','uploaded','ingesting','ingested','failed','needs_ocr') NOT NULL DEFAULT 'pending',
   page_count  INT,
   uploaded_by CHAR(36),
   created_at  DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
