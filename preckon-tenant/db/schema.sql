@@ -1500,3 +1500,16 @@ CREATE TABLE IF NOT EXISTS measurement_rule (
   UNIQUE KEY uq_rule_key (rule_set_id, `key`),
   KEY idx_rule_seq (rule_set_id, seq)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ── MFA: TOTP with backup codes (migration 025) ─────────────────────────────
+-- camelCase to match the other Better Auth tables; the plugin builds its own
+-- queries and will not find snake_case columns.
+CREATE TABLE IF NOT EXISTS twoFactor (
+  id          VARCHAR(255) NOT NULL PRIMARY KEY,
+  secret      TEXT         NOT NULL,
+  backupCodes TEXT         NOT NULL,
+  userId      VARCHAR(255) NOT NULL,
+  KEY idx_twofactor_user (userId),
+  KEY idx_twofactor_secret (secret(64)),
+  CONSTRAINT fk_twofactor_user FOREIGN KEY (userId) REFERENCES `user`(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

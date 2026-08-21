@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { twoFactor } from "better-auth/plugins/two-factor";
 import { pool } from "./db";
 import { email } from "./integrations";
 import { MIN_PASSWORD_LENGTH } from "./constants";
@@ -34,6 +35,24 @@ export const auth = betterAuth({
       "/sign-in/email": { window: 60, max: Number(process.env.AUTH_SIGNIN_MAX ?? 3) },
     },
   },
+  /* Second factor: TOTP, with single-use backup codes.
+   *
+   * The protocol is Better Auth's rather than ours, deliberately — a
+   * hand-rolled TOTP is the kind of code that looks right, passes its own
+   * tests, and is subtly wrong about clock skew or replay.
+   *
+   * `skipVerificationOnEnable` is left OFF: a user must prove the code works
+   * before the factor is switched on. Enabling first and verifying later locks
+   * out anybody whose authenticator was set up wrong, and they cannot use the
+   * second factor to recover from having a broken second factor.
+   */
+  plugins: [
+    twoFactor({
+      issuer: process.env.MFA_ISSUER ?? "Preckon",
+      backupCodeOptions: { amount: 10, length: 10 },
+    }),
+  ],
+
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
