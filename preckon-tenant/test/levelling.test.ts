@@ -187,7 +187,9 @@ describe("things with no resource demand", () => {
 
   it("still honours a milestone's predecessors", () => {
     const r = level(
-      [act("work", 0, 3, 0, [{ role: "gang", units: 1 }]), act("ms", 0, 0, 0, undefined, ["work"])],
+      // The milestone's early start is 3 because its predecessor takes 3 days.
+      // Inputs come from CPM, so they arrive already consistent with the logic.
+      [act("work", 0, 3, 0, [{ role: "gang", units: 1 }]), act("ms", 3, 0, 0, undefined, ["work"])],
       [have("gang", 1)],
     );
     expect(r.durationAfter).toBe(3);

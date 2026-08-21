@@ -137,12 +137,22 @@ export function level(
   const availByRole = new Map(availability.map((a) => [a.role, a] as const));
   const byKey = new Map(activities.map((a) => [a.key, a] as const));
 
+  /* Project duration is the longest LATE finish, not the longest early finish.
+     ES + duration + total float IS the late finish, and taking the maximum of
+     it gives the project duration for any consistent CPM result.
+
+     Using early finishes instead would say a project whose last activity has
+     ten days of float is ten days shorter than it is — and then report every
+     day of levelling inside that float as a delay, which is exactly the
+     free-versus-costly distinction this module exists to keep straight. */
   const naturalEnd = activities.reduce(
+    (m, a) => Math.max(m, a.earlyStart + Math.max(0, a.duration) + Math.max(0, a.totalFloat)), 0);
+  const earlyEnd = activities.reduce(
     (m, a) => Math.max(m, a.earlyStart + Math.max(0, a.duration)), 0);
   // Generous by default: enough room to sequence everything end to end, which
   // is the worst case a solvable programme can need.
   const horizon = opts.horizonDays ??
-    naturalEnd + activities.reduce((s, a) => s + Math.max(0, a.duration), 0) + 1;
+    earlyEnd + activities.reduce((s, a) => s + Math.max(0, a.duration), 0) + 1;
 
   /** Committed units per role per day, as levelling proceeds. */
   const used = new Map<string, Map<number, number>>();
@@ -239,9 +249,17 @@ export function level(
     }
   }
 
+  /* How far completion moves.
+
+     An activity delayed within its float costs nothing; delayed past it, it
+     pushes the end by exactly the excess. The project delay is therefore the
+     worst excess across all activities — cascades are already accounted for,
+     because a successor pushed by its predecessor carries that push in its own
+     delay, and its own float already reflects its position in the network. */
   const durationBefore = naturalEnd;
-  const durationAfter = activities.reduce(
-    (m, a) => Math.max(m, (placedStart.get(a.key) ?? a.earlyStart) + Math.max(0, a.duration)), 0);
+  const overrun = moves.reduce(
+    (m, mv) => Math.max(m, mv.delay - Math.max(0, byKey.get(mv.key)?.totalFloat ?? 0)), 0);
+  const durationAfter = durationBefore + Math.max(0, overrun);
 
   const peaks = [...new Set(activities.flatMap((a) => (a.demands ?? []).map((d) => d.role)))]
     .sort()
