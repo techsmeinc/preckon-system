@@ -7,6 +7,7 @@ import { runBimAgent2, sharedRules } from "@/lib/bim/agent2";
 import { ToolRegistry } from "@/lib/bim/registry";
 import { applyCadOps, type CadOp } from "@/lib/cad/agent";
 import { CAD_TOOLS } from "@/lib/cad/tools";
+import { DRAFTING_TOOLS } from "@/lib/cad/drafting-tools";
 import { nativeUnit, type DxfModel } from "@/lib/cad/model";
 
 // POST /projects/{pid}/cad/assistant — do something to the drawing that is open.
