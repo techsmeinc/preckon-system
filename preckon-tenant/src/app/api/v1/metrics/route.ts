@@ -91,6 +91,17 @@ export async function GET(req: Request) {
      SELECT COUNT(*) AS n FROM ai_usage_ledger
       WHERE outcome = 'rejected' AND created_at >= NOW() - INTERVAL 24 HOUR`), [{ n: 0 }]);
 
+  /* Cache warming, whether or not reuse is switched on.
+     While AI_CACHE_REUSE is off these entries are never served, so `hits` stays
+     zero and `saved` measures nothing yet — but `entries` shows the cache
+     filling, and once reuse is enabled the same two numbers answer "is it
+     working" and "what is it worth" without a new deploy. */
+  const cache = await safe(() => query<any>(`-- metrics:instance-wide
+     SELECT COUNT(*) AS entries, COALESCE(SUM(hits),0) AS hits,
+            COALESCE(SUM(hits * cost_minor),0) AS saved,
+            COALESCE(SUM(hits = 0),0) AS cold
+       FROM ai_response_cache`), [{ entries: 0, hits: 0, saved: 0, cold: 0 }]);
+
   const tenants = await safe(() => query<any>(`-- metrics:instance-wide
      SELECT COUNT(*) AS n FROM tenant`), [{ n: 0 }]);
   const projects = await safe(() => query<any>(`-- metrics:instance-wide
@@ -128,6 +139,26 @@ export async function GET(req: Request) {
       // something: it is the count of jobs the policy WOULD have stopped.
       name: "preckon_ai_policy_rejected_24h", help: "Attempts refused by AI policy or budget", type: "counter",
       values: [{ value: Number(rejected[0]?.n ?? 0) }],
+    },
+    {
+      name: "preckon_ai_cache_entries", help: "Answers stored in the AI response cache", type: "gauge",
+      values: [{ value: Number(cache[0]?.entries ?? 0) }],
+    },
+    {
+      name: "preckon_ai_cache_hits", help: "Times a stored answer has been served instead of a model call", type: "counter",
+      values: [{ value: Number(cache[0]?.hits ?? 0) }],
+    },
+    {
+      // What the hits would have cost had they been calls — the honest measure
+      // of what the cache is worth, rather than a hit rate.
+      name: "preckon_ai_cache_saved_minor", help: "Spend avoided by serving cached answers, in minor units", type: "counter",
+      values: [{ value: Number(cache[0]?.saved ?? 0) }],
+    },
+    {
+      // Entries stored and never served. A high number against a low hit count
+      // means the cache is being filled with questions nobody asks twice.
+      name: "preckon_ai_cache_cold_entries", help: "Cached answers that have never been served", type: "gauge",
+      values: [{ value: Number(cache[0]?.cold ?? 0) }],
     },
     {
       name: "preckon_tenants", help: "Tenants provisioned", type: "gauge",

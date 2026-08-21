@@ -67,6 +67,10 @@ export interface JobResult {
     payload?: Record<string, unknown>;
   }>;
   usage?: { model: string; input_tokens: number; output_tokens: number; cost_minor: number };
+  /** Set only by tryCachedJob. Never sent by a worker, which is the point: a
+   *  stub-mode result also reports zero tokens, and inferring "cached" from a
+   *  zero cost would file it as reuse that never happened. */
+  from_cache?: boolean;
   trace_id?: string;
   error?: { message: string } | null;
 }
@@ -321,6 +325,7 @@ export async function tryCachedJob(input: EnqueueInput): Promise<CachedJob | nul
         status: "succeeded",
         outputs: cached?.outputs ?? [],
         message: cached?.message,
+        from_cache: true,
         // Zero cost and zero tokens, because none were spent. The ledger row
         // this becomes is marked cache_hit, so "what did we spend" and "what
         // did we serve" stay separable.
@@ -498,12 +503,10 @@ export async function recordJobResult(result: JobResult): Promise<{
      duplicate callback cannot double-count. */
   const envelope = parseEnvelope(job.envelope);
   const promptRef = parseRef(job.prompt_ref ?? "");
-  // A job whose usage reports nothing spent was not computed — it came from the
-  // cache. Distinguishing it here keeps "what we served" and "what we paid for"
-  // separable in the ledger, which is the whole point of the cache_hit column.
-  const servedFromCache =
-    status === "succeeded" && (result.usage?.cost_minor ?? 0) === 0 &&
-    (result.usage?.input_tokens ?? 0) === 0 && !!envelope?.cache;
+  // Declared by the caller, not inferred from a zero cost. Keeping "what we
+  // served" and "what we paid for" separable is the whole point of the
+  // cache_hit column, and a stub-mode result would fail a cost-based guess.
+  const servedFromCache = result.from_cache === true;
 
   await recordUsage({
     tenantId: job.tenant_id,
@@ -530,11 +533,21 @@ export async function recordJobResult(result: JobResult): Promise<{
   });
 
   /* Write-through.
-     Only successes, and only answers that were actually computed — storing a
-     cache hit back over itself would reset its own hit counter and lose the
-     evidence of reuse. Failures are never stored: a cached failure is a job that
-     can never succeed until something invalidates it. */
-  if (CACHE_WARM && status === "succeeded" && !servedFromCache && envelope?.cache) {
+
+     Three conditions, each for its own reason.
+
+     Successes only. A cached failure is a job that can never succeed again
+     until something invalidates it.
+
+     Not a cache hit. Storing one back over itself would reset its own hit
+     counter and destroy the evidence that reuse is working.
+
+     Tokens actually consumed. A real model call always reports some; a stub
+     result reports none. Without this, running with DEMO_STUB_MODE would fill
+     the cache with placeholder answers that later get served to real runs —
+     a fabricated BOQ presented with the same confidence as a computed one. */
+  const didRealWork = (result.usage?.input_tokens ?? 0) > 0 || (result.usage?.output_tokens ?? 0) > 0;
+  if (CACHE_WARM && status === "succeeded" && !servedFromCache && didRealWork && envelope?.cache) {
     await responseCache.store({
       dims: envelope.cache,
       response: { outputs: result.outputs ?? [], message: result.message ?? null },
