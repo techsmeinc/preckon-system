@@ -21,6 +21,10 @@ advance, and none of the cost of pretending we knew earlier.
 | [006](006-per-attempt-ledger.md) | Usage is recorded per attempt, append-only |
 | [007](007-cache-key-safety.md) | Every dimension that changes an answer is in the key |
 | [008](008-tenant-isolation.md) | Isolation is app-layer and statically verified |
+| [009](009-report-only-rollout.md) | Governance ships report-only before it ships enforcing |
+| [010](010-prompt-registry-baseline.md) | Prompt registry v1 records identity, not prompt text |
+| [011](011-analysis-proposes.md) | Analysis proposes; it never rewrites the programme or the price |
+| [012](012-units-are-never-converted.md) | Mismatched units are reported, never silently converted |
 
 Format: context, decision, consequences. Short on purpose — an ADR
 nobody reads has failed regardless of how thorough it is.
