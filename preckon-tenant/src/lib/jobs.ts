@@ -231,6 +231,17 @@ export function cacheDimensionsFor(
   };
 }
 
+/** MySQL hands back JSON columns already parsed on some drivers and as a string
+ *  on others. Tolerating both here beats a crash in the completion path. */
+function parseEnvelope(raw: unknown): JobEnvelope | null {
+  try {
+    if (!raw) return null;
+    return (typeof raw === "string" ? JSON.parse(raw) : raw) as JobEnvelope;
+  } catch {
+    return null;
+  }
+}
+
 /** What a cache hit yields: a job row that already has its answer. */
 export interface CachedJob {
   jobId: string;

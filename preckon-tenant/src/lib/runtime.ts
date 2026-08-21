@@ -5,7 +5,10 @@ import { query, queryOne, tx } from "./db";
 import { lessonsFor, subjectsOf } from "./learning";
 import { errNotFound } from "./errors";
 import { newId } from "./ids";
-import { enqueueJob, recordJobResult, type JobInputArtifact, type JobResult } from "./jobs";
+import {
+  enqueueJob, recordJobResult, tryCachedJob,
+  type EnqueueInput, type JobInputArtifact, type JobResult,
+} from "./jobs";
 import type { Tier } from "./constants";
 import { cadDigest } from "./cad";
 import { join as pathJoin } from "node:path";
@@ -575,7 +578,7 @@ async function dispatchAgentStep(
       );
       const ctx: AgentContext = { tenantId, projectId, runId, stepId: childId, agentKey: node.agent_key! };
       const inputs = await gatherInputs([itemId]);
-      const jobId = await enqueueJob({
+      const jobId = await dispatchOrServe({
         ctx,
         agentKind: agent.kind,
         jobType,
@@ -609,7 +612,7 @@ async function dispatchAgentStep(
 
   const params = await buildAgentParams(tenantId, projectId, agent, { __produce: produceSpec });
 
-  const jobId = await enqueueJob({
+  const jobId = await dispatchOrServe({
     ctx,
     agentKind: agent.kind,
     jobType,
@@ -620,6 +623,35 @@ async function dispatchAgentStep(
     idempotencyKey: `${step.id}:${jobType}:${step.attempt ?? 0}`,
   });
   await query("UPDATE workflow_run_step SET job_id = ? WHERE id = ?", [jobId, step.id]);
+}
+
+/**
+ * Dispatch a step, serving it from the response cache when one is stored.
+ *
+ * The cache check lives here rather than inside enqueueJob because completing a
+ * job means going through onJobResult — materialising outputs through the ABI,
+ * writing the audit events, advancing the workflow — and that lives in this
+ * file. jobs.ts calling back into it would be a cycle.
+ *
+ * A hit therefore takes the *same* completion path as a worker callback. The
+ * only difference between a cached run and a computed one is that nothing was
+ * spent; the artifacts, the provenance and the audit chain are produced
+ * identically. Anything else would mean workflows whose outputs depended on
+ * whether the cache happened to be warm.
+ */
+async function dispatchOrServe(input: EnqueueInput): Promise<string> {
+  const cached = await tryCachedJob(input);
+  if (!cached) return enqueueJob(input);
+
+  // System, not the user who started the run and not the agent that would have
+  // run. Nobody performed this work — the platform served an answer it already
+  // had, and the audit event should say so rather than attribute a computation
+  // to an agent that was never called.
+  await onJobResult(
+    { tenantId: input.ctx.tenantId, actorId: null, actorKind: "system" },
+    cached.result,
+  );
+  return cached.jobId;
 }
 
 // ── Job result (§4.3 step 3 / §5.1): materialize the worker's proposals through
