@@ -132,6 +132,9 @@ export interface UsageRow {
   providerModel?: string | null;
   sensitivity?: string | null;
   policyVersion?: number | null;
+  /** Which prompt produced this output. NULL where the task is unregistered. */
+  promptKey?: string | null;
+  promptVersion?: number | null;
   inputTokens?: number;
   outputTokens?: number;
   costMinor?: number;
@@ -154,13 +157,15 @@ export async function recordUsage(row: UsageRow): Promise<void> {
       `INSERT INTO ai_usage_ledger
          (id, tenant_id, project_id, job_id, request_id, attempt, module, task_type,
           execution_class, model_alias, provider, provider_model, sensitivity, policy_version,
+          prompt_key, prompt_version,
           input_tokens, output_tokens, cost_minor, latency_ms, cache_hit, outcome, error_code)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
         newId(), row.tenantId, row.projectId ?? null, row.jobId ?? null, row.requestId ?? null,
         row.attempt ?? 1, row.module ?? null, row.taskType ?? null,
         row.executionClass, row.modelAlias ?? null, row.provider ?? null, row.providerModel ?? null,
         row.sensitivity ?? null, row.policyVersion ?? null,
+        row.promptKey ?? null, row.promptVersion ?? null,
         row.inputTokens ?? 0, row.outputTokens ?? 0, row.costMinor ?? 0, row.latencyMs ?? 0,
         row.cacheHit ? 1 : 0, row.outcome, row.errorCode ?? null,
       ],
